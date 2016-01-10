@@ -2,6 +2,7 @@ module coop.wisdom;
 import coop.union_binder;
 
 import std.algorithm;
+import std.array;
 import std.exception;
 import std.file;
 import std.path;
@@ -20,8 +21,6 @@ struct Wisdom{
 
     auto readBinderList(string sysBase, string userBase)
     {
-        import std.array;
-
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
 
@@ -64,6 +63,7 @@ struct Wisdom{
     auto writeBinderList()
     {
         import std.json;
+        import std.container.rbtree;
 
         auto userBinderDir = buildPath(userBase_, "バインダー");
         if (!userBinderDir.exists)
@@ -74,7 +74,6 @@ struct Wisdom{
         JSONValue[string] binderFiles;
         foreach(kv; binderList.byKeyValue)
         {
-            import std.array;
             import std.conv;
             import std.regex;
             auto binder = kv.key.to!string;
@@ -97,12 +96,18 @@ struct Wisdom{
             }
         }
 
+        auto existingBinders = make!(RedBlackTree!string)(dirEntries(buildPath(userBase_, "バインダー"), "*.json", SpanMode.breadth));
         foreach(kv; binderFiles.byKeyValue)
         {
             import std.stdio;
             auto path = buildPath(userBinderDir, kv.key~".json");
             auto f = File(path, "w");
             f.write(kv.value.toPrettyString);
+            existingBinders.removeKey(path);
         }
+
+        existingBinders[].each!((string file) {
+                file.remove;
+            });
     }
 }

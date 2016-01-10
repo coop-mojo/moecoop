@@ -1,0 +1,5 @@
+name "fukuro"
+description "生協の知恵袋"
+copyright "Copyright © 2015, もじょんぬ"
+authors "もじょんぬ@E鯖"
+dependency "dlangui" version="0.7.32"

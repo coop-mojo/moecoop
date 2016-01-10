@@ -32,7 +32,7 @@ immutable MaxColumns = 4;
 immutable fontName = defaultFontName;
 
 version(Windows) {
-    immutable defaultFontName = "MS ゴシック";
+    immutable defaultFontName = "Meiryo UI";
 }
 else version(linux) {
     immutable defaultFontName = "源ノ角ゴシック JP";

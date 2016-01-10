@@ -87,7 +87,6 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
         auto key = keys[idx];
         if (auto lst = wisdom.binderElements(key))
         {
-            writefln("Binder[%s]", key);
             auto binderElems = layout.childById!HorizontalLayout("recipes");
             binderElems.updateElememnts(*lst);
         }

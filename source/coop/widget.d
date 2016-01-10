@@ -1,11 +1,13 @@
 module coop.widget;
-import coop.wisdom;
-import coop.union_binder;
 import dlangui;
 import dlangui.widgets.metadata;
+
 import std.algorithm;
 import std.stdio;
 import std.range;
+
+import coop.union_binder;
+import coop.wisdom;
 
 immutable MaxNumberOfBinderPages = 128;
 immutable MaxColumns = 4;

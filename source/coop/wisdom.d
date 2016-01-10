@@ -1,11 +1,12 @@
 module coop.wisdom;
-import coop.union_binder;
 
 import std.algorithm;
 import std.array;
 import std.exception;
 import std.file;
 import std.path;
+
+import coop.union_binder;
 
 struct Wisdom{
     BinderElement[][dstring] binderList;

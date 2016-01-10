@@ -1,13 +1,14 @@
 module coop.union_binder;
+
 import std.algorithm;
+import std.conv;
 import std.exception;
 import std.file;
 import std.json;
-import std.range;
-import std.conv;
 import std.path;
-import std.typecons;
+import std.range;
 import std.traits;
+import std.typecons;
 
 immutable SystemResourceBase = "resource";
 immutable BinderResourcePath = buildPath(SystemResourceBase, "バインダー");

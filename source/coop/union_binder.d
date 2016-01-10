@@ -38,11 +38,6 @@ private:
     bool isFiled_;
 }
 
-// auto unquote(S)(S s) if (__traits(compiles, { auto s = S.init.to!dstring; }))
-// {
-//     return s.to!dstring[1..$-1];
-// }
-
 auto readBinders(string systemResourceFile, string sysBase, string userBase)
 in{
     assert(systemResourceFile.exists);
@@ -100,18 +95,11 @@ auto unionRange(AA)(dstring[] r, AA aa)
         @property auto front() {
             auto recipe = r_.front;
             bool isFiled;
-            import std.stdio;
-            writef("In unionRange.front (%s)", recipe);
             if (auto val = (recipe.to!string in aa_))
             {
-                writeln(" is filed");
                 enforce(val.type == JSON_TYPE.TRUE ||
                         val.type == JSON_TYPE.FALSE);
                 isFiled = (val.type == JSON_TYPE.TRUE);
-            }
-            else
-            {
-                writeln(" is not filed");
             }
             return BinderElement(recipe, isFiled);
         }

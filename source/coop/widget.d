@@ -63,7 +63,7 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
             }
 
             TextWidget { text: "レシピ" }
-            HorizontalLayout {
+            FrameLayout {
                 id: recipes
             }
         }
@@ -87,7 +87,7 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
         auto key = keys[idx];
         if (auto lst = wisdom.binderElements(key))
         {
-            auto binderElems = layout.childById!HorizontalLayout("recipes");
+            auto binderElems = layout.childById!FrameLayout("recipes");
             binderElems.updateElememnts(*lst);
         }
         return true;
@@ -96,18 +96,23 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
     layout.childById("searchButton").click = (Widget src) {
         auto query = layout.childById("searchQuery").text;
         auto binder = layout.childById!ComboBox("cbOptions").selectedItem;
-        auto binderElems = layout.childById!HorizontalLayout("recipes");
+        auto binderElems = layout.childById!FrameLayout("recipes");
         binderElems.updateElememnts(wisdom.searchBinderElements(binder, query));
         return true;
     };
     return layout;
 }
 
-void updateElememnts(Recipes)(HorizontalLayout layout, Recipes rs)
+void updateElememnts(Recipes)(FrameLayout layout, Recipes rs)
     if (isInputRange!Recipes && is(ElementType!Recipes == BinderElement))
 {
     layout.removeAllChildren();
-    rs.toBinderTableWidget.each!(column => layout.addChild(column));
+    auto scroll = new ScrollWidget;
+    auto horizontal = new HorizontalLayout;
+
+    rs.toBinderTableWidget.each!(column => horizontal.addChild(column));
+    scroll.contentWidget = horizontal;
+    layout.addChild(scroll);
 }
 
 auto toBinderTableWidget(Recipes)(Recipes rs)

@@ -104,15 +104,12 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
     enum exitFun = (Widget src) { parent.close; return true; };
     layout.childById("exit").click = exitFun;
 
+    import std.exception;
     auto keys = wisdom.binders;
     layout.childById!ComboBox("binders").items = keys;
     layout.childById!ComboBox("binders").itemClick = (Widget src, int idx) {
-        auto key = keys[idx];
-        if (auto lst = wisdom.binderElements(key))
-        {
-            auto binderElems = layout.childById!FrameLayout("recipes");
-            binderElems.updateElememnts(*lst);
-        }
+        auto binderElems = layout.childById!FrameLayout("recipes");
+        binderElems.updateElememnts(*enforce(wisdom.binderElements(keys[idx])));
         return true;
     };
     return layout;

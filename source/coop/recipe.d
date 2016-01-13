@@ -63,7 +63,6 @@ in{
     assert(recipeCategoryFile.exists);
 } body {
     import std.path;
-    import std.typecons;
     auto category = recipeCategoryFile.baseName(".json");
     auto sysRes = recipeCategoryFile.readText.parseJSON;
     enforce(sysRes.type == JSON_TYPE.OBJECT);

@@ -22,12 +22,25 @@ import std.array;
 import std.exception;
 import std.file;
 import std.path;
+import std.typecons;
 
 import coop.union_binder;
+import coop.recipe;
+
+alias Binder = Typedef!(dstring, "binder");
+alias Category = Typedef!(dstring, "category");
 
 struct Wisdom{
+    /// バインダーごとのレシピ名一覧
     BinderElement[][dstring] binderList;
+
+    /// カテゴリごとのレシピ一覧
+    Recipe[][dstring] recipeList;
+
+    /// システムデータが保存してあるパス
     immutable string sysBase_;
+
+    /// ユーザーデータを保存するパス
     immutable string userBase_;
 
     this(string sysBase, string userBase)
@@ -35,6 +48,7 @@ struct Wisdom{
         sysBase_ = sysBase;
         userBase_ = userBase;
         binderList = readBinderList(sysBase, userBase);
+        recipeList = readRecipeList(sysBase, userBase);
     }
 
     auto readBinderList(string sysBase, string userBase)
@@ -48,17 +62,36 @@ struct Wisdom{
             .assocArray;
     }
 
+    auto readRecipeList(string sysBase, string userBase)
+    {
+        enforce(sysBase.exists);
+        enforce(sysBase.isDir);
+
+        return dirEntries(buildPath(sysBase, "レシピ"), "*.json", SpanMode.breadth)
+            .map!(s => s.readRecipes(sysBase, userBase))
+            .assocArray;
+    }
+
+    @property auto recipeCategories()
+    {
+        return recipeList.keys.sort().array;
+    }
+
+    auto recipesIn(Category name)
+    {
+        enforce(name in recipeList);
+        return recipeList[cast(dstring)name];
+    }
+
     @property auto binders()
     {
-        import std.algorithm.sorting;
-        import std.range;
         return binderList.keys.sort().array;
     }
 
-    auto recipesIn(dstring name)
+    auto recipesIn(Binder name)
     {
         enforce(name in binderList);
-        return binderList[name];
+        return binderList[cast(dstring)name];
     }
 
     ~this()

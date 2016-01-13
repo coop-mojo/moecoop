@@ -113,7 +113,7 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
     layout.childById!ComboBox("binders").items = keys;
     layout.childById!ComboBox("binders").itemClick = (Widget src, int idx) {
         auto binderElems = layout.childById!FrameLayout("recipes");
-        binderElems.updateElememnts(wisdom.recipesIn(keys[idx]));
+        binderElems.updateElememnts(wisdom.recipesIn(Binder(keys[idx])));
         return true;
     };
     return layout;
@@ -130,12 +130,12 @@ void showRecipes(MainLayout layout, ref Wisdom wisdom)
     InputRange!BinderElement recipes;
     if (isMetaSearch)
     {
-        recipes = inputRangeObject(wisdom.binders.map!(b => wisdom.recipesIn(b)).joiner);
+        recipes = inputRangeObject(wisdom.binders.map!(b => wisdom.recipesIn(Binder(b))).cache.joiner);
     }
     else
     {
         auto binder = layout.childById!ComboBox("binders").selectedItem;
-        recipes = inputRangeObject(wisdom.recipesIn(binder));
+        recipes = inputRangeObject(wisdom.recipesIn(Binder(binder)));
     }
     auto binderElems = layout.childById!FrameLayout("recipes");
     binderElems.updateElememnts(

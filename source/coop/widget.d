@@ -56,7 +56,7 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
             HorizontalLayout {
                 TextWidget { text: "バインダー" }
                 ComboBox {
-                    id: cbOptions
+                    id: binders
                 }
             }
 
@@ -77,7 +77,7 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
             Button { text: "レシピ情報"}
             Button { text: "アイテム情報"}
             HorizontalLayout {
-                Button { id: btnExit; text: "終了" }
+                Button { id: exit; text: "終了" }
             }
         }
     }
@@ -95,19 +95,19 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
     };
     editLine.keyEvent = (Widget src, KeyEvent e) {
         auto query = src.text;
-        auto binder = layout.childById!ComboBox("cbOptions").selectedItem;
+        auto binder = layout.childById!ComboBox("binders").selectedItem;
         auto binderElems = layout.childById!FrameLayout("recipes");
         binderElems.updateElememnts(wisdom.searchBinderElements(binder, query));
         return false;
     };
 
     enum exitFun = (Widget src) { parent.close; return true; };
-    layout.childById("btnExit").click = exitFun;
+    layout.childById("exit").click = exitFun;
 
     import std.algorithm.sorting;
     auto keys = wisdom.binders;
-    layout.childById!ComboBox("cbOptions").items = keys;
-    layout.childById!ComboBox("cbOptions").itemClick = (Widget src, int idx) {
+    layout.childById!ComboBox("binders").items = keys;
+    layout.childById!ComboBox("binders").itemClick = (Widget src, int idx) {
         auto key = keys[idx];
         if (auto lst = wisdom.binderElements(key))
         {

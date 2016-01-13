@@ -104,7 +104,6 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
     enum exitFun = (Widget src) { parent.close; return true; };
     layout.childById("exit").click = exitFun;
 
-    import std.algorithm.sorting;
     auto keys = wisdom.binders;
     layout.childById!ComboBox("binders").items = keys;
     layout.childById!ComboBox("binders").itemClick = (Widget src, int idx) {

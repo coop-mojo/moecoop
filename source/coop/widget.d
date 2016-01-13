@@ -66,6 +66,7 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
                     minWidth: 200
                     text: "見たいレシピ"
                 }
+                CheckBox { id: metaSearch; text: "バインダー全部から検索する" }
             }
 
             TextWidget { text: "レシピ" }
@@ -94,11 +95,14 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
         return true;
     };
     editLine.keyEvent = (Widget src, KeyEvent e) {
-        auto query = src.text;
-        auto binder = layout.childById!ComboBox("binders").selectedItem;
-        auto binderElems = layout.childById!FrameLayout("recipes");
-        binderElems.updateElememnts(wisdom.searchBinderElements(binder, query));
+        showRecipes(layout, wisdom);
         return false;
+    };
+
+    auto metaSearchBox = layout.childById!CheckBox("metaSearch");
+    metaSearchBox.checkChange = (Widget src, bool checked) {
+        showRecipes(layout, wisdom);
+        return true;
     };
 
     enum exitFun = (Widget src) { parent.close; return true; };
@@ -109,10 +113,33 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
     layout.childById!ComboBox("binders").items = keys;
     layout.childById!ComboBox("binders").itemClick = (Widget src, int idx) {
         auto binderElems = layout.childById!FrameLayout("recipes");
-        binderElems.updateElememnts(*enforce(wisdom.binderElements(keys[idx])));
+        binderElems.updateElememnts(wisdom.recipesIn(keys[idx]));
         return true;
     };
     return layout;
+}
+
+void showRecipes(MainLayout layout, ref Wisdom wisdom)
+{
+    auto query = layout.childById!EditLine("searchQuery").text;
+    auto isMetaSearch = layout.childById!CheckBox("metaSearch").checked;
+
+    if (isMetaSearch && query.empty)
+        return;
+
+    InputRange!BinderElement recipes;
+    if (isMetaSearch)
+    {
+        recipes = inputRangeObject(wisdom.binders.map!(b => wisdom.recipesIn(b)).joiner);
+    }
+    else
+    {
+        auto binder = layout.childById!ComboBox("binders").selectedItem;
+        recipes = inputRangeObject(wisdom.recipesIn(binder));
+    }
+    auto binderElems = layout.childById!FrameLayout("recipes");
+    binderElems.updateElememnts(
+        recipes.filter!(s => !find(s.recipe, boyerMooreFinder(query)).empty).array);
 }
 
 void updateElememnts(Recipes)(FrameLayout layout, Recipes rs)

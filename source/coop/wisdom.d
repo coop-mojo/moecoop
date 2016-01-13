@@ -55,22 +55,10 @@ struct Wisdom{
         return binderList.keys.sort().array;
     }
 
-    auto binderElements(dstring name)
+    auto recipesIn(dstring name)
     {
-        return name in binderList;
-    }
-
-    auto searchBinderElements(dstring name, dstring query)
-    {
-        import std.range;
-        if (auto lst = binderElements(name))
-        {
-            return (*binderElements(name)).filter!(s => !find(s.recipe, boyerMooreFinder(query)).empty).array;
-        }
-        else
-        {
-            return null;
-        }
+        enforce(name in binderList);
+        return binderList[name];
     }
 
     ~this()

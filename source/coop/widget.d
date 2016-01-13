@@ -58,7 +58,7 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
             }
 
             HorizontalLayout {
-                EditLine { id: searchQuery; text: "Search for something" }
+                EditLine { id: searchQuery }
                 Button { id: searchButton; text: "レシピを検索" }
             }
 
@@ -76,6 +76,16 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
         }
     }
         });
+
+    enum defaultQText = "見たいレシピ";
+    auto editLine = layout.childById!EditLine("searchQuery");
+    editLine.text = defaultQText;
+    editLine.focusChange = (Widget src, bool _) {
+        if (src.text == defaultQText) {
+            src.text = "";
+        }
+        return true;
+    };
 
     enum exitFun = (Widget src) { parent.close; return true; };
     layout.childById("btnExit").click = exitFun;

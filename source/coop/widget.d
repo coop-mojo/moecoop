@@ -53,8 +53,11 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
     MainLayout {
         margins: 20; padding: 10
         VerticalLayout {
-            ComboBox {
-                id: cbOptions
+            HorizontalLayout {
+                TextWidget { text: "バインダー" }
+                ComboBox {
+                    id: cbOptions
+                }
             }
 
             HorizontalLayout {
@@ -102,7 +105,7 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
     layout.childById("btnExit").click = exitFun;
 
     import std.algorithm.sorting;
-    auto keys = ["バインダー"d, "-----"] ~ wisdom.binders;
+    auto keys = wisdom.binders;
     layout.childById!ComboBox("cbOptions").items = keys;
     layout.childById!ComboBox("cbOptions").itemClick = (Widget src, int idx) {
         auto key = keys[idx];

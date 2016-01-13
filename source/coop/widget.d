@@ -58,7 +58,11 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
             }
 
             HorizontalLayout {
-                EditLine { id: searchQuery; layoutWidth: 100 }
+                EditLine {
+                    id: searchQuery
+                    layoutWidth: 100
+                    text: "見たいレシピ"
+                }
             }
 
             TextWidget { text: "レシピ" }
@@ -76,12 +80,13 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
     }
         });
 
-    enum defaultQText = "見たいレシピ";
     auto editLine = layout.childById!EditLine("searchQuery");
-    editLine.text = defaultQText;
     editLine.focusChange = (Widget src, bool _) {
-        if (src.text == defaultQText) {
+        static bool isFirstInput = true;
+        if (isFirstInput)
+        {
             src.text = "";
+            isFirstInput = false;
         }
         return true;
     };

@@ -59,7 +59,6 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
 
             HorizontalLayout {
                 EditLine { id: searchQuery; layoutWidth: 100 }
-                Button { id: searchButton; text: "レシピを検索" }
             }
 
             TextWidget { text: "レシピ" }
@@ -86,6 +85,13 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
         }
         return true;
     };
+    editLine.keyEvent = (Widget src, KeyEvent e) {
+        auto query = src.text;
+        auto binder = layout.childById!ComboBox("cbOptions").selectedItem;
+        auto binderElems = layout.childById!FrameLayout("recipes");
+        binderElems.updateElememnts(wisdom.searchBinderElements(binder, query));
+        return false;
+    };
 
     enum exitFun = (Widget src) { parent.close; return true; };
     layout.childById("btnExit").click = exitFun;
@@ -100,14 +106,6 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
             auto binderElems = layout.childById!FrameLayout("recipes");
             binderElems.updateElememnts(*lst);
         }
-        return true;
-    };
-
-    layout.childById("searchButton").click = (Widget src) {
-        auto query = layout.childById("searchQuery").text;
-        auto binder = layout.childById!ComboBox("cbOptions").selectedItem;
-        auto binderElems = layout.childById!FrameLayout("recipes");
-        binderElems.updateElememnts(wisdom.searchBinderElements(binder, query));
         return true;
     };
     return layout;

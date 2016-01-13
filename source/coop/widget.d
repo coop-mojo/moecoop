@@ -60,7 +60,7 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
             HorizontalLayout {
                 EditLine {
                     id: searchQuery
-                    layoutWidth: 100
+                    layoutWidth: 200
                     text: "見たいレシピ"
                 }
             }

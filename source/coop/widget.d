@@ -58,7 +58,7 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
             }
 
             HorizontalLayout {
-                EditLine { id: searchQuery }
+                EditLine { id: searchQuery; layoutWidth: 100 }
                 Button { id: searchButton; text: "レシピを検索" }
             }
 

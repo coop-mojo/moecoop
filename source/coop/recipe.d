@@ -127,6 +127,7 @@ unittest
     assert(recipe.ingredients == ["ヘビの肉"d: 1]);
     assert(recipe.products == ["ロースト スネーク ミート"d: 1]);
     assert(recipe.techniques[].equal(["料理(焼く)"d]));
+    assert(!recipe.requiresRecipe);
     assert(!recipe.isGambledRoulette);
     assert(!recipe.isPenaltyRoulette);
     assert(recipe.remarks.empty);

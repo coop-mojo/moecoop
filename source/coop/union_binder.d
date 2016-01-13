@@ -34,25 +34,25 @@ immutable UserResourceBase = "userdata";
 struct BinderElement{
     this(dstring recipe, bool isFiled = false)
     {
-        recipe_ = recipe;
+        this.recipe = recipe;
         isFiled_ = isFiled;
     }
 
-    @property auto recipe() const { return recipe_; }
     @property auto isFiled() const { return isFiled_; }
     @property auto isFiled(bool f) { return isFiled_ = f; }
 
     size_t toHash() const @safe pure nothrow
     {
-        return recipe_.hashOf;
+        return recipe.hashOf;
     }
 
     bool opEquals(ref const typeof(this) s) const @safe pure nothrow
     {
-        return recipe_ == s.recipe;
+        return recipe == s.recipe;
     }
+
+    immutable dstring recipe;
 private:
-    immutable dstring recipe_;
     bool isFiled_;
 }
 

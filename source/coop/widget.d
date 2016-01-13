@@ -20,9 +20,11 @@ import dlangui;
 import dlangui.widgets.metadata;
 
 import std.algorithm;
+import std.container.util;
 import std.stdio;
 import std.range;
 
+import coop.recipe;
 import coop.union_binder;
 import coop.wisdom;
 
@@ -75,7 +77,8 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
             }
         }
         VerticalLayout {
-            Button { text: "レシピ情報"}
+            TextWidget { text: "レシピ情報" }
+            FrameLayout { id: recipeDetail }
             Button { text: "アイテム情報"}
             HorizontalLayout {
                 Button { id: exit; text: "終了" }
@@ -83,6 +86,11 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
         }
     }
         });
+
+    auto detail = layout.childById("recipeDetail");
+    Recipe dummy;
+    dummy.techniques = make!(typeof(dummy.techniques))(cast(dstring)[]);
+    detail.addChild(dummy.toRecipeWidget);
 
     auto editLine = layout.childById!EditLine("searchQuery");
     editLine.focusChange = (Widget src, bool _) {
@@ -113,7 +121,7 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
     layout.childById!ComboBox("binders").items = keys;
     layout.childById!ComboBox("binders").itemClick = (Widget src, int idx) {
         auto binderElems = layout.childById!FrameLayout("recipes");
-        binderElems.updateElememnts(wisdom.recipesIn(Binder(keys[idx])));
+        binderElems.updateElememnts(wisdom.recipesIn(Binder(keys[idx])), wisdom);
         return true;
     };
     return layout;
@@ -139,40 +147,135 @@ void showRecipes(MainLayout layout, ref Wisdom wisdom)
     }
     auto binderElems = layout.childById!FrameLayout("recipes");
     binderElems.updateElememnts(
-        recipes.filter!(s => !find(s.recipe, boyerMooreFinder(query)).empty).array);
+        recipes.filter!(s => !find(s.recipe, boyerMooreFinder(query)).empty).array, wisdom);
 }
 
-void updateElememnts(Recipes)(FrameLayout layout, Recipes rs)
+void updateElememnts(Recipes)(FrameLayout layout, Recipes rs, ref Wisdom wisdom)
     if (isInputRange!Recipes && is(ElementType!Recipes == BinderElement))
 {
     layout.removeAllChildren();
     auto scroll = new ScrollWidget;
     auto horizontal = new HorizontalLayout;
 
-    rs.toBinderTableWidget.each!(column => horizontal.addChild(column));
+    rs.toBinderTableWidget(cast(MainLayout)layout.parent.parent, wisdom).each!(column => horizontal.addChild(column));
     scroll.contentWidget = horizontal;
     layout.addChild(scroll);
 }
 
-auto toBinderTableWidget(Recipes)(Recipes rs)
+auto toBinderTableWidget(Recipes)(Recipes rs, MainLayout rootLayout, ref Wisdom wisdom)
     if (isInputRange!Recipes && is(ElementType!Recipes == BinderElement))
 {
     return rs
         .map!((ref r) {
-                auto box = new CheckBox("recipe", r.recipe.to!dstring);
+                auto layout = new HorizontalLayout;
+                auto box = new CheckBox("recipe", r.recipe);
                 box.checked = r.isFiled;
                 box.checkChange = (Widget src, bool checked) {
                     r.isFiled = checked;
                     return true;
                 };
-                return box;
+                auto btn = new Button("detail", "詳細"d);
+                btn.click = (Widget src) {
+                    auto list = wisdom.recipesIn(Category("料理"));
+                    if (auto detail = (r.recipe in list))
+                    {
+                        auto pane = rootLayout.childById("recipeDetail");
+                        pane.removeAllChildren;
+                        pane.addChild((*detail).toRecipeWidget);
+                    }
+                    return true;
+                };
+                return [box, btn];
             })
         .chunks(MaxNumberOfBinderPages/MaxColumns)
         .map!((rs) {
-                auto l = new VerticalLayout();
-                rs.each!(r => l.addChild(r));
+                auto l = new TableLayout;
+                l.colCount = 2;
+                rs.each!(rr => rr.each!(r => l.addChild(r)));
                 return l;
             });
+}
+
+auto toRecipeWidget(Recipe r)
+{
+    auto layout = parseML(q{
+            VerticalLayout {
+                TableLayout {
+                    colCount: 2
+
+                    TextWidget { text: "レシピ名: " }
+                    TextWidget { id: recipe }
+
+                    TextWidget { text: "テクニック: " }
+                    TextWidget { id: tech }
+
+                    TextWidget { text: "必要スキル: " }
+                    TextWidget { id: skills }
+
+                    TextWidget { text: "生成物: " }
+                    VerticalLayout { id: products }
+
+                    TextWidget { text: "材料: " }
+                    VerticalLayout { id: ingredients }
+
+                    TextWidget { text: "ルーレット: " }
+                    TextWidget { id: roulette }
+                }
+                HorizontalLayout {
+                    id: remarksInfo
+                    TextWidget { text: "備考:" }
+                    TextWidget { id: remarks }
+                }
+            }
+        });
+
+    import std.format;
+    layout.childById("recipe").text = r.name;
+    layout.childById("tech").text = r.techniques[].join(" or ");
+    layout.childById("skills").text = r.requiredSkills
+                                       .byKeyValue
+                                       .map!(kv => format("%s (%s)"d, kv.key, kv.value))
+                                       .join(", ");
+    auto productsList = r.products
+                         .byKeyValue
+                         .map!(kv => format("%s x %s"d, kv.key, kv.value))
+                         .map!(s => new TextWidget("product", s));
+    auto productsLayout = layout.childById!VerticalLayout("products");
+    productsList.each!(w => productsLayout.addChild(w));
+
+    auto ingredientsList = r.ingredients
+                            .byKeyValue
+                            .map!(kv => format("%s x %s"d, kv.key, kv.value))
+                            .map!(s => new TextWidget("ingredients", s));
+    auto ingredientsLayout = layout.childById!VerticalLayout("ingredients");
+    ingredientsList.each!(w => ingredientsLayout.addChild(w));
+
+    dstring rouletteText;
+    if (!r.isGambledRoulette && !r.isPenaltyRoulette)
+    {
+        rouletteText = "通常"d;
+    }
+    else
+    {
+        dstring[] attrs;
+        if (r.isGambledRoulette) attrs ~= "ギャンブル";
+        if (r.isPenaltyRoulette) attrs ~= "ペナルティ";
+        rouletteText = attrs.join(", ");
+    }
+    layout.childById("roulette").text = rouletteText;
+
+    auto l = layout.childById("remarksInfo");
+    if (r.remarks.empty)
+    {
+        l.visibility = Visibility.Gone;
+    }
+    else
+    {
+        l.visibility = Visibility.Visible;
+        auto remarksText = layout.childById("remarks");
+        remarksText.text = r.remarks;
+    }
+    return layout;
 }
 
 mixin(registerWidgets!(MainLayout)());

@@ -35,7 +35,7 @@ struct Wisdom{
     BinderElement[][dstring] binderList;
 
     /// カテゴリごとのレシピ一覧
-    Recipe[][dstring] recipeList;
+    Recipe[dstring][dstring] recipeList;
 
     /// システムデータが保存してあるパス
     immutable string sysBase_;

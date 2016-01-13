@@ -49,6 +49,13 @@ struct Recipe
     bool isPenaltyRoulette;
 
     dstring remarks;
+
+    auto opCmp(ref const Recipe other) const
+    {
+        if (name == other.name) return 0;
+        else if (name < other.name) return -1;
+        else return 1;
+    }
 }
 
 auto readRecipes(string recipeCategoryFile, string sysBase, string userBase)
@@ -63,9 +70,9 @@ in{
 
     auto recipes = sysRes.object;
     return tuple(category.to!dstring,
-                 recipes.keys.map!((key) {
-                         return key.toRecipe(recipes[key].object);
-                     }).array);
+                 recipes.keys.map!(key =>
+                                   tuple(key.to!dstring,
+                                         key.toRecipe(recipes[key].object))).assocArray);
 }
 
 auto toRecipe(string s, JSONValue[string] json)

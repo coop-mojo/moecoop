@@ -218,6 +218,9 @@ auto toRecipeWidget(Recipe r)
                     TextWidget { text: "材料: " }
                     VerticalLayout { id: ingredients }
 
+                    TextWidget { text: "レシピ必須: " }
+                    TextWidget { id: requireRecipe }
+
                     TextWidget { text: "ルーレット: " }
                     TextWidget { id: roulette }
                 }
@@ -249,6 +252,8 @@ auto toRecipeWidget(Recipe r)
                             .map!(s => new TextWidget("ingredients", s));
     auto ingredientsLayout = layout.childById!VerticalLayout("ingredients");
     ingredientsList.each!(w => ingredientsLayout.addChild(w));
+
+    layout.childById("requireRecipe").text = r.requiresRecipe ? "はい": "いいえ";
 
     dstring rouletteText;
     if (!r.isGambledRoulette && !r.isPenaltyRoulette)

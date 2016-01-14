@@ -71,7 +71,7 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
                 CheckBox { id: metaSearch; text: "バインダー全部から検索する" }
             }
 
-            TextWidget { text: "レシピ" }
+            TextWidget { text: "レシピ一覧" }
             HorizontalLayout {
                 FrameLayout {
                     id: recipes

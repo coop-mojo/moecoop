@@ -110,6 +110,11 @@ struct Wisdom{
         }
     }
 
+    auto bindersFor(dstring recipeName)
+    {
+        return binders.filter!(b => recipesIn(Binder(b)).canFind!(elem => elem.recipe == recipeName)).array;
+    }
+
     auto relatedBinders(Category cat)
     {
         immutable binderMap = [

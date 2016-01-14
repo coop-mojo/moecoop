@@ -91,7 +91,7 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
     auto detail = layout.childById("recipeDetail");
     Recipe dummy;
     dummy.techniques = make!(typeof(dummy.techniques))(cast(dstring)[]);
-    detail.addChild(dummy.toRecipeWidget);
+    detail.addChild(dummy.toRecipeWidget(wisdom));
 
     auto editLine = layout.childById!EditLine("searchQuery");
     editLine.focusChange = (Widget src, bool _) {
@@ -185,7 +185,7 @@ auto toBinderTableWidget(Recipes)(Recipes rs, MainLayout rootLayout, ref Wisdom 
                         detail.name = r.recipe;
                         detail.remarks = "作り方がわかりません（´・ω・｀）";
                     }
-                    pane.addChild(detail.toRecipeWidget);
+                    pane.addChild(detail.toRecipeWidget(wisdom));
                     return true;
                 };
                 return [box, btn];
@@ -199,7 +199,7 @@ auto toBinderTableWidget(Recipes)(Recipes rs, MainLayout rootLayout, ref Wisdom 
             });
 }
 
-auto toRecipeWidget(Recipe r)
+auto toRecipeWidget(Recipe r, ref Wisdom wisdom)
 {
     auto layout = parseML(q{
             VerticalLayout {
@@ -220,6 +220,9 @@ auto toRecipeWidget(Recipe r)
 
                     TextWidget { text: "生成物: " }
                     VerticalLayout { id: products }
+
+                    TextWidget { text: "収録バインダー: " }
+                    TextWidget { id: binders }
 
                     TextWidget { text: "レシピ必須: " }
                     TextWidget { id: requireRecipe }
@@ -256,6 +259,7 @@ auto toRecipeWidget(Recipe r)
     auto ingredientsLayout = layout.childById!VerticalLayout("ingredients");
     ingredientsList.each!(w => ingredientsLayout.addChild(w));
 
+    layout.childById("binders").text = wisdom.bindersFor(r.name).join(", ");
     layout.childById("requireRecipe").text = r.requiresRecipe ? "はい": "いいえ";
 
     dstring rouletteText;

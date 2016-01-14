@@ -215,7 +215,6 @@ auto toRecipeWidget(Recipe r, ref Wisdom wisdom)
     auto layout = parseML(q{
             VerticalLayout {
                 padding: 5
-                backgroundColor: "white"
                 TableLayout {
                     colCount: 2
 
@@ -301,7 +300,11 @@ auto toRecipeWidget(Recipe r, ref Wisdom wisdom)
         auto remarksText = layout.childById("remarks");
         remarksText.text = r.remarks;
     }
-    return layout;
+
+    auto ret = new ScrollWidget;
+    ret.contentWidget = layout;
+    ret.backgroundColor = "white";
+    return ret;
 }
 
 mixin(registerWidgets!(MainLayout)());

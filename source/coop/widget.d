@@ -177,20 +177,12 @@ auto toBinderTableWidget(Recipes)(Recipes rs, MainLayout rootLayout, ref Wisdom 
                 };
                 auto btn = new Button("detail", "詳細"d);
                 btn.click = (Widget src) {
-                    /// どこかから選択中のバインダーを取ってくる
-                    /// isMetaSearch 中は全部から探す必要あり?
-                    auto list = wisdom.recipesIn(Category("料理"));
                     auto pane = rootLayout.childById("recipeDetail");
                     pane.removeAllChildren;
-                    Recipe detail;
-                    if (auto d = (r.recipe in list))
-                    {
-                        detail = *d;
-                    }
-                    else
+                    auto detail = wisdom.recipeFor(r.recipe);
+                    if (detail.name.empty)
                     {
                         detail.name = r.recipe;
-                        detail.techniques = make!(typeof(detail.techniques))(cast(dstring)[]);
                         detail.remarks = "作り方がわかりません（´・ω・｀）";
                     }
                     pane.addChild(detail.toRecipeWidget);

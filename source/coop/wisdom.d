@@ -94,6 +94,22 @@ struct Wisdom{
         return binderList[cast(dstring)name];
     }
 
+    auto recipeFor(dstring recipeName)
+    {
+        auto ret = recipeCategories.find!(c => recipeName in recipesIn(Category(c)));
+        if (ret.empty)
+        {
+            import std.container.util;
+            Recipe dummy;
+            dummy.techniques = make!(typeof(dummy.techniques))(cast(dstring)[]);
+            return dummy;
+        }
+        else
+        {
+            return recipesIn(Category(ret.front))[recipeName];
+        }
+    }
+
     auto relatedBinders(Category cat)
     {
         immutable binderMap = [

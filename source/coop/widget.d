@@ -77,9 +77,6 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
                     id: recipes
                     padding: 1
                 }
-                FrameLayout {
-                    layoutWidth: FILL_PARENT
-                }
             }
         }
         VerticalLayout {
@@ -173,6 +170,7 @@ void updateElememnts(Recipes)(FrameLayout layout, Recipes rs, ref Wisdom wisdom)
     rs.toBinderTableWidget(cast(MainLayout)layout.parent.parent.parent, wisdom)
       .each!(column => horizontal.addChild(column));
     scroll.contentWidget = horizontal;
+    scroll.backgroundColor = "white";
     layout.addChild(scroll);
 }
 
@@ -207,7 +205,6 @@ auto toBinderTableWidget(Recipes)(Recipes rs, MainLayout rootLayout, ref Wisdom 
         .map!((rs) {
                 auto l = new TableLayout;
                 l.colCount = 2;
-                l.backgroundColor = "white";
                 rs.each!(rr => rr.each!(r => l.addChild(r)));
                 return l;
             });

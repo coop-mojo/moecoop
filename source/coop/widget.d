@@ -259,7 +259,8 @@ auto toRecipeWidget(Recipe r, ref Wisdom wisdom)
     auto ingredientsLayout = layout.childById!VerticalLayout("ingredients");
     ingredientsList.each!(w => ingredientsLayout.addChild(w));
 
-    layout.childById("binders").text = wisdom.bindersFor(r.name).join(", ");
+    auto filedBinders = wisdom.bindersFor(r.name);
+    layout.childById("binders").text = filedBinders.empty ? "なし": filedBinders.join(", ");
     layout.childById("requireRecipe").text = r.requiresRecipe ? "はい": "いいえ";
 
     dstring rouletteText;

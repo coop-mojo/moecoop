@@ -24,6 +24,7 @@ mixin APP_ENTRY_POINT;
 
 immutable SystemResourceBase = "resource";
 immutable UserResourceBase = "userdata";
+immutable AppName = "生協の知恵袋"d;
 
 /*
   KNOWN ISSUE:
@@ -42,7 +43,7 @@ extern(C) int UIAppMain(string[] args)
 
     Platform.instance.uiLanguage = "ja";
     Platform.instance.uiTheme = "theme_default";
-    auto window = Platform.instance.createWindow("fukuro", null);
+    auto window = Platform.instance.createWindow(AppName, null);
     auto layout = createBinderListLayout(window, wisdom);
     window.mainWidget = layout;
     window.show;

@@ -72,14 +72,25 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
             }
 
             TextWidget { text: "レシピ" }
-            FrameLayout {
-                id: recipes
+            HorizontalLayout {
+                FrameLayout {
+                    id: recipes
+                    padding: 1
+                }
+                FrameLayout {
+                    layoutWidth: FILL_PARENT
+                }
             }
         }
         VerticalLayout {
-            minWidth: 300
+            padding: 10
+            minWidth: 400
             TextWidget { text: "レシピ情報" }
-            FrameLayout { id: recipeDetail }
+            FrameLayout {
+                id: recipeDetail
+                padding: 1
+                backgroundColor: "black"
+            }
             Button { text: "アイテム情報"}
             HorizontalLayout {
                 Button { id: exit; text: "終了" }
@@ -158,7 +169,9 @@ void updateElememnts(Recipes)(FrameLayout layout, Recipes rs, ref Wisdom wisdom)
     auto scroll = new ScrollWidget;
     auto horizontal = new HorizontalLayout;
 
-    rs.toBinderTableWidget(cast(MainLayout)layout.parent.parent, wisdom).each!(column => horizontal.addChild(column));
+    layout.backgroundColor = rs.empty ? "white" : "black";
+    rs.toBinderTableWidget(cast(MainLayout)layout.parent.parent.parent, wisdom)
+      .each!(column => horizontal.addChild(column));
     scroll.contentWidget = horizontal;
     layout.addChild(scroll);
 }
@@ -194,6 +207,7 @@ auto toBinderTableWidget(Recipes)(Recipes rs, MainLayout rootLayout, ref Wisdom 
         .map!((rs) {
                 auto l = new TableLayout;
                 l.colCount = 2;
+                l.backgroundColor = "white";
                 rs.each!(rr => rr.each!(r => l.addChild(r)));
                 return l;
             });
@@ -203,6 +217,8 @@ auto toRecipeWidget(Recipe r, ref Wisdom wisdom)
 {
     auto layout = parseML(q{
             VerticalLayout {
+                padding: 5
+                backgroundColor: "white"
                 TableLayout {
                     colCount: 2
 

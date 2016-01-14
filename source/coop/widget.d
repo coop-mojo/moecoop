@@ -77,6 +77,7 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
             }
         }
         VerticalLayout {
+            minWidth: 300
             TextWidget { text: "レシピ情報" }
             FrameLayout { id: recipeDetail }
             Button { text: "アイテム情報"}
@@ -179,12 +180,20 @@ auto toBinderTableWidget(Recipes)(Recipes rs, MainLayout rootLayout, ref Wisdom 
                     /// どこかから選択中のバインダーを取ってくる
                     /// isMetaSearch 中は全部から探す必要あり?
                     auto list = wisdom.recipesIn(Category("料理"));
-                    if (auto detail = (r.recipe in list))
+                    auto pane = rootLayout.childById("recipeDetail");
+                    pane.removeAllChildren;
+                    Recipe detail;
+                    if (auto d = (r.recipe in list))
                     {
-                        auto pane = rootLayout.childById("recipeDetail");
-                        pane.removeAllChildren;
-                        pane.addChild((*detail).toRecipeWidget);
+                        detail = *d;
                     }
+                    else
+                    {
+                        detail.name = r.recipe;
+                        detail.techniques = make!(typeof(detail.techniques))(cast(dstring)[]);
+                        detail.remarks = "作り方がわかりません（´・ω・｀）";
+                    }
+                    pane.addChild(detail.toRecipeWidget);
                     return true;
                 };
                 return [box, btn];
@@ -214,11 +223,11 @@ auto toRecipeWidget(Recipe r)
                     TextWidget { text: "必要スキル: " }
                     TextWidget { id: skills }
 
-                    TextWidget { text: "生成物: " }
-                    VerticalLayout { id: products }
-
                     TextWidget { text: "材料: " }
                     VerticalLayout { id: ingredients }
+
+                    TextWidget { text: "生成物: " }
+                    VerticalLayout { id: products }
 
                     TextWidget { text: "レシピ必須: " }
                     TextWidget { id: requireRecipe }

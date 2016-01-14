@@ -176,6 +176,8 @@ auto toBinderTableWidget(Recipes)(Recipes rs, MainLayout rootLayout, ref Wisdom 
                 };
                 auto btn = new Button("detail", "詳細"d);
                 btn.click = (Widget src) {
+                    /// どこかから選択中のバインダーを取ってくる
+                    /// isMetaSearch 中は全部から探す必要あり?
                     auto list = wisdom.recipesIn(Category("料理"));
                     if (auto detail = (r.recipe in list))
                     {

@@ -27,10 +27,6 @@ import std.range;
 import std.traits;
 import std.typecons;
 
-immutable SystemResourceBase = "resource";
-immutable BinderResourcePath = buildPath(SystemResourceBase, "バインダー");
-immutable UserResourceBase = "userdata";
-
 struct BinderElement{
     this(dstring recipe, bool isFiled = false)
     {

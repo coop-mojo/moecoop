@@ -29,10 +29,6 @@ immutable AppName = "生協の知恵袋"d;
 /*
   KNOWN ISSUE:
 
-  CheckBox[] に対して ElementType が使えない
-    -> init() が .init を上書きしているせい． initialize 等にリネームするべき
-    -> masterでは修正済み
-
   フォント名には "Source Han Sans JP" じゃなくて "源ノ角ゴシック JP" を指定する必要あり
     -> FreeTypeFontManager が別名をちゃんと見てくれていない？
  */

@@ -17,6 +17,9 @@
 */
 import dlangui;
 
+import std.path;
+
+import coop.config;
 import coop.wisdom;
 import coop.widget;
 
@@ -35,13 +38,26 @@ immutable AppName = "生協の知恵袋"d;
 
 extern(C) int UIAppMain(string[] args)
 {
+    auto config = Config(buildPath(UserResourceBase, "config.json"));
     auto wisdom = Wisdom(SystemResourceBase, UserResourceBase);
 
     Platform.instance.uiLanguage = "ja";
     Platform.instance.uiTheme = "theme_default";
-    auto window = Platform.instance.createWindow(AppName, null);
+    auto window = Platform.instance.createWindow(AppName, null, WindowFlag.Resizable,
+                                                 config.windowWidth == 0 ? 400 : config.windowWidth,
+                                                 config.windowHeight == 0 ? 300 : config.windowHeight);
     auto layout = createBinderListLayout(window, wisdom);
     window.mainWidget = layout;
     window.show;
+    window.onClose = {
+        version(Windows) {
+            config.windowWidth = pixelsToPoints(window.width);
+            config.windowHeight = pixelsToPoints(window.height);
+        }
+        else {
+            config.windowWidth = window.width;
+            config.windowHeight = window.height;
+        }
+    };
     return Platform.instance.enterMessageLoop();
 }

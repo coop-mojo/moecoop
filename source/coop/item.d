@@ -168,7 +168,7 @@ auto toFood(string s, JSONValue[string] json)
 /// 飲食バフのグループ
 enum AdditionalEffectGroup
 {
-    A, B, C1, C2, D1, D2, D3, D4, E, F,
+    A, B1, B2, C1, C2, D1, D2, D3, D4, E, F,
 }
 
 /// 飲食バフの効果情報

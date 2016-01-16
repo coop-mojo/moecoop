@@ -340,6 +340,7 @@ auto toRecipeWidget(Recipe r, ref Wisdom wisdom)
 
 auto toItemWidget(Item item, ref Wisdom wisdom)
 {
+    import std.format;
     auto itemBasiclayout = parseML(q{
             VerticalLayout {
                 padding: 5
@@ -402,7 +403,7 @@ auto toItemWidget(Item item, ref Wisdom wisdom)
     itemBasiclayout.childById("name").text = item.name;
     itemBasiclayout.childById("ename").text = item.ename.empty ? "わからん（´・ω・｀）": item.ename;
     itemBasiclayout.childById("weight").text = item.weight.isNaN ? "そこそこの重さ": item.weight.to!dstring;
-    itemBasiclayout.childById("price").text = item.price.to!dstring;
+    itemBasiclayout.childById("price").text = format("%s g"d, item.price);
     itemBasiclayout.childById("transferable").text = item.transferable ? "はい" : "いいえ";
     itemBasiclayout.childById("stackable").text = item.stackable ? "はい": "いいえ";
     itemBasiclayout.childById("info").text = item.info;
@@ -481,8 +482,6 @@ auto toItemWidget(Item item, ref Wisdom wisdom)
             itemBasiclayout.childById("effect").text = foodInfo.effect.to!dstring;
         if (auto effectName = foodInfo.additionalEffect)
         {
-            import std.format;
-
             showFoodAdditionalEffect;
             itemBasiclayout.childById("additional").text = foodInfo.additionalEffect;
             if (auto f = effectName in wisdom.foodEffectList)

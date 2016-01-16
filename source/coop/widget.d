@@ -138,7 +138,8 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
 
 void showRecipes(MainLayout layout, ref Wisdom wisdom)
 {
-    auto query = layout.childById!EditLine("searchQuery").text;
+    import std.string;
+    auto query = layout.childById!EditLine("searchQuery").text.removechars(r"/[ 　]/");
     auto isMetaSearch = layout.childById!CheckBox("metaSearch").checked;
 
     if (isMetaSearch && query.empty)
@@ -156,7 +157,7 @@ void showRecipes(MainLayout layout, ref Wisdom wisdom)
     }
     auto binderElems = layout.childById!FrameLayout("recipes");
     binderElems.updateElememnts(
-        recipes.filter!(s => !find(s.recipe, boyerMooreFinder(query)).empty).array, wisdom);
+        recipes.filter!(s => !find(s.recipe.removechars(r"/[ 　]/"), boyerMooreFinder(query)).empty).array, wisdom);
 }
 
 void updateElememnts(Recipes)(FrameLayout layout, Recipes rs, ref Wisdom wisdom)

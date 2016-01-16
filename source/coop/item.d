@@ -28,6 +28,49 @@ import std.typecons;
 
 import coop.util;
 
+
+enum PetFoodType
+{
+    Food,
+    Meat,
+    Weed,
+    Drink,
+    Liquor,
+    Medicine,
+    Metal,
+    Stone,
+    Bone,
+    Crystal,
+    Wood,
+    Leather,
+    Paper,
+    Cloth,
+    Others,
+}
+
+auto toString(PetFoodType t)
+{
+    final switch(t) with(PetFoodType)
+    {
+    case Food:     return "食べ物";
+    case Meat:     return "肉食物";
+    case Weed:     return "草食物";
+    case Drink:    return "飲み物";
+    case Liquor:   return "お酒";
+    case Medicine: return "薬";
+    case Metal:    return "金属";
+    case Stone:    return "石";
+    case Bone:     return "骨";
+    case Crystal:  return "クリスタル";
+    case Wood:     return "木";
+    case Leather:  return "皮";
+    case Paper:    return "紙";
+    case Cloth:    return "布";
+    case Others:   return "その他";
+    }
+}
+
+
 enum SpecialProperty: ushort
 {
     NT = 0b00000000000001,
@@ -90,7 +133,7 @@ struct Item
     SpecialProperty properties;
     bool transferable;
     bool stackable;
-    bool isFoodForPets;
+    real[PetFoodType] petFoodInfo;
     dstring remarks;
     ItemType type;
 }
@@ -108,17 +151,19 @@ auto readItems(string fname, string sysBase, string userBase)
 auto toItem(string s, JSONValue[string] json)
 {
     Item item;
-    import std.stdio;
     with(item) {
         name = s.to!dstring;
         ename = json["英名"].str.to!dstring;
         price = json["NPC売却価格"].integer.to!uint;
-        writefln("%s: price = %s", name, price);
         weight = json["重さ"].floating.to!real;
         info = json["info"].str.to!dstring;
         transferable = json["転送できる"].toBool;
         stackable = json["スタックできる"].toBool;
-        isFoodForPets = json["ペットの餌"].toBool;
+        if (auto petFood = "ペットアイテム" in json)
+        {
+            petFoodInfo = (*petFood).object.toPetFoodInfo;
+        }
+
         if (auto props = "特殊条件" in json)
         {
             properties = (*props).array.toSpecialProperties;
@@ -131,6 +176,30 @@ auto toSpecialProperties(JSONValue[] vals)
 {
     auto props = vals.map!"a.str".map!(s => s.to!SpecialProperty).array;
     return props.reduce!((a, b) => a|b).to!SpecialProperty;
+}
+
+auto toPetFoodInfo(JSONValue[string] vals)
+{
+    with(PetFoodType) {
+        auto FoodTypeMap = [
+            "食べ物": Food,
+            "肉食物": Meat,
+            "草食物": Weed,
+            "飲み物": Drink,
+            "お酒": Liquor,
+            "薬": Medicine,
+            "金属": Metal,
+            "石": Stone,
+            "骨": Bone,
+            "クリスタル": Crystal,
+            "木": Wood,
+            "皮": Leather,
+            "紙": Paper,
+            "布": Cloth,
+            "その他": Others,
+            ];
+        return vals.keys.map!(k => tuple(FoodTypeMap[k], vals[k].floating.to!real)).assocArray;
+    }
 }
 
 /// 料理固有の情報

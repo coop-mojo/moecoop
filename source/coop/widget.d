@@ -21,6 +21,7 @@ import dlangui.widgets.metadata;
 
 import std.algorithm;
 import std.container.util;
+import std.exception;
 import std.stdio;
 import std.range;
 
@@ -185,7 +186,6 @@ void updateElememnts(Recipes)(FrameLayout layout, Recipes rs, ref Wisdom wisdom)
 auto toBinderTableWidget(Recipes)(Recipes rs, MainLayout rootLayout, ref Wisdom wisdom)
     if (isInputRange!Recipes && is(ElementType!Recipes == BinderElement))
 {
-    import std.exception;
     return rs
         .map!((ref r) {
                 auto layout = new HorizontalLayout;
@@ -422,30 +422,32 @@ auto toItemWidget(Item item, ref Wisdom wisdom)
 
     auto petCap = itemBasiclayout.childById("petItemCaption");
     auto petFoodInfo = itemBasiclayout.childById("petItem");
-    if (item.isFoodForPets)
-    {
-        petCap.visibility = Visibility.Visible;
-        petFoodInfo.visibility = Visibility.Visible;
-    }
-    else
+    if (item.petFoodInfo.keys.empty)
     {
         petCap.visibility = Visibility.Gone;
         petFoodInfo.visibility = Visibility.Gone;
+    }
+    else
+    {
+        petCap.visibility = Visibility.Visible;
+        petFoodInfo.visibility = Visibility.Visible;
+        auto str = item.petFoodInfo.byKeyValue.map!(kv => format("%s (%s)"d, kv.key.toString, kv.value)).front;
+        petFoodInfo.text = str;
     }
 
     auto clearAllOtherInfo() {
         with(itemBasiclayout)
         {
-            childById("effCap").visibility     = Visibility.Gone;
-            childById("effect").visibility     = Visibility.Gone;
-            childById("addCap").visibility     = Visibility.Gone;
-            childById("additional").visibility = Visibility.Gone;
+            childById("effCap").visibility           = Visibility.Gone;
+            childById("effect").visibility           = Visibility.Gone;
+            childById("addCap").visibility           = Visibility.Gone;
+            childById("additional").visibility       = Visibility.Gone;
             childById("addDetailCap").visibility     = Visibility.Gone;
             childById("additionalDetail").visibility = Visibility.Gone;
-            childById("groupCap").visibility   = Visibility.Gone;
-            childById("group").visibility      = Visibility.Gone;
-            childById("durCap").visibility     = Visibility.Gone;
-            childById("duration").visibility   = Visibility.Gone;
+            childById("groupCap").visibility         = Visibility.Gone;
+            childById("group").visibility            = Visibility.Gone;
+            childById("durCap").visibility           = Visibility.Gone;
+            childById("duration").visibility         = Visibility.Gone;
         }
     }
 
@@ -459,14 +461,14 @@ auto toItemWidget(Item item, ref Wisdom wisdom)
     auto showFoodAdditionalEffect() {
         with(itemBasiclayout)
         {
-            childById("addCap").visibility = Visibility.Visible;
-            childById("additional").visibility = Visibility.Visible;
-            childById("addDetailCap").visibility = Visibility.Visible;
+            childById("addCap").visibility           = Visibility.Visible;
+            childById("additional").visibility       = Visibility.Visible;
+            childById("addDetailCap").visibility     = Visibility.Visible;
             childById("additionalDetail").visibility = Visibility.Visible;
-            childById("groupCap").visibility = Visibility.Visible;
-            childById("group").visibility = Visibility.Visible;
-            childById("durCap").visibility = Visibility.Visible;
-            childById("duration").visibility = Visibility.Visible;
+            childById("groupCap").visibility         = Visibility.Visible;
+            childById("group").visibility            = Visibility.Visible;
+            childById("durCap").visibility           = Visibility.Visible;
+            childById("duration").visibility         = Visibility.Visible;
         }
     }
 

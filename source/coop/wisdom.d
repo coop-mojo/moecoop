@@ -24,6 +24,7 @@ import std.file;
 import std.path;
 import std.typecons;
 
+import coop.item;
 import coop.union_binder;
 import coop.recipe;
 
@@ -37,6 +38,15 @@ struct Wisdom{
     /// カテゴリごとのレシピ一覧
     Recipe[dstring][dstring] recipeList;
 
+    /// アイテム一覧
+    Item[dstring] itemList;
+
+    /// 料理一覧
+    Food[dstring] foodList;
+
+    /// 飲食バフ一覧
+    AdditionalEffect[dstring] foodEffectList;
+
     /// システムデータが保存してあるパス
     immutable string sysBase_;
 
@@ -49,6 +59,9 @@ struct Wisdom{
         userBase_ = userBase;
         binderList = readBinderList(sysBase, userBase);
         recipeList = readRecipeList(sysBase, userBase);
+        itemList = readItemList(sysBase, userBase);
+        foodList = readFoodList(sysBase);
+        foodEffectList = readFoodEffectList(sysBase);
     }
 
     auto readBinderList(string sysBase, string userBase)
@@ -69,6 +82,35 @@ struct Wisdom{
 
         return dirEntries(buildPath(sysBase, "レシピ"), "*.json", SpanMode.breadth)
             .map!(s => s.readRecipes(sysBase, userBase))
+            .assocArray;
+    }
+
+    auto readItemList(string sysBase, string userBase)
+    {
+        enforce(sysBase.exists);
+        enforce(sysBase.isDir);
+        return dirEntries(buildPath(sysBase, "素材"), "*.json", SpanMode.breadth)
+            .map!(s => s.readItems(sysBase, userBase))
+            .array
+            .joiner
+            .assocArray;
+    }
+
+    auto readFoodList(string sysBase) {
+        enforce(sysBase.exists);
+        enforce(sysBase.isDir);
+        return dirEntries(buildPath(sysBase, "食べ物"), "*.json", SpanMode.breadth)
+            .map!(s => s.readFoods(sysBase))
+            .joiner
+            .assocArray;
+    }
+
+    auto readFoodEffectList(string sysBase) {
+        enforce(sysBase.exists);
+        enforce(sysBase.isDir);
+        return dirEntries(buildPath(sysBase, "飲食バフ"), "*.json", SpanMode.breadth)
+            .map!(s => s.readFoodEffects(sysBase))
+            .joiner
             .assocArray;
     }
 
@@ -113,47 +155,6 @@ struct Wisdom{
     auto bindersFor(dstring recipeName)
     {
         return binders.filter!(b => recipesIn(Binder(b)).canFind!(elem => elem.recipe == recipeName)).array;
-    }
-
-    auto relatedBinders(Category cat)
-    {
-        immutable binderMap = [
-            "料理"d: [ "食べ物"d, "カオス", "材料/道具", "家具", "QoAクエスト", ], // "チュートリアル用"
-            "醸造": [ "飲み物"d, "カオス", ],
-            "鍛冶": [ "鍛冶"d, "材料/道具", "QoAクエスト", "カオス", "家具", "楽器"],
-            "木工": [ "木工"d, "材料/道具", "鍛冶", "QoAクエスト", "カオス", "家具", "家", "楽器", ],
-            "裁縫": [ "裁縫"d, "材料/道具", "QoAクエスト", "カオス", "家具", ],
-            "装飾": [ "材料/道具"d, "アクセサリー", "カオス", "QoAクエスト", "楽器", "家具", ],
-            "複製": [ "材料/道具"d, "複製", ],
-            "調合": [ "材料/道具"d, "飲み物", "カオス", "QoAクエスト", ],
-            "合成": [ "罠"d, ],
-            // "美容": [], // 含めるかどうかは後で考える
-            // "栽培": [],
-            "複合": [ "材料/道具"d, "鍛冶", "木工", "裁縫", "アクセサリー", "QoAクエスト", "家具", ],
-            ];
-        return binderMap[cast(dstring)cat];
-    }
-
-    auto relatedCategories(Binder binder)
-    {
-        immutable categoryMap = [
-            "QoAクエスト"d: [ "鍛冶"d, "木工", "裁縫", "料理", "複合", "装飾", "調合", ],
-            "アクセサリー": [],
-            "カオス": [],
-            "飲み物": [],
-            "家": [],
-            "家具": ["罠"d, ],
-            "楽器": [],
-            "裁縫": [],
-            "材料/道具": [], // "材料\/道具" の可能性あり
-            "食べ物": [ "料理"d,  ],
-            "鍛冶": [ "鍛冶"d, "複合", ],
-            "複製": [],
-            "木工": [],
-            "罠": [ "合成"d, ],
-            "アセット": [], /// 上には含まれていないものがあったはず
-            ];
-        return categoryMap[cast(dstring)binder];
     }
 
     ~this()

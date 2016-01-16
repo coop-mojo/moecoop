@@ -27,6 +27,8 @@ import std.file;
 import std.json;
 import std.typecons;
 
+import coop.util;
+
 struct Recipe
 {
     /// レシピ名
@@ -102,13 +104,6 @@ auto toMaterails(JSONValue[string] json)
 auto toRequiredSkills(JSONValue[string] json)
 {
     return json.keys.map!((key) { return tuple(key.to!dstring, json[key].floating.to!real); }).assocArray;
-}
-
-auto toBool(JSONValue val)
-{
-    enforce(val.type == JSON_TYPE.TRUE ||
-            val.type == JSON_TYPE.FALSE);
-    return val.type == JSON_TYPE.TRUE;
 }
 
 unittest

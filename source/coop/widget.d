@@ -24,6 +24,7 @@ import std.container.util;
 import std.stdio;
 import std.range;
 
+import coop.item;
 import coop.recipe;
 import coop.union_binder;
 import coop.wisdom;
@@ -88,7 +89,13 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
                 padding: 1
                 backgroundColor: "black"
             }
-            Button { text: "アイテム情報"}
+
+            TextWidget { text: "アイテム情報1" }
+            FrameLayout {
+                id: itemDetail
+                padding: 1
+                backgroundColor: "black"
+            }
             HorizontalLayout {
                 Button { id: exit; text: "終了" }
             }
@@ -178,6 +185,7 @@ void updateElememnts(Recipes)(FrameLayout layout, Recipes rs, ref Wisdom wisdom)
 auto toBinderTableWidget(Recipes)(Recipes rs, MainLayout rootLayout, ref Wisdom wisdom)
     if (isInputRange!Recipes && is(ElementType!Recipes == BinderElement))
 {
+    import std.exception;
     return rs
         .map!((ref r) {
                 auto layout = new HorizontalLayout;
@@ -189,15 +197,37 @@ auto toBinderTableWidget(Recipes)(Recipes rs, MainLayout rootLayout, ref Wisdom 
                 };
                 auto btn = new Button("detail", "詳細"d);
                 btn.click = (Widget src) {
-                    auto pane = rootLayout.childById("recipeDetail");
-                    pane.removeAllChildren;
-                    auto detail = wisdom.recipeFor(r.recipe);
-                    if (detail.name.empty)
+                    auto recipeDetail = rootLayout.childById("recipeDetail");
+                    recipeDetail.removeAllChildren;
+                    auto rDetail = wisdom.recipeFor(r.recipe);
+                    if (rDetail.name.empty)
                     {
-                        detail.name = r.recipe;
-                        detail.remarks = "作り方がわかりません（´・ω・｀）";
+                        rDetail.name = r.recipe;
+                        rDetail.remarks = "作り方がわかりません（´・ω・｀）";
                     }
-                    pane.addChild(detail.toRecipeWidget(wisdom));
+                    recipeDetail.addChild(rDetail.toRecipeWidget(wisdom));
+
+                    auto itemDetail = rootLayout.childById("itemDetail");
+                    itemDetail.removeAllChildren;
+                    auto itemNames = rDetail.products.keys;
+                    enforce(itemNames.length <= 2);
+                    Item item;
+                    if (itemNames.empty)
+                    {
+                        // レシピ情報が完成するまでの間に合わせ
+                        item.name = r.recipe~"のレシピで作れる何か";
+                        item.remarks = "細かいことはわかりません（´・ω・｀）";
+                    }
+                    else if (auto i = itemNames[0] in wisdom.itemList)
+                    {
+                        item = *i;
+                    }
+                    else
+                    {
+                        item.name = itemNames[0];
+                        item.remarks = "細かいことはわかりません（´・ω・｀）";
+                    }
+                    itemDetail.addChild(item.toItemWidget(wisdom));
                     return true;
                 };
                 return [box, btn];
@@ -304,6 +334,184 @@ auto toRecipeWidget(Recipe r, ref Wisdom wisdom)
 
     auto ret = new ScrollWidget;
     ret.contentWidget = layout;
+    ret.backgroundColor = "white";
+    return ret;
+}
+
+auto toItemWidget(Item item, ref Wisdom wisdom)
+{
+    auto itemBasiclayout = parseML(q{
+            VerticalLayout {
+                padding: 5
+                TableLayout {
+                    colCount: 2
+
+                    TextWidget { text: "名前: " }
+                    TextWidget { id: name }
+
+                    TextWidget { text: "英名: " }
+                    TextWidget { id: ename }
+
+                    TextWidget { text: "重さ: " }
+                    TextWidget { id: weight }
+
+                    /// 食べ物情報
+                    TextWidget { id: effCap; text: "効果"}
+                    TextWidget { id: effect }
+
+                    TextWidget { id: addCap; text: "付加効果"}
+                    TextWidget { id: additional }
+
+                    TextWidget { id: addDetailCap; text: ""}
+                    TextWidget { id: additionalDetail }
+
+                    TextWidget { id: groupCap; text: "バフグループ"}
+                    TextWidget { id: group }
+
+                    TextWidget { id: durCap; text: "効果時間"}
+                    TextWidget { id: duration }
+
+                    /// 飲み物
+                    /// 武器
+                    /// 防具
+
+                    TextWidget { text: "NPC売却価格: " }
+                    TextWidget { id: price }
+
+                    TextWidget { text: "転送可: " }
+                    TextWidget { id: transferable }
+
+                    TextWidget { text: "スタック可: " }
+                    TextWidget { id: stackable }
+
+                    TextWidget { text: "ペットアイテム: "; id: petItemCaption }
+                    TextWidget { id: petItem }
+
+                    TextWidget { text: "info: " }
+                    TextWidget { id: info }
+                }
+
+                HorizontalLayout {
+                    id: remarksInfo
+                    TextWidget { text: "備考:" }
+                    TextWidget { id: remarks }
+                }
+            }
+        });
+    import std.math;
+    itemBasiclayout.childById("name").text = item.name;
+    itemBasiclayout.childById("ename").text = item.ename.empty ? "わからん（´・ω・｀）": item.ename;
+    itemBasiclayout.childById("weight").text = item.weight.isNaN ? "そこそこの重さ": item.weight.to!dstring;
+    itemBasiclayout.childById("price").text = item.price.to!dstring;
+    itemBasiclayout.childById("transferable").text = item.transferable ? "はい" : "いいえ";
+    itemBasiclayout.childById("stackable").text = item.stackable ? "はい": "いいえ";
+    itemBasiclayout.childById("info").text = item.info;
+
+    auto remInfo = itemBasiclayout.childById("remarksInfo");
+    if (item.remarks.empty)
+    {
+        remInfo.visibility = Visibility.Gone;
+    }
+    else
+    {
+        remInfo.visibility = Visibility.Visible;
+        auto remarksText = itemBasiclayout.childById("remarks");
+        remarksText.text = item.remarks;
+    }
+
+    auto petCap = itemBasiclayout.childById("petItemCaption");
+    auto petFoodInfo = itemBasiclayout.childById("petItem");
+    if (item.isFoodForPets)
+    {
+        petCap.visibility = Visibility.Visible;
+        petFoodInfo.visibility = Visibility.Visible;
+    }
+    else
+    {
+        petCap.visibility = Visibility.Gone;
+        petFoodInfo.visibility = Visibility.Gone;
+    }
+
+    auto clearAllOtherInfo() {
+        with(itemBasiclayout)
+        {
+            childById("effCap").visibility     = Visibility.Gone;
+            childById("effect").visibility     = Visibility.Gone;
+            childById("addCap").visibility     = Visibility.Gone;
+            childById("additional").visibility = Visibility.Gone;
+            childById("addDetailCap").visibility     = Visibility.Gone;
+            childById("additionalDetail").visibility = Visibility.Gone;
+            childById("groupCap").visibility   = Visibility.Gone;
+            childById("group").visibility      = Visibility.Gone;
+            childById("durCap").visibility     = Visibility.Gone;
+            childById("duration").visibility   = Visibility.Gone;
+        }
+    }
+
+    auto showFoodBasicInfo() {
+        with(itemBasiclayout)
+        {
+            childById("effCap").visibility = Visibility.Visible;
+            childById("effect").visibility = Visibility.Visible;
+        }
+    }
+    auto showFoodAdditionalEffect() {
+        with(itemBasiclayout)
+        {
+            childById("addCap").visibility = Visibility.Visible;
+            childById("additional").visibility = Visibility.Visible;
+            childById("addDetailCap").visibility = Visibility.Visible;
+            childById("additionalDetail").visibility = Visibility.Visible;
+            childById("groupCap").visibility = Visibility.Visible;
+            childById("group").visibility = Visibility.Visible;
+            childById("durCap").visibility = Visibility.Visible;
+            childById("duration").visibility = Visibility.Visible;
+        }
+    }
+
+    clearAllOtherInfo;
+
+    final switch (item.type) with (ItemType)
+    {
+    case Food:
+        if (auto info = item.name in wisdom.foodList)
+        {
+            auto foodInfo = *info;
+            showFoodBasicInfo;
+            itemBasiclayout.childById("effect").text = foodInfo.effect.to!dstring;
+        if (auto effectName = foodInfo.additionalEffect)
+        {
+            import std.format;
+
+            showFoodAdditionalEffect;
+            itemBasiclayout.childById("additional").text = foodInfo.additionalEffect;
+            if (auto f = effectName in wisdom.foodEffectList)
+            {
+            auto effectInfo = *f;
+
+            auto effectStr = effectInfo.effects
+                                       .byKeyValue
+                                       .map!(kv => format("%s: %s%s"d, kv.key, kv.value > 0 ? "+" : "-", kv.value))
+                                       .join(", ");
+            itemBasiclayout.childById("additionalDetail").text = effectStr;
+            itemBasiclayout.childById("group").text = effectInfo.group.to!dstring;
+            itemBasiclayout.childById("duration").text =  format("%s 秒"d, effectInfo.duration);
+            }
+        }
+        }
+        break;
+    case Drink:
+        break;
+    case Weapon:
+        break;
+    case Armor:
+        break;
+    case Other:
+        break;
+    }
+
+    auto ret = new ScrollWidget;
+    ret.contentWidget = itemBasiclayout;
     ret.backgroundColor = "white";
     return ret;
 }

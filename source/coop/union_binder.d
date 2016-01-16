@@ -53,9 +53,8 @@ private:
 }
 
 auto readBinders(string systemResourceFile, string sysBase, string userBase)
-in{
-    assert(systemResourceFile.exists);
-} body {
+{
+    enforce(systemResourceFile.exists);
     auto base = systemResourceFile.dirName;
     auto rest = systemResourceFile.drop(sysBase.length+1);
     auto userResourceFile = buildPath(userBase, rest);

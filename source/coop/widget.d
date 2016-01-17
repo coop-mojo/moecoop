@@ -357,19 +357,19 @@ auto toItemWidget(Item item, ref Wisdom wisdom)
                     TextWidget { id: weight }
 
                     /// 食べ物情報
-                    TextWidget { id: effCap; text: "効果"}
+                    TextWidget { id: effCap; text: "効果: "}
                     TextWidget { id: effect }
 
-                    TextWidget { id: addCap; text: "付加効果"}
+                    TextWidget { id: addCap; text: "付加効果: "}
                     TextWidget { id: additional }
 
                     TextWidget { id: addDetailCap; text: ""}
                     TextWidget { id: additionalDetail }
 
-                    TextWidget { id: groupCap; text: "バフグループ"}
+                    TextWidget { id: groupCap; text: "バフグループ: "}
                     TextWidget { id: group }
 
-                    TextWidget { id: durCap; text: "効果時間"}
+                    TextWidget { id: durCap; text: "効果時間: "}
                     TextWidget { id: duration }
 
                     /// 飲み物
@@ -394,7 +394,7 @@ auto toItemWidget(Item item, ref Wisdom wisdom)
 
                 HorizontalLayout {
                     id: remarksInfo
-                    TextWidget { text: "備考:" }
+                    TextWidget { text: "備考: " }
                     TextWidget { id: remarks }
                 }
             }

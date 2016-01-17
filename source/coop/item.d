@@ -246,6 +246,7 @@ struct AdditionalEffect
     dstring name;
     AdditionalEffectGroup group;
     int[dstring] effects;
+    dstring otherEffects;
     uint duration;
     dstring remarks;
 }
@@ -266,6 +267,10 @@ auto toFoodEffect(string s, JSONValue[string] json)
     with(effect) {
         name = s.to!dstring;
         effects = json["効果"].object.toStatusEffect;
+        if (auto others = "その他効果" in json)
+        {
+            otherEffects = (*others).str.to!dstring;
+        }
         duration = json["効果時間"].integer.to!uint;
         group = json["グループ"].str.to!AdditionalEffectGroup;
         if (auto rem = "備考" in json)

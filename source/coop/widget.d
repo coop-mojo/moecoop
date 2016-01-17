@@ -409,14 +409,15 @@ auto toItemWidget(Item item, ref Wisdom wisdom)
     itemBasiclayout.childById("info").text = item.info;
 
     auto remInfo = itemBasiclayout.childById("remarksInfo");
+    auto remarksText = itemBasiclayout.childById("remarks");
     if (item.remarks.empty)
     {
         remInfo.visibility = Visibility.Gone;
+        remarksText.text = ""d;
     }
     else
     {
         remInfo.visibility = Visibility.Visible;
-        auto remarksText = itemBasiclayout.childById("remarks");
         remarksText.text = item.remarks;
     }
 
@@ -494,9 +495,24 @@ auto toItemWidget(Item item, ref Wisdom wisdom)
                                        .byKeyValue
                                        .map!(kv => format("%s: %s%s"d, kv.key, kv.value > 0 ? "+" : "", kv.value))
                                        .join(", ");
+            if (effectInfo.otherEffects)
+            {
+                effectStr ~= ", "~effectInfo.otherEffects;
+            }
             itemBasiclayout.childById("additionalDetail").text = effectStr;
             itemBasiclayout.childById("group").text = effectInfo.group.to!dstring;
             itemBasiclayout.childById("duration").text =  format("%s 秒"d, effectInfo.duration);
+
+            if (effectInfo.remarks)
+            {
+                auto rInfo = itemBasiclayout.childById("remarksInfo");
+                auto rText = itemBasiclayout.childById("remarks");
+                rInfo.visibility = Visibility.Visible;
+                rText.visibility = Visibility.Visible;
+                if (rText.text)
+                    rText.text = rText.text ~ ", ";
+                rText.text = rText.text ~ effectInfo.remarks;
+            }
             }
         }
         }

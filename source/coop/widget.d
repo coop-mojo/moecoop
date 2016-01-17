@@ -492,7 +492,7 @@ auto toItemWidget(Item item, ref Wisdom wisdom)
 
             auto effectStr = effectInfo.effects
                                        .byKeyValue
-                                       .map!(kv => format("%s: %s%s"d, kv.key, kv.value > 0 ? "+" : "-", kv.value))
+                                       .map!(kv => format("%s: %s%s"d, kv.key, kv.value > 0 ? "+" : "", kv.value))
                                        .join(", ");
             itemBasiclayout.childById("additionalDetail").text = effectStr;
             itemBasiclayout.childById("group").text = effectInfo.group.to!dstring;

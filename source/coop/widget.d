@@ -91,18 +91,35 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
                 backgroundColor: "black"
             }
 
-            TextWidget { text: "アイテム情報1" }
-            FrameLayout {
-                id: itemDetail
-                padding: 1
-                backgroundColor: "black"
+            VerticalLayout {
+                id: item1
+                TextWidget { text: "アイテム情報1" }
+                FrameLayout {
+                    id: detail
+                    padding: 1
+                    backgroundColor: "black"
+                }
             }
+
+            VerticalLayout {
+                id: item2
+                TextWidget { text: "アイテム情報2" }
+                FrameLayout {
+                    id: detail
+                    padding: 1
+                    backgroundColor: "black"
+                }
+            }
+
             HorizontalLayout {
                 Button { id: exit; text: "終了" }
             }
         }
     }
         });
+
+    layout.childById("item1").visibility = Visibility.Gone;
+    layout.childById("item2").visibility = Visibility.Gone;
 
     auto detail = layout.childById("recipeDetail");
     Recipe dummy;
@@ -207,27 +224,42 @@ auto toBinderTableWidget(Recipes)(Recipes rs, MainLayout rootLayout, ref Wisdom 
                     }
                     recipeDetail.addChild(rDetail.toRecipeWidget(wisdom));
 
-                    auto itemDetail = rootLayout.childById("itemDetail");
-                    itemDetail.removeAllChildren;
                     auto itemNames = rDetail.products.keys;
                     enforce(itemNames.length <= 2);
-                    Item item;
                     if (itemNames.empty)
                     {
                         // レシピ情報が完成するまでの間に合わせ
-                        item.name = r.recipe~"のレシピで作れる何か";
-                        item.remarks = "細かいことはわかりません（´・ω・｀）";
+                        itemNames = [ r.recipe~"のレシピで作れる何か" ];
                     }
-                    else if (auto i = itemNames[0] in wisdom.itemList)
-                    {
-                        item = *i;
-                    }
-                    else
-                    {
-                        item.name = itemNames[0];
-                        item.remarks = "細かいことはわかりません（´・ω・｀）";
-                    }
-                    itemDetail.addChild(item.toItemWidget(wisdom));
+
+                    auto itemLayouts = [1, 2].map!`"item"~a.to!string`
+                                             .map!(id => rootLayout.childById(id))
+                                             .array;
+                    itemLayouts.each!(l => l.visibility = Visibility.Gone);
+
+                    zip(itemNames, itemLayouts).each!((val) {
+                            auto name = val[0];
+                            auto layout = val[1];
+
+                            Item item;
+                            if (auto i = name in wisdom.itemList)
+                            {
+                                item = *i;
+                            }
+                            else
+                            {
+                                item.name = name;
+                                item.remarks = "細かいことはわかりません（´・ω・｀）";
+                            }
+
+                            layout.visibility = Visibility.Visible;
+                            with(layout.childById("detail"))
+                            {
+                                removeAllChildren;
+                                addChild(item.toItemWidget(wisdom));
+                            }
+                    });
+
                     return true;
                 };
                 return [box, btn];

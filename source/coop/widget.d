@@ -471,30 +471,33 @@ auto toItemWidget(Item item, ref Wisdom wisdom)
         petFoodInfo.text = str;
     }
 
-    auto clearAllOtherInfo() {
-        with(itemBasiclayout)
-        {
-            childById("effCap").visibility           = Visibility.Gone;
-            childById("effect").visibility           = Visibility.Gone;
-            childById("addCap").visibility           = Visibility.Gone;
-            childById("additional").visibility       = Visibility.Gone;
-            childById("addDetailCap").visibility     = Visibility.Gone;
-            childById("additionalDetail").visibility = Visibility.Gone;
-            childById("groupCap").visibility         = Visibility.Gone;
-            childById("group").visibility            = Visibility.Gone;
-            childById("durCap").visibility           = Visibility.Gone;
-            childById("duration").visibility         = Visibility.Gone;
-        }
+    with(itemBasiclayout)
+    {
+        childById("effCap").visibility           = Visibility.Gone;
+        childById("effect").visibility           = Visibility.Gone;
+        childById("addCap").visibility           = Visibility.Gone;
+        childById("additional").visibility       = Visibility.Gone;
+        childById("addDetailCap").visibility     = Visibility.Gone;
+        childById("additionalDetail").visibility = Visibility.Gone;
+        childById("groupCap").visibility         = Visibility.Gone;
+        childById("group").visibility            = Visibility.Gone;
+        childById("durCap").visibility           = Visibility.Gone;
+        childById("duration").visibility         = Visibility.Gone;
     }
 
-    auto showFoodBasicInfo() {
+    /// 食べ物情報を表示
+    auto showFoodBasicInfo()
+    {
         with(itemBasiclayout)
         {
             childById("effCap").visibility = Visibility.Visible;
             childById("effect").visibility = Visibility.Visible;
         }
     }
-    auto showFoodAdditionalEffect() {
+
+    /// 食べ物のバフ効果を表示
+    auto showFoodAdditionalEffect()
+    {
         with(itemBasiclayout)
         {
             childById("addCap").visibility           = Visibility.Visible;
@@ -507,8 +510,6 @@ auto toItemWidget(Item item, ref Wisdom wisdom)
             childById("duration").visibility         = Visibility.Visible;
         }
     }
-
-    clearAllOtherInfo;
 
     final switch (item.type) with (ItemType)
     {

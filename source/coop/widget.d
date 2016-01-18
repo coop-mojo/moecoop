@@ -529,7 +529,9 @@ auto toItemWidget(Item item, ref Wisdom wisdom)
                                        .join(", ");
             if (effectInfo.otherEffects)
             {
-                effectStr ~= ", "~effectInfo.otherEffects;
+                if (effectStr)
+                    effectStr ~= ", ";
+                effectStr ~= effectInfo.otherEffects;
             }
             itemBasiclayout.childById("additionalDetail").text = effectStr;
             itemBasiclayout.childById("group").text = effectInfo.group.to!dstring;

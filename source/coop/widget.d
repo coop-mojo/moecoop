@@ -41,6 +41,9 @@ version(Windows) {
 else version(linux) {
     immutable defaultFontName = "源ノ角ゴシック JP";
 }
+else version(OSX) {
+    immutable defaultFontName = "メイリオ";
+}
 
 class MainLayout : HorizontalLayout
 {

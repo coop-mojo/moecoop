@@ -132,7 +132,7 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom, ref Config config)
                     minWidth: 200
                     text: "見たいレシピ"
                 }
-                CheckBox { id: metaSearch; text: "バインダー全部から検索" }
+                CheckBox { id: metaSearch; text: "全てのバインダーから検索" }
                 CheckBox { id: migemo; text: "Migemo 検索" }
             }
 
@@ -172,10 +172,6 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom, ref Config config)
                     padding: 1
                     backgroundColor: "black"
                 }
-            }
-
-            HorizontalLayout {
-                Button { id: exit; text: "終了" }
             }
         }
     }
@@ -224,10 +220,6 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom, ref Config config)
         migemoSearchBox.enabled = false;
     }
 
-    enum exitFun = (Widget src) { parent.close; return true; };
-    layout.childById("exit").click = exitFun;
-
-    import std.exception;
     auto keys = wisdom.binders;
     layout.childById!ComboBox("binders").items = keys;
     layout.childById!ComboBox("binders").itemClick = (Widget src, int idx) {

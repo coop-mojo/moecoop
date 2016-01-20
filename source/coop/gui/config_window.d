@@ -17,12 +17,9 @@
 */
 module coop.gui.config_window;
 
+import dlangui;
 import dlangui.dialogs.dialog;
 import dlangui.dialogs.filedlg;
-import dlangui.dml.parser;
-import dlangui.platforms.common.platform;
-import dlangui.widgets.editors;
-import dlangui.widgets.widget;
 
 import coop.config;
 

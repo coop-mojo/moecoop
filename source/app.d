@@ -29,13 +29,6 @@ immutable SystemResourceBase = "resource";
 immutable UserResourceBase = "userdata";
 immutable AppName = "生協の知恵袋"d;
 
-/*
-  KNOWN ISSUE:
-
-  フォント名には "Source Han Sans JP" じゃなくて "源ノ角ゴシック JP" を指定する必要あり
-    -> FreeTypeFontManager が別名をちゃんと見てくれていない？
- */
-
 extern(C) int UIAppMain(string[] args)
 {
     auto config = Config(buildPath(UserResourceBase, "config.json"));
@@ -44,9 +37,9 @@ extern(C) int UIAppMain(string[] args)
     Platform.instance.uiLanguage = "ja";
     Platform.instance.uiTheme = "theme_default";
     auto window = Platform.instance.createWindow(AppName, null, WindowFlag.Resizable,
-                                                 config.windowWidth == 0 ? 400 : config.windowWidth,
-                                                 config.windowHeight == 0 ? 300 : config.windowHeight);
-    auto layout = createBinderListLayout(window, wisdom);
+                                                 config.windowWidth,
+                                                 config.windowHeight);
+    auto layout = createBinderListLayout(window, wisdom, config);
     window.mainWidget = layout;
     window.show;
     window.onClose = {

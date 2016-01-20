@@ -22,10 +22,12 @@ import dlangui.widgets.metadata;
 import std.algorithm;
 import std.container.util;
 import std.exception;
+import std.file;
 import std.stdio;
 import std.range;
 
 import coop.item;
+import coop.migemo;
 import coop.recipe;
 import coop.union_binder;
 import coop.wisdom;
@@ -45,19 +47,76 @@ else version(OSX) {
     immutable defaultFontName = "游ゴシック体";
 }
 
-class MainLayout : HorizontalLayout
+enum MENU_ACTION{
+    EXIT,
+    OPTION,
+}
+
+class MainLayout : VerticalLayout
 {
-    this()
-    {
+    this() {
         super();
+        ownStyle.theme.fontFamily(FontFamily.SansSerif).fontFace(fontName);
+    }
+
+    this(string id)
+    {
+        super(id);
         ownStyle.theme.fontFamily(FontFamily.SansSerif).fontFace(fontName);
     }
 }
 
-auto createBinderListLayout(Window parent, ref Wisdom wisdom)
+class BinderInfoLayout: HorizontalLayout
 {
-    auto layout = cast(MainLayout)parseML(q{
-    MainLayout {
+    this() { super(); }
+}
+
+import coop.config;
+
+auto createBinderListLayout(Window parent, ref Wisdom wisdom, ref Config config)
+{
+    auto root = new MainLayout("root");
+
+    auto mainMenuItems = new MenuItem;
+    auto optionItem = new MenuItem(new Action(MENU_ACTION.OPTION, "オプション..."d));
+    auto exitItem = new MenuItem(new Action(MENU_ACTION.EXIT, "終了"d));
+    mainMenuItems.add(optionItem);
+    mainMenuItems.add(exitItem);
+    auto mainMenu = new MainMenu(mainMenuItems);
+
+    mainMenu.menuItemClick = (MenuItem item) {
+        auto a = item.action;
+        if (a) {
+            switch(a.id) with(MENU_ACTION)
+            {
+            case EXIT:
+                parent.close;
+                break;
+            case OPTION:
+                import coop.gui.config_window;
+                showConfigWindow(parent, config);
+                break;
+            default:
+            }
+        }
+        return true;
+    };
+    root.addChild(mainMenu);
+
+    auto tabs = new TabWidget("tabs");
+    tabs.layoutWidth(FILL_PARENT)
+        .layoutHeight(FILL_PARENT);
+    root.addChild(tabs);
+
+    // TODO: 下にスペースが残る
+    auto status = new StatusLine;
+    status.id = "status";
+    status.setStatusText(" "d);
+    root.addChild(status);
+
+    auto layout = cast(BinderInfoLayout)parseML(q{
+    BinderInfoLayout {
+        id: binderFrame
         margins: 20; padding: 10
         VerticalLayout {
             HorizontalLayout {
@@ -73,7 +132,8 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
                     minWidth: 200
                     text: "見たいレシピ"
                 }
-                CheckBox { id: metaSearch; text: "バインダー全部から検索する" }
+                CheckBox { id: metaSearch; text: "バインダー全部から検索" }
+                CheckBox { id: migemo; text: "Migemo 検索" }
             }
 
             TextWidget { text: "レシピ一覧" }
@@ -121,8 +181,12 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
     }
         });
 
+    layout.layoutHeight(FILL_PARENT)
+        .layoutWidth(FILL_PARENT);
     layout.childById("item1").visibility = Visibility.Gone;
     layout.childById("item2").visibility = Visibility.Gone;
+
+    tabs.addTab(layout, "Binders"d);
 
     auto detail = layout.childById("recipeDetail");
     Recipe dummy;
@@ -140,15 +204,25 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
         return true;
     };
     editLine.keyEvent = (Widget src, KeyEvent e) {
-        showRecipes(layout, wisdom);
+        showRecipes(layout, wisdom, config);
         return false;
     };
 
     auto metaSearchBox = layout.childById!CheckBox("metaSearch");
     metaSearchBox.checkChange = (Widget src, bool checked) {
-        showRecipes(layout, wisdom);
+        showRecipes(layout, wisdom, config);
         return true;
     };
+
+    auto migemoSearchBox = layout.childById!CheckBox("migemo");
+    migemoSearchBox.checkChange = (Widget src, bool checked) {
+        showRecipes(layout, wisdom, config);
+        return true;
+    };
+    if (!config.migemoDLL.exists)
+    {
+        migemoSearchBox.enabled = false;
+    }
 
     enum exitFun = (Widget src) { parent.close; return true; };
     layout.childById("exit").click = exitFun;
@@ -158,23 +232,24 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
     layout.childById!ComboBox("binders").items = keys;
     layout.childById!ComboBox("binders").itemClick = (Widget src, int idx) {
         auto binderElems = layout.childById!FrameLayout("recipes");
-        binderElems.updateElememnts(wisdom.recipesIn(Binder(keys[idx])), wisdom);
+        binderElems.updateElements(wisdom.recipesIn(Binder(keys[idx])), wisdom);
         return true;
     };
-    return layout;
+
+    return root;
 }
 
-void showRecipes(MainLayout layout, ref Wisdom wisdom)
+void showRecipes(BinderInfoLayout layout, ref Wisdom wisdom, ref Config config)
 {
     import std.string;
     auto query = layout.childById!EditLine("searchQuery").text.removechars(r"/[ 　]/");
-    auto isMetaSearch = layout.childById!CheckBox("metaSearch").checked;
+    auto useMetaSearch = layout.childById!CheckBox("metaSearch").checked;
 
-    if (isMetaSearch && query.empty)
+    if (useMetaSearch && query.empty)
         return;
 
     InputRange!BinderElement recipes;
-    if (isMetaSearch)
+    if (useMetaSearch)
     {
         recipes = inputRangeObject(wisdom.binders.map!(b => wisdom.recipesIn(Binder(b))).cache.joiner);
     }
@@ -184,11 +259,30 @@ void showRecipes(MainLayout layout, ref Wisdom wisdom)
         recipes = inputRangeObject(wisdom.recipesIn(Binder(binder)));
     }
     auto binderElems = layout.childById!FrameLayout("recipes");
-    binderElems.updateElememnts(
-        recipes.filter!(s => !find(s.recipe.removechars(r"/[ 　]/"), boyerMooreFinder(query)).empty).array, wisdom);
+    bool delegate(BinderElement) matchFun =
+        s => !find(s.recipe.removechars(r"/[ 　]/"), boyerMooreFinder(query)).empty;
+    auto useMigemo = layout.childById!CheckBox("migemo").checked;
+    if (useMigemo)
+    {
+        // TODO: 毎回辞書を読まなくても済むように変更する
+        import std.path;
+        import std.regex;
+        auto migemo = new Migemo(config.migemoDLL, config.migemoDict);
+        scope(exit) migemo.destroy;
+        migemo.load("resource/dict/moe-dict");
+        enforce(migemo.isEnable);
+        try{
+            // ? や ( 等のメタ文字が入っているとうまくいかない
+            auto q = migemo.query(query).regex;
+            matchFun = s => !s.recipe.removechars(r"/[ 　]/").matchFirst(q).empty;
+        } catch(RegexException e) {
+            // use default matchFun
+        }
+    }
+    binderElems.updateElements(recipes.filter!matchFun.array, wisdom);
 }
 
-void updateElememnts(Recipes)(FrameLayout layout, Recipes rs, ref Wisdom wisdom)
+void updateElements(Recipes)(FrameLayout layout, Recipes rs, ref Wisdom wisdom)
     if (isInputRange!Recipes && is(ElementType!Recipes == BinderElement))
 {
     layout.removeAllChildren();
@@ -196,14 +290,14 @@ void updateElememnts(Recipes)(FrameLayout layout, Recipes rs, ref Wisdom wisdom)
     auto horizontal = new HorizontalLayout;
 
     layout.backgroundColor = rs.empty ? "white" : "black";
-    rs.toBinderTableWidget(cast(MainLayout)layout.parent.parent.parent, wisdom)
+    rs.toBinderTableWidget(cast(BinderInfoLayout)layout.parent.parent.parent, wisdom)
       .each!(column => horizontal.addChild(column));
     scroll.contentWidget = horizontal;
     scroll.backgroundColor = "white";
     layout.addChild(scroll);
 }
 
-auto toBinderTableWidget(Recipes)(Recipes rs, MainLayout rootLayout, ref Wisdom wisdom)
+auto toBinderTableWidget(Recipes)(Recipes rs, BinderInfoLayout rootLayout, ref Wisdom wisdom)
     if (isInputRange!Recipes && is(ElementType!Recipes == BinderElement))
 {
     return rs
@@ -571,4 +665,4 @@ auto toItemWidget(Item item, ref Wisdom wisdom)
     return ret;
 }
 
-mixin(registerWidgets!(MainLayout)());
+mixin(registerWidgets!(MainLayout, BinderInfoLayout)());

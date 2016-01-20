@@ -47,6 +47,11 @@ else version(OSX) {
     immutable defaultFontName = "游ゴシック体";
 }
 
+enum MENU_ACTION{
+    EXIT,
+    OPTION,
+}
+
 class MainLayout : VerticalLayout
 {
     this() {
@@ -66,30 +71,30 @@ class BinderInfoLayout: HorizontalLayout
     this() { super(); }
 }
 
-auto createBinderListLayout(Window parent, ref Wisdom wisdom)
+import coop.config;
+
+auto createBinderListLayout(Window parent, ref Wisdom wisdom, ref Config config)
 {
     auto root = new MainLayout("root");
 
-    enum ACTION_OPEN_OPTION = 5503;
-    enum ACTION_EXIT = 5504;
     auto mainMenuItems = new MenuItem;
-    auto optionItem = new MenuItem(new Action(ACTION_OPEN_OPTION, "option..."d, "document-close"c,
-                                              KeyCode.KEY_O, KeyFlag.Alt));
-    auto exitItem = new MenuItem(new Action(ACTION_EXIT, "exit"d, "document-close"c,
-                                            KeyCode.KEY_X, KeyFlag.Alt));
+    auto optionItem = new MenuItem(new Action(MENU_ACTION.OPTION, "オプション..."d));
+    auto exitItem = new MenuItem(new Action(MENU_ACTION.EXIT, "終了"d));
     mainMenuItems.add(optionItem);
     mainMenuItems.add(exitItem);
     auto mainMenu = new MainMenu(mainMenuItems);
+
     mainMenu.menuItemClick = (MenuItem item) {
         auto a = item.action;
         if (a) {
-            switch(a.id)
+            switch(a.id) with(MENU_ACTION)
             {
-            case ACTION_EXIT:
+            case EXIT:
                 parent.close;
                 break;
-            case ACTION_OPEN_OPTION:
-                writeln("open option");
+            case OPTION:
+                import coop.gui.config_window;
+                showConfigWindow(parent, config);
                 break;
             default:
             }
@@ -199,22 +204,22 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
         return true;
     };
     editLine.keyEvent = (Widget src, KeyEvent e) {
-        showRecipes(layout, wisdom);
+        showRecipes(layout, wisdom, config);
         return false;
     };
 
     auto metaSearchBox = layout.childById!CheckBox("metaSearch");
     metaSearchBox.checkChange = (Widget src, bool checked) {
-        showRecipes(layout, wisdom);
+        showRecipes(layout, wisdom, config);
         return true;
     };
 
     auto migemoSearchBox = layout.childById!CheckBox("migemo");
     migemoSearchBox.checkChange = (Widget src, bool checked) {
-        showRecipes(layout, wisdom);
+        showRecipes(layout, wisdom, config);
         return true;
     };
-    if (!migemoDLL.exists)
+    if (!config.migemoDLL.exists)
     {
         migemoSearchBox.enabled = false;
     }
@@ -234,7 +239,7 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
     return root;
 }
 
-void showRecipes(BinderInfoLayout layout, ref Wisdom wisdom)
+void showRecipes(BinderInfoLayout layout, ref Wisdom wisdom, ref Config config)
 {
     import std.string;
     auto query = layout.childById!EditLine("searchQuery").text.removechars(r"/[ 　]/");
@@ -262,13 +267,13 @@ void showRecipes(BinderInfoLayout layout, ref Wisdom wisdom)
         // TODO: 毎回辞書を読まなくても済むように変更する
         import std.path;
         import std.regex;
-        auto migemo = new Migemo(migemoDLL, dictPath.dirName);
+        auto migemo = new Migemo(config.migemoDLL, config.migemoDict);
         scope(exit) migemo.destroy;
         migemo.load("resource/dict/moe-dict");
         enforce(migemo.isEnable);
         try{
             // ? や ( 等のメタ文字が入っているとうまくいかない
-            auto q = migemo.query(query.to!string).to!dstring.regex;
+            auto q = migemo.query(query).regex;
             matchFun = s => !s.recipe.removechars(r"/[ 　]/").matchFirst(q).empty;
         } catch(RegexException e) {
             // use default matchFun

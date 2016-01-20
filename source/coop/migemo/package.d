@@ -17,20 +17,13 @@
 */
 module coop.migemo;
 
+import std.conv;
 import std.exception;
 import std.file;
+import std.path;
 import std.string;
 
 import coop.migemo.derelict.migemo;
-
-version(OSX)
-{
-    // TODO: 適切な場所に移動させる
-    import std.path;
-    enum migemoDir = "/usr/local/opt/cmigemo";
-    enum migemoDLL = buildPath(migemoDir, "lib/libmigemo.dylib");
-    enum dictPath = buildPath(migemoDir, "share/migemo/utf-8/migemo-dict");
-}
 
 class MigemoException: Exception
 {
@@ -40,37 +33,37 @@ class MigemoException: Exception
 alias migemoEnforce = enforceEx!MigemoException;
 
 struct Migemo{
-    this(string path, string dictDir)
+    this(String)(String path, String dictDir)
     in{
         assert(path.exists);
         assert(path.isFile);
     } body {
-        DerelictMigemo.load(path);
+        DerelictMigemo.load(path.to!string);
         m = migemo_open(null);
         migemo_setproc_int2char(m, &int2char);
         migemo_setproc_char2int(m, &char2int);
 
-        auto roma2hira = buildPath(dictDir, "roma2hira.dat");
+        auto roma2hira = buildPath(dictDir, "roma2hira.dat".to!String);
         if (roma2hira.exists)
         {
-            migemoEnforce(migemo_load(m, MIGEMO_DICTID.ROMA2HIRA, roma2hira.toStringz) != MIGEMO_DICTID.INVALID,
+            migemoEnforce(migemo_load(m, MIGEMO_DICTID.ROMA2HIRA, roma2hira.to!string.toStringz) != MIGEMO_DICTID.INVALID,
                           "Failed to initialize migemo");
         }
-        auto hira2kata = buildPath(dictDir, "hira2kata.dat");
+        auto hira2kata = buildPath(dictDir, "hira2kata.dat".to!String);
         if (hira2kata.exists)
         {
-            migemoEnforce(migemo_load(m, MIGEMO_DICTID.HIRA2KATA, hira2kata.toStringz) != MIGEMO_DICTID.INVALID,
+            migemoEnforce(migemo_load(m, MIGEMO_DICTID.HIRA2KATA, hira2kata.to!string.toStringz) != MIGEMO_DICTID.INVALID,
                           "Failed to initialize migemo");
         }
     }
 
-    void load(string path)
+    void load(String)(String path)
     {
         import std.format;
 
         migemoEnforce(path.exists, format("%s does not exist.", path));
         migemoEnforce(path.isFile, format("%s is not a file.", path));
-        migemoEnforce(migemo_load(m, MIGEMO_DICTID.MIGEMO, path.toStringz) != MIGEMO_DICTID.INVALID,
+        migemoEnforce(migemo_load(m, MIGEMO_DICTID.MIGEMO, path.to!string.toStringz) != MIGEMO_DICTID.INVALID,
                       format("Failed to load %s.", path));
     }
 
@@ -79,13 +72,11 @@ struct Migemo{
         return cast(bool)migemo_is_enable(m);
     }
 
-    auto query(string q)
+    auto query(String)(String query)
     {
-        import std.conv;
-        auto cstr = migemo_query(m, q.toStringz);
+        auto cstr = migemo_query(m, query.to!string.toStringz);
         scope(exit) migemo_release(m, cstr);
-
-        return cstr.to!string;
+        return fromStringz(cstr).idup.to!String;
     }
 
     ~this()

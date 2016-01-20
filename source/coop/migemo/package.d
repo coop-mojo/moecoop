@@ -34,18 +34,7 @@ version(OSX)
 
 class MigemoException: Exception
 {
-    // mixin basicExceptionCtors;
-    this(string msg, string file = __FILE__, size_t line = __LINE__,
-         Throwable next = null) @nogc @safe pure nothrow
-    {
-        super(msg, file, line, next);
-    }
-
-    this(string msg, Throwable next, string file = __FILE__,
-         size_t line = __LINE__) @nogc @safe pure nothrow
-    {
-        super(msg, file, line, next);
-    }
+    mixin basicExceptionCtors;
 }
 
 alias migemoEnforce = enforceEx!MigemoException;
@@ -58,6 +47,8 @@ struct Migemo{
     } body {
         DerelictMigemo.load(path);
         m = migemo_open(null);
+        migemo_setproc_int2char(m, &int2char);
+        migemo_setproc_char2int(m, &char2int);
 
         auto roma2hira = buildPath(dictDir, "roma2hira.dat");
         if (roma2hira.exists)
@@ -103,4 +94,51 @@ struct Migemo{
     }
 private:
     migemo *m;
+}
+
+private:
+pure nothrow @nogc:
+
+extern(C)
+{
+
+    int char2int(const char* input, uint* output)
+    {
+        if (input[0] != '\\')
+            return 0;
+        switch(input[1])
+        {
+        case '?':
+            *output = '?';
+            break;
+        case '(':
+            *output = '(';
+            break;
+        case ')':
+            *output = ')';
+            break;
+        default:
+            return 0;
+        }
+        return 2;
+    }
+
+    int int2char(uint input, char* output)
+    {
+        switch(input)
+        {
+        case '?':
+            output[0..2] = `\?`;
+            break;
+        case '(':
+            output[0..2] = `\(`;
+            break;
+        case ')':
+            output[0..2] = `\)`;
+            break;
+        default:
+            return 0;
+        }
+        return 2;
+    }
 }

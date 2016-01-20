@@ -29,13 +29,6 @@ immutable SystemResourceBase = "resource";
 immutable UserResourceBase = "userdata";
 immutable AppName = "生協の知恵袋"d;
 
-/*
-  KNOWN ISSUE:
-
-  フォント名には "Source Han Sans JP" じゃなくて "源ノ角ゴシック JP" を指定する必要あり
-    -> FreeTypeFontManager が別名をちゃんと見てくれていない？
- */
-
 extern(C) int UIAppMain(string[] args)
 {
     auto config = Config(buildPath(UserResourceBase, "config.json"));

@@ -186,7 +186,7 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom, ref Config config)
     layout.childById("item1").visibility = Visibility.Gone;
     layout.childById("item2").visibility = Visibility.Gone;
 
-    tabs.addTab(layout, "Binders"d);
+    tabs.addTab(layout, "バインダー"d);
 
     auto detail = layout.childById("recipeDetail");
     Recipe dummy;

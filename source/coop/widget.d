@@ -47,19 +47,71 @@ else version(OSX) {
     immutable defaultFontName = "游ゴシック体";
 }
 
-class MainLayout : HorizontalLayout
+class MainLayout : VerticalLayout
 {
-    this()
-    {
+    this() {
         super();
+        ownStyle.theme.fontFamily(FontFamily.SansSerif).fontFace(fontName);
+    }
+
+    this(string id)
+    {
+        super(id);
         ownStyle.theme.fontFamily(FontFamily.SansSerif).fontFace(fontName);
     }
 }
 
+class BinderInfoLayout: HorizontalLayout
+{
+    this() { super(); }
+}
+
 auto createBinderListLayout(Window parent, ref Wisdom wisdom)
 {
-    auto layout = cast(MainLayout)parseML(q{
-    MainLayout {
+    auto root = new MainLayout("root");
+
+    enum ACTION_OPEN_OPTION = 5503;
+    enum ACTION_EXIT = 5504;
+    auto mainMenuItems = new MenuItem;
+    auto optionItem = new MenuItem(new Action(ACTION_OPEN_OPTION, "option..."d, "document-close"c,
+                                              KeyCode.KEY_O, KeyFlag.Alt));
+    auto exitItem = new MenuItem(new Action(ACTION_EXIT, "exit"d, "document-close"c,
+                                            KeyCode.KEY_X, KeyFlag.Alt));
+    mainMenuItems.add(optionItem);
+    mainMenuItems.add(exitItem);
+    auto mainMenu = new MainMenu(mainMenuItems);
+    mainMenu.menuItemClick = (MenuItem item) {
+        auto a = item.action;
+        if (a) {
+            switch(a.id)
+            {
+            case ACTION_EXIT:
+                parent.close;
+                break;
+            case ACTION_OPEN_OPTION:
+                writeln("open option");
+                break;
+            default:
+            }
+        }
+        return true;
+    };
+    root.addChild(mainMenu);
+
+    auto tabs = new TabWidget("tabs");
+    tabs.layoutWidth(FILL_PARENT)
+        .layoutHeight(FILL_PARENT);
+    root.addChild(tabs);
+
+    // TODO: 下にスペースが残る
+    auto status = new StatusLine;
+    status.id = "status";
+    status.setStatusText(" "d);
+    root.addChild(status);
+
+    auto layout = cast(BinderInfoLayout)parseML(q{
+    BinderInfoLayout {
+        id: binderFrame
         margins: 20; padding: 10
         VerticalLayout {
             HorizontalLayout {
@@ -124,8 +176,12 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
     }
         });
 
+    layout.layoutHeight(FILL_PARENT)
+        .layoutWidth(FILL_PARENT);
     layout.childById("item1").visibility = Visibility.Gone;
     layout.childById("item2").visibility = Visibility.Gone;
+
+    tabs.addTab(layout, "Binders"d);
 
     auto detail = layout.childById("recipeDetail");
     Recipe dummy;
@@ -174,10 +230,11 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom)
         binderElems.updateElements(wisdom.recipesIn(Binder(keys[idx])), wisdom);
         return true;
     };
-    return layout;
+
+    return root;
 }
 
-void showRecipes(MainLayout layout, ref Wisdom wisdom)
+void showRecipes(BinderInfoLayout layout, ref Wisdom wisdom)
 {
     import std.string;
     auto query = layout.childById!EditLine("searchQuery").text.removechars(r"/[ 　]/");
@@ -228,14 +285,14 @@ void updateElements(Recipes)(FrameLayout layout, Recipes rs, ref Wisdom wisdom)
     auto horizontal = new HorizontalLayout;
 
     layout.backgroundColor = rs.empty ? "white" : "black";
-    rs.toBinderTableWidget(cast(MainLayout)layout.parent.parent.parent, wisdom)
+    rs.toBinderTableWidget(cast(BinderInfoLayout)layout.parent.parent.parent, wisdom)
       .each!(column => horizontal.addChild(column));
     scroll.contentWidget = horizontal;
     scroll.backgroundColor = "white";
     layout.addChild(scroll);
 }
 
-auto toBinderTableWidget(Recipes)(Recipes rs, MainLayout rootLayout, ref Wisdom wisdom)
+auto toBinderTableWidget(Recipes)(Recipes rs, BinderInfoLayout rootLayout, ref Wisdom wisdom)
     if (isInputRange!Recipes && is(ElementType!Recipes == BinderElement))
 {
     return rs
@@ -603,4 +660,4 @@ auto toItemWidget(Item item, ref Wisdom wisdom)
     return ret;
 }
 
-mixin(registerWidgets!(MainLayout)());
+mixin(registerWidgets!(MainLayout, BinderInfoLayout)());

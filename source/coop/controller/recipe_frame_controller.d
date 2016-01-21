@@ -153,8 +153,9 @@ private:
     auto toBinderRecipeWidgets(dstring binder, dstring[] recipes)
     {
         return recipes.map!((r) {
+                import std.stdio;
                 auto ret = new RecipeEntryWidget(r);
-                ret.checked = chars_.front.hasRecipe(r, binder);
+
                 ret.filedStateChanged = (bool marked) {
                     if (marked)
                     {
@@ -165,6 +166,7 @@ private:
                         chars_.front.unmarkFiledRecipe(r, binder);
                     }
                 };
+                ret.checked = chars_.front.hasRecipe(r, binder);
                 ret.detailClicked = {
                     auto rDetail = wisdom_.recipeFor(r);
                     if (rDetail.name.empty)
@@ -217,11 +219,11 @@ private:
                     TextWidget { text: "レシピ名: " }
                     TextWidget { id: recipe }
 
-                    TextWidget { text: "テクニック: "; backgroundColor: "gray" }
-                    TextWidget { id: tech; backgroundColor: "gray"  }
+                    TextWidget { text: "テクニック: " }
+                    TextWidget { id: tech  }
 
-                    TextWidget { text: "必要スキル: "; backgroundColor: "gray"  }
-                    TextWidget { id: skills; backgroundColor: "gray"  }
+                    TextWidget { text: "必要スキル: "  }
+                    TextWidget { id: skills  }
 
                     TextWidget { text: "材料: " }
                     VerticalLayout { id: ingredients }

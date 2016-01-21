@@ -34,8 +34,7 @@ class Character
         }
         else
         {
-            return binder in filedMap_ &&
-                   recipe in filedMap_[binder];
+            return (binder in filedMap_) && (recipe in filedMap_[binder]);
         }
     }
 
@@ -102,8 +101,6 @@ private:
             f.write(kv.value.toPrettyString);
             existingBinders.removeKey(path);
         }
-
-        existingBinders[].each!remove;
     }
 
     RedBlackTree!dstring[dstring] filedMap_;

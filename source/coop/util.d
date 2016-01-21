@@ -26,3 +26,5 @@ auto toBool(JSONValue val)
             val.type == JSON_TYPE.FALSE);
     return val.type == JSON_TYPE.TRUE;
 }
+
+alias EventHandler(T...) = void delegate(T);

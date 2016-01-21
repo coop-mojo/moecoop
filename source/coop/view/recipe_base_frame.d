@@ -19,10 +19,17 @@ module coop.view.recipe_base_frame;
 
 import dlangui;
 
+import std.algorithm;
+import std.array;
+import std.range;
+
 import coop.model.item;
 import coop.model.recipe;
+import coop.util;
 
-abstract class RecipeBaseFrame: HorizontalLayout
+immutable MaxNumberOfBinderPages = 128;
+
+class RecipeBaseFrame: HorizontalLayout
 {
     this() { super(); }
 
@@ -37,7 +44,7 @@ abstract class RecipeBaseFrame: HorizontalLayout
         layoutWidth(FILL_PARENT);
         with(childById!ComboBox("nColumns"))
         {
-            items = [ "1列表示", "2列表示", "4列表示" ];
+            items = ["1列表示"d, "2列表示", "4列表示"];
             selectedItemIndex = 2;
             itemClick = (Widget src, int idx) {
                 nColumnChanged();
@@ -82,16 +89,40 @@ abstract class RecipeBaseFrame: HorizontalLayout
         return childById!ComboBox("categories").selectedItem;
     }
 
-    @property auto recipeList(dstring[] recipes)
+    auto showRecipeList(Widget[] recipes, int nColumns)
     {
+        auto recipeList = childById("recipeList");
+        recipeList.removeAllChildren;
+        recipeList.backgroundColor = recipes.empty ? "white" : "black";
+
+        auto scroll = new ScrollWidget;
+        auto horizontal = new HorizontalLayout;
+
+        recipes
+            .chunks(MaxNumberOfBinderPages/nColumns)
+            .map!((rs) {
+                    auto col = new VerticalLayout;
+                    rs.each!(r => col.addChild(r));
+                    return col;
+                })
+            .each!(col => horizontal.addChild(col));
+        scroll.contentWidget = horizontal;
+        scroll.backgroundColor = "white";
+        recipeList.addChild(scroll);
     }
 
-    @property auto recipeDetail(Recipe recipe)
+    @property auto recipeDetail(Widget recipe)
     {
+        auto frame = childById("recipeDetail");
+        frame.removeAllChildren;
+        frame.addChild(recipe);
     }
 
-    @property auto itemDedail(Item item, int idx)
+    auto setItemDetail(Widget item, int idx)
     {
+        auto frame = childById("detail"~(idx+1).to!string);
+        frame.removeAllChildren;
+        frame.addChild(item);
     }
 
     @property auto queryText()
@@ -106,12 +137,12 @@ abstract class RecipeBaseFrame: HorizontalLayout
 
     auto hideItemDetail(int idx)
     {
-        childById("item"~idx.to!string).visibility = Visibility.Gone;
+        childById("item"~(idx+1).to!string).visibility = Visibility.Gone;
     }
 
     auto showItemDetail(int idx)
     {
-        childById("item"~idx.to!string).visibility = Visibility.Visible;
+        childById("item"~(idx+1).to!string).visibility = Visibility.Visible;
     }
 
     @property auto numberOfColumns()
@@ -126,7 +157,7 @@ abstract class RecipeBaseFrame: HorizontalLayout
 
     @property auto useMigemo()
     {
-        return childById!CheckBox("metaSearch").checked;
+        return childById!CheckBox("migemo").checked;
     }
 
     @property auto disableMigemoBox()
@@ -146,13 +177,12 @@ abstract class RecipeBaseFrame: HorizontalLayout
         childById("metaSearch").text = format("全ての%sから検索"d, cat);
     }
 
-    alias EventHandler = void delegate();
-    EventHandler queryFocused;
-    EventHandler queryChanged;
-    EventHandler metaSearchOptionChanged;
-    EventHandler migemoOptionChanged;
-    EventHandler categoryChanged;
-    EventHandler nColumnChanged;
+    EventHandler!() queryFocused;
+    EventHandler!() queryChanged;
+    EventHandler!() metaSearchOptionChanged;
+    EventHandler!() migemoOptionChanged;
+    EventHandler!() categoryChanged;
+    EventHandler!() nColumnChanged;
 }
 
 auto recipeListLayout()
@@ -226,4 +256,41 @@ auto recipeDetailsLayout()
             }
         });
     return layout;
+}
+
+class RecipeEntryWidget: HorizontalLayout
+{
+    this()
+    {
+        super();
+    }
+
+    this(dstring recipe)
+    {
+        super(recipe.to!string);
+        box = new CheckBox(null, recipe);
+        btn = new Button(null, "詳細"d);
+        addChild(box);
+        addChild(btn);
+        box.checkChange = (Widget src, bool checked) {
+            filedStateChanged(checked);
+            return true;
+        };
+        btn.click = (Widget src) {
+            detailClicked();
+            return true;
+        };
+    }
+
+    override @property bool checked() { return box.checked; }
+    override @property Widget checked(bool c) {
+        box.checked = c;
+        return this;
+    }
+
+    EventHandler!(bool) filedStateChanged;
+    EventHandler!() detailClicked;
+private:
+    CheckBox box;
+    Button btn;
 }

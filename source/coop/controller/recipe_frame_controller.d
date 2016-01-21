@@ -19,21 +19,21 @@ module coop.controller.recipe_frame_controller;
 
 import dlangui;
 
-import std.container.util;
-import std.range;
-import std.regex;
 import std.algorithm;
+import std.container.util;
 import std.exception;
 import std.file;
+import std.range;
+import std.regex;
 import std.typecons;
 
-import coop.view.recipe_base_frame;
-import coop.model.config;
 import coop.migemo;
-import coop.model.wisdom;
 import coop.model.character;
+import coop.model.config;
 import coop.model.item;
 import coop.model.recipe;
+import coop.model.wisdom;
+import coop.view.recipe_base_frame;
 
 class RecipeFrameController
 {

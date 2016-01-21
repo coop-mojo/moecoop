@@ -1,13 +1,13 @@
 module coop.model.character;
 
 import std.algorithm;
+import std.array;
 import std.container.rbtree;
-import std.json;
+import std.conv;
 import std.exception;
 import std.file;
+import std.json;
 import std.path;
-import std.array;
-import std.conv;
 import std.regex;
 
 class Character

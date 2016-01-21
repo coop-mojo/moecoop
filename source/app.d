@@ -31,8 +31,10 @@ immutable AppName = "生協の知恵袋"d;
 
 extern(C) int UIAppMain(string[] args)
 {
-    auto config = Config(buildPath(UserResourceBase, "config.json"));
-    auto wisdom = Wisdom(SystemResourceBase, UserResourceBase);
+    auto wisdom = new Wisdom(SystemResourceBase, UserResourceBase);
+    scope(exit) wisdom.destroy;
+    auto config = new Config(buildPath(UserResourceBase, "config.json"));
+    scope(exit) config.destroy;
 
     Platform.instance.uiLanguage = "ja";
     Platform.instance.uiTheme = "theme_default";

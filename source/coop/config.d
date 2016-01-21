@@ -22,7 +22,7 @@ import std.exception;
 import std.file;
 import std.json;
 
-struct Config {
+class Config {
     this(string file)
     {
         if (file.exists)

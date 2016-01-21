@@ -31,7 +31,7 @@ import coop.recipe;
 alias Binder = Typedef!(dstring, "binder");
 alias Category = Typedef!(dstring, "category");
 
-struct Wisdom{
+class Wisdom{
     /// バインダーごとのレシピ名一覧
     BinderElement[][dstring] binderList;
 

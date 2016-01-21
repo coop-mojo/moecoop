@@ -16,6 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 module coop.widget;
+
 import dlangui;
 import dlangui.widgets.metadata;
 
@@ -73,7 +74,7 @@ class BinderInfoLayout: HorizontalLayout
 
 import coop.config;
 
-auto createBinderListLayout(Window parent, ref Wisdom wisdom, ref Config config)
+auto createBinderListLayout(Window parent, Wisdom wisdom, Config config)
 {
     auto root = new MainLayout("root");
 
@@ -137,11 +138,9 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom, ref Config config)
             }
 
             TextWidget { text: "レシピ一覧" }
-            HorizontalLayout {
-                FrameLayout {
-                    id: recipes
-                    padding: 1
-                }
+            FrameLayout {
+                id: recipes
+                padding: 1
             }
         }
         VerticalLayout {
@@ -231,7 +230,7 @@ auto createBinderListLayout(Window parent, ref Wisdom wisdom, ref Config config)
     return root;
 }
 
-void showRecipes(BinderInfoLayout layout, ref Wisdom wisdom, ref Config config)
+void showRecipes(BinderInfoLayout layout, Wisdom wisdom, Config config)
 {
     import std.string;
     auto query = layout.childById!EditLine("searchQuery").text.removechars(r"/[ 　]/");
@@ -274,7 +273,7 @@ void showRecipes(BinderInfoLayout layout, ref Wisdom wisdom, ref Config config)
     binderElems.updateElements(recipes.filter!matchFun.array, wisdom);
 }
 
-void updateElements(Recipes)(FrameLayout layout, Recipes rs, ref Wisdom wisdom)
+void updateElements(Recipes)(FrameLayout layout, Recipes rs, Wisdom wisdom)
     if (isInputRange!Recipes && is(ElementType!Recipes == BinderElement))
 {
     layout.removeAllChildren();
@@ -289,7 +288,7 @@ void updateElements(Recipes)(FrameLayout layout, Recipes rs, ref Wisdom wisdom)
     layout.addChild(scroll);
 }
 
-auto toBinderTableWidget(Recipes)(Recipes rs, BinderInfoLayout rootLayout, ref Wisdom wisdom)
+auto toBinderTableWidget(Recipes)(Recipes rs, BinderInfoLayout rootLayout, Wisdom wisdom)
     if (isInputRange!Recipes && is(ElementType!Recipes == BinderElement))
 {
     return rs
@@ -362,7 +361,7 @@ auto toBinderTableWidget(Recipes)(Recipes rs, BinderInfoLayout rootLayout, ref W
             });
 }
 
-auto toRecipeWidget(Recipe r, ref Wisdom wisdom)
+auto toRecipeWidget(Recipe r, Wisdom wisdom)
 {
     auto layout = parseML(q{
             VerticalLayout {
@@ -459,7 +458,7 @@ auto toRecipeWidget(Recipe r, ref Wisdom wisdom)
     return ret;
 }
 
-auto toItemWidget(Item item, ref Wisdom wisdom)
+auto toItemWidget(Item item, Wisdom wisdom)
 {
     import std.format;
     auto itemBasiclayout = parseML(q{

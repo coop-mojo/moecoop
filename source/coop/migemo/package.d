@@ -22,6 +22,7 @@ import std.exception;
 import std.file;
 import std.path;
 import std.string;
+import std.traits;
 
 import coop.migemo.derelict.migemo;
 
@@ -32,8 +33,8 @@ class MigemoException: Exception
 
 alias migemoEnforce = enforceEx!MigemoException;
 
-struct Migemo{
-    this(String)(String path, String dictDir)
+class Migemo{
+    this(String)(String path, String dictDir) if (isSomeString!String)
     in{
         assert(path.exists);
         assert(path.isFile);
@@ -57,7 +58,7 @@ struct Migemo{
         }
     }
 
-    void load(String)(String path)
+    void load(String)(String path) if (isSomeString!String)
     {
         import std.format;
 
@@ -72,7 +73,7 @@ struct Migemo{
         return cast(bool)migemo_is_enable(m);
     }
 
-    auto query(String)(String query)
+    auto query(String)(String query) if (isSomeString!String)
     {
         auto cstr = migemo_query(m, query.to!string.toStringz);
         scope(exit) migemo_release(m, cstr);

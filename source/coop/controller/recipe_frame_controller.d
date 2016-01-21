@@ -444,58 +444,58 @@ private:
         }
 
         final switch (item.type) with (ItemType)
-                                 {
-                                 case Food:
-                                     if (auto info = item.name in wisdom_.foodList)
-                                     {
-                                         auto foodInfo = *info;
-                                         showFoodBasicInfo;
-                                         itemBasiclayout.childById("effect").text = foodInfo.effect.to!dstring;
-                                         if (auto effectName = foodInfo.additionalEffect)
-                                         {
-                                             showFoodAdditionalEffect;
-                                             itemBasiclayout.childById("additional").text = foodInfo.additionalEffect;
-                                             if (auto f = effectName in wisdom_.foodEffectList)
-                                             {
-                                                 auto effectInfo = *f;
+        {
+        case Food:
+            if (auto info = item.name in wisdom_.foodList)
+            {
+                auto foodInfo = *info;
+                showFoodBasicInfo;
+                itemBasiclayout.childById("effect").text = foodInfo.effect.to!dstring;
+                if (auto effectName = foodInfo.additionalEffect)
+                {
+                    showFoodAdditionalEffect;
+                    itemBasiclayout.childById("additional").text = foodInfo.additionalEffect;
+                    if (auto f = effectName in wisdom_.foodEffectList)
+                    {
+                        auto effectInfo = *f;
 
-                                                 auto effectStr = effectInfo.effects
-                                                                  .byKeyValue
-                                                                  .map!(kv => format("%s: %s%s"d, kv.key, kv.value > 0 ? "+" : "", kv.value))
-                                                                  .join(", ");
-                                                 if (effectInfo.otherEffects)
-                                                 {
-                                                     if (effectStr)
-                                                         effectStr ~= ", ";
-                                                     effectStr ~= effectInfo.otherEffects;
-                                                 }
-                                                 itemBasiclayout.childById("additionalDetail").text = effectStr;
-                                                 itemBasiclayout.childById("group").text = effectInfo.group.to!dstring;
-                                                 itemBasiclayout.childById("duration").text =  format("%s 秒"d, effectInfo.duration);
+                        auto effectStr = effectInfo.effects
+                                         .byKeyValue
+                                         .map!(kv => format("%s: %s%s"d, kv.key, kv.value > 0 ? "+" : "", kv.value))
+                                         .join(", ");
+                        if (effectInfo.otherEffects)
+                        {
+                            if (effectStr)
+                                effectStr ~= ", ";
+                            effectStr ~= effectInfo.otherEffects;
+                        }
+                        itemBasiclayout.childById("additionalDetail").text = effectStr;
+                        itemBasiclayout.childById("group").text = effectInfo.group.to!dstring;
+                        itemBasiclayout.childById("duration").text =  format("%s 秒"d, effectInfo.duration);
 
-                                                 if (effectInfo.remarks)
-                                                 {
-                                                     auto rInfo = itemBasiclayout.childById("remarksInfo");
-                                                     auto rText = itemBasiclayout.childById("remarks");
-                                                     rInfo.visibility = Visibility.Visible;
-                                                     rText.visibility = Visibility.Visible;
-                                                     if (rText.text)
-                                                         rText.text = rText.text ~ ", ";
-                                                     rText.text = rText.text ~ effectInfo.remarks;
-                                                 }
-                                             }
-                                         }
-                                     }
-                                     break;
-                                 case Drink:
-                                     break;
-                                 case Weapon:
-                                     break;
-                                 case Armor:
-                                     break;
-                                 case Other:
-                                     break;
-                                 }
+                        if (effectInfo.remarks)
+                        {
+                            auto rInfo = itemBasiclayout.childById("remarksInfo");
+                            auto rText = itemBasiclayout.childById("remarks");
+                            rInfo.visibility = Visibility.Visible;
+                            rText.visibility = Visibility.Visible;
+                            if (rText.text)
+                                rText.text = rText.text ~ ", ";
+                            rText.text = rText.text ~ effectInfo.remarks;
+                        }
+                    }
+                }
+            }
+            break;
+        case Drink:
+            break;
+        case Weapon:
+            break;
+        case Armor:
+            break;
+        case Other:
+            break;
+        }
 
         auto ret = new ScrollWidget;
         ret.contentWidget = itemBasiclayout;

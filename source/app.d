@@ -18,11 +18,13 @@
 import dlangui;
 
 import std.algorithm;
+import std.array;
+import std.file;
 import std.path;
 
+import coop.model.character;
 import coop.model.config;
 import coop.model.wisdom;
-import coop.model.character;
 import coop.view.widget;
 
 mixin APP_ENTRY_POINT;
@@ -37,7 +39,17 @@ extern(C) int UIAppMain(string[] args)
     scope(exit) wisdom.destroy;
     auto config = new Config(buildPath(UserResourceBase, "config.json"));
     scope(exit) config.destroy;
-    auto chars = [new Character(buildPath(UserResourceBase, "かきあげ"))];
+    auto dirs = dirEntries(UserResourceBase, SpanMode.shallow)
+                .filter!((string s) => s.isDir)
+                .map!"a.name"
+                .array;
+    if (dirs.empty)
+    {
+        dirs = [buildPath(UserResourceBase, "かきあげ")];
+    }
+    auto chars = dirs
+                 .map!(path => new Character(path))
+                 .array;
     scope(exit) chars.each!destroy;
 
     Platform.instance.uiLanguage = "ja";

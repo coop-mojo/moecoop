@@ -15,7 +15,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-module coop.widget;
+module coop.view.widget;
 
 import dlangui;
 import dlangui.widgets.metadata;
@@ -27,11 +27,12 @@ import std.file;
 import std.stdio;
 import std.range;
 
-import coop.item;
+import coop.model.item;
 import coop.migemo;
-import coop.recipe;
-import coop.union_binder;
-import coop.wisdom;
+import coop.model.recipe;
+import coop.model.character;
+import coop.model.wisdom;
+import coop.model.config;
 
 immutable MaxNumberOfBinderPages = 128;
 immutable MaxColumns = 4;
@@ -72,9 +73,7 @@ class BinderInfoLayout: HorizontalLayout
     this() { super(); }
 }
 
-import coop.config;
-
-auto createBinderListLayout(Window parent, Wisdom wisdom, Config config)
+auto createBinderListLayout(Window parent, Wisdom wisdom, Character[] chars, Config config)
 {
     auto root = new MainLayout("root");
 
@@ -94,7 +93,7 @@ auto createBinderListLayout(Window parent, Wisdom wisdom, Config config)
                 parent.close;
                 break;
             case OPTION:
-                import coop.gui.config_window;
+                import coop.view.config_window;
                 showConfigWindow(parent, config);
                 break;
             default:
@@ -199,19 +198,19 @@ auto createBinderListLayout(Window parent, Wisdom wisdom, Config config)
         return true;
     };
     editLine.keyEvent = (Widget src, KeyEvent e) {
-        showRecipes(layout, wisdom, config);
+        showRecipes(layout, wisdom, chars, config);
         return false;
     };
 
     auto metaSearchBox = layout.childById!CheckBox("metaSearch");
     metaSearchBox.checkChange = (Widget src, bool checked) {
-        showRecipes(layout, wisdom, config);
+        showRecipes(layout, wisdom, chars, config);
         return true;
     };
 
     auto migemoSearchBox = layout.childById!CheckBox("migemo");
     migemoSearchBox.checkChange = (Widget src, bool checked) {
-        showRecipes(layout, wisdom, config);
+        showRecipes(layout, wisdom, chars, config);
         return true;
     };
     if (!config.migemoDLL.exists)
@@ -223,14 +222,14 @@ auto createBinderListLayout(Window parent, Wisdom wisdom, Config config)
     layout.childById!ComboBox("binders").items = keys;
     layout.childById!ComboBox("binders").itemClick = (Widget src, int idx) {
         auto binderElems = layout.childById!FrameLayout("recipes");
-        binderElems.updateElements(wisdom.recipesIn(Binder(keys[idx])), wisdom);
+        binderElems.updateElements(wisdom.recipesIn(Binder(keys[idx])), wisdom, chars);
         return true;
     };
 
     return root;
 }
 
-void showRecipes(BinderInfoLayout layout, Wisdom wisdom, Config config)
+void showRecipes(BinderInfoLayout layout, Wisdom wisdom, Character[] chars, Config config)
 {
     import std.string;
     auto query = layout.childById!EditLine("searchQuery").text.removechars(r"/[ 　]/");
@@ -239,10 +238,10 @@ void showRecipes(BinderInfoLayout layout, Wisdom wisdom, Config config)
     if (useMetaSearch && query.empty)
         return;
 
-    InputRange!BinderElement recipes;
+    InputRange!dstring recipes;
     if (useMetaSearch)
     {
-        recipes = inputRangeObject(wisdom.binders.map!(b => wisdom.recipesIn(Binder(b))).cache.joiner);
+        recipes = inputRangeObject(wisdom.binders.map!(b => wisdom.recipesIn(Binder(b))).joiner);
     }
     else
     {
@@ -250,8 +249,8 @@ void showRecipes(BinderInfoLayout layout, Wisdom wisdom, Config config)
         recipes = inputRangeObject(wisdom.recipesIn(Binder(binder)));
     }
     auto binderElems = layout.childById!FrameLayout("recipes");
-    bool delegate(BinderElement) matchFun =
-        s => !find(s.recipe.removechars(r"/[ 　]/"), boyerMooreFinder(query)).empty;
+    bool delegate(dstring) matchFun =
+        s => !find(s.removechars(r"/[ 　]/"), boyerMooreFinder(query)).empty;
     auto useMigemo = layout.childById!CheckBox("migemo").checked;
     if (useMigemo)
     {
@@ -265,49 +264,49 @@ void showRecipes(BinderInfoLayout layout, Wisdom wisdom, Config config)
         try{
             // ? や ( 等のメタ文字が入っているとうまくいかない
             auto q = migemo.query(query).regex;
-            matchFun = s => !s.recipe.removechars(r"/[ 　]/").matchFirst(q).empty;
+            matchFun = s => !s.removechars(r"/[ 　]/").matchFirst(q).empty;
         } catch(RegexException e) {
             // use default matchFun
         }
     }
-    binderElems.updateElements(recipes.filter!matchFun.array, wisdom);
+    binderElems.updateElements(recipes.filter!matchFun.array, wisdom, chars);
 }
 
-void updateElements(Recipes)(FrameLayout layout, Recipes rs, Wisdom wisdom)
-    if (isInputRange!Recipes && is(ElementType!Recipes == BinderElement))
+void updateElements(Recipes)(FrameLayout layout, Recipes rs, Wisdom wisdom, Character[] chars)
+    if (isInputRange!Recipes && is(ElementType!Recipes == dstring))
 {
     layout.removeAllChildren();
     auto scroll = new ScrollWidget;
     auto horizontal = new HorizontalLayout;
 
     layout.backgroundColor = rs.empty ? "white" : "black";
-    rs.toBinderTableWidget(cast(BinderInfoLayout)layout.parent.parent.parent, wisdom)
+    rs.toBinderTableWidget(cast(BinderInfoLayout)layout.parent.parent, wisdom, chars)
       .each!(column => horizontal.addChild(column));
     scroll.contentWidget = horizontal;
     scroll.backgroundColor = "white";
     layout.addChild(scroll);
 }
 
-auto toBinderTableWidget(Recipes)(Recipes rs, BinderInfoLayout rootLayout, Wisdom wisdom)
-    if (isInputRange!Recipes && is(ElementType!Recipes == BinderElement))
+auto toBinderTableWidget(Recipes)(Recipes rs, BinderInfoLayout rootLayout, Wisdom wisdom, Character[] chars)
+    if (isInputRange!Recipes && is(ElementType!Recipes == dstring))
 {
     return rs
-        .map!((ref r) {
+        .map!((r) {
                 auto layout = new HorizontalLayout;
-                auto box = new CheckBox("recipe", r.recipe);
-                box.checked = r.isFiled;
+                auto box = new CheckBox("recipe", r);
+                box.checked = chars.front.hasRecipe(r);
                 box.checkChange = (Widget src, bool checked) {
-                    r.isFiled = checked;
+                    // r.isFiled = checked;
                     return true;
                 };
                 auto btn = new Button("detail", "詳細"d);
                 btn.click = (Widget src) {
                     auto recipeDetail = rootLayout.childById("recipeDetail");
                     recipeDetail.removeAllChildren;
-                    auto rDetail = wisdom.recipeFor(r.recipe);
+                    auto rDetail = wisdom.recipeFor(r);
                     if (rDetail.name.empty)
                     {
-                        rDetail.name = r.recipe;
+                        rDetail.name = r;
                         rDetail.remarks = "作り方がわかりません（´・ω・｀）";
                     }
                     recipeDetail.addChild(rDetail.toRecipeWidget(wisdom));
@@ -317,7 +316,7 @@ auto toBinderTableWidget(Recipes)(Recipes rs, BinderInfoLayout rootLayout, Wisdo
                     if (itemNames.empty)
                     {
                         // レシピ情報が完成するまでの間に合わせ
-                        itemNames = [ r.recipe~"のレシピで作れる何か" ];
+                        itemNames = [ r~"のレシピで作れる何か" ];
                     }
 
                     auto itemLayouts = [1, 2].map!`"item"~a.to!string`

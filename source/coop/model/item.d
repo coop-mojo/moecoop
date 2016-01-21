@@ -15,7 +15,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-module coop.item;
+module coop.model.item;
 
 import std.algorithm;
 import std.container.rbtree;
@@ -138,7 +138,7 @@ struct Item
     ItemType type;
 }
 
-auto readItems(string fname, string sysBase, string userBase)
+auto readItems(string fname)
 {
     auto res = fname.readText.parseJSON;
     enforce(res.type == JSON_TYPE.OBJECT);
@@ -210,7 +210,7 @@ struct Food
     dstring additionalEffect;
 }
 
-auto readFoods(string fname, string sysBase)
+auto readFoods(string fname)
 {
     auto res = fname.readText.parseJSON;
     enforce(res.type == JSON_TYPE.OBJECT);
@@ -251,7 +251,7 @@ struct AdditionalEffect
     dstring remarks;
 }
 
-auto readFoodEffects(string fname, string sysBase)
+auto readFoodEffects(string fname)
 {
     auto res = fname.readText.parseJSON;
     enforce(res.type == JSON_TYPE.OBJECT);

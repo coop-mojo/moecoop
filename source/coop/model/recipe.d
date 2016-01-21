@@ -15,7 +15,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-module coop.recipe;
+module coop.model.recipe;
 
 import std.algorithm;
 import std.array;
@@ -60,20 +60,22 @@ struct Recipe
     }
 }
 
-auto readRecipes(string recipeCategoryFile, string sysBase, string userBase)
+auto readRecipes(string file)
 in{
-    assert(recipeCategoryFile.exists);
+    assert(file.exists);
 } body {
     import std.path;
-    auto category = recipeCategoryFile.baseName(".json");
-    auto sysRes = recipeCategoryFile.readText.parseJSON;
-    enforce(sysRes.type == JSON_TYPE.OBJECT);
+    auto category = file.baseName(".json");
+    auto res = file.readText.parseJSON;
+    enforce(res.type == JSON_TYPE.OBJECT);
 
-    auto recipes = sysRes.object;
+    auto recipes = res.object;
     return tuple(category.to!dstring,
-                 recipes.keys.map!(key =>
-                                   tuple(key.to!dstring,
-                                         key.toRecipe(recipes[key].object))).assocArray);
+                 recipes.keys
+                        .map!(key =>
+                              tuple(key.to!dstring,
+                                    key.toRecipe(recipes[key].object)))
+                        .assocArray);
 }
 
 auto toRecipe(string s, JSONValue[string] json)

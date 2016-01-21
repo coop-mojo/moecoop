@@ -15,7 +15,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-module coop.wisdom;
+module coop.model.wisdom;
 
 import std.algorithm;
 import std.array;
@@ -24,16 +24,15 @@ import std.file;
 import std.path;
 import std.typecons;
 
-import coop.item;
-import coop.union_binder;
-import coop.recipe;
+import coop.model.item;
+import coop.model.recipe;
 
 alias Binder = Typedef!(dstring, "binder");
 alias Category = Typedef!(dstring, "category");
 
 class Wisdom{
     /// バインダーごとのレシピ名一覧
-    BinderElement[][dstring] binderList;
+    dstring[][dstring] binderList;
 
     /// カテゴリごとのレシピ一覧
     Recipe[dstring][dstring] recipeList;
@@ -48,49 +47,46 @@ class Wisdom{
     AdditionalEffect[dstring] foodEffectList;
 
     /// システムデータが保存してあるパス
-    immutable string sysBase_;
+    immutable string baseDir_;
 
-    /// ユーザーデータを保存するパス
-    immutable string userBase_;
-
-    this(string sysBase, string userBase)
+    this(string baseDir)
     {
-        sysBase_ = sysBase;
-        userBase_ = userBase;
-        binderList = readBinderList(sysBase, userBase);
-        recipeList = readRecipeList(sysBase, userBase);
-        itemList = readItemList(sysBase, userBase);
-        foodList = readFoodList(sysBase);
-        foodEffectList = readFoodEffectList(sysBase);
+        baseDir_ = baseDir;
+        binderList = readBinderList(baseDir_);
+        recipeList = readRecipeList(baseDir_);
+        itemList = readItemList(baseDir_);
+        foodList = readFoodList(baseDir_);
+        foodEffectList = readFoodEffectList(baseDir_);
     }
 
-    auto readBinderList(string sysBase, string userBase)
+    auto readBinderList(string basedir)
     {
-        enforce(sysBase.exists);
-        enforce(sysBase.isDir);
+        enforce(basedir.exists);
+        enforce(basedir.isDir);
 
-        return dirEntries(buildPath(sysBase, "バインダー"), "*.json", SpanMode.breadth)
-            .map!(s => s.readBinders(sysBase, userBase))
+        return dirEntries(buildPath(basedir, "バインダー"), "*.json", SpanMode.breadth)
+            .map!(s => s.readBinders)
+            .array
             .joiner
             .assocArray;
     }
 
-    auto readRecipeList(string sysBase, string userBase)
+    auto readRecipeList(string sysBase)
     {
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
 
         return dirEntries(buildPath(sysBase, "レシピ"), "*.json", SpanMode.breadth)
-            .map!(s => s.readRecipes(sysBase, userBase))
+            .map!(s => s.readRecipes)
             .assocArray;
     }
 
-    auto readItemList(string sysBase, string userBase)
+    auto readItemList(string sysBase)
     {
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
         return dirEntries(buildPath(sysBase, "素材"), "*.json", SpanMode.breadth)
-            .map!(s => s.readItems(sysBase, userBase))
+            .map!(s => s.readItems)
             .array
             .joiner
             .assocArray;
@@ -100,7 +96,7 @@ class Wisdom{
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
         return dirEntries(buildPath(sysBase, "食べ物"), "*.json", SpanMode.breadth)
-            .map!(s => s.readFoods(sysBase))
+            .map!(s => s.readFoods)
             .joiner
             .assocArray;
     }
@@ -109,7 +105,7 @@ class Wisdom{
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
         return dirEntries(buildPath(sysBase, "飲食バフ"), "*.json", SpanMode.breadth)
-            .map!(s => s.readFoodEffects(sysBase))
+            .map!(s => s.readFoodEffects)
             .joiner
             .assocArray;
     }
@@ -154,62 +150,27 @@ class Wisdom{
 
     auto bindersFor(dstring recipeName)
     {
-        return binders.filter!(b => recipesIn(Binder(b)).canFind!(elem => elem.recipe == recipeName)).array;
+        return binders.filter!(b => recipesIn(Binder(b)).canFind(recipeName)).array;
     }
+}
 
-    ~this()
-    {
-        writeBinderList;
-    }
+auto readBinders(string file)
+{
+    import std.json;
+    import std.conv;
 
-    auto writeBinderList()
-    {
-        import std.json;
-        import std.container.rbtree;
-
-        auto userBinderDir = buildPath(userBase_, "バインダー");
-        if (!userBinderDir.exists)
-        {
-            mkdirRecurse(userBinderDir);
-        }
-
-        JSONValue[string] binderFiles;
-        foreach(kv; binderList.byKeyValue)
-        {
-            import std.conv;
-            import std.regex;
-            auto binder = kv.key.to!string;
-            auto elems = kv.value.filter!(e => e.isFiled);
-            if (elems.empty) continue;
-            auto fileName = binder
-                            .replaceFirst(ctRegex!r" No\.(\d)+$", "")
-                            .replaceFirst(ctRegex!r"/", "_")
-                            .to!string;
-            bool[string] jsonElems;
-            elems.each!(r => jsonElems[r.recipe.to!string] = r.isFiled);
-            if (fileName !in binderFiles)
-            {
-                binderFiles[fileName] = JSONValue([binder: jsonElems]);
-            }
-            else
-            {
-                enforce(binderFiles[fileName].type == JSON_TYPE.OBJECT);
-                binderFiles[fileName][binder] = jsonElems;
-            }
-        }
-
-        auto existingBinders = make!(RedBlackTree!string)(dirEntries(buildPath(userBase_, "バインダー"), "*.json", SpanMode.breadth));
-        foreach(kv; binderFiles.byKeyValue)
-        {
-            import std.stdio;
-            auto path = buildPath(userBinderDir, kv.key~".json");
-            auto f = File(path, "w");
-            f.write(kv.value.toPrettyString);
-            existingBinders.removeKey(path);
-        }
-
-        existingBinders[].each!((string file) {
-                file.remove;
+    enforce(file.exists);
+    auto res = file
+               .readText
+               .parseJSON;
+    enforce(res.type == JSON_TYPE.OBJECT);
+    return res
+        .object
+        .byKeyValue
+        .map!((kv) {
+                auto binder = kv.key.to!dstring;
+                enforce(kv.value.type == JSON_TYPE.ARRAY);
+                auto recipes = kv.value.array.map!(e => e.str).array.to!(dstring[]);
+                return tuple(binder, recipes);
             });
-    }
 }

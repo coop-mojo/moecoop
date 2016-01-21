@@ -17,11 +17,13 @@
 */
 import dlangui;
 
+import std.algorithm;
 import std.path;
 
-import coop.config;
-import coop.wisdom;
-import coop.widget;
+import coop.model.config;
+import coop.model.wisdom;
+import coop.model.character;
+import coop.view.widget;
 
 mixin APP_ENTRY_POINT;
 
@@ -31,17 +33,19 @@ immutable AppName = "生協の知恵袋"d;
 
 extern(C) int UIAppMain(string[] args)
 {
-    auto wisdom = new Wisdom(SystemResourceBase, UserResourceBase);
+    auto wisdom = new Wisdom(SystemResourceBase);
     scope(exit) wisdom.destroy;
     auto config = new Config(buildPath(UserResourceBase, "config.json"));
     scope(exit) config.destroy;
+    auto chars = [new Character(buildPath(UserResourceBase, "かきあげ"))];
+    scope(exit) chars.each!destroy;
 
     Platform.instance.uiLanguage = "ja";
     Platform.instance.uiTheme = "theme_default";
     auto window = Platform.instance.createWindow(AppName, null, WindowFlag.Resizable,
                                                  config.windowWidth,
                                                  config.windowHeight);
-    auto layout = createBinderListLayout(window, wisdom, config);
+    auto layout = createBinderListLayout(window, wisdom, chars, config);
     window.mainWidget = layout;
     window.show;
     window.onClose = {

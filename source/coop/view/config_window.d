@@ -15,13 +15,13 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-module coop.gui.config_window;
+module coop.view.config_window;
 
 import dlangui;
 import dlangui.dialogs.dialog;
 import dlangui.dialogs.filedlg;
 
-import coop.config;
+import coop.model.config;
 
 auto showConfigWindow(Window parent, ref Config config)
 {

@@ -58,6 +58,11 @@ class Character
         writeBindersInfo;
     }
 
+    auto deleteConfig()
+    {
+        dir_.rmdirRecurse;
+    }
+
     immutable string name;
 private:
 

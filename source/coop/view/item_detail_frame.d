@@ -1,0 +1,254 @@
+module coop.view.item_detail_frame;
+
+import dlangui;
+
+import std.array;
+import std.algorithm;
+import std.conv;
+import std.math;
+import std.format;
+
+import coop.model.item;
+import coop.model.wisdom;
+
+class ItemDetailFrame: ScrollWidget
+{
+    this() { super(); }
+
+    this(string id)
+    {
+        super(id);
+        auto layout = parseML(q{
+                VerticalLayout {
+                    padding: 5
+                    TableLayout {
+                        colCount: 2
+
+                        TextWidget { text: "名前: " }
+                        TextWidget { id: name }
+
+                        TextWidget { text: "英名: " }
+                        TextWidget { id: ename }
+
+                        TextWidget { text: "重さ: " }
+                        TextWidget { id: weight }
+
+                        /// 食べ物情報
+                        TextWidget { id: effCap; text: "効果: "}
+                        TextWidget { id: effect }
+
+                        TextWidget { id: addCap; text: "付加効果: "}
+                        TextWidget { id: additional }
+
+                        TextWidget { id: addDetailCap; text: ""}
+                        TextWidget { id: additionalDetail }
+
+                        TextWidget { id: groupCap; text: "バフグループ: "}
+                        TextWidget { id: group }
+
+                        TextWidget { id: durCap; text: "効果時間: "}
+                        TextWidget { id: duration }
+
+                        /// 飲み物
+                        /// 武器
+                        /// 防具
+
+                        TextWidget { text: "NPC売却価格: " }
+                        TextWidget { id: price }
+
+                        TextWidget { text: "転送可: " }
+                        TextWidget { id: transferable }
+
+                        TextWidget { text: "スタック可: " }
+                        TextWidget { id: stackable }
+
+                        TextWidget {
+                            id: petItemCaption
+                            text: "ペットアイテム: "
+                        }
+                        TextWidget { id: petItem }
+
+                        TextWidget {
+                            id: infoCap
+                            text: "info: "
+                        }
+                        TextWidget { id: info }
+                    }
+
+                    HorizontalLayout {
+                        id: remarksInfo
+                        TextWidget { text: "備考: " }
+                        TextWidget { id: remarks }
+                    }
+                }
+            });
+
+        with(layout)
+        {
+            /// 食べ物情報
+            childById("effCap").visibility           = Visibility.Gone;
+            childById("effect").visibility           = Visibility.Gone;
+            childById("addCap").visibility           = Visibility.Gone;
+            childById("additional").visibility       = Visibility.Gone;
+            childById("addDetailCap").visibility     = Visibility.Gone;
+            childById("additionalDetail").visibility = Visibility.Gone;
+            childById("groupCap").visibility         = Visibility.Gone;
+            childById("group").visibility            = Visibility.Gone;
+            childById("durCap").visibility           = Visibility.Gone;
+            childById("duration").visibility         = Visibility.Gone;
+        }
+        contentWidget = layout;
+        backgroundColor = "white";
+    }
+
+    static auto create(Item i, Wisdom wisdom)
+    {
+        auto ret = new typeof(this)(i.name.to!string);
+        ret.item_ = i;
+        with(ret)
+        {
+            childById("name").text = i.name;
+            childById("ename").text =
+                i.ename.empty ? "わからん（´・ω・｀）" : i.ename;
+            childById("weight").text =
+                i.weight.isNaN ? "そこそこの重さ" : i.weight.to!dstring;
+            childById("price").text = format("%s g"d, i.price);
+            childById("transferable").text
+                = i.transferable ? "はい" : "いいえ";
+            childById("stackable").text = i.stackable ? "はい": "いいえ";
+
+            childById("info").text = i.info;
+            childById("info").visibility =
+                i.info.empty ? Visibility.Gone : Visibility.Visible;
+            childById("infoCap").visibility =
+                i.info.empty ? Visibility.Gone : Visibility.Visible;
+
+            childById("remarks").text = i.remarks;
+            childById("remarksInfo").visibility
+                = i.remarks.empty ? Visibility.Gone : Visibility.Visible;
+
+            // ペットアイテム情報
+            auto petCap = childById("petItemCaption");
+            auto pFoodInfo = childById("petItem");
+            if (i.petFoodInfo.keys.empty)
+            {
+                petCap.visibility = Visibility.Gone;
+                pFoodInfo.visibility = Visibility.Gone;
+            }
+            else
+            {
+                petCap.visibility = Visibility.Visible;
+                pFoodInfo.visibility = Visibility.Visible;
+                auto str = i.petFoodInfo
+                           .byKeyValue
+                           .map!(kv => format("%s (%s)"d,
+                                              kv.key.toString,
+                                              kv.value)).join;
+                pFoodInfo.text = str;
+            }
+        }
+
+        final switch(i.type) with(ItemType)
+        {
+        case Food:
+            if (auto info = i.name in wisdom.foodList)
+            {
+                ret.setFoodInfo(*info, wisdom);
+            }
+            break;
+        case Drink:
+            break;
+        case Weapon:
+            break;
+        case Armor:
+            break;
+        case Other:
+            break;
+        }
+        return ret;
+    }
+
+    @property auto item()
+    {
+        return item_;
+    }
+
+    @property auto foodInfo()
+    {
+        return food_;
+    }
+
+    @property auto setFoodInfo(Food f, Wisdom wisdom)
+    {
+        childById("effCap").visibility = Visibility.Visible;
+        childById("effect").visibility = Visibility.Visible;
+
+        childById("effect").text = f.effect.to!dstring;
+
+        if (auto effectName = f.additionalEffect)
+        {
+            setFoodEffect(effectName, wisdom);
+        }
+    }
+
+    @property auto foodEffect()
+    {
+        return effect_;
+    }
+
+    // AdditionalEffect eff にしたいが，まだデータができてないのでうまくいかない
+    auto setFoodEffect(dstring eff, Wisdom wisdom)
+    {
+        childById("addCap").visibility           = Visibility.Visible;
+        childById("additional").visibility       = Visibility.Visible;
+        childById("addDetailCap").visibility     = Visibility.Visible;
+        childById("additionalDetail").visibility = Visibility.Visible;
+        childById("groupCap").visibility         = Visibility.Visible;
+        childById("group").visibility            = Visibility.Visible;
+        childById("durCap").visibility           = Visibility.Visible;
+        childById("duration").visibility         = Visibility.Visible;
+
+        childById("additional").text = eff;
+        if (auto f = eff in wisdom.foodEffectList)
+        {
+            auto effectInfo = *f;
+            auto effectStr = effectInfo
+                             .effects
+                             .byKeyValue
+                             .map!(kv => format("%s: %s%s"d,
+                                                kv.key,
+                                                kv.value > 0 ? "+" : "",
+                                                kv.value))
+                             .join(", ");
+            if (effectInfo.otherEffects)
+            {
+                if (effectStr)
+                    effectStr ~= ", ";
+                effectStr ~= effectInfo.otherEffects;
+            }
+            childById("additionalDetail").text = effectStr;
+            childById("group").text =
+                effectInfo.group == AdditionalEffectGroup.Others
+                ? "その他"
+                : effectInfo.group.to!dstring;
+            childById("duration").text =
+                format("%s 秒"d, effectInfo.duration);
+
+            if (effectInfo.remarks)
+            {
+                auto rInfo = childById("remarksInfo");
+                auto rText = childById("remarks");
+                rInfo.visibility = Visibility.Visible;
+                rText.visibility = Visibility.Visible;
+                if (rText.text)
+                    rText.text = rText.text ~ ", ";
+                rText.text = rText.text ~ effectInfo.remarks;
+            }
+        }
+    }
+private:
+    Item item_;
+    /// 料理固有
+    Food food_;
+    AdditionalEffect effect_;
+}

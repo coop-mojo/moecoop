@@ -134,7 +134,7 @@ class RecipeFrameController
                     if (recipes.empty)
                         return cast(Widget[])[];
                     Widget header = new TextWidget("", binder);
-                    header.backgroundColor = "gray";
+                    header.backgroundColor = 0xCCCCCC;
                     return header~toBinderRecipeWidgets(binder, kv.value);
                 }).join;
         }

@@ -28,7 +28,11 @@ import coop.migemo.derelict.migemo;
 
 class MigemoException: Exception
 {
-    mixin basicExceptionCtors;
+    this(string msg, string file = __FILE__, size_t line = __LINE__,
+        Throwable next = null) pure nothrow @nogc @safe
+    {
+        super(msg, file, line, next);
+    }
 }
 
 alias migemoEnforce = enforceEx!MigemoException;

@@ -267,16 +267,16 @@ class RecipeEntryWidget: HorizontalLayout
 
     this(dstring recipe)
     {
-        super(recipe.to!string);
-        box = new CheckBox(null, recipe);
-        btn = new Button(null, "詳細"d);
+        super();
+        box = new CheckBox(null, ""d);
+        link = new LinkWidget(null, recipe);
         addChild(box);
-        addChild(btn);
+        addChild(link);
         box.checkChange = (Widget src, bool checked) {
             filedStateChanged(checked);
             return true;
         };
-        btn.click = (Widget src) {
+        link.click = (Widget src) {
             detailClicked();
             return true;
         };
@@ -292,5 +292,23 @@ class RecipeEntryWidget: HorizontalLayout
     EventHandler!() detailClicked;
 private:
     CheckBox box;
-    Button btn;
+    LinkWidget link;
+}
+
+class LinkWidget: TextWidget
+{
+    this() {
+        super();
+        clickable = true;
+        // textColor = "blue";
+        // textFlags = TextFlag.Underline;
+    }
+
+    this(string id, dstring txt)
+    {
+        super(id, txt);
+        clickable = true;
+        // textColor = "blue";
+        // textFlags = TextFlag.Underline;
+    }
 }

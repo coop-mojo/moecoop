@@ -41,7 +41,7 @@ class Config {
             windowWidth = 400;
             windowHeight = 300;
             version(Windows) {
-                migemoDLL = `C:\Program Files (x86)\cmigemo-defalut-win32\migemo.dll`d;
+                migemoDLL = `C:\Program Files (x86)\cmigemo-default-win32\migemo.dll`d;
                 migemoDict = `C:\Program Files (x86)\cmigemo-default-win32\dict\utf-8`d;
             }
             version(linux) {

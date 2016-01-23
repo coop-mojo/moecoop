@@ -26,7 +26,7 @@ import coop.model.config;
 auto showConfigWindow(Window parent, ref Config config)
 {
     /// DlangUI 0.7.41 ではモーダルダイアログは未実装
-    auto configWindow = Platform.instance.createWindow("設定"d, parent, WindowFlag.Modal);
+    auto configWindow = Platform.instance.createWindow("設定"d, parent, WindowFlag.Resizable);
 
     version(Windows) {
         enum directory = "フォルダ";

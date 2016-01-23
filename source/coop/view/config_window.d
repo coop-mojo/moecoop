@@ -23,183 +23,150 @@ import dlangui.dialogs.filedlg;
 
 import coop.model.config;
 
-auto showConfigWindow(Window parent, ref Config config)
+class ConfigDialog: Dialog
 {
-    /// DlangUI 0.7.41 ではモーダルダイアログは未実装
-    auto configWindow = Platform.instance.createWindow("設定"d, parent, WindowFlag.Resizable);
-
-    version(Windows) {
-        enum directory = "フォルダ";
-    } else {
-        enum directory = "ディレクトリ";
+    this(Window parent, Config con)
+    {
+        super(UIString("設定"d), parent, DialogFlag.Popup);
+        config_ = con;
     }
 
-    auto wLayout = parseML(q{
-            TableLayout {
-                colCount: 4
+    override void initialize()
+    {
+        version(Windows) {
+            enum directory = "フォルダ";
+        } else {
+            enum directory = "ディレクトリ";
+        }
+
+        auto wLayout = parseML(q{
+                TableLayout {
+                colCount: 3
                 padding: 10
                 TextWidget {
                     id: DLLCaption
-                }
+                    }
                 EditLine {
-                    id: migemoDLLPath
+                id: migemoDLLPath
                 }
                 Button {
-                    id: migemoDLLSelecter
-                    text: "変更"
-                }
-                TextWidget {
-                    id: DLLalert
+                id: migemoDLLSelecter
+                text: "変更"
                 }
 
                 TextWidget {
-                    id: DictCaption
+                id: DictCaption
                 }
                 EditLine {
-                    id: migemoDictPath
+                id: migemoDictPath
                 }
                 TextWidget {
-                    id: migemoDictSelecter
-                    text: ""
+                id: migemoDictSelecter
+                text: ""
                 }
-                TextWidget {
-                    id: Dictalert
                 }
+            });
 
-                TextWidget {
-                    text: ""
-                }
-                TextWidget {
-                    text: ""
-                }
-                Button {
-                    id: exit
-                    text: "設定を終わる"
-                }
-            }
-        });
+        auto dllCaption = "Migemo ライブラリのパス"d;
+        auto dictCaption = "Migemo 辞書のある"d~directory;
 
-    auto dllCaption = "Migemo ライブラリのパス"d;
-    auto dictCaption = "Migemo 辞書のある"d~directory;
+        wLayout.childById("DLLCaption").text = dllCaption;
+        wLayout.childById("DictCaption").text = dictCaption;
 
-    wLayout.childById("DLLCaption").text = dllCaption;
-    wLayout.childById("DictCaption").text = dictCaption;
-
-    with(wLayout.childById("migemoDLLPath"))
-    {
-        text = config.migemoDLL;
-        keyEvent = (Widget src, KeyEvent e) {
-            import std.file;
-            import dlangui.graphics.colors;
-            auto alert = wLayout.childById("DLLalert");
-            if (text.exists)
-            {
-                alert.text = "";
-                alert.textColor = decodeHexColor("black");
-            }
-            else
-            {
-
-                alert.text = "ファイルがありません！";
-                alert.textColor = decodeHexColor("red");
-            }
-            return false;
-        };
-    }
-
-    wLayout.childById("migemoDLLSelecter").click = (Widget src) {
-        auto dlg = new FileDialog(UIString(dllCaption), configWindow, null, FileDialogFlag.FileMustExist);
-        dlg.dialogResult = (Dialog dlg, const Action result) {
-            import dlangui.core.stdaction;
-            if (result.id == ACTION_OPEN.id)
-            {
-                import std.conv;
+        with(wLayout.childById("migemoDLLPath"))
+        {
+            text = config_.migemoDLL;
+            keyEvent = (Widget src, KeyEvent e) {
                 import std.file;
-                auto path = result.stringParam.to!dstring;
-                with(wLayout.childById!EditLine("migemoDLLPath"))
+                if (text.exists)
                 {
-                    text = path;
-                    import dlangui.graphics.colors;
-                    auto alert = wLayout.childById("DLLalert");
-                    if (text.exists)
+                    textColor = "black";
+                }
+                else
+                {
+
+                    textColor = "red";
+                }
+                return false;
+            };
+        }
+
+        wLayout.childById("migemoDLLSelecter").click = (Widget src) {
+            auto dlg = new FileDialog(UIString(dllCaption), window, null, FileDialogFlag.FileMustExist);
+            dlg.dialogResult = (Dialog dlg, const Action result) {
+                import dlangui.core.stdaction;
+                if (result.id == ACTION_OPEN.id)
+                {
+                    import std.conv;
+                    import std.file;
+                    auto path = result.stringParam.to!dstring;
+                    with(wLayout.childById!EditLine("migemoDLLPath"))
                     {
-                        alert.text = "";
-                        alert.textColor = decodeHexColor("black");
-                    }
-                    else
-                    {
-                        alert.text = "ファイルがありません！";
-                        alert.textColor = decodeHexColor("red");
+                        text = path;
+                        if (text.exists)
+                        {
+                            textColor = "black";
+                        }
+                        else
+                        {
+                            textColor = "red";
+                        }
                     }
                 }
-            }
+            };
+            dlg.show;
+            return true;
         };
-        dlg.show;
-        return true;
-    };
 
-    with(wLayout.childById("migemoDictPath"))
-    {
-        text = config.migemoDict;
-        keyEvent = (Widget src, KeyEvent e) {
-            import std.file;
-            import dlangui.graphics.colors;
-            auto alert = wLayout.childById("Dictalert");
-            if (text.exists && text.isDir)
-            {
-                alert.text = "";
-                alert.textColor = decodeHexColor("black");
-            }
-            else
-            {
-                import std.format;
-                auto txt = text.exists ? "では" : "が";
-                alert.text = format("%s%sありません！"d, directory, txt);
-                alert.textColor = decodeHexColor("red");
-            }
-            return false;
-        };
+        with(wLayout.childById("migemoDictPath"))
+        {
+            text = config_.migemoDict;
+            keyEvent = (Widget src, KeyEvent e) {
+                import std.file;
+                if (text.exists && text.isDir)
+                {
+                    textColor = "black";
+                }
+                else
+                {
+                    textColor = "red";
+                }
+                return false;
+            };
+        }
+
+        wLayout.backgroundColor = 0xCCCCCC;
+        addChild(wLayout);
+
+        auto exits = new HorizontalLayout;
+        auto spacer = new FrameLayout;
+        spacer.layoutWidth(FILL_PARENT);
+        spacer.minWidth(400);
+        exits.addChild(spacer);
+        exits.addChild(new Button(ACTION_OK));
+        exits.addChild(new Button(ACTION_CANCEL));
+        _buttonActions = [ACTION_OK, ACTION_CANCEL];
+        addChild(exits);
+
     }
 
-    // wLayout.childById("migemoDictSelecter").click = (Widget src) {
-    //     auto dlg = new FileDialog(UIString(dictCaption), configWindow, null, FileDialogFlag.SelectDirectory);
-    //     dlg.dialogResult = (Dialog dlg, const Action result) {
-    //         import dlangui.core.stdaction;
-    //         if (result.id == ACTION_OPEN.id)
-    //         {
-    //             import std.conv;
-    //             import std.file;
-    //             auto path = result.stringParam.to!dstring;
-    //             with(wLayout.childById!EditLine("migemoDictPath"))
-    //             {
-    //                 text = path;
-    //                 import dlangui.graphics.colors;
-    //                 auto alert = wLayout.childById("Dictalert");
-    //                 if (text.exists)
-    //                 {
-    //                     alert.text = "";
-    //                     alert.textColor = decodeHexColor("black");
-    //                 }
-    //                 else
-    //                 {
-    //                     alert.text = "ファイルがありません！";
-    //                     alert.textColor = decodeHexColor("red");
-    //                 }
-    //             }
-    //         }
-    //     };
-    //     dlg.show;
-    //     return true;
-    // };
+    override void close(const Action action)
+    {
+        if (action) {
+            if (action.id == StandardAction.Ok)
+            {
+                config_.migemoDLL = childById("migemoDLLPath").text;
+                config_.migemoDict = childById("migemoDictPath").text;
+            }
+        }
+        _parentWindow.removePopup(_popup);
+    }
+private:
+    Config config_;
+}
 
-    wLayout.childById("exit").click = (Widget src) {
-        configWindow.close;
-        return true;
-    };
-    configWindow.mainWidget = wLayout;
-    configWindow.show;
-    configWindow.onClose = {
-        config.migemoDLL = wLayout.childById("migemoDLLPath").text;
-        config.migemoDict = wLayout.childById("migemoDictPath").text;
-    };
+auto showConfigWindow(Window parent, ref Config config)
+{
+    auto dlg = new ConfigDialog(parent, config);
+    dlg.show;
 }

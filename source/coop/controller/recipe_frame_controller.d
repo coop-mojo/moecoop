@@ -61,6 +61,9 @@ class RecipeFrameController
         };
 
         // モーダル窓が作れないから設定を即時反映できない
+        import std.format;
+        Log.d(format("DLL: `%s` exists?: %s", config_.migemoDLL, config_.migemoDLL.exists));
+        Log.d(format("Dict: `%s` exists?: %s", config_.migemoDict, config_.migemoDict.exists));
         if (config_.migemoDLL.exists && config_.migemoDict.exists)
         {
             migemo_ = new Migemo(config_.migemoDLL, config_.migemoDict);

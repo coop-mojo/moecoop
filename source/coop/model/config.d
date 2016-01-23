@@ -45,8 +45,8 @@ class Config {
                 migemoDict = ""d;
             }
             version(linux) {
-                migemoDLL = ""d;
-                migemoDict = ""d;
+                migemoDLL = "/usr/lib/libmigemo.so"d;
+                migemoDict = "/usr/share/migemo/utf-8"d;
             }
             else version(OSX)
             {

@@ -1,5 +1,7 @@
 .dub/
 dub.selections.json
 userdata/
-fukuro
+fukuro*
 __test__library__
+libfreetype-*.dll
+ui.log

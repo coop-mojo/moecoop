@@ -59,7 +59,6 @@ auto showConfigWindow(Window parent, ref Config config)
                     id: migemoDictPath
                 }
                 TextWidget {
-                    // FileDialog はディレクトリを指定できない！
                     id: migemoDictSelecter
                     text: ""
                 }
@@ -162,6 +161,37 @@ auto showConfigWindow(Window parent, ref Config config)
         };
     }
 
+    // wLayout.childById("migemoDictSelecter").click = (Widget src) {
+    //     auto dlg = new FileDialog(UIString(dictCaption), configWindow, null, FileDialogFlag.SelectDirectory);
+    //     dlg.dialogResult = (Dialog dlg, const Action result) {
+    //         import dlangui.core.stdaction;
+    //         if (result.id == ACTION_OPEN.id)
+    //         {
+    //             import std.conv;
+    //             import std.file;
+    //             auto path = result.stringParam.to!dstring;
+    //             with(wLayout.childById!EditLine("migemoDictPath"))
+    //             {
+    //                 text = path;
+    //                 import dlangui.graphics.colors;
+    //                 auto alert = wLayout.childById("Dictalert");
+    //                 if (text.exists)
+    //                 {
+    //                     alert.text = "";
+    //                     alert.textColor = decodeHexColor("black");
+    //                 }
+    //                 else
+    //                 {
+    //                     alert.text = "ファイルがありません！";
+    //                     alert.textColor = decodeHexColor("red");
+    //                 }
+    //             }
+    //         }
+    //     };
+    //     dlg.show;
+    //     return true;
+    // };
+
     wLayout.childById("exit").click = (Widget src) {
         configWindow.close;
         return true;
@@ -169,7 +199,6 @@ auto showConfigWindow(Window parent, ref Config config)
     configWindow.mainWidget = wLayout;
     configWindow.show;
     configWindow.onClose = {
-        import std.stdio;
         config.migemoDLL = wLayout.childById("migemoDLLPath").text;
         config.migemoDict = wLayout.childById("migemoDictPath").text;
     };

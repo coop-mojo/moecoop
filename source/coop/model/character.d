@@ -69,10 +69,7 @@ private:
     auto writeBindersInfo()
     {
         auto binderDir = buildPath(dir_, "バインダー");
-        if (!binderDir.exists)
-        {
-            mkdirRecurse(binderDir);
-        }
+        mkdirRecurse(binderDir);
 
         JSONValue[string] binderFiles;
         foreach(kv; filedMap_.byKeyValue)

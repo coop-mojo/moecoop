@@ -39,6 +39,7 @@ extern(C) int UIAppMain(string[] args)
     scope(exit) wisdom.destroy;
     auto config = new Config(buildPath(UserResourceBase, "config.json"));
     scope(exit) config.destroy;
+    mkdirRecurse(UserResourceBase);
     auto dirs = dirEntries(UserResourceBase, SpanMode.shallow)
                 .filter!((string s) => s.isDir)
                 .map!"a.name"

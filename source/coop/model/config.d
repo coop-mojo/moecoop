@@ -60,6 +60,8 @@ class Config {
     ~this()
     {
         import std.stdio;
+        import std.path;
+        mkdirRecurse(configFile.dirName);
         auto f = File(configFile, "w");
         f.write(toJSON);
     }

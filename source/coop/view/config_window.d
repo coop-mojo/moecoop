@@ -23,6 +23,8 @@ import dlangui.dialogs.filedlg;
 
 import coop.model.config;
 
+import std.algorithm;
+
 class ConfigDialog: Dialog
 {
     this(Window parent, Config con)
@@ -43,6 +45,27 @@ class ConfigDialog: Dialog
                 TableLayout {
                 colCount: 3
                 padding: 10
+
+                TextWidget {
+                    text: "キャラクター管理(飾り)"
+                }
+                EditLine { id: toBeAdded }
+                Button {
+                    id: addCharacter
+                    text: "追加"
+                }
+                TextWidget {
+                    text: ""
+                }
+                ListWidget {
+                    id: characters
+                    backgroundColor: "white"
+                }
+                Button {
+                    id: deleteCharacter
+                    text: "選択したキャラクターを削除"
+                }
+
                 TextWidget {
                     id: DLLCaption
                     }
@@ -66,6 +89,48 @@ class ConfigDialog: Dialog
                 }
                 }
             });
+
+        StringListAdapter charList = new StringListAdapter;
+        dstring[] chars = ["しらたま"d, "かきあげ"d];
+        chars.each!(c => charList.add(c));
+        wLayout.childById!ListWidget("characters").ownAdapter = charList;
+
+        with(wLayout.childById("toBeAdded"))
+        {
+            keyEvent = (Widget src, KeyEvent e) {
+                if (chars.any!(c => c == text))
+                {
+                    wLayout.childById("addCharacter").clickable = false;
+                    // グレーアウトさせたい
+                }
+                else
+                {
+                    wLayout.childById("addCharacter").clickable = true;
+                }
+                return false;
+            };
+        }
+        wLayout.childById("addCharacter").click = (Widget src) {
+            // auto newChar = wLayout.childById("toBeAdded").text;
+            // charList.add(newChar);
+            // chars ~= newChar;
+            /// add newChar to the original character list
+            return true;
+        };
+        wLayout.childById("deleteCharacter").click = (Widget src) {
+            // auto list = wLayout.childById!ListWidget("characters");
+            // auto deletedIdx = list.selectedItemIndex;
+            // import std.stdio;
+            // writeln("Idx: ", deletedIdx);
+            // auto deleted = chars[deletedIdx];
+            // // charList.remove(deletedIdx);
+            // chars = chars[0..deletedIdx] ~ chars[deletedIdx+1..$];
+            // auto newList = new StringListAdapter;
+            // chars.each!(c => newList.add(c));
+            // list.ownAdapter = newList;
+            // /// delete oldChar to the original character list
+            return true;
+        };
 
         auto dllCaption = "Migemo ライブラリのパス"d;
         auto dictCaption = "Migemo 辞書のある"d~directory;

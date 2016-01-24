@@ -80,7 +80,7 @@ class RecipeFrameController
 
         Recipe dummy;
         dummy.techniques = make!(typeof(dummy.techniques))(cast(dstring)[]);
-        frame_.recipeDetail = RecipeDetailFrame.create(dummy, wisdom_);
+        frame_.recipeDetail = RecipeDetailFrame.create(dummy, wisdom_, chars);
 
         frame_.characters = chars.keys.sort().array;
 
@@ -185,7 +185,7 @@ private:
                         rDetail.name = r;
                         rDetail.remarks = "作り方がわかりません（´・ω・｀）";
                     }
-                    frame_.recipeDetail = RecipeDetailFrame.create(rDetail, wisdom_);
+                    frame_.recipeDetail = RecipeDetailFrame.create(rDetail, wisdom_, chars_);
 
                     auto itemNames = rDetail.products.keys;
                     enforce(itemNames.length <= 2);

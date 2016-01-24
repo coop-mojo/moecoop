@@ -25,9 +25,11 @@ import std.container.rbtree;
 import std.format;
 import std.range;
 import std.traits;
+import std.typecons;
 
 import coop.model.recipe;
 import coop.model.wisdom;
+import coop.model.character;
 
 class RecipeDetailFrame: ScrollWidget
 {
@@ -61,6 +63,9 @@ class RecipeDetailFrame: ScrollWidget
                         TextWidget { text: "収録バインダー: " }
                         TextWidget { id: binders }
 
+                        TextWidget { text: "所持キャラクター: " }
+                        TextWidget { id: owners }
+
                         TextWidget { text: "レシピ必須: " }
                         TextWidget { id: requireRecipe }
 
@@ -79,7 +84,7 @@ class RecipeDetailFrame: ScrollWidget
         backgroundColor = "white";
     }
 
-    static auto create(Recipe r, Wisdom wisdom)
+    static auto create(Recipe r, Wisdom wisdom, Character[dstring] chars)
     {
         auto ret = new typeof(this)(r.name.to!string);
         ret.recipe_ = r;
@@ -126,7 +131,14 @@ class RecipeDetailFrame: ScrollWidget
             childById("remarks").text = r.remarks;
         }
         ret.binders = wisdom.bindersFor(r.name);
-        ret.owners = cast(dstring[])[];
+        ret.owners = chars
+                     .keys
+                     .filter!(k =>
+                              ret.binders
+                                 .any!(b => chars[k].hasRecipe(r.name, b)))
+                     .map!(k => tuple(k,
+                                      make!(RedBlackTree!dstring)(ret.binders.filter!(b => chars[k].hasRecipe(r.name, b)).array)))
+                     .assocArray;
         return ret;
     }
 
@@ -197,14 +209,27 @@ class RecipeDetailFrame: ScrollWidget
         return owners_;
     }
 
-    @property auto owners(R)(R os)
-        if (isInputRange!R && is(ElementType!R == dstring))
+    @property auto owners(RedBlackTree!dstring[dstring] os)
     {
         owners_ = os;
-        //
+        auto bLen = binders.length;
+        childById("owners").text =
+            os.keys.empty
+            ? "なし"
+            : os.keys.map!((k) {
+                    if (bLen)
+                    {
+                        return k;
+                    }
+                    else
+                    {
+                        return format("%s (%s)"d,
+                                      k,os[k][].join(", "));
+                    }
+                }).join(", ");
     }
 private:
     Recipe recipe_;
     dstring[] filedBinders_;
-    dstring[] owners_;
+    RedBlackTree!dstring[dstring] owners_;
 }

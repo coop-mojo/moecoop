@@ -64,7 +64,7 @@ class RecipeFrameController
         if (config_.migemoDLL.exists && config_.migemoDict.exists)
         {
             version(Windows) {
-                frame_disableMigemoBox;
+                frame_.disableMigemoBox;
             } else {
                 import std.path;
                 migemo_ = new Migemo(config_.migemoDLL, config_.migemoDict);

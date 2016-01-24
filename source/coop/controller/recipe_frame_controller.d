@@ -63,10 +63,14 @@ class RecipeFrameController
         // モーダル窓が作れないから設定を即時反映できない
         if (config_.migemoDLL.exists && config_.migemoDict.exists)
         {
-            import std.path;
-            migemo_ = new Migemo(config_.migemoDLL, config_.migemoDict);
-            migemo_.load(buildPath("resource", "dict", "moe-dict"));
-            enforce(migemo_.isEnable);
+            version(Windows) {
+                frame_disableMigemoBox;
+            } else {
+                import std.path;
+                migemo_ = new Migemo(config_.migemoDLL, config_.migemoDict);
+                migemo_.load(buildPath("resource", "dict", "moe-dict"));
+                enforce(migemo_.isEnable);
+            }
         }
         else
         {

@@ -58,7 +58,7 @@ class MainLayout : VerticalLayout
     RecipeFrameController binderFrameController;
 }
 
-auto createBinderListLayout(Window parent, Wisdom wisdom, Character[] chars, Config config)
+auto createBinderListLayout(Window parent, Wisdom wisdom, Character[dstring] chars, Config config)
 {
     auto root = new MainLayout("root");
 

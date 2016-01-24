@@ -39,7 +39,7 @@ import coop.view.recipe_detail_frame;
 
 class RecipeFrameController
 {
-    this(RecipeBaseFrame frame, Wisdom wisdom, Character[] chars, Config config)
+    this(RecipeBaseFrame frame, Wisdom wisdom, Character[dstring] chars, Config config)
     {
         frame_ = frame;
         wisdom_ = wisdom;
@@ -56,6 +56,7 @@ class RecipeFrameController
             frame_.metaSearchOptionChanged =
             frame_.migemoOptionChanged =
             frame_.categoryChanged =
+            frame_.characterChanged =
             frame_.nColumnChanged = {
             showBinderRecipes;
         };
@@ -80,6 +81,8 @@ class RecipeFrameController
         Recipe dummy;
         dummy.techniques = make!(typeof(dummy.techniques))(cast(dstring)[]);
         frame_.recipeDetail = RecipeDetailFrame.create(dummy, wisdom_);
+
+        frame_.characters = chars.keys.sort().array;
 
         frame_.hideItemDetail(0);
         frame_.hideItemDetail(1);
@@ -164,16 +167,17 @@ private:
                 auto ret = new RecipeEntryWidget(r);
 
                 ret.filedStateChanged = (bool marked) {
+                    auto c = frame_.selectedCharacter;
                     if (marked)
                     {
-                        chars_.front.markFiledRecipe(r, binder);
+                        chars_[c].markFiledRecipe(r, binder);
                     }
                     else
                     {
-                        chars_.front.unmarkFiledRecipe(r, binder);
+                        chars_[c].unmarkFiledRecipe(r, binder);
                     }
                 };
-                ret.checked = chars_.front.hasRecipe(r, binder);
+                ret.checked = chars_[frame_.selectedCharacter].hasRecipe(r, binder);
                 ret.detailClicked = {
                     auto rDetail = wisdom_.recipeFor(r);
                     if (rDetail.name.empty)
@@ -219,6 +223,6 @@ private:
     RecipeBaseFrame frame_;
     Config config_;
     Migemo migemo_;
-    Character[] chars_;
+    Character[dstring] chars_;
     Wisdom wisdom_;
 }

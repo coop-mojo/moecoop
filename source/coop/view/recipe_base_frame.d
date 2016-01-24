@@ -77,6 +77,11 @@ class RecipeBaseFrame: HorizontalLayout
             categoryChanged();
             return true;
         };
+
+        childById!ComboBox("characters").itemClick = (Widget src, int idx) {
+            characterChanged();
+            return true;
+        };
     }
 
     @property auto categories(dstring[] cats)
@@ -87,6 +92,16 @@ class RecipeBaseFrame: HorizontalLayout
     @property auto selectedCategory()
     {
         return childById!ComboBox("categories").selectedItem;
+    }
+
+    @property auto characters(dstring[] chars)
+    {
+        childById!ComboBox("characters").items = chars;
+    }
+
+    @property auto selectedCharacter()
+    {
+        return childById!ComboBox("characters").selectedItem;
     }
 
     auto showRecipeList(Widget[] recipes, int nColumns)
@@ -182,6 +197,7 @@ class RecipeBaseFrame: HorizontalLayout
     EventHandler!() metaSearchOptionChanged;
     EventHandler!() migemoOptionChanged;
     EventHandler!() categoryChanged;
+    EventHandler!() characterChanged;
     EventHandler!() nColumnChanged;
 }
 
@@ -190,6 +206,11 @@ auto recipeListLayout()
     auto layout = parseML(q{
             VerticalLayout {
                 HorizontalLayout {
+                    TextWidget { text: "キャラクター" }
+                    ComboBox {
+                        id: characters
+                    }
+
                     TextWidget { id: categoryCaption }
                     ComboBox {
                         id: categories

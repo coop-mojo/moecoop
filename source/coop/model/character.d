@@ -29,14 +29,15 @@ import std.regex;
 
 class Character
 {
-    this(string baseDir)
+    this(dstring n, dstring baseDir)
     {
         dir_ = baseDir;
-        name = baseDir.baseName;
-        if (dir_.exists)
+        name_ = n;
+        if (buildPath(dir_, name_).exists)
         {
-            filedMap_ = dirEntries(buildPath(dir_, "バインダー"),
-                                   "*.json", SpanMode.breadth)
+            auto binderDir = buildPath(dir_, name_, "バインダー"d).to!string;
+            mkdirRecurse(binderDir);
+            filedMap_ = dirEntries(binderDir, "*.json", SpanMode.breadth)
                         .map!(s => s.readBindersInfo)
                         .joiner
                         .assocArray;
@@ -70,6 +71,16 @@ class Character
         filedMap_[binder].removeKey(recipe);
     }
 
+    @property auto name()
+    {
+        return name_;
+    }
+
+    @property auto name(dstring newName)
+    {
+        name_ = newName;
+    }
+
     ~this()
     {
         writeBindersInfo;
@@ -77,15 +88,14 @@ class Character
 
     auto deleteConfig()
     {
-        dir_.rmdirRecurse;
+        buildPath(dir_, name_).to!string.rmdirRecurse;
     }
 
-    immutable string name;
 private:
 
     auto writeBindersInfo()
     {
-        auto binderDir = buildPath(dir_, "バインダー");
+        auto binderDir = buildPath(dir_, name_, "バインダー"d).to!string;
         mkdirRecurse(binderDir);
 
         JSONValue[string] binderFiles;
@@ -111,7 +121,8 @@ private:
             }
         }
 
-        auto existingBinders = make!(RedBlackTree!string)(dirEntries(buildPath(dir_, "バインダー"), "*.json", SpanMode.breadth));
+        auto existingBinders = make!(RedBlackTree!string)(dirEntries(buildPath(dir_, name_, "バインダー"d).to!string,
+                                                                     "*.json", SpanMode.breadth));
         foreach(kv; binderFiles.byKeyValue)
         {
             import std.stdio;
@@ -123,7 +134,8 @@ private:
     }
 
     RedBlackTree!dstring[dstring] filedMap_;
-    string dir_;
+    dstring name_;
+    dstring dir_;
 }
 
 auto readBindersInfo(string file)

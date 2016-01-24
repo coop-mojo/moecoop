@@ -21,6 +21,7 @@ import std.algorithm;
 import std.array;
 import std.file;
 import std.path;
+import std.typecons;
 
 import coop.model.character;
 import coop.model.config;
@@ -42,16 +43,16 @@ extern(C) int UIAppMain(string[] args)
     mkdirRecurse(UserResourceBase);
     auto dirs = dirEntries(UserResourceBase, SpanMode.shallow)
                 .filter!((string s) => s.isDir)
-                .map!"a.name"
+                .map!((string s) => [s.dirName, s.baseName].map!(to!dstring).array)
                 .array;
     if (dirs.empty)
     {
-        dirs = [buildPath(UserResourceBase, "かきあげ")];
+        dirs = [[UserResourceBase.to!dstring, "かきあげ"d]];
     }
     auto chars = dirs
-                 .map!(path => new Character(path))
-                 .array;
-    scope(exit) chars.each!destroy;
+                 .map!(paths => tuple(paths[1], new Character(paths[1], paths[0])))
+                 .assocArray;
+    scope(exit) chars.values.each!destroy;
 
     Platform.instance.uiLanguage = "ja";
     Platform.instance.uiTheme = "theme_default";

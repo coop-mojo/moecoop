@@ -24,6 +24,7 @@ import dlangui.dialogs.filedlg;
 import coop.model.config;
 
 import std.algorithm;
+import std.file;
 
 class ConfigDialog: Dialog
 {
@@ -141,6 +142,10 @@ class ConfigDialog: Dialog
         with(wLayout.childById("migemoDLLPath"))
         {
             text = config_.migemoDLL;
+            if (!text.exists)
+            {
+                textColor = "red";
+            }
             keyEvent = (Widget src, KeyEvent e) {
                 import std.file;
                 if (text.exists)
@@ -186,6 +191,10 @@ class ConfigDialog: Dialog
         with(wLayout.childById("migemoDictPath"))
         {
             text = config_.migemoDict;
+            if (!text.exists)
+            {
+                textColor = "red";
+            }
             keyEvent = (Widget src, KeyEvent e) {
                 import std.file;
                 if (text.exists && text.isDir)

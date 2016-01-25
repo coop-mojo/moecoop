@@ -139,6 +139,8 @@ class RecipeDetailFrame: ScrollWidget
                      .map!(k => tuple(k,
                                       make!(RedBlackTree!dstring)(ret.binders.filter!(b => chars[k].hasRecipe(r.name, b)).array)))
                      .assocArray;
+        import std.stdio;
+        writeln("OWNERS: ", ret.owners);
         return ret;
     }
 
@@ -213,11 +215,13 @@ class RecipeDetailFrame: ScrollWidget
     {
         owners_ = os;
         auto bLen = binders.length;
+        import std.stdio;
+        writeln("binders", bLen);
         childById("owners").text =
             os.keys.empty
             ? "なし"
             : os.keys.map!((k) {
-                    if (bLen)
+                    if (bLen == 1)
                     {
                         return k;
                     }

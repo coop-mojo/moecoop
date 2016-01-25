@@ -53,8 +53,8 @@ enum MIGEMO_OPINDEX: int
     NEWLINE    = 5,
 }
 
-extern(C) {
-    alias MIGEMO_PROC_CHAR2INT = int function(const char*, uint*);
+extern(C) pure nothrow @nogc{
+    alias MIGEMO_PROC_CHAR2INT = int function(const(char)*, uint*);
     alias MIGEMO_PROC_INT2CHAR = int function(uint, char*);
 }
 
@@ -62,18 +62,18 @@ struct migemo;
 
 extern(C) pure nothrow @nogc
 {
-    alias da_migemo_open = migemo* function(const char* dict);
-    alias da_migemo_close = void function(migemo* object);
-    alias da_migemo_query = char* function(migemo* object, const(char)* query);
-    alias da_migemo_release = void function(migemo* object, char* string);
+    alias da_migemo_open = migemo* function(const(char)*);
+    alias da_migemo_close = void function(migemo*);
+    alias da_migemo_query = char* function(migemo*, const(char)*);
+    alias da_migemo_release = void function(migemo*, char*);
 
-    alias da_migemo_set_operator = int function(migemo* object, MIGEMO_OPINDEX index, const char* op);
-    alias da_migemo_get_operator = const(char)* function(migemo* object, MIGEMO_OPINDEX index);
-    alias da_migemo_setproc_char2int = void function(migemo* object, MIGEMO_PROC_CHAR2INT proc);
-    alias da_migemo_setproc_int2char = void function(migemo* object, MIGEMO_PROC_INT2CHAR proc);
+    alias da_migemo_set_operator = int function(migemo*, MIGEMO_OPINDEX, const(char)*);
+    alias da_migemo_get_operator = const(char)* function(migemo*, MIGEMO_OPINDEX);
+    alias da_migemo_setproc_char2int = void function(migemo*, MIGEMO_PROC_CHAR2INT);
+    alias da_migemo_setproc_int2char = void function(migemo*, MIGEMO_PROC_INT2CHAR);
 
-    alias da_migemo_load = MIGEMO_DICTID function(migemo* obj, MIGEMO_DICTID dict_id, const(char)* dict_file);
-    alias da_migemo_is_enable = int function(migemo* obj);
+    alias da_migemo_load = MIGEMO_DICTID function(migemo*, MIGEMO_DICTID, const(char)*);
+    alias da_migemo_is_enable = int function(migemo*);
 }
 
 __gshared {

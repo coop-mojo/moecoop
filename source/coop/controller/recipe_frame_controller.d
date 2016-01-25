@@ -36,15 +36,15 @@ import coop.model.wisdom;
 import coop.view.item_detail_frame;
 import coop.view.recipe_base_frame;
 import coop.view.recipe_detail_frame;
+import coop.controller.main_frame_controller;
 
-class RecipeFrameController
+class BinderTabFrameController
 {
-    this(RecipeBaseFrame frame, Wisdom wisdom, Character[dstring] chars, Config config)
+    mixin TabController;
+
+    this(BinderTabFrame frame)
     {
         frame_ = frame;
-        wisdom_ = wisdom;
-        chars_ = chars;
-        config_ = config;
         frame_.queryFocused = {
             if (frame_.queryText == defaultTxtMsg)
             {
@@ -61,31 +61,26 @@ class RecipeFrameController
             showBinderRecipes;
         };
 
-        // モーダル窓が作れないから設定を即時反映できない
-        if (config_.migemoDLL.exists && config_.migemoDict.exists)
+        Recipe dummy;
+        dummy.techniques = make!(typeof(dummy.techniques))(cast(dstring)[]);
+        auto w = wisdom;
+        auto cc = characters;
+        auto fr = RecipeDetailFrame.create(dummy, wisdom, characters);
+        frame_.recipeDetail = fr;
+
+        frame_.characters = characters.keys.sort().array;
+
+        frame_.hideItemDetail(0);
+        frame_.hideItemDetail(1);
+
+        if (migemo)
         {
-            version(Windows) {
-                frame_.disableMigemoBox;
-            } else {
-                import std.path;
-                migemo_ = new Migemo(config_.migemoDLL, config_.migemoDict);
-                migemo_.load(buildPath("resource", "dict", "moe-dict"));
-                enforce(migemo_.isEnable);
-            }
+            frame_.enableMigemoBox;
         }
         else
         {
             frame_.disableMigemoBox;
         }
-
-        Recipe dummy;
-        dummy.techniques = make!(typeof(dummy.techniques))(cast(dstring)[]);
-        frame_.recipeDetail = RecipeDetailFrame.create(dummy, wisdom_, chars);
-
-        frame_.characters = chars.keys.sort().array;
-
-        frame_.hideItemDetail(0);
-        frame_.hideItemDetail(1);
     }
 
     auto showBinderRecipes()
@@ -104,12 +99,12 @@ class RecipeFrameController
         dstring[][dstring] recipes;
         if (frame_.useMetaSearch)
         {
-            recipes = wisdom_.binders.map!(b => tuple(b, wisdom_.recipesIn(Binder(b)))).assocArray;
+            recipes = wisdom.binders.map!(b => tuple(b, wisdom.recipesIn(Binder(b)))).assocArray;
         }
         else
         {
             auto binder = frame_.selectedCategory;
-            recipes = [tuple(binder, wisdom_.recipesIn(Binder(binder)))].assocArray;
+            recipes = [tuple(binder, wisdom.recipesIn(Binder(binder)))].assocArray;
         }
 
         if (!query.empty)
@@ -119,7 +114,7 @@ class RecipeFrameController
             if (frame_.useMigemo)
             {
                 try{
-                    auto q = migemo_.query(query).regex;
+                    auto q = migemo.query(query).regex;
                     matchFun = s => !s.removechars(r"/[ 　]/").matchFirst(q).empty;
                 } catch(RegexException e) {
                     // use default matchFun
@@ -154,7 +149,7 @@ class RecipeFrameController
         frame_.showRecipeList(tableElems, frame_.numberOfColumns);
     }
 
-    auto categories(dstring[] cats)
+    @property auto categories(dstring[] cats)
     {
         frame_.categories = cats;
     }
@@ -170,22 +165,22 @@ private:
                     auto c = frame_.selectedCharacter;
                     if (marked)
                     {
-                        chars_[c].markFiledRecipe(r, binder);
+                        characters[c].markFiledRecipe(r, binder);
                     }
                     else
                     {
-                        chars_[c].unmarkFiledRecipe(r, binder);
+                        characters[c].unmarkFiledRecipe(r, binder);
                     }
                 };
-                ret.checked = chars_[frame_.selectedCharacter].hasRecipe(r, binder);
+                ret.checked = characters[frame_.selectedCharacter].hasRecipe(r, binder);
                 ret.detailClicked = {
-                    auto rDetail = wisdom_.recipeFor(r);
+                    auto rDetail = wisdom.recipeFor(r);
                     if (rDetail.name.empty)
                     {
                         rDetail.name = r;
                         rDetail.remarks = "作り方がわかりません（´・ω・｀）";
                     }
-                    frame_.recipeDetail = RecipeDetailFrame.create(rDetail, wisdom_, chars_);
+                    frame_.recipeDetail = RecipeDetailFrame.create(rDetail, wisdom, characters);
 
                     auto itemNames = rDetail.products.keys;
                     enforce(itemNames.length <= 2);
@@ -201,7 +196,7 @@ private:
                             auto idx = idx_name[0];
                             dstring name = idx_name[1];
                             Item item;
-                            if (auto i = name in wisdom_.itemList)
+                            if (auto i = name in wisdom.itemList)
                             {
                                 item = *i;
                             }
@@ -212,7 +207,7 @@ private:
                             }
 
                             frame_.showItemDetail(idx);
-                            frame_.setItemDetail(ItemDetailFrame.create(item, wisdom_), idx);
+                            frame_.setItemDetail(ItemDetailFrame.create(item, wisdom), idx);
                         });
                 };
                 return cast(Widget)ret;
@@ -220,9 +215,4 @@ private:
     }
 
     enum defaultTxtMsg = "見たいレシピ";
-    RecipeBaseFrame frame_;
-    Config config_;
-    Migemo migemo_;
-    Character[dstring] chars_;
-    Wisdom wisdom_;
 }

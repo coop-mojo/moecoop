@@ -27,21 +27,28 @@ import coop.model.item;
 import coop.model.recipe;
 import coop.util;
 
+import coop.view.widget;
+import coop.controller.recipe_frame_controller;
+
 immutable MaxNumberOfBinderPages = 128;
 
-class RecipeBaseFrame: HorizontalLayout
+class BinderTabFrame: HorizontalLayout
 {
+    mixin TabFrame;
+
     this() { super(); }
 
     this(string id) {
         super(id);
-        margins = 20;
-        padding = 10;
+        auto layout = new HorizontalLayout;
+        addChild(layout);
+        layout.margins = 20;
+        layout.padding = 10;
 
-        addChild(recipeListLayout);
-        addChild(recipeDetailsLayout);
-        layoutHeight(FILL_PARENT);
-        layoutWidth(FILL_PARENT);
+        layout.addChild(recipeListLayout);
+        layout.addChild(recipeDetailsLayout);
+        layout.layoutHeight(FILL_PARENT);
+        layout.layoutWidth(FILL_PARENT);
         with(childById!ComboBox("nColumns"))
         {
             items = ["1列表示"d, "2列表示", "4列表示"];

@@ -1,6 +1,6 @@
 module coop.controller.main_frame_controller;
 
-import coop.view.widget;
+import coop.view.main_frame;
 import coop.model.config;
 import coop.model.character;
 import coop.model.wisdom;

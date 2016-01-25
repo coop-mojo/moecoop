@@ -26,7 +26,7 @@ import std.typecons;
 import coop.model.character;
 import coop.model.config;
 import coop.model.wisdom;
-import coop.view.widget;
+import coop.view.main_frame;
 
 mixin APP_ENTRY_POINT;
 
@@ -54,19 +54,13 @@ extern(C) int UIAppMain(string[] args)
                  .assocArray;
     scope(exit) chars.values.each!destroy;
 
-    import std.stdio;
-    writeln("AAA");
     Platform.instance.uiLanguage = "ja";
     Platform.instance.uiTheme = "theme_default";
-    writeln("BBB");
     auto window = Platform.instance.createWindow(AppName, null, WindowFlag.Resizable,
                                                  config.windowWidth,
                                                  config.windowHeight);
-    writeln("CCC");
     auto layout = MainFrame.create(window, wisdom, chars, config);
-    writeln("DDD");
     window.mainWidget = layout;
-    writeln("EEE");
     window.show;
     window.onClose = {
         version(Windows) {

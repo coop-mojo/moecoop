@@ -27,7 +27,7 @@ import coop.model.item;
 import coop.model.recipe;
 import coop.util;
 
-import coop.view.widget;
+import coop.view.main_frame;
 import coop.controller.binder_tab_frame_controller;
 
 immutable MaxNumberOfBinderPages = 128;

@@ -15,7 +15,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-module coop.controller.recipe_frame_controller;
+module coop.controller.binder_tab_frame_controller;
 
 import dlangui;
 
@@ -34,7 +34,7 @@ import coop.model.item;
 import coop.model.recipe;
 import coop.model.wisdom;
 import coop.view.item_detail_frame;
-import coop.view.recipe_base_frame;
+import coop.view.binder_tab_frame;
 import coop.view.recipe_detail_frame;
 import coop.controller.main_frame_controller;
 

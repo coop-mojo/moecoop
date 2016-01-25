@@ -23,8 +23,8 @@ import dlangui.widgets.metadata;
 import coop.model.character;
 import coop.model.wisdom;
 import coop.model.config;
-import coop.view.recipe_base_frame;
-import coop.controller.recipe_frame_controller;
+import coop.view.binder_tab_frame;
+import coop.controller.binder_tab_frame_controller;
 import coop.controller.main_frame_controller;
 
 immutable fontName = defaultFontName;

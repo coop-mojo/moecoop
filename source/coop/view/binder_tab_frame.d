@@ -15,7 +15,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-module coop.view.recipe_base_frame;
+module coop.view.binder_tab_frame;
 
 import dlangui;
 
@@ -28,7 +28,7 @@ import coop.model.recipe;
 import coop.util;
 
 import coop.view.widget;
-import coop.controller.recipe_frame_controller;
+import coop.controller.binder_tab_frame_controller;
 
 immutable MaxNumberOfBinderPages = 128;
 

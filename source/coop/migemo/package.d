@@ -98,7 +98,7 @@ pure nothrow @nogc:
 extern(C)
 {
 
-    int char2int(const char* input, uint* output)
+    int char2int(const(char)* input, uint* output)
     {
         if (input[0] != '\\')
             return 0;

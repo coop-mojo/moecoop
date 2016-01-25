@@ -1,0 +1,80 @@
+module coop.controller.main_frame_controller;
+
+import coop.view.widget;
+import coop.model.config;
+import coop.model.character;
+import coop.model.wisdom;
+import coop.migemo;
+
+import std.file;
+import std.path;
+import std.exception;
+
+class MainFrameController
+{
+    this(MainFrame frame, Wisdom wisdom, Character[dstring] chars, Config config)
+    {
+        frame_ = frame;
+        wisdom_ = wisdom;
+        chars_ = chars;
+        config_ = config;
+
+        // モーダル窓が作れないから設定を即時反映できない
+        if (config.migemoDLL.exists && config.migemoDict.exists)
+        {
+            version(Windows) {
+                // Bug
+            } else {
+                migemo_ = new Migemo(config_.migemoDLL, config_.migemoDict);
+                migemo_.load(buildPath("resource", "dict", "moe-dict"));
+                enforce(migemo_.isEnable);
+            }
+        }
+    }
+
+    auto frame() { return frame_; }
+    auto config() { return config_; }
+    auto characters() { return chars_; }
+    auto wisdom() { return wisdom_; }
+    auto migemo() { return migemo_; }
+
+    Config config_;
+    Character[dstring] chars_;
+    Wisdom wisdom_;
+    Migemo migemo_;
+    MainFrame frame_;
+}
+
+mixin template TabController()
+{
+public:
+    import std.format;
+    import std.exception;
+    mixin(format("alias FrameType = %s;", typeof(this).stringof[0..$-10]));
+
+    FrameType frame() { return frame; }
+    auto config()
+    {
+        return frame_.root.controller_.config;
+    }
+
+    auto characters()
+    {
+        return frame_.root.controller_.characters;
+    }
+
+    auto wisdom()
+    out(ret)
+    {
+        assert(ret);
+    } body {
+        return frame_.root.controller_.wisdom;
+    }
+
+    auto migemo()
+    {
+        return frame_.root.controller_.migemo;
+    }
+protected:
+    FrameType frame_;
+}

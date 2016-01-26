@@ -81,7 +81,8 @@ class Character
         name_ = newName;
     }
 
-    ~this()
+
+    auto writeConfig()
     {
         writeBindersInfo;
     }
@@ -89,6 +90,11 @@ class Character
     auto deleteConfig()
     {
         buildPath(dir_, name_).to!string.rmdirRecurse;
+    }
+
+    auto baseDirectory()
+    {
+        return dir_;
     }
 
 private:

@@ -22,15 +22,18 @@ import dlangui.dialogs.dialog;
 import dlangui.dialogs.filedlg;
 
 import coop.model.config;
+import coop.model.character;
 
 import std.algorithm;
 import std.file;
+import std.array;
 
 class ConfigDialog: Dialog
 {
-    this(Window parent, Config con)
+    this(Window parent, Character[dstring] chars, Config con)
     {
         super(UIString("設定"d), parent, DialogFlag.Popup);
+        chars_ = chars;
         config_ = con;
     }
 
@@ -44,84 +47,80 @@ class ConfigDialog: Dialog
 
         auto wLayout = parseML(q{
                 TableLayout {
-                colCount: 3
-                padding: 10
+                    colCount: 3
+                    padding: 10
 
-                TextWidget {
-                    text: "キャラクター管理(飾り)"
-                }
-                EditLine { id: toBeAdded }
-                Button {
-                    id: addCharacter
-                    text: "追加"
-                }
-                TextWidget {
-                    text: ""
-                }
-                ListWidget {
-                    id: characters
-                    backgroundColor: "white"
-                }
-                Button {
-                    id: deleteCharacter
-                    text: "選択したキャラクターを削除"
-                }
-
-                TextWidget {
-                    id: DLLCaption
+                    TextWidget {
+                        text: "キャラクター管理"
                     }
-                EditLine {
-                id: migemoDLLPath
-                }
-                Button {
-                id: migemoDLLSelecter
-                text: "変更"
-                }
+                    EditLine { id: toBeAdded }
+                    Button {
+                        id: addCharacter
+                        text: "追加"
+                    }
+                    TextWidget {
+                        text: ""
+                    }
+                    ListWidget {
+                        id: characters
+                        backgroundColor: "white"
+                    }
+                    Button {
+                        id: deleteCharacter
+                        text: "選択したキャラクターを削除"
+                    }
 
-                TextWidget {
-                id: DictCaption
-                }
-                EditLine {
-                id: migemoDictPath
-                }
-                TextWidget {
-                id: migemoDictSelecter
-                text: ""
-                }
+                    TextWidget {
+                        id: DLLCaption
+                    }
+                    EditLine {
+                        id: migemoDLLPath
+                    }
+                    Button {
+                        id: migemoDLLSelecter
+                        text: "変更"
+                    }
+
+                    TextWidget {
+                        id: DictCaption
+                    }
+                    EditLine {
+                        id: migemoDictPath
+                    }
+                    TextWidget {
+                        id: migemoDictSelecter
+                        text: ""
+                    }
                 }
             });
 
         StringListAdapter charList = new StringListAdapter;
-        dstring[] chars = ["しらたま"d, "かきあげ"d];
-        chars.each!(c => charList.add(c));
+        chars_.keys.each!(c => charList.add(c));
         wLayout.childById!ListWidget("characters").ownAdapter = charList;
+        dstring baseDir = chars_.values.front.baseDirectory;
 
         with(wLayout.childById("toBeAdded"))
         {
             keyEvent = (Widget src, KeyEvent e) {
-                wLayout.childById("addCharacter").enabled = chars.any!(c => c == text);
+                wLayout.childById("addCharacter").enabled = chars_.keys.all!(c => c != text);
                 return false;
             };
         }
         wLayout.childById("addCharacter").click = (Widget src) {
-            // auto newChar = wLayout.childById("toBeAdded").text;
-            // charList.add(newChar);
-            // chars ~= newChar;
-            /// add newChar to the original character list
+            auto newChar = wLayout.childById("toBeAdded").text;
+            chars_[newChar] = new Character(newChar, baseDir);
+            charList.add(newChar);
             return true;
         };
         wLayout.childById("deleteCharacter").click = (Widget src) {
-            // auto list = wLayout.childById!ListWidget("characters");
-            // auto deletedIdx = list.selectedItemIndex;
-            // import std.stdio;
-            // writeln("Idx: ", deletedIdx);
-            // auto deleted = chars[deletedIdx];
-            // // charList.remove(deletedIdx);
-            // chars = chars[0..deletedIdx] ~ chars[deletedIdx+1..$];
-            // auto newList = new StringListAdapter;
-            // chars.each!(c => newList.add(c));
-            // list.ownAdapter = newList;
-            // /// delete oldChar to the original character list
+            auto list = wLayout.childById!ListWidget("characters");
+            auto deletedIdx = list.selectedItemIndex;
+            auto deleted = charList.items[deletedIdx];
+            auto c = chars_[deleted];
+            chars_.remove(deleted);
+            c.deleteConfig;
+            charList.clear;
+            chars_.keys.each!(c => charList.add(c));
             return true;
         };
 
@@ -229,10 +228,11 @@ class ConfigDialog: Dialog
     }
 private:
     Config config_;
+    Character[dstring] chars_;
 }
 
-auto showConfigWindow(Window parent, ref Config config)
+auto showConfigWindow(Window parent, Character[dstring] chars, Config config)
 {
-    auto dlg = new ConfigDialog(parent, config);
+    auto dlg = new ConfigDialog(parent, chars, config);
     dlg.show;
 }

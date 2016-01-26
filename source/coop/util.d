@@ -20,6 +20,10 @@ module coop.util;
 import std.exception;
 import std.json;
 
+immutable SystemResourceBase = "resource";
+immutable UserResourceBase = "userdata";
+immutable AppName = "生協の知恵袋"d;
+
 auto toBool(JSONValue val)
 {
     enforce(val.type == JSON_TYPE.TRUE ||

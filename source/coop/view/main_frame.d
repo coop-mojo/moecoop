@@ -100,7 +100,7 @@ class MainFrame : VerticalLayout
                     break;
                 case OPTION:
                     import coop.view.config_window;
-                    showConfigWindow(parent, config);
+                    showConfigWindow(parent, chars, config);
                     break;
                 default:
                 }

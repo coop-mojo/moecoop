@@ -27,17 +27,13 @@ import coop.model.character;
 import coop.model.config;
 import coop.model.wisdom;
 import coop.view.main_frame;
+import coop.util;
 
 mixin APP_ENTRY_POINT;
-
-immutable SystemResourceBase = "resource";
-immutable UserResourceBase = "userdata";
-immutable AppName = "生協の知恵袋"d;
 
 extern(C) int UIAppMain(string[] args)
 {
     auto wisdom = new Wisdom(SystemResourceBase);
-    scope(exit) wisdom.destroy;
     auto config = new Config(buildPath(UserResourceBase, "config.json"));
     scope(exit) config.destroy;
     mkdirRecurse(UserResourceBase);
@@ -52,7 +48,7 @@ extern(C) int UIAppMain(string[] args)
     auto chars = dirs
                  .map!(paths => tuple(paths[1], new Character(paths[1], paths[0])))
                  .assocArray;
-    scope(exit) chars.values.each!destroy;
+    scope(exit) chars.values.each!(c => c.writeConfig);
 
     Platform.instance.uiLanguage = "ja";
     Platform.instance.uiTheme = "theme_default";

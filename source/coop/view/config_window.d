@@ -99,15 +99,7 @@ class ConfigDialog: Dialog
         with(wLayout.childById("toBeAdded"))
         {
             keyEvent = (Widget src, KeyEvent e) {
-                if (chars.any!(c => c == text))
-                {
-                    wLayout.childById("addCharacter").clickable = false;
-                    // グレーアウトさせたい
-                }
-                else
-                {
-                    wLayout.childById("addCharacter").clickable = true;
-                }
+                wLayout.childById("addCharacter").enabled = chars.any!(c => c == text);
                 return false;
             };
         }

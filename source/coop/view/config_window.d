@@ -23,6 +23,7 @@ import dlangui.dialogs.filedlg;
 
 import coop.model.config;
 import coop.model.character;
+import coop.view.binder_tab_frame;
 
 import std.algorithm;
 import std.file;
@@ -110,6 +111,8 @@ class ConfigDialog: Dialog
             auto newChar = wLayout.childById("toBeAdded").text;
             chars_[newChar] = new Character(newChar, baseDir);
             charList.add(newChar);
+            // TODO: 全てのタブに notify する必要がある
+            _parentWindow.mainWidget.childById!BinderTabFrame("binderFrame").updateCharacters(chars_.keys);
             return true;
         };
         wLayout.childById("deleteCharacter").click = (Widget src) {
@@ -121,6 +124,8 @@ class ConfigDialog: Dialog
             c.deleteConfig;
             charList.clear;
             chars_.keys.each!(c => charList.add(c));
+            // TODO: 全てのタブに notify する必要がある
+            _parentWindow.mainWidget.childById!BinderTabFrame("binderFrame").updateCharacters(chars_.keys);
             return true;
         };
 

@@ -89,7 +89,11 @@ class Character
 
     auto deleteConfig()
     {
-        buildPath(dir_, name_).to!string.rmdirRecurse;
+        auto configDir = buildPath(dir_, name_);
+        if (configDir.exists)
+        {
+            configDir.to!string.rmdirRecurse;
+        }
     }
 
     auto baseDirectory()

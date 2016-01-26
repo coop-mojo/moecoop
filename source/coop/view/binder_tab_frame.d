@@ -18,6 +18,7 @@
 module coop.view.binder_tab_frame;
 
 import dlangui;
+import dlangui.widgets.metadata;
 
 import std.algorithm;
 import std.array;
@@ -93,7 +94,11 @@ class BinderTabFrame: HorizontalLayout
 
     @property auto categories(dstring[] cats)
     {
-        childById!ComboBox("categories").items = cats;
+        with(childById!ComboBox("categories"))
+        {
+            items = cats;
+            selectedItemIndex = 0;
+        }
     }
 
     @property auto selectedCategory()
@@ -103,7 +108,17 @@ class BinderTabFrame: HorizontalLayout
 
     @property auto characters(dstring[] chars)
     {
-        childById!ComboBox("characters").items = chars;
+        auto charBox = childById!ComboBox("characters");
+        auto selected = charBox.items.length == 0 ? "存在しないユーザー" : charBox.selectedItem;
+        charBox.items = chars;
+        auto newIdx = chars.countUntil(selected).to!int;
+        charBox.selectedItemIndex = newIdx == -1 ? 0 : newIdx;
+    }
+
+    auto updateCharacters(dstring[] chars)
+    {
+        characters = chars;
+        characterChanged();
     }
 
     @property auto selectedCharacter()
@@ -340,3 +355,5 @@ class LinkWidget: TextWidget
         // textFlags = TextFlag.Underline;
     }
 }
+
+mixin(registerWidgets!(BinderTabFrame));

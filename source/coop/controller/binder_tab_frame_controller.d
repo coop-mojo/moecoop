@@ -63,10 +63,7 @@ class BinderTabFrameController
 
         Recipe dummy;
         dummy.techniques = make!(typeof(dummy.techniques))(cast(dstring)[]);
-        auto w = wisdom;
-        auto cc = characters;
-        auto fr = RecipeDetailFrame.create(dummy, wisdom, characters);
-        frame_.recipeDetail = fr;
+        frame_.recipeDetail = RecipeDetailFrame.create(dummy, wisdom, characters);
 
         frame_.characters = characters.keys.sort().array;
 

@@ -343,7 +343,6 @@ class RecipeEntryWidget: HorizontalLayout
     this(dstring recipe)
     {
         super(recipe.to!string);
-        // styleId = STYLE_CHECKBOX;
         box = new CheckBox(null, ""d);
         link = new LinkWidget(null, recipe);
         addChild(box);

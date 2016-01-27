@@ -18,6 +18,7 @@
 module coop.view.recipe_detail_frame;
 
 import dlangui;
+import dlangui.widgets.metadata;
 
 import std.algorithm;
 import std.array;
@@ -233,3 +234,5 @@ private:
     dstring[] filedBinders_;
     RedBlackTree!dstring[dstring] owners_;
 }
+
+mixin(registerWidgets!RecipeDetailFrame);

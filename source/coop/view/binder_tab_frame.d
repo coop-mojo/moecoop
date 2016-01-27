@@ -30,6 +30,7 @@ import coop.util;
 
 import coop.view.main_frame;
 import coop.controller.binder_tab_frame_controller;
+import coop.view.recipe_detail_frame;
 
 immutable MaxNumberOfBinderPages = 128;
 
@@ -128,6 +129,8 @@ class BinderTabFrame: HorizontalLayout
 
     auto showRecipeList(Widget[] recipes, int nColumns)
     {
+        unhighlightDetailRecipe;
+        scope(exit) highlightDetailRecipe;
         auto recipeList = childById("recipeList");
         recipeList.removeAllChildren;
         recipeList.backgroundColor = recipes.empty ? "white" : "black";
@@ -148,11 +151,40 @@ class BinderTabFrame: HorizontalLayout
         recipeList.addChild(scroll);
     }
 
+    @property auto recipeDetail()
+    {
+        return cast(RecipeDetailFrame)childById!FrameLayout("recipeDetail").child(0);
+    }
+
     @property auto recipeDetail(Widget recipe)
     {
         auto frame = childById("recipeDetail");
         frame.removeAllChildren;
         frame.addChild(recipe);
+    }
+
+    auto highlightDetailRecipe()
+    {
+        if (auto detailFrame = recipeDetail)
+        {
+            auto shownRecipe = detailFrame.name;
+            if (auto item = childById("recipeList").childById!RecipeEntryWidget(shownRecipe.to!string))
+            {
+                item.highlight;
+            }
+        }
+    }
+
+    auto unhighlightDetailRecipe()
+    {
+        if (auto detailFrame = recipeDetail)
+        {
+            auto shownRecipe = detailFrame.name;
+            if (auto item = childById("recipeList").childById!RecipeEntryWidget(shownRecipe.to!string))
+            {
+                item.unhighlight;
+            }
+        }
     }
 
     auto setItemDetail(Widget item, int idx)
@@ -310,13 +342,21 @@ class RecipeEntryWidget: HorizontalLayout
 
     this(dstring recipe)
     {
-        super();
+        super(recipe.to!string);
         box = new CheckBox(null, ""d);
         link = new LinkWidget(null, recipe);
         addChild(box);
         addChild(link);
         box.checkChange = (Widget src, bool checked) {
             filedStateChanged(checked);
+            if (checked)
+            {
+                this.backgroundColor = 0xdcdcdc;
+            }
+            else
+            {
+                this.backgroundColor = "white";
+            }
             return true;
         };
         link.click = (Widget src) {
@@ -329,6 +369,13 @@ class RecipeEntryWidget: HorizontalLayout
     override @property Widget checked(bool c) {
         box.checked = c;
         return this;
+    }
+
+    auto highlight() {
+        link.backgroundColor = 0xfffacd;
+    }
+    auto unhighlight() {
+        link.backgroundColor = backgroundColor;
     }
 
     EventHandler!(bool) filedStateChanged;
@@ -356,4 +403,4 @@ class LinkWidget: TextWidget
     }
 }
 
-mixin(registerWidgets!(BinderTabFrame));
+mixin(registerWidgets!(BinderTabFrame, RecipeEntryWidget));

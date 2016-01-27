@@ -174,6 +174,10 @@ private:
                 };
                 ret.checked = characters[frame_.selectedCharacter].hasRecipe(r, binder);
                 ret.detailClicked = {
+                    frame_.unhighlightDetailRecipe;
+                    scope(exit) frame_.highlightDetailRecipe;
+
+
                     auto rDetail = wisdom.recipeFor(r);
                     if (rDetail.name.empty)
                     {

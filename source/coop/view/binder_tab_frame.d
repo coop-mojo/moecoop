@@ -343,6 +343,7 @@ class RecipeEntryWidget: HorizontalLayout
     this(dstring recipe)
     {
         super(recipe.to!string);
+        // styleId = STYLE_CHECKBOX;
         box = new CheckBox(null, ""d);
         link = new LinkWidget(null, recipe);
         addChild(box);
@@ -390,16 +391,18 @@ class LinkWidget: TextWidget
     this() {
         super();
         clickable = true;
-        // textColor = "blue";
-        // textFlags = TextFlag.Underline;
+        styleId = STYLE_CHECKBOX_LABEL;
+        enabled = true;
+        trackHover = true;
     }
 
     this(string id, dstring txt)
     {
         super(id, txt);
         clickable = true;
-        // textColor = "blue";
-        // textFlags = TextFlag.Underline;
+        styleId = STYLE_CHECKBOX_LABEL;
+        enabled = true;
+        trackHover = true;
     }
 }
 

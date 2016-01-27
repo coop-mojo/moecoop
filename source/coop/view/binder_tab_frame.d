@@ -110,7 +110,7 @@ class BinderTabFrame: HorizontalLayout
     @property auto characters(dstring[] chars)
     {
         auto charBox = childById!ComboBox("characters");
-        auto selected = charBox.items.length == 0 ? "存在しないユーザー" : charBox.selectedItem;
+        auto selected = charBox.items.empty ? "存在しないユーザー" : charBox.selectedItem;
         charBox.items = chars;
         auto newIdx = chars.countUntil(selected).to!int;
         charBox.selectedItemIndex = newIdx == -1 ? 0 : newIdx;

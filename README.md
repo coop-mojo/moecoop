@@ -10,7 +10,7 @@
   - 食事バフ等の詳細情報の確認 (まだ一部)
 - バインダー内のレシピを検索
 - 複数のバインダーからレシピをまとめて検索
-- [C/Migemo](http://www.kaoriya.net/software/cmigemo/) を利用したいい感じの検索 (別途 C/Migemo for Windows 32bit のインストールが必要です)
+- [C/Migemo](http://www.kaoriya.net/software/cmigemo/) を利用したいい感じの検索 (別途 C/Migemo for Windows のインストールが必要です)
   - katsu でカツ丼やカツを検索できます (ローマ字のまま検索)
   - cookie でクッキーを，bread でパンを検索できます (英語でも検索)
   - soi でソード オブ インフェルノを検索できます (略称検索)

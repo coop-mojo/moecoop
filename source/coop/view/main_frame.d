@@ -78,6 +78,20 @@ class MainFrame : VerticalLayout
         ownStyle.theme.fontFamily(FontFamily.SansSerif).fontFace(fontName);
     }
 
+    auto enableMigemo() {
+        if (auto fr = childById!BinderTabFrame("binderFrame"))
+        {
+            fr.enableMigemoBox;
+        }
+    }
+
+    auto disableMigemo() {
+        if (auto fr = childById!BinderTabFrame("binderFrame"))
+        {
+            fr.disableMigemoBox;
+        }
+    }
+
     static auto create(Window parent, Wisdom wisdom, Character[dstring] chars, Config config)
     {
         auto root = new MainFrame("root");
@@ -121,6 +135,11 @@ class MainFrame : VerticalLayout
         root.addChild(status);
 
         auto binderTab = new BinderTabFrame("binderFrame");
+        if (root.controller_.migemo is null)
+        {
+            binderTab.disableMigemoBox;
+        }
+
         tabs.addTab(binderTab, "バインダー"d);
         binderTab.setCategoryName("バインダー"d);
         binderTab.controller_ = new BinderTabFrameController(binderTab);

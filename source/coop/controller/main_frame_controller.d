@@ -36,17 +36,7 @@ class MainFrameController
         chars_ = chars;
         config_ = config;
 
-        // モーダル窓が作れないから設定を即時反映できない
-        if (config.migemoDLL.exists && config.migemoDict.exists)
-        {
-            version(Windows) {
-                // Bug
-            } else {
-                migemo_ = new Migemo(config_.migemoDLL, config_.migemoDict);
-                migemo_.load(buildPath("resource", "dict", "moe-dict"));
-                enforce(migemo_.isEnable);
-            }
-        }
+        loadMigemo;
     }
 
     auto frame() { return frame_; }
@@ -54,6 +44,22 @@ class MainFrameController
     auto characters() { return chars_; }
     auto wisdom() { return wisdom_; }
     auto migemo() { return migemo_; }
+
+    auto loadMigemo()
+    {
+        if (config.migemoDLL.exists && config.migemoDict.exists)
+        {
+            try{
+                migemo_ = new Migemo(config_.migemoDLL, config_.migemoDict);
+                migemo_.load(buildPath("resource", "dict", "moe-dict"));
+                enforce(migemo_.isEnable);
+                frame_.enableMigemo;
+            } catch(MigemoException e) {
+                migemo_ = null;
+                frame_.disableMigemo;
+            }
+        }
+    }
 
     Config config_;
     Character[dstring] chars_;

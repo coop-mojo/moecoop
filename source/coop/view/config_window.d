@@ -24,6 +24,7 @@ import dlangui.dialogs.filedlg;
 import coop.model.config;
 import coop.model.character;
 import coop.view.binder_tab_frame;
+import coop.view.main_frame;
 
 import std.algorithm;
 import std.file;
@@ -227,6 +228,7 @@ class ConfigDialog: Dialog
             {
                 config_.migemoDLL = childById("migemoDLLPath").text;
                 config_.migemoDict = childById("migemoDictPath").text;
+                (cast(MainFrame)_parentWindow.mainWidget).controller_.loadMigemo;
             }
         }
         _parentWindow.removePopup(_popup);

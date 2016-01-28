@@ -231,7 +231,11 @@ class BinderTabFrame: HorizontalLayout
 
     @property auto disableMigemoBox()
     {
-        childById!CheckBox("migemo").enabled = false;
+        with(childById!CheckBox("migemo"))
+        {
+            checked = false;
+            enabled = false;
+        }
     }
 
     @property auto enableMigemoBox()

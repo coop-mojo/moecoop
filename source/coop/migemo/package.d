@@ -17,6 +17,8 @@
 */
 module coop.migemo;
 
+import derelict.util.exception;
+
 import std.conv;
 import std.exception;
 import std.file;
@@ -43,22 +45,26 @@ class Migemo{
         assert(path.exists);
         assert(path.isFile);
     } body {
-        DerelictMigemo.load(path.to!string);
-        m = migemo_open(null);
-        migemo_setproc_int2char(m, &int2char);
-        migemo_setproc_char2int(m, &char2int);
+        try{
+            DerelictMigemo.load(path.to!string);
+            m = migemo_open(null);
+            migemo_setproc_int2char(m, &int2char);
+            migemo_setproc_char2int(m, &char2int);
 
-        auto roma2hira = buildPath(dictDir, "roma2hira.dat".to!String);
-        if (roma2hira.exists)
-        {
-            migemoEnforce(migemo_load(m, MIGEMO_DICTID.ROMA2HIRA, roma2hira.to!string.toStringz) != MIGEMO_DICTID.INVALID,
-                          "Failed to initialize migemo");
-        }
-        auto hira2kata = buildPath(dictDir, "hira2kata.dat".to!String);
-        if (hira2kata.exists)
-        {
-            migemoEnforce(migemo_load(m, MIGEMO_DICTID.HIRA2KATA, hira2kata.to!string.toStringz) != MIGEMO_DICTID.INVALID,
-                          "Failed to initialize migemo");
+            auto roma2hira = buildPath(dictDir, "roma2hira.dat".to!String);
+            if (roma2hira.exists)
+            {
+                migemoEnforce(migemo_load(m, MIGEMO_DICTID.ROMA2HIRA, roma2hira.to!string.toStringz) != MIGEMO_DICTID.INVALID,
+                              "Failed to initialize migemo");
+            }
+            auto hira2kata = buildPath(dictDir, "hira2kata.dat".to!String);
+            if (hira2kata.exists)
+            {
+                migemoEnforce(migemo_load(m, MIGEMO_DICTID.HIRA2KATA, hira2kata.to!string.toStringz) != MIGEMO_DICTID.INVALID,
+                              "Failed to initialize migemo");
+            }
+        } catch(SharedLibLoadException e) {
+            throw new MigemoException("Migemo.dll のロードに失敗しました");
         }
     }
 

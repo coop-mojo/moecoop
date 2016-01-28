@@ -20,6 +20,7 @@ module coop.model.config;
 import std.conv;
 import std.exception;
 import std.file;
+import std.format;
 import std.json;
 
 class Config {

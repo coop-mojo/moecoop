@@ -41,8 +41,18 @@ class Config {
             windowWidth = 400;
             windowHeight = 300;
             version(Windows) {
-                migemoDLL = `C:\Program Files (x86)\cmigemo-default-win32\migemo.dll`d;
-                migemoDict = `C:\Program Files (x86)\cmigemo-default-win32\dict\utf-8`d;
+                version(X86)
+                {
+                    enum bits = "32";
+                    enum footer = " (x86)";
+                }
+                else version(X86_64)
+                {
+                    enum bits = "64";
+                    enum footer = "";
+                }
+                migemoDLL = format(`C:\Program Files%s\cmigemo-default-win%s\migemo.dll`d, footer, bits);
+                migemoDict = format(`C:\Program Files%s\cmigemo-default-win%s\dict\utf-8`d, footer, bits);
             }
             version(linux) {
                 migemoDLL = "/usr/lib/libmigemo.so"d;

@@ -30,7 +30,7 @@ import coop.model.recipe;
 alias Binder = Typedef!(dstring, "binder");
 alias Category = Typedef!(dstring, "category");
 
-class Wisdom{
+class Wisdom {
     /// バインダーごとのレシピ名一覧
     dstring[][dstring] binderList;
 
@@ -92,7 +92,8 @@ class Wisdom{
             .assocArray;
     }
 
-    auto readFoodList(string sysBase) {
+    auto readFoodList(string sysBase)
+    {
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
         return dirEntries(buildPath(sysBase, "食べ物"), "*.json", SpanMode.breadth)
@@ -101,7 +102,8 @@ class Wisdom{
             .assocArray;
     }
 
-    auto readFoodEffectList(string sysBase) {
+    auto readFoodEffectList(string sysBase)
+    {
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
         return dirEntries(buildPath(sysBase, "飲食バフ"), "*.json", SpanMode.breadth)

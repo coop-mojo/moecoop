@@ -77,7 +77,8 @@ class Config {
         f.write(toJSON);
     }
 
-    auto toJSON() {
+    auto toJSON()
+    {
         auto json = JSONValue([ "initWindowWidth": JSONValue(windowWidth),
                                 "initWindowHeight": JSONValue(windowHeight),
                                 "font": JSONValue(font),

@@ -40,7 +40,8 @@ class BinderTabFrame: HorizontalLayout
 
     this() { super(); }
 
-    this(string id) {
+    this(string id)
+    {
         super(id);
         auto layout = new HorizontalLayout;
         addChild(layout);
@@ -375,10 +376,12 @@ class RecipeEntryWidget: HorizontalLayout
         return this;
     }
 
-    auto highlight() {
+    auto highlight()
+    {
         link.backgroundColor = 0xfffacd;
     }
-    auto unhighlight() {
+    auto unhighlight()
+    {
         link.backgroundColor = backgroundColor;
     }
 
@@ -391,7 +394,8 @@ private:
 
 class LinkWidget: TextWidget
 {
-    this() {
+    this()
+    {
         super();
         clickable = true;
         styleId = STYLE_CHECKBOX_LABEL;

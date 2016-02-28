@@ -85,7 +85,7 @@ class Wisdom{
     {
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
-        return dirEntries(buildPath(sysBase, "素材"), "*.json", SpanMode.breadth)
+        return dirEntries(buildPath(sysBase, "アイテム"), "*.json", SpanMode.breadth)
             .map!(s => s.readItems)
             .array
             .joiner

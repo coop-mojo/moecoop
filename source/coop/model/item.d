@@ -31,6 +31,7 @@ import coop.util;
 
 enum PetFoodType
 {
+    UNKNOWN,
     Food,
     Meat,
     Weed,
@@ -52,6 +53,7 @@ auto toString(PetFoodType t)
 {
     final switch(t) with(PetFoodType)
     {
+    case UNKNOWN:  return "不明";
     case Food:     return "食べ物";
     case Meat:     return "肉食物";
     case Weed:     return "草食物";
@@ -182,6 +184,7 @@ auto toPetFoodInfo(JSONValue[string] vals)
 {
     with(PetFoodType) {
         auto FoodTypeMap = [
+            "不明": UNKNOWN,
             "食べ物": Food,
             "肉食物": Meat,
             "草食物": Weed,

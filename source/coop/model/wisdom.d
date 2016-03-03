@@ -43,6 +43,12 @@ class Wisdom {
     /// 料理一覧
     Food[dstring] foodList;
 
+    /// 飲み物一覧
+    Food[dstring] drinkList;
+
+    /// 酒一覧
+    Food[dstring] liquorList;
+
     /// 飲食バフ一覧
     AdditionalEffect[dstring] foodEffectList;
 

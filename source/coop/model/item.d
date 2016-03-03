@@ -58,7 +58,7 @@ auto toString(PetFoodType t)
     case Meat:     return "肉食物";
     case Weed:     return "草食物";
     case Drink:    return "飲み物";
-    case Liquor:   return "お酒";
+    case Liquor:   return "酒";
     case Medicine: return "薬";
     case Metal:    return "金属";
     case Stone:    return "石";
@@ -189,7 +189,7 @@ auto toPetFoodInfo(JSONValue[string] vals)
             "肉食物": Meat,
             "草食物": Weed,
             "飲み物": Drink,
-            "お酒": Liquor,
+            "酒": Liquor,
             "薬": Medicine,
             "金属": Metal,
             "石": Stone,

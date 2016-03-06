@@ -175,11 +175,15 @@ class ItemDetailFrame: ScrollWidget
             break;
         case Drink:
             break;
+        case Liquor:
+            break;
+        case Medicine:
+            break;
         case Weapon:
             break;
         case Armor:
             break;
-        case Other:
+        case Others:
             break;
         }
         return ret;

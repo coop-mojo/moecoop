@@ -117,11 +117,30 @@ auto toString(SpecialProperty sp)
 
 enum ItemType
 {
+    Others,
     Food,
     Drink,
+    Liquor,
+    Medicine,
     Weapon,
     Armor,
-    Other,
+}
+
+auto toItemType(string s)
+{
+    with(ItemType)
+    {
+        auto map = [
+            "その他": Others,
+            "食べ物": Food,
+            "飲み物": Drink,
+            "酒": Liquor,
+            "薬": Medicine,
+            "武器": Weapon,
+            "鎧": Armor,
+            ];
+        return map[s];
+    }
 }
 
 /// アイテム一般の情報
@@ -161,6 +180,8 @@ auto toItem(string s, JSONValue[string] json)
         info = json["info"].str.to!dstring;
         transferable = json["転送できる"].toBool;
         stackable = json["スタックできる"].toBool;
+        type = json["種類"].str.toItemType;
+
         if (auto petFood = "ペットアイテム" in json)
         {
             petFoodInfo = (*petFood).object.toPetFoodInfo;

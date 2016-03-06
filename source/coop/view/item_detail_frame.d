@@ -174,8 +174,16 @@ class ItemDetailFrame: ScrollWidget
             }
             break;
         case Drink:
+            if (auto info = i.name in wisdom.drinkList)
+            {
+                ret.setFoodInfo(*info, wisdom);
+            }
             break;
         case Liquor:
+            if (auto info = i.name in wisdom.liquorList)
+            {
+                ret.setFoodInfo(*info, wisdom);
+            }
             break;
         case Medicine:
             break;

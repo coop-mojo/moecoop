@@ -62,6 +62,8 @@ class Wisdom {
         recipeList = readRecipeList(baseDir_);
         itemList = readItemList(baseDir_);
         foodList = readFoodList(baseDir_);
+        drinkList = readDrinkList(baseDir_);
+        liquorList = readLiquorList(baseDir_);
         foodEffectList = readFoodEffectList(baseDir_);
     }
 
@@ -106,6 +108,20 @@ class Wisdom {
             .map!(s => s.readFoods)
             .joiner
             .assocArray;
+    }
+
+    auto readDrinkList(string sysBase)
+    {
+        enforce(sysBase.exists);
+        enforce(sysBase.isDir);
+        return buildPath(sysBase, "飲み物", "飲み物.json").readFoods.assocArray;
+    }
+
+    auto readLiquorList(string sysBase)
+    {
+        enforce(sysBase.exists);
+        enforce(sysBase.isDir);
+        return buildPath(sysBase, "飲み物", "酒.json").readFoods.assocArray;
     }
 
     auto readFoodEffectList(string sysBase)

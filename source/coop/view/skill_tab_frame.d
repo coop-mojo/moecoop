@@ -66,21 +66,7 @@ class SkillTabFrame: HorizontalLayout
         {
             items = ["スキル値順"d, "名前順"];
             selectedItemIndex = 0;
-            bool delegate(dstring, dstring)[] funMap = [
-                (a, b) {
-                    auto levels(dstring s) {
-                        import std.typecons;
-                        auto arr = controller_.wisdom.recipeFor(s).requiredSkills.byKeyValue.map!(a => tuple(a.key, a.value)).array;
-                        arr.multiSort!("a[0] < b[0]", "a[1] < b[1]");
-                        return arr;
-                    }
-                    return levels(a) < levels(b);
-                },
-                (a, b) => a < b,
-                ];
-            sortKeyFun_ = funMap[0];
             itemClick = (Widget src, int idx) {
-                sortKeyFun_ = funMap[idx];
                 sortKeyChanged();
                 return true;
             };
@@ -219,9 +205,9 @@ class SkillTabFrame: HorizontalLayout
         frame.addChild(item);
     }
 
-    @property auto sortKeyFun()
+    @property auto sortKey()
     {
-        return sortKeyFun_;
+        return childById!ComboBox("sortBy").selectedItem;
     }
 
     @property auto queryText()

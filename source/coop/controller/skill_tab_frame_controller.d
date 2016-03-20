@@ -97,12 +97,12 @@ class SkillTabFrameController
         dstring[][dstring] recipes;
         if (frame_.useMetaSearch)
         {
-            recipes = wisdom.recipeCategories.map!(b => tuple(b, wisdom.recipesIn(Category(b)).keys.sort!((a, b) => frame_.sortKeyFun()(a, b)).array)).assocArray;
+            recipes = wisdom.recipeCategories.map!(c => tuple(c, wisdom.recipesIn(Category(c)).keys)).assocArray;
         }
         else
         {
-            auto binder = frame_.selectedCategory;
-            recipes = [tuple(binder, wisdom.recipesIn(Category(binder)).keys.sort!((a, b) => frame_.sortKeyFun()(a, b)).array)].assocArray;
+            auto c = frame_.selectedCategory;
+            recipes = [tuple(c, wisdom.recipesIn(Category(c)).keys)].assocArray;
         }
 
         if (!query.empty)
@@ -127,35 +127,43 @@ class SkillTabFrameController
         }
 
         Widget[] tableElems;
-        dstring[][dstring] cats;
-        if (frame_.useMetaSearch)
-        {
-            cats = recipes;
-        }
-        else
-        {
-            auto c = frame_.selectedCategory;
-            cats = [tuple(c, recipes[c])].assocArray;
-        }
-        tableElems = cats.byKeyValue.map!((kv) {
+        auto chunks = recipes.byKeyValue.map!((kv) {
                 auto category = kv.key;
-                auto recipes = kv.value;
-                if (recipes.empty)
-                    return Widget[].init;
-                auto levels(dstring s) {
-                    auto arr = wisdom.recipeFor(s).requiredSkills.byKeyValue.map!(a => tuple(a.key, a.value)).array;
-                    arr.multiSort!("a[0] < b[0]", "a[1] < b[1]");
-                    return arr;
+                auto rs = kv.value;
+                if (rs.empty)
+                    return [tuple(category, rs.array)];
+                switch(frame_.sortKey)
+                {
+                case "スキル値順"d:
+                    auto levels(dstring s) {
+                        auto arr = wisdom.recipeFor(s).requiredSkills.byKeyValue.map!(a => tuple(a.key, a.value)).array;
+                        arr.multiSort!("a[0] < b[0]", "a[1] < b[1]");
+                        return arr;
+                    }
+                    auto lvToStr(Tuple!(dstring, real)[] tpls)
+                    {
+                        return tpls.map!(t => format("%s (%s)"d, t.tupleof)).join(", ");
+                    }
+                    auto arr = rs.map!(a => tuple(a, levels(a))).array;
+                    arr.multiSort!("a[1] < b[1]", "a[0] < b[0]");
+                    return arr.chunkBy!"a[1]"
+                        .map!(a => tuple(lvToStr(a[0]), a[1].map!"a[0]".array))
+                        .array;
+                case "名前順"d:
+                    return [tuple(category, rs.sort().array)];
+                default:
+                    assert(false);
                 }
-                // Issue 14909 のせいで，chunkBy の中でローカル変数にアクセス出来ない
-                return recipes.map!(a => tuple(a, levels(a))).array.sort!"a[1] < b[1]".chunkBy!"a[1]".map!"a[1]".map!((rs) {
-                        Widget header = new TextWidget("", rs.front[1].map!((kv) {
-                                    return format("%s (%s)"d, kv[0], kv[1]);
-                                }).join(", "));
-                        header.backgroundColor = 0xCCCCCC;
-                        return header~toBinderRecipeWidgets(category, rs.map!"a[0]".array);
-                    }).join
-                ;
+            }).joiner;
+        tableElems = chunks.filter!"!a[1].empty".map!((tpl) {
+                Widget[] header = [];
+                if (frame_.useMetaSearch || frame_.sortKey == "スキル値順")
+                {
+                    Widget hd = new TextWidget("", tpl[0]);
+                    hd.backgroundColor = 0xCCCCCC;
+                    header = [hd];
+                }
+                return header~toBinderRecipeWidgets(tpl[0], tpl[1]);
             }).join;
         frame_.showRecipeList(tableElems, frame_.numberOfColumns);
     }

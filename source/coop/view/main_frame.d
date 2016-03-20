@@ -25,6 +25,8 @@ import coop.model.wisdom;
 import coop.model.config;
 import coop.view.binder_tab_frame;
 import coop.controller.binder_tab_frame_controller;
+import coop.view.skill_tab_frame;
+import coop.controller.skill_tab_frame_controller;
 import coop.controller.main_frame_controller;
 
 immutable fontName = defaultFontName;
@@ -144,6 +146,17 @@ class MainFrame : VerticalLayout
         binderTab.setCategoryName("バインダー"d);
         binderTab.controller_ = new BinderTabFrameController(binderTab);
         binderTab.controller_.categories = wisdom.binders;
+
+        auto skillTab = new SkillTabFrame("skillFrame");
+        if (root.controller_.migemo is null)
+        {
+            skillTab.disableMigemoBox;
+        }
+
+        tabs.addTab(skillTab, "スキル"d);
+        skillTab.setCategoryName("スキル"d);
+        skillTab.controller_ = new SkillTabFrameController(skillTab);
+        skillTab.controller_.categories = wisdom.recipeCategories;
 
         return root;
     }

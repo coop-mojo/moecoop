@@ -180,25 +180,20 @@ private:
                 auto ret = new RecipeEntryWidget(r);
                 auto binders = wisdom.bindersFor(r);
 
-                if (binders.empty)
-                {
-                    ret.enabled = false;
-                }
-                else
-                {
-                    ret.filedStateChanged = (bool marked) {
-                        auto c = frame_.selectedCharacter;
-                        if (marked)
-                        {
-                            binders.each!(b => characters[c].markFiledRecipe(r, b));
-                        }
-                        else
-                        {
-                            binders.each!(b => characters[c].unmarkFiledRecipe(r, b));
-                        }
-                    };
-                    ret.checked = binders.canFind!(b => characters[frame_.selectedCharacter].hasRecipe(r, b));
-                }
+                ret.filedStateChanged = (bool marked) {
+                    auto c = frame_.selectedCharacter;
+                    if (marked)
+                    {
+                        binders.each!(b => characters[c].markFiledRecipe(r, b));
+                    }
+                    else
+                    {
+                        binders.each!(b => characters[c].unmarkFiledRecipe(r, b));
+                    }
+                };
+                ret.checked = binders.canFind!(b => characters[frame_.selectedCharacter].hasRecipe(r, b));
+                ret.enabled = binders.length == 1;
+
                 ret.detailClicked = {
                     frame_.unhighlightDetailRecipe;
                     scope(exit) frame_.highlightDetailRecipe;

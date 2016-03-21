@@ -125,24 +125,21 @@ class BinderTabFrameController
                       .assocArray;
         }
 
-        Widget[] tableElems;
-        if (frame_.useMetaSearch)
-        {
-            tableElems = recipes.byKeyValue.map!((kv) {
-                    auto binder = kv.key;
-                    auto recipes = kv.value;
-                    if (recipes.empty)
-                        return cast(Widget[])[];
-                    Widget header = new TextWidget("", binder);
-                    header.backgroundColor = 0xCCCCCC;
-                    return header~toBinderRecipeWidgets(binder, kv.value);
-                }).join;
-        }
-        else
-        {
-            auto binder = frame_.selectedCategory;
-            tableElems = toBinderRecipeWidgets(binder, recipes[binder]);
-        }
+        Widget[] tableElems = recipes.byKeyValue.map!((kv) {
+                auto binder = kv.key;
+                auto recipes = kv.value;
+                if (recipes.empty)
+                    return Widget[].init;
+
+                Widget[] header = [];
+                if (frame_.useMetaSearch)
+                {
+                    Widget hd = new TextWidget("", binder);
+                    hd.backgroundColor = 0xCCCCCC;
+                    header = [hd];
+                }
+                return header~toBinderRecipeWidgets(binder, kv.value);
+            }).join;
         frame_.showRecipeList(tableElems, frame_.numberOfColumns);
     }
 

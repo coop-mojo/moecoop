@@ -126,7 +126,6 @@ class SkillTabFrameController
                       .assocArray;
         }
 
-        Widget[] tableElems;
         auto chunks = recipes.byKeyValue.map!((kv) {
                 auto category = kv.key;
                 auto rs = kv.value;
@@ -155,15 +154,20 @@ class SkillTabFrameController
                     assert(false);
                 }
             }).joiner;
-        tableElems = chunks.filter!"!a[1].empty".map!((tpl) {
+        Widget[] tableElems = chunks.map!((tpl) {
+                auto category = tpl[0];
+                auto recipes = tpl[1];
+                if (recipes.empty)
+                    return Widget[].init;
+
                 Widget[] header = [];
                 if (frame_.useMetaSearch || frame_.sortKey == "スキル値順")
                 {
-                    Widget hd = new TextWidget("", tpl[0]);
+                    Widget hd = new TextWidget("", category);
                     hd.backgroundColor = 0xCCCCCC;
                     header = [hd];
                 }
-                return header~toBinderRecipeWidgets(tpl[0], tpl[1]);
+                return header~toBinderRecipeWidgets(category, recipes);
             }).join;
         frame_.showRecipeList(tableElems, frame_.numberOfColumns);
     }

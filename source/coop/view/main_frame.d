@@ -136,6 +136,7 @@ class MainFrame : VerticalLayout
         status.setStatusText(" "d);
         root.addChild(status);
 
+        // TODO: タブ切り替え時にも所持チェックの CheckBox を更新して欲しい
         auto binderTab = new BinderTabFrame("binderFrame");
         if (root.controller_.migemo is null)
         {

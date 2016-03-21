@@ -173,24 +173,32 @@ class SkillTabFrameController
         frame_.categories = cats;
     }
 private:
-    auto toBinderRecipeWidgets(dstring binder, dstring[] recipes)
+    auto toBinderRecipeWidgets(dstring category, dstring[] recipes)
     {
         return recipes.map!((r) {
                 import std.stdio;
                 auto ret = new RecipeEntryWidget(r);
+                auto binders = wisdom.bindersFor(r);
 
-                ret.filedStateChanged = (bool marked) {
-                    auto c = frame_.selectedCharacter;
-                    if (marked)
-                    {
-                        characters[c].markFiledRecipe(r, binder);
-                    }
-                    else
-                    {
-                        characters[c].unmarkFiledRecipe(r, binder);
-                    }
-                };
-                ret.checked = characters[frame_.selectedCharacter].hasRecipe(r, binder);
+                if (binders.empty)
+                {
+                    ret.enabled = false;
+                }
+                else
+                {
+                    ret.filedStateChanged = (bool marked) {
+                        auto c = frame_.selectedCharacter;
+                        if (marked)
+                        {
+                            binders.each!(b => characters[c].markFiledRecipe(r, b));
+                        }
+                        else
+                        {
+                            binders.each!(b => characters[c].unmarkFiledRecipe(r, b));
+                        }
+                    };
+                    ret.checked = binders.canFind!(b => characters[frame_.selectedCharacter].hasRecipe(r, b));
+                }
                 ret.detailClicked = {
                     frame_.unhighlightDetailRecipe;
                     scope(exit) frame_.highlightDetailRecipe;

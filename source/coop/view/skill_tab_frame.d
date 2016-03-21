@@ -396,6 +396,11 @@ class RecipeEntryWidget: HorizontalLayout
         return this;
     }
 
+    override @property Widget enabled(bool c) {
+        box.enabled = c;
+        return this;
+    }
+
     auto highlight()
     {
         link.backgroundColor = 0xfffacd;

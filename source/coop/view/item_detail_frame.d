@@ -79,6 +79,9 @@ class ItemDetailFrame: ScrollWidget
                         TextWidget { text: "スタック可: " }
                         TextWidget { id: stackable }
 
+                        TextWidget { id: specialPropCap ; text: "特殊条件: " }
+                        TextWidget { id: specialProp }
+
                         TextWidget {
                             id: petItemCaption
                             text: "ペットアイテム: "
@@ -162,6 +165,20 @@ class ItemDetailFrame: ScrollWidget
                                               kv.key.toString,
                                               kv.value)).join;
                 pFoodInfo.text = str;
+            }
+
+            auto spCap = childById("specialPropCap");
+            auto sp = childById("specialProp");
+            if (i.properties == 0)
+            {
+                spCap.visibility = Visibility.Gone;
+                sp.visibility = Visibility.Gone;
+            }
+            else
+            {
+                spCap.visibility = Visibility.Visible;
+                sp.visibility = Visibility.Visible;
+                sp.text = i.properties.toStrings.join(", ").to!dstring;
             }
         }
 

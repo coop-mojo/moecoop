@@ -91,7 +91,7 @@ enum SpecialProperty: ushort
     WA = 0b10000000000000,
 }
 
-auto toString(SpecialProperty sp)
+auto toStrings(ushort sps)
 {
     with(SpecialProperty)
     {
@@ -111,7 +111,7 @@ auto toString(SpecialProperty sp)
             AL: "現在のエリア限定",
             WA: "WarAgeでは性能が低下する",
             ];
-        return propMap[sp];
+        return propMap.keys.filter!(p => sps&p).map!(p => propMap[p]).array;
     }
 }
 
@@ -151,7 +151,7 @@ struct Item
     real weight;
     uint price;
     dstring info;
-    SpecialProperty properties;
+    ushort properties;
     bool transferable;
     bool stackable;
     real[PetFoodType] petFoodInfo;
@@ -198,7 +198,7 @@ auto toItem(string s, JSONValue[string] json)
 auto toSpecialProperties(JSONValue[] vals)
 {
     auto props = vals.map!"a.str".map!(s => s.to!SpecialProperty).array;
-    return props.reduce!((a, b) => a|b).to!SpecialProperty;
+    return props.reduce!((a, b) => a|b).to!ushort;
 }
 
 auto toPetFoodInfo(JSONValue[string] vals)

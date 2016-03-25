@@ -32,7 +32,7 @@ import coop.controller.main_frame_controller;
 immutable fontName = defaultFontName;
 
 version(Windows) {
-    immutable defaultFontName = "Yu gothic UI";
+    immutable defaultFontName = "Meiryo UI";
 }
 else version(linux) {
     immutable defaultFontName = "源ノ角ゴシック JP";

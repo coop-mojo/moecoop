@@ -68,12 +68,6 @@ public:
 
 class MainFrame : VerticalLayout
 {
-    this()
-    {
-        super();
-        ownStyle.theme.fontFamily(FontFamily.SansSerif).fontFace(fontName);
-    }
-
     this(string id)
     {
         super(id);

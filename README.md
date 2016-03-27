@@ -40,7 +40,7 @@
 ```
 
 新機能の要望等は[Issues](https://github.com/coop-mojo/moecoop/issues)に登録してくれたら対応するかもしれません．
-- 画面右上の `New Issue` をクリックして登録できます．
+- 画面右上の `New Issue` をクリックして登録できます (Github のアカウントが必要です)．
 
 ## できないこと
 

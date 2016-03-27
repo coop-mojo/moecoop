@@ -1,6 +1,8 @@
 # 生協の知恵袋
 
-生協の知恵袋は，[Master of Epic](http://moepic.com/top.php?mid=_) のバインダーやアイテム・レシピ情報を参照できる予定のツールです．
+生協の知恵袋は，[Master of Epic](http://moepic.com/top.php?mid=_) のバインダーやアイテム・レシピ情報を見るためのツールです．
+
+[リンク先](https://github.com/coop-mojo/moecoop/releases/latest)から moecoop-*-64bit.zip をダウンロードしてご利用ください．
 
 ## できること
 - バインダーに登録されているレシピの管理

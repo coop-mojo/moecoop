@@ -35,7 +35,7 @@ version(Windows) {
     immutable defaultFontName = "Meiryo UI";
 }
 else version(linux) {
-    immutable defaultFontName = "源ノ角ゴシック JP";
+    immutable defaultFontName = "源ノ角ゴシック JP,VL ゴシック,Takaoゴシック";
 }
 else version(OSX) {
     immutable defaultFontName = "游ゴシック体";

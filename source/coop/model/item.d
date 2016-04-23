@@ -124,6 +124,7 @@ enum ItemType
     Medicine,
     Weapon,
     Armor,
+    Asset,
 }
 
 auto toItemType(string s)
@@ -138,6 +139,7 @@ auto toItemType(string s)
             "薬": Medicine,
             "武器": Weapon,
             "鎧": Armor,
+            "アセット": Asset,
             ];
         return map[s];
     }

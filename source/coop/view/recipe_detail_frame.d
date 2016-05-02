@@ -132,14 +132,17 @@ class RecipeDetailFrame: ScrollWidget
             childById("remarks").text = r.remarks;
         }
         ret.binders = wisdom.bindersFor(r.name);
-        ret.owners = chars
-                     .keys
-                     .filter!(k =>
-                              ret.binders
-                                 .any!(b => chars[k].hasRecipe(r.name, b)))
-                     .map!(k => tuple(k,
-                                      make!(RedBlackTree!dstring)(ret.binders.filter!(b => chars[k].hasRecipe(r.name, b)).array)))
-                     .assocArray;
+        if (!chars.keys.empty)
+        {
+            ret.owners = chars
+                         .keys
+                         .filter!(k =>
+                                  ret.binders
+                                  .any!(b => chars[k].hasRecipe(r.name, b)))
+                         .map!(k => tuple(k,
+                                          make!(RedBlackTree!dstring)(ret.binders.filter!(b => chars[k].hasRecipe(r.name, b)).array)))
+                         .assocArray;
+        }
         return ret;
     }
 

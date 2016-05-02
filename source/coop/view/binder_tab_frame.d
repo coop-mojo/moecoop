@@ -225,9 +225,19 @@ class BinderTabFrame: HorizontalLayout
         return childById!CheckBox("metaSearch").checked;
     }
 
+    @property auto useMetaSearch(bool use)
+    {
+        childById!CheckBox("metaSearch").checked = use;
+    }
+
     @property auto useMigemo()
     {
         return childById!CheckBox("migemo").checked;
+    }
+
+    @property auto useMigemo(bool use)
+    {
+        childById!CheckBox("migemo").checked = use;
     }
 
     @property auto disableMigemoBox()

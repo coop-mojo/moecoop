@@ -208,6 +208,8 @@ class ItemDetailFrame: ScrollWidget
             break;
         case Armor:
             break;
+        case Asset:
+            break;
         case Others:
             break;
         }

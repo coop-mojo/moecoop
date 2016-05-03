@@ -141,7 +141,7 @@ class SkillTabFrameController
                     }
                     auto lvToStr(Tuple!(dstring, real)[] tpls)
                     {
-                        return tpls.map!(t => format("%s (%s)"d, t.tupleof)).join(", ");
+                        return tpls.map!(t => format("%s (%.1f)"d, t.tupleof)).join(", ");
                     }
                     auto arr = rs.map!(a => tuple(a, levels(a))).array;
                     arr.multiSort!("a[1] < b[1]", "a[0] < b[0]");

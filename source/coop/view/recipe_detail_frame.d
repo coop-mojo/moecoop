@@ -95,7 +95,7 @@ class RecipeDetailFrame: ScrollWidget
             childById("tech").text = r.techniques[].join(" or ");
             childById("skills").text = r.requiredSkills
                                        .byKeyValue
-                                       .map!(kv => format("%s (%s)"d,
+                                       .map!(kv => format("%s (%.1f)"d,
                                                           kv.key, kv.value))
                                        .join(", ");
 

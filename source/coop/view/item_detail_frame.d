@@ -131,7 +131,7 @@ class ItemDetailFrame: ScrollWidget
             childById("ename").text =
                 i.ename.empty ? "わからん（´・ω・｀）" : i.ename;
             childById("weight").text =
-                i.weight.isNaN ? "そこそこの重さ" : i.weight.to!dstring;
+                i.weight.isNaN ? "そこそこの重さ" : format("%.2f"d, i.weight);
             childById("price").text = format("%s g"d, i.price);
             childById("transferable").text
                 = i.transferable ? "はい" : "いいえ";
@@ -161,7 +161,7 @@ class ItemDetailFrame: ScrollWidget
                 pFoodInfo.visibility = Visibility.Visible;
                 auto str = i.petFoodInfo
                            .byKeyValue
-                           .map!(kv => format("%s (%s)"d,
+                           .map!(kv => format("%s (%.1f)"d,
                                               kv.key.toString,
                                               kv.value)).join;
                 pFoodInfo.text = str;
@@ -231,7 +231,7 @@ class ItemDetailFrame: ScrollWidget
         childById("effCap").visibility = Visibility.Visible;
         childById("effect").visibility = Visibility.Visible;
 
-        childById("effect").text = f.effect.to!dstring;
+        childById("effect").text = format("%.1f"d, f.effect);
 
         if (auto effectName = f.additionalEffect)
         {

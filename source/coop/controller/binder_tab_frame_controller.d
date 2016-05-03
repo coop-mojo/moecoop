@@ -125,6 +125,6 @@ protected:
     override Widget[][] toRecipeTable(Widget[] recipes, int nColumns)
     {
         enum MaxNumberOfBinderPages = 128;
-        return recipes.chunks(MaxNumberOfBinderPages/nColumns).array;
+        return recipes.empty ? [] : recipes.chunks(MaxNumberOfBinderPages/nColumns).array;
     }
 }

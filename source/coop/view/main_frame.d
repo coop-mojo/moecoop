@@ -165,6 +165,8 @@ class MainFrame : VerticalLayout
                         tab.queryText = queryText;
                     });
             }
+
+            (cast(RecipeTabFrame)root.childById(next)).controller_.showBinderRecipes;
         };
 
         return root;

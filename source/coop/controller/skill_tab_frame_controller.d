@@ -20,164 +20,41 @@ module coop.controller.skill_tab_frame_controller;
 import dlangui;
 
 import std.algorithm;
-import std.container.util;
 import std.exception;
-import std.file;
 import std.range;
-import std.regex;
 import std.typecons;
 
-import coop.migemo;
-import coop.model.character;
-import coop.model.config;
 import coop.model.item;
-import coop.model.recipe;
 import coop.model.wisdom;
 import coop.view.item_detail_frame;
-import coop.view.skill_tab_frame;
+import coop.view.recipe_tab_frame;
 import coop.view.recipe_detail_frame;
-import coop.controller.main_frame_controller;
+import coop.controller.recipe_tab_frame_controller;
 
-class SkillTabFrameController
+class SkillTabFrameController: RecipeTabFrameController
 {
-    mixin TabController;
-
-    this(SkillTabFrame frame)
+    this(RecipeTabFrame frame)
     {
-        frame_ = frame;
-        frame_.queryFocused = {
-            if (frame_.queryText == defaultTxtMsg)
-            {
-                frame_.queryText = ""d;
-            }
-        };
-
-        frame_.queryChanged =
-            frame_.metaSearchOptionChanged =
-            frame_.migemoOptionChanged =
-            frame_.categoryChanged =
-            frame_.characterChanged =
-            frame_.nColumnChanged =
-            frame_.sortKeyChanged = {
-            showBinderRecipes;
-        };
-
-        Recipe dummy;
-        dummy.techniques = make!(typeof(dummy.techniques))(cast(dstring)[]);
-        frame_.recipeDetail = RecipeDetailFrame.create(dummy, wisdom, characters);
-
-        frame_.characters = characters.keys.sort().array;
-
-        frame_.hideItemDetail(0);
-        frame_.hideItemDetail(1);
-
-        if (migemo)
-        {
-            frame_.enableMigemoBox;
-        }
-        else
-        {
-            frame_.disableMigemoBox;
-        }
+        super(frame);
     }
 
-    auto showBinderRecipes()
+protected:
+    override dstring[][dstring] recipeChunks(Wisdom wisdom)
     {
-        import std.string;
-
-        if (frame_.queryText == defaultTxtMsg)
-        {
-            frame_.queryText = ""d;
-        }
-
-        auto query = frame_.queryText.removechars(r"/[ 　]/");
-        if (frame_.useMetaSearch && query.empty)
-            return;
-
-        dstring[][dstring] recipes;
-        if (frame_.useMetaSearch)
-        {
-            recipes = wisdom.recipeCategories.map!(c => tuple(c, wisdom.recipesIn(Category(c)).keys)).assocArray;
-        }
-        else
-        {
-            auto c = frame_.selectedCategory;
-            recipes = [tuple(c, wisdom.recipesIn(Category(c)).keys)].assocArray;
-        }
-
-        if (!query.empty)
-        {
-            bool delegate(dstring) matchFun =
-                s => !find(s.removechars(r"/[ 　]/"), boyerMooreFinder(query)).empty;
-            if (frame_.useMigemo)
-            {
-                try{
-                    auto q = migemo.query(query).regex;
-                    matchFun = s => !s.removechars(r"/[ 　]/").matchFirst(q).empty;
-                } catch(RegexException e) {
-                    // use default matchFun
-                }
-            }
-            recipes = recipes
-                      .byKeyValue
-                      .map!(kv =>
-                            tuple(kv.key,
-                                  kv.value.filter!matchFun.array))
-                      .assocArray;
-        }
-
-        auto chunks = recipes.byKeyValue.map!((kv) {
-                auto category = kv.key;
-                auto rs = kv.value;
-                if (rs.empty)
-                    return [tuple(category, rs.array)];
-                switch(frame_.sortKey)
-                {
-                case "スキル値順"d:
-                    auto levels(dstring s) {
-                        auto arr = wisdom.recipeFor(s).requiredSkills.byKeyValue.map!(a => tuple(a.key, a.value)).array;
-                        arr.multiSort!("a[0] < b[0]", "a[1] < b[1]");
-                        return arr;
-                    }
-                    auto lvToStr(Tuple!(dstring, real)[] tpls)
-                    {
-                        return tpls.map!(t => format("%s (%.1f)"d, t.tupleof)).join(", ");
-                    }
-                    auto arr = rs.map!(a => tuple(a, levels(a))).array;
-                    arr.multiSort!("a[1] < b[1]", "a[0] < b[0]");
-                    return arr.chunkBy!"a[1]"
-                        .map!(a => tuple(lvToStr(a[0]), a[1].map!"a[0]".array))
-                        .array;
-                case "名前順"d:
-                    return [tuple(category, rs.sort().array)];
-                default:
-                    assert(false);
-                }
-            }).joiner;
-        Widget[] tableElems = chunks.map!((tpl) {
-                auto category = tpl[0];
-                auto recipes = tpl[1];
-                if (recipes.empty)
-                    return Widget[].init;
-
-                Widget[] header = [];
-                if (frame_.useMetaSearch || frame_.sortKey == "スキル値順")
-                {
-                    Widget hd = new TextWidget("", category);
-                    hd.backgroundColor = 0xCCCCCC;
-                    header = [hd];
-                }
-                return header~toBinderRecipeWidgets(category, recipes);
-            }).join;
-        frame_.showRecipeList(tableElems, frame_.numberOfColumns);
+        return wisdom.recipeCategories.map!(c => tuple(c, wisdom.recipesIn(Category(c)).keys)).assocArray;
     }
 
-    @property auto categories(dstring[] cats)
+    override dstring[][dstring] recipeChunksFor(Wisdom wisdom, dstring cat)
     {
-        frame_.categories = cats;
+        return [tuple(cat, wisdom.recipesIn(Category(cat)).keys)].assocArray;
     }
-private:
-    auto toBinderRecipeWidgets(dstring category, dstring[] recipes)
+
+    override bool useHeader(RecipeTabFrame frame)
+    {
+        return frame.sortKey == SortOrder.BySkill;
+    }
+
+    override Widget[] toRecipeWidgets(dstring[] recipes, dstring category)
     {
         return recipes.map!((r) {
                 import std.stdio;
@@ -242,6 +119,4 @@ private:
                 return cast(Widget)ret;
             }).array;
     }
-
-    enum defaultTxtMsg = "見たいレシピ";
 }

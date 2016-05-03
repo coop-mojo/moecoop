@@ -23,11 +23,10 @@ import dlangui.widgets.metadata;
 import coop.model.character;
 import coop.model.wisdom;
 import coop.model.config;
-import coop.view.binder_tab_frame;
+import coop.view.recipe_tab_frame;
 import coop.controller.binder_tab_frame_controller;
-import coop.view.skill_tab_frame;
-import coop.controller.skill_tab_frame_controller;
 import coop.controller.main_frame_controller;
+import coop.controller.skill_tab_frame_controller;
 
 immutable fontName = defaultFontName;
 
@@ -75,14 +74,14 @@ class MainFrame : VerticalLayout
     }
 
     auto enableMigemo() {
-        if (auto fr = childById!BinderTabFrame("binderFrame"))
+        if (auto fr = childById!RecipeTabFrame("binderFrame"))
         {
             fr.enableMigemoBox;
         }
     }
 
     auto disableMigemo() {
-        if (auto fr = childById!BinderTabFrame("binderFrame"))
+        if (auto fr = childById!RecipeTabFrame("binderFrame"))
         {
             fr.disableMigemoBox;
         }
@@ -131,7 +130,7 @@ class MainFrame : VerticalLayout
         root.addChild(status);
 
         // TODO: タブ切り替え時にも所持チェックの CheckBox を更新して欲しい
-        auto binderTab = new BinderTabFrame("binderFrame");
+        auto binderTab = new RecipeTabFrame("binderFrame");
         if (root.controller_.migemo is null)
         {
             binderTab.disableMigemoBox;
@@ -142,7 +141,7 @@ class MainFrame : VerticalLayout
         binderTab.controller_ = new BinderTabFrameController(binderTab);
         binderTab.controller_.categories = wisdom.binders;
 
-        auto skillTab = new SkillTabFrame("skillFrame");
+        auto skillTab = new RecipeTabFrame("skillFrame");
         if (root.controller_.migemo is null)
         {
             skillTab.disableMigemoBox;

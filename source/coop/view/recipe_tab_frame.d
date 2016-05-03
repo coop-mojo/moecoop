@@ -15,7 +15,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-module coop.view.skill_tab_frame;
+module coop.view.recipe_tab_frame;
 
 import dlangui;
 import dlangui.widgets.metadata;
@@ -29,12 +29,12 @@ import coop.model.recipe;
 import coop.util;
 
 import coop.view.main_frame;
-import coop.controller.skill_tab_frame_controller;
+import coop.controller.recipe_tab_frame_controller;
 import coop.view.recipe_detail_frame;
 
 immutable MaxNumberOfBinderPages = 128;
 
-class SkillTabFrame: HorizontalLayout
+class RecipeTabFrame: HorizontalLayout
 {
     mixin TabFrame;
 
@@ -318,9 +318,14 @@ auto recipeListLayout()
                 HorizontalLayout {
                     TextWidget { text: "レシピ一覧" }
                     ComboBox { id: nColumns }
+
                     TextWidget { text: " " }
-                    TextWidget { text: "ソート" }
-                    ComboBox { id: sortBy }
+
+                    HorizontalLayout {
+                        id: sortBox
+                        TextWidget { text: "ソート" }
+                        ComboBox { id: sortBy }
+                    }
                 }
                 FrameLayout {
                     id: recipeList
@@ -448,4 +453,4 @@ class LinkWidget: TextWidget
     }
 }
 
-mixin(registerWidgets!(SkillTabFrame, RecipeEntryWidget));
+mixin(registerWidgets!(RecipeTabFrame, RecipeEntryWidget));

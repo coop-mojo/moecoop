@@ -20,136 +20,42 @@ module coop.controller.binder_tab_frame_controller;
 import dlangui;
 
 import std.algorithm;
-import std.container.util;
 import std.exception;
-import std.file;
 import std.range;
-import std.regex;
 import std.typecons;
 
-import coop.migemo;
-import coop.model.character;
-import coop.model.config;
 import coop.model.item;
-import coop.model.recipe;
 import coop.model.wisdom;
 import coop.view.item_detail_frame;
-import coop.view.binder_tab_frame;
 import coop.view.recipe_detail_frame;
-import coop.controller.main_frame_controller;
+import coop.view.recipe_tab_frame;
+import coop.controller.recipe_tab_frame_controller;
 
-class BinderTabFrameController
+class BinderTabFrameController: RecipeTabFrameController
 {
-    mixin TabController;
-
-    this(BinderTabFrame frame)
+    this(RecipeTabFrame frame)
     {
-        frame_ = frame;
-        frame_.queryFocused = {
-            if (frame_.queryText == defaultTxtMsg)
-            {
-                frame_.queryText = ""d;
-            }
-        };
-
-        frame_.queryChanged =
-            frame_.metaSearchOptionChanged =
-            frame_.migemoOptionChanged =
-            frame_.categoryChanged =
-            frame_.characterChanged =
-            frame_.nColumnChanged = {
-            showBinderRecipes;
-        };
-
-        Recipe dummy;
-        dummy.techniques = make!(typeof(dummy.techniques))(cast(dstring)[]);
-        frame_.recipeDetail = RecipeDetailFrame.create(dummy, wisdom, characters);
-
-        frame_.characters = characters.keys.sort().array;
-
-        frame_.hideItemDetail(0);
-        frame_.hideItemDetail(1);
-
-        if (migemo)
-        {
-            frame_.enableMigemoBox;
-        }
-        else
-        {
-            frame_.disableMigemoBox;
-        }
+        super(frame);
+        frame.childById("sortBox").visibility = Visibility.Gone;
     }
 
-    auto showBinderRecipes()
+protected:
+    override dstring[][dstring] recipeChunks(Wisdom wisdom)
     {
-        import std.string;
-
-        if (frame_.queryText == defaultTxtMsg)
-        {
-            frame_.queryText = ""d;
-        }
-
-        auto query = frame_.queryText.removechars(r"/[ 　]/");
-        if (frame_.useMetaSearch && query.empty)
-            return;
-
-        dstring[][dstring] recipes;
-        if (frame_.useMetaSearch)
-        {
-            recipes = wisdom.binders.map!(b => tuple(b, wisdom.recipesIn(Binder(b)))).assocArray;
-        }
-        else
-        {
-            auto binder = frame_.selectedCategory;
-            recipes = [tuple(binder, wisdom.recipesIn(Binder(binder)))].assocArray;
-        }
-
-        if (!query.empty)
-        {
-            bool delegate(dstring) matchFun =
-                s => !find(s.removechars(r"/[ 　]/"), boyerMooreFinder(query)).empty;
-            if (frame_.useMigemo)
-            {
-                try{
-                    auto q = migemo.query(query).regex;
-                    matchFun = s => !s.removechars(r"/[ 　]/").matchFirst(q).empty;
-                } catch(RegexException e) {
-                    // use default matchFun
-                }
-            }
-            recipes = recipes
-                      .byKeyValue
-                      .map!(kv =>
-                            tuple(kv.key,
-                                  kv.value.filter!matchFun.array))
-                      .assocArray;
-        }
-
-        Widget[] tableElems = recipes.byKeyValue.map!((kv) {
-                auto binder = kv.key;
-                auto recipes = kv.value;
-                if (recipes.empty)
-                    return Widget[].init;
-
-                Widget[] header = [];
-                if (frame_.useMetaSearch)
-                {
-                    Widget hd = new TextWidget("", binder);
-                    hd.backgroundColor = 0xCCCCCC;
-                    header = [hd];
-                }
-                return header~toBinderRecipeWidgets(binder, kv.value);
-            }).join;
-        frame_.showRecipeList(tableElems, frame_.numberOfColumns);
+        return wisdom.binders.map!(b => tuple(b, wisdom.recipesIn(Binder(b)))).assocArray;
     }
 
-    @property auto categories(dstring[] cats)
+    override dstring[][dstring] recipeChunksFor(Wisdom wisdom, dstring cat)
     {
-        frame_.categories = cats;
+        return [tuple(cat, wisdom.recipesIn(Binder(cat)))].assocArray;
     }
-private:
 
-    auto toBinderRecipeWidgets(dstring binder, dstring[] recipes)
+    override bool useHeader(RecipeTabFrame frame)
+    {
+        return false;
+    }
+
+    override Widget[] toRecipeWidgets(dstring[] recipes, dstring binder)
     {
         return recipes.map!((r) {
                 import std.stdio;
@@ -167,6 +73,8 @@ private:
                     }
                 };
                 ret.checked = characters[frame_.selectedCharacter].hasRecipe(r, binder);
+                ret.enabled = true;
+
                 ret.detailClicked = {
                     frame_.unhighlightDetailRecipe;
                     scope(exit) frame_.highlightDetailRecipe;
@@ -211,6 +119,4 @@ private:
                 return cast(Widget)ret;
             }).array;
     }
-
-    enum defaultTxtMsg = "見たいレシピ";
 }

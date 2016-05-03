@@ -173,7 +173,7 @@ abstract class RecipeTabFrameController
                 }
                 return header~toRecipeWidgets(recipes, category);
             }).join;
-        frame_.showRecipeList(tableElems, frame_.numberOfColumns);
+        frame_.showRecipeList(toRecipeTable(tableElems, frame_.numberOfColumns));
     }
 
     @property auto categories(dstring[] cats)
@@ -185,6 +185,7 @@ protected:
     abstract dstring[][dstring] recipeChunksFor(Wisdom, dstring);
     abstract bool useHeader(RecipeTabFrame);
     abstract Widget[] toRecipeWidgets(dstring[], dstring);
+    abstract Widget[][] toRecipeTable(Widget[], int);
 
 private:
     enum defaultTxtMsg = "見たいレシピ";

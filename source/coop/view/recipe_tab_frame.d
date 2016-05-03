@@ -33,8 +33,6 @@ import coop.view.main_frame;
 import coop.controller.recipe_tab_frame_controller;
 import coop.view.recipe_detail_frame;
 
-immutable MaxNumberOfBinderPages = 128;
-
 class RecipeTabFrame: HorizontalLayout
 {
     mixin TabFrame;
@@ -139,7 +137,7 @@ class RecipeTabFrame: HorizontalLayout
         return childById!ComboBox("characters").selectedItem;
     }
 
-    auto showRecipeList(Widget[] recipes, int nColumns)
+    auto showRecipeList(Widget[][] recipes)
     {
         unhighlightDetailRecipe;
         scope(exit) highlightDetailRecipe;
@@ -151,7 +149,6 @@ class RecipeTabFrame: HorizontalLayout
         auto horizontal = new HorizontalLayout;
 
         recipes
-            .chunks(MaxNumberOfBinderPages/nColumns)
             .map!((rs) {
                     auto col = new VerticalLayout;
                     rs.each!(r => col.addChild(r));

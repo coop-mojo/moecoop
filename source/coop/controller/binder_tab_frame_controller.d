@@ -121,4 +121,10 @@ protected:
                 return cast(Widget)ret;
             }).array;
     }
+
+    override Widget[][] toRecipeTable(Widget[] recipes, int nColumns)
+    {
+        enum MaxNumberOfBinderPages = 128;
+        return recipes.chunks(MaxNumberOfBinderPages/nColumns).array;
+    }
 }

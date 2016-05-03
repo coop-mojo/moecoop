@@ -125,4 +125,10 @@ protected:
                 return cast(Widget)ret;
             }).array;
     }
+
+    override Widget[][] toRecipeTable(Widget[] recipes, int nColumns)
+    {
+        import std.math;
+        return recipes.chunks((recipes.length.to!real/nColumns).ceil.to!int).array;
+    }
 }

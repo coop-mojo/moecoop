@@ -31,4 +31,25 @@ auto toBool(JSONValue val)
     return val.type == JSON_TYPE.TRUE;
 }
 
-alias EventHandler(T...) = void delegate(T);
+struct EventHandler(T...)
+{
+    void opCall(T args) {
+        if (proc == Proc.init)
+        {
+            // nop
+        }
+        else
+        {
+            proc(args);
+        }
+    }
+
+    auto opAssign(Proc p)
+    {
+        proc = p;
+        return p;
+    }
+private:
+    alias Proc = void delegate(T);
+    Proc proc;
+}

@@ -181,9 +181,9 @@ abstract class RecipeTabFrameController
         frame_.categories = cats;
     }
 protected:
-    abstract dstring[][dstring] recipeChunks(Wisdom wisdom);
-    abstract dstring[][dstring] recipeChunksFor(Wisdom wisdom, dstring cat);
-    abstract bool useHeader(RecipeTabFrame frame);
+    abstract dstring[][dstring] recipeChunks(Wisdom);
+    abstract dstring[][dstring] recipeChunksFor(Wisdom, dstring);
+    abstract bool useHeader(RecipeTabFrame);
     abstract Widget[] toRecipeWidgets(dstring[], dstring);
 
 private:

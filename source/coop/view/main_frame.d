@@ -20,6 +20,8 @@ module coop.view.main_frame;
 import dlangui;
 import dlangui.widgets.metadata;
 
+import std.algorithm;
+
 import coop.model.character;
 import coop.model.wisdom;
 import coop.model.config;
@@ -149,6 +151,21 @@ class MainFrame : VerticalLayout
         tabs.addTab(skillTab, "スキル"d);
         skillTab.setCategoryName("スキル"d);
         skillTab.controller_ = new SkillTabFrameController(skillTab, wisdom.recipeCategories);
+
+        tabs.tabChanged = (string next, string prev) {
+            if (auto recipeTab = cast(RecipeTabFrame)root.childById(prev))
+            {
+                auto useMetaSearch = recipeTab.useMetaSearch;
+                auto useMigemo = recipeTab.useMigemo;
+                auto queryText = recipeTab.queryText;
+
+                [binderTab, skillTab].each!((tab) {
+                        tab.useMetaSearch = useMetaSearch;
+                        tab.useMigemo = useMigemo;
+                        tab.queryText = queryText;
+                    });
+            }
+        };
 
         return root;
     }

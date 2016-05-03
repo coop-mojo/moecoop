@@ -22,6 +22,7 @@ import dlangui;
 import std.algorithm;
 import std.exception;
 import std.range;
+import std.traits;
 import std.typecons;
 
 import coop.model.item;
@@ -33,9 +34,10 @@ import coop.controller.recipe_tab_frame_controller;
 
 class BinderTabFrameController: RecipeTabFrameController
 {
-    this(RecipeTabFrame frame)
+    this(RecipeTabFrame frame, dstring[] categories)
     {
-        super(frame);
+        super(frame, categories);
+        frame.childById!ComboBox("sortBy").selectedItemIndex = [EnumMembers!SortOrder].length-1;
         frame.childById("sortBox").visibility = Visibility.Gone;
     }
 

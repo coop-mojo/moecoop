@@ -138,8 +138,7 @@ class MainFrame : VerticalLayout
 
         tabs.addTab(binderTab, "バインダー"d);
         binderTab.setCategoryName("バインダー"d);
-        binderTab.controller_ = new BinderTabFrameController(binderTab);
-        binderTab.controller_.categories = wisdom.binders;
+        binderTab.controller_ = new BinderTabFrameController(binderTab, wisdom.binders);
 
         auto skillTab = new RecipeTabFrame("skillFrame");
         if (root.controller_.migemo is null)
@@ -149,8 +148,7 @@ class MainFrame : VerticalLayout
 
         tabs.addTab(skillTab, "スキル"d);
         skillTab.setCategoryName("スキル"d);
-        skillTab.controller_ = new SkillTabFrameController(skillTab);
-        skillTab.controller_.categories = wisdom.recipeCategories;
+        skillTab.controller_ = new SkillTabFrameController(skillTab, wisdom.recipeCategories);
 
         return root;
     }

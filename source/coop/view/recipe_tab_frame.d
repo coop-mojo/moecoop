@@ -23,6 +23,7 @@ import dlangui.widgets.metadata;
 import std.algorithm;
 import std.array;
 import std.range;
+import std.traits;
 
 import coop.model.item;
 import coop.model.recipe;
@@ -64,7 +65,7 @@ class RecipeTabFrame: HorizontalLayout
 
         with(childById!ComboBox("sortBy"))
         {
-            items = ["スキル値順"d, "名前順"];
+            items = [EnumMembers!SortOrder];
             selectedItemIndex = 0;
             itemClick = (Widget src, int idx) {
                 sortKeyChanged();

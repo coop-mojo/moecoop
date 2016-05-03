@@ -41,7 +41,7 @@ abstract class RecipeTabFrameController
 {
     mixin TabController;
 
-    this(RecipeTabFrame frame)
+    this(RecipeTabFrame frame, dstring[] cats)
     {
         frame_ = frame;
         frame_.queryFocused = {
@@ -78,6 +78,7 @@ abstract class RecipeTabFrameController
         {
             frame_.disableMigemoBox;
         }
+        categories = cats;
     }
 
     auto showBinderRecipes()
@@ -150,8 +151,10 @@ abstract class RecipeTabFrameController
                     return arr.chunkBy!"a[1]"
                         .map!(a => Entry(lvToStr(a[0]), a[1].map!"a[0]".array))
                         .array;
-                case ByName, ByBinderOrder:
+                case ByName:
                     return [Entry(category, rs.sort().array)];
+                case ByBinderOrder:
+                    return [Entry(category, rs.array)];
                 }
             }).joiner;
 

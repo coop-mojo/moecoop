@@ -228,7 +228,7 @@ class ConfigDialog: Dialog
             {
                 config_.migemoDLL = childById("migemoDLLPath").text;
                 config_.migemoDict = childById("migemoDictPath").text;
-                (cast(MainFrame)_parentWindow.mainWidget).controller_.loadMigemo;
+                (cast(MainFrame)_parentWindow.mainWidget).controller.loadMigemo;
             }
         }
         _parentWindow.removePopup(_popup);

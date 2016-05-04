@@ -78,12 +78,12 @@ public:
     FrameType frame() { return frame; }
     auto config()
     {
-        return frame_.root.controller_.config;
+        return frame_.root.controller.config;
     }
 
     auto characters()
     {
-        return frame_.root.controller_.characters;
+        return frame_.root.controller.characters;
     }
 
     auto wisdom()
@@ -91,12 +91,12 @@ public:
     {
         assert(ret);
     } body {
-        return frame_.root.controller_.wisdom;
+        return frame_.root.controller.wisdom;
     }
 
     auto migemo()
     {
-        return frame_.root.controller_.migemo;
+        return frame_.root.controller.migemo;
     }
 protected:
     FrameType frame_;

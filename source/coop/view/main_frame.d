@@ -52,6 +52,7 @@ mixin template TabFrame()
 public:
     import std.format;
     mixin(format("alias Controller = %sController;", typeof(this).stringof));
+
     auto root()
     out(ret)
     {
@@ -64,7 +65,8 @@ public:
         }
         return cast(MainFrame)parent_;
     }
-    Controller controller_;
+
+    Controller controller;
 }
 
 class MainFrame : VerticalLayout
@@ -92,7 +94,7 @@ class MainFrame : VerticalLayout
     static auto create(Window parent, Wisdom wisdom, Character[dstring] chars, Config config)
     {
         auto root = new MainFrame("root");
-        root.controller_ = new MainFrameController(root, wisdom, chars, config);
+        root.controller = new MainFrameController(root, wisdom, chars, config);
 
         auto mainMenuItems = new MenuItem;
         auto optionItem = new MenuItem(new Action(MENU_ACTION.OPTION, "オプション..."d));
@@ -132,24 +134,14 @@ class MainFrame : VerticalLayout
         root.addChild(status);
 
         auto binderTab = new RecipeTabFrame("binderFrame");
-        if (root.controller_.migemo is null)
-        {
-            binderTab.disableMigemoBox;
-        }
-
         tabs.addTab(binderTab, "バインダー"d);
         binderTab.setCategoryName("バインダー"d);
-        binderTab.controller_ = new BinderTabFrameController(binderTab, wisdom.binders);
+        binderTab.controller = new BinderTabFrameController(binderTab, wisdom.binders);
 
         auto skillTab = new RecipeTabFrame("skillFrame");
-        if (root.controller_.migemo is null)
-        {
-            skillTab.disableMigemoBox;
-        }
-
         tabs.addTab(skillTab, "スキル"d);
         skillTab.setCategoryName("スキル"d);
-        skillTab.controller_ = new SkillTabFrameController(skillTab, wisdom.recipeCategories);
+        skillTab.controller = new SkillTabFrameController(skillTab, wisdom.recipeCategories);
 
         tabs.tabChanged = (string next, string prev) {
             if (auto recipeTab = cast(RecipeTabFrame)root.childById(prev))
@@ -165,11 +157,11 @@ class MainFrame : VerticalLayout
                     });
             }
 
-            (cast(RecipeTabFrame)root.childById(next)).controller_.showBinderRecipes;
+            (cast(RecipeTabFrame)root.childById(next)).controller.showBinderRecipes;
         };
 
         return root;
     }
 
-    MainFrameController controller_;
+    MainFrameController controller;
 }

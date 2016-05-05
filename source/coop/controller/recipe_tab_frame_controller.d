@@ -22,7 +22,7 @@ import dlangui;
 import std.algorithm;
 import std.container.util;
 import std.range;
-import std.regex;
+import std.string;
 import std.typecons;
 
 import coop.model.recipe;
@@ -36,6 +36,8 @@ enum SortOrder {
     ByName        = "名前順",
     ByBinderOrder = "バインダー順",
 }
+
+alias RecipePair = Tuple!(dstring, "category", dstring[], "recipes");
 
 abstract class RecipeTabFrameController
 {
@@ -58,7 +60,11 @@ abstract class RecipeTabFrameController
             frame_.characterChanged =
             frame_.nColumnChanged =
             frame_.sortKeyChanged = {
-            showBinderRecipes;
+            assert(frame_);
+            if (frame_.controller)
+            {
+                showBinderRecipes;
+            }
         };
 
         Recipe dummy;
@@ -78,19 +84,20 @@ abstract class RecipeTabFrameController
         {
             frame_.disableMigemoBox;
         }
-        categories = cats;
+        frame_.categories = cats;
     }
 
     auto showBinderRecipes()
     {
-        import std.string;
-
         if (frame_.queryText == defaultTxtMsg)
         {
             frame_.queryText = ""d;
         }
 
         auto query = frame_.queryText.removechars(r"/[ 　]/");
+
+        // メタ検索 + 検索欄が空 -> 全部の候補がでてくる
+        // 意味がないのでこの場合には何もせず処理を終了する
         if (frame_.useMetaSearch && query.empty)
             return;
 
@@ -107,33 +114,23 @@ abstract class RecipeTabFrameController
 
         if (!query.empty)
         {
-            bool delegate(dstring) matchFun =
-                s => !find(s.removechars(r"/[ 　]/"), boyerMooreFinder(query)).empty;
-            if (frame_.useMigemo)
-            {
-                try{
-                    auto q = migemo.query(query).regex;
-                    matchFun = s => !s.removechars(r"/[ 　]/").matchFirst(q).empty;
-                } catch(RegexException e) {
-                    // use default matchFun
-                }
-            }
+            auto queryFun = matchFunFor(query);
             recipes = recipes
                       .byKeyValue
                       .map!(kv =>
                             tuple(kv.key,
-                                  kv.value.filter!matchFun.array))
+                                  kv.value.filter!queryFun.array))
+                      .filter!"!a[1].empty"
                       .assocArray;
         }
 
-        auto chunks = recipes.byKeyValue.map!((kv) {
+        auto elems = recipes.byKeyValue.map!((kv) {
                 auto category = kv.key;
                 auto rs = kv.value;
 
-                alias Entry = Tuple!(dstring, "key", typeof(rs.array), "value");
-
                 if (rs.empty)
-                    return [Entry(category, rs.array)];
+                    return [RecipePair(category, rs.array)];
+
                 final switch(frame_.sortKey) with(SortOrder)
                 {
                 case BySkill:
@@ -149,44 +146,41 @@ abstract class RecipeTabFrameController
                     auto arr = rs.map!(a => tuple(a, levels(a))).array;
                     arr.multiSort!("a[1] < b[1]", "a[0] < b[0]");
                     return arr.chunkBy!"a[1]"
-                        .map!(a => Entry(lvToStr(a[0]), a[1].map!"a[0]".array))
+                        .map!(a => RecipePair(lvToStr(a[0]), a[1].map!"a[0]".array))
                         .array;
                 case ByName:
-                    return [Entry(category, rs.sort().array)];
+                    return [RecipePair(category, rs.sort().array)];
                 case ByBinderOrder:
-                    return [Entry(category, rs.array)];
+                    return [RecipePair(category, rs.array)];
                 }
             }).joiner;
 
-        Widget[] tableElems = chunks.map!((kv) {
-                auto category = kv.key;
-                auto recipes = kv.value;
-                if (recipes.empty)
-                    return Widget[].init;
-
-                Widget[] header = [];
-                if (frame_.useMetaSearch || useHeader(frame_))
-                {
-                    Widget hd = new TextWidget("", category);
-                    hd.backgroundColor = 0xCCCCCC;
-                    header = [hd];
-                }
-                return header~toRecipeWidgets(recipes, category);
-            }).join;
-        frame_.showRecipeList(toRecipeTable(tableElems, frame_.numberOfColumns));
+        frame_.showRecipeList(elems);
     }
 
-    @property auto categories(dstring[] cats)
-    {
-        frame_.categories = cats;
-    }
 protected:
     abstract dstring[][dstring] recipeChunks(Wisdom);
     abstract dstring[][dstring] recipeChunksFor(Wisdom, dstring);
-    abstract bool useHeader(RecipeTabFrame);
-    abstract Widget[] toRecipeWidgets(dstring[], dstring);
-    abstract Widget[][] toRecipeTable(Widget[], int);
 
 private:
+    auto matchFunFor(dstring query)
+    {
+        import std.regex;
+        if (frame_.useMigemo)
+        {
+            try{
+                auto q = migemo.query(query).regex;
+                return (dstring s) => !s.removechars(r"/[ 　]/").matchFirst(q).empty;
+            } catch(RegexException e) {
+                // use default matchFun
+            }
+        }
+        else
+        {
+            return (dstring s) => !find(s.removechars(r"/[ 　]/"), boyerMooreFinder(query)).empty;
+        }
+        assert(false);
+    }
+
     enum defaultTxtMsg = "見たいレシピ";
 }

@@ -21,17 +21,17 @@ import dlangui;
 import dlangui.widgets.metadata;
 
 import std.algorithm;
-import std.array;
+import std.exception;
 import std.range;
 import std.traits;
 
 import coop.model.item;
-import coop.model.recipe;
 import coop.util;
 
 import coop.view.main_frame;
-import coop.controller.recipe_tab_frame_controller;
+import coop.view.item_detail_frame;
 import coop.view.recipe_detail_frame;
+import coop.controller.recipe_tab_frame_controller;
 
 class RecipeTabFrame: HorizontalLayout
 {
@@ -137,18 +137,22 @@ class RecipeTabFrame: HorizontalLayout
         return childById!ComboBox("characters").selectedItem;
     }
 
-    auto showRecipeList(Widget[][] recipes)
+    auto showRecipeList(Pairs)(Pairs pairs)
+        if (isInputRange!Pairs && is(ElementType!Pairs == RecipePair))
     {
+        auto entries = toRecipeEntries(pairs);
+
         unhighlightDetailRecipe;
         scope(exit) highlightDetailRecipe;
         auto recipeList = childById("recipeList");
         recipeList.removeAllChildren;
-        recipeList.backgroundColor = recipes.empty ? "white" : "black";
+        recipeList.backgroundColor = entries.empty ? "white" : "black";
 
         auto scroll = new ScrollWidget;
         auto horizontal = new HorizontalLayout;
 
-        recipes
+        entries
+            .chunks(tableColumnLength(entries.length, numberOfColumns))
             .map!((rs) {
                     auto col = new VerticalLayout;
                     rs.each!(r => col.addChild(r));
@@ -159,6 +163,48 @@ class RecipeTabFrame: HorizontalLayout
         scroll.backgroundColor = "white";
         recipeList.addChild(scroll);
     }
+
+    auto toRecipeEntries(Pairs)(Pairs pairs)
+        if (isInputRange!Pairs && is(ElementType!Pairs == RecipePair))
+    {
+        return pairs.map!((pair) {
+                auto category = pair.category;
+                auto recipes = pair.recipes;
+
+                Widget[] header = [];
+                if (useMetaSearch || sortKey == SortOrder.BySkill)
+                {
+                    Widget hd = new TextWidget("", category);
+                    hd.backgroundColor = 0xCCCCCC;
+                    header = [hd];
+                }
+                return chain(header, recipes.map!(r => toRecipeWidget(r, category)).array);
+            }).join.array;
+    }
+
+    // auto showRecipeList(dstring[][] recipes)
+    // {
+    //     unhighlightDetailRecipe;
+    //     scope(exit) highlightDetailRecipe;
+    //     auto recipeList = childById("recipeList");
+    //     recipeList.removeAllChildren;
+    //     recipeList.backgroundColor = recipes.empty ? "white" : "black";
+
+    //     auto scroll = new ScrollWidget;
+    //     auto horizontal = new HorizontalLayout;
+
+    //     recipes
+    //         .map!(rs => rs.map!(r => toRecipeWidget(r)).array)
+    //         .map!((rs) {
+    //                 auto col = new VerticalLayout;
+    //                 rs.each!(r => col.addChild(r));
+    //                 return col;
+    //             })
+    //         .each!(col => horizontal.addChild(col));
+    //     scroll.contentWidget = horizontal;
+    //     scroll.backgroundColor = "white";
+    //     recipeList.addChild(scroll);
+    // }
 
     @property auto recipeDetail()
     {
@@ -274,7 +320,6 @@ class RecipeTabFrame: HorizontalLayout
         childById("metaSearch").text = format("全ての%sから検索"d, cat);
     }
 
-    bool delegate(dstring, dstring) sortKeyFun_;
     EventHandler!() queryFocused;
     EventHandler!() queryChanged;
     EventHandler!() metaSearchOptionChanged;
@@ -283,6 +328,74 @@ class RecipeTabFrame: HorizontalLayout
     EventHandler!() characterChanged;
     EventHandler!() nColumnChanged;
     EventHandler!() sortKeyChanged;
+    int delegate(size_t, int) tableColumnLength;
+    dstring[] delegate(dstring, dstring) relatedBindersFor;
+
+private:
+    Widget toRecipeWidget(dstring recipe, dstring category)
+    {
+        auto ret = new RecipeEntryWidget(recipe);
+        auto wisdom = controller.wisdom;
+        auto characters = controller.characters;
+        auto binders = relatedBindersFor(recipe, category);
+
+        ret.filedStateChanged = (bool marked) {
+            auto c = selectedCharacter;
+            if (marked)
+            {
+                binders.each!(b => characters[c].markFiledRecipe(recipe, b));
+            }
+            else
+            {
+                binders.each!(b => characters[c].unmarkFiledRecipe(recipe, b));
+            }
+        };
+        ret.checked = binders.canFind!(b => characters[selectedCharacter].hasRecipe(recipe, b));
+        ret.enabled = binders.length == 1;
+
+        ret.detailClicked = {
+            unhighlightDetailRecipe;
+            scope(exit) highlightDetailRecipe;
+
+
+            auto rDetail = wisdom.recipeFor(recipe);
+            if (rDetail.name.empty)
+            {
+                rDetail.name = recipe;
+                rDetail.remarks = "作り方がわかりません（´・ω・｀）";
+            }
+            recipeDetail = RecipeDetailFrame.create(rDetail, wisdom, characters);
+
+            auto itemNames = rDetail.products.keys;
+            enforce(itemNames.length <= 2);
+            if (itemNames.empty)
+            {
+                // レシピ情報が完成するまでの間に合わせ
+                itemNames = [ recipe~"のレシピで作れる何か" ];
+            }
+
+            hideItemDetail(1);
+
+            itemNames.enumerate(0).each!((idx_name) {
+                    auto idx = idx_name[0];
+                    dstring name = idx_name[1];
+                    Item item;
+                    if (auto i = name in wisdom.itemList)
+                    {
+                        item = *i;
+                    }
+                    else
+                    {
+                        item.name = name;
+                        item.remarks = "細かいことはわかりません（´・ω・｀）";
+                    }
+
+                    showItemDetail(idx);
+                    setItemDetail(ItemDetailFrame.create(item, wisdom), idx);
+                });
+        };
+        return ret;
+    }
 }
 
 auto recipeListLayout()

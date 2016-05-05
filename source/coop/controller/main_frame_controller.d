@@ -72,7 +72,6 @@ mixin template TabController()
 {
 public:
     import std.format;
-    import std.exception;
     mixin(format("alias FrameType = %s;", typeof(this).stringof[0..$-10]));
 
     FrameType frame() { return frame; }

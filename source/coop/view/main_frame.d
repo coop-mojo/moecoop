@@ -160,6 +160,8 @@ class MainFrame : VerticalLayout
             (cast(RecipeTabFrame)root.childById(next)).controller.showBinderRecipes;
         };
 
+        (cast(RecipeTabFrame)tabs.selectedTabBody).controller.showBinderRecipes;
+
         return root;
     }
 

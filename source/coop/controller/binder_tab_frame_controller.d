@@ -20,15 +20,11 @@ module coop.controller.binder_tab_frame_controller;
 import dlangui;
 
 import std.algorithm;
-import std.exception;
 import std.range;
 import std.traits;
 import std.typecons;
 
-import coop.model.item;
 import coop.model.wisdom;
-import coop.view.item_detail_frame;
-import coop.view.recipe_detail_frame;
 import coop.view.recipe_tab_frame;
 import coop.controller.recipe_tab_frame_controller;
 
@@ -37,6 +33,9 @@ class BinderTabFrameController: RecipeTabFrameController
     this(RecipeTabFrame frame, dstring[] categories)
     {
         super(frame, categories);
+        frame.relatedBindersFor = (recipe, binder) => [binder];
+        frame.tableColumnLength = (_, nColumns) => MaxNumberOfBinderPages/nColumns;
+
         frame.childById!ComboBox("sortBy").selectedItemIndex = [EnumMembers!SortOrder].length-1;
         frame.childById("sortBox").visibility = Visibility.Gone;
     }
@@ -52,79 +51,6 @@ protected:
         return [tuple(cat, wisdom.recipesIn(Binder(cat)))].assocArray;
     }
 
-    override bool useHeader(RecipeTabFrame frame)
-    {
-        return false;
-    }
-
-    override Widget[] toRecipeWidgets(dstring[] recipes, dstring binder)
-    {
-        return recipes.map!((r) {
-                import std.stdio;
-                auto ret = new RecipeEntryWidget(r);
-
-                ret.filedStateChanged = (bool marked) {
-                    auto c = frame_.selectedCharacter;
-                    if (marked)
-                    {
-                        characters[c].markFiledRecipe(r, binder);
-                    }
-                    else
-                    {
-                        characters[c].unmarkFiledRecipe(r, binder);
-                    }
-                };
-                ret.checked = characters[frame_.selectedCharacter].hasRecipe(r, binder);
-                ret.enabled = true;
-
-                ret.detailClicked = {
-                    frame_.unhighlightDetailRecipe;
-                    scope(exit) frame_.highlightDetailRecipe;
-
-
-                    auto rDetail = wisdom.recipeFor(r);
-                    if (rDetail.name.empty)
-                    {
-                        rDetail.name = r;
-                        rDetail.remarks = "作り方がわかりません（´・ω・｀）";
-                    }
-                    frame_.recipeDetail = RecipeDetailFrame.create(rDetail, wisdom, characters);
-
-                    auto itemNames = rDetail.products.keys;
-                    enforce(itemNames.length <= 2);
-                    if (itemNames.empty)
-                    {
-                        // レシピ情報が完成するまでの間に合わせ
-                        itemNames = [ r~"のレシピで作れる何か" ];
-                    }
-
-                    frame_.hideItemDetail(1);
-
-                    itemNames.enumerate(0).each!((idx_name) {
-                            auto idx = idx_name[0];
-                            dstring name = idx_name[1];
-                            Item item;
-                            if (auto i = name in wisdom.itemList)
-                            {
-                                item = *i;
-                            }
-                            else
-                            {
-                                item.name = name;
-                                item.remarks = "細かいことはわかりません（´・ω・｀）";
-                            }
-
-                            frame_.showItemDetail(idx);
-                            frame_.setItemDetail(ItemDetailFrame.create(item, wisdom), idx);
-                        });
-                };
-                return cast(Widget)ret;
-            }).array;
-    }
-
-    override Widget[][] toRecipeTable(Widget[] recipes, int nColumns)
-    {
-        enum MaxNumberOfBinderPages = 128;
-        return recipes.empty ? [] : recipes.chunks(MaxNumberOfBinderPages/nColumns).array;
-    }
+private:
+    enum MaxNumberOfBinderPages = 128;
 }

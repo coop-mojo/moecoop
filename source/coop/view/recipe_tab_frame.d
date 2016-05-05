@@ -182,30 +182,6 @@ class RecipeTabFrame: HorizontalLayout
             }).join.array;
     }
 
-    // auto showRecipeList(dstring[][] recipes)
-    // {
-    //     unhighlightDetailRecipe;
-    //     scope(exit) highlightDetailRecipe;
-    //     auto recipeList = childById("recipeList");
-    //     recipeList.removeAllChildren;
-    //     recipeList.backgroundColor = recipes.empty ? "white" : "black";
-
-    //     auto scroll = new ScrollWidget;
-    //     auto horizontal = new HorizontalLayout;
-
-    //     recipes
-    //         .map!(rs => rs.map!(r => toRecipeWidget(r)).array)
-    //         .map!((rs) {
-    //                 auto col = new VerticalLayout;
-    //                 rs.each!(r => col.addChild(r));
-    //                 return col;
-    //             })
-    //         .each!(col => horizontal.addChild(col));
-    //     scroll.contentWidget = horizontal;
-    //     scroll.backgroundColor = "white";
-    //     recipeList.addChild(scroll);
-    // }
-
     @property auto recipeDetail()
     {
         return cast(RecipeDetailFrame)childById!FrameLayout("recipeDetail").child(0);

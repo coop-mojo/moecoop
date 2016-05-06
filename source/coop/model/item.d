@@ -138,7 +138,7 @@ auto toItemType(string s)
             "酒": Liquor,
             "薬": Medicine,
             "武器": Weapon,
-            "鎧": Armor,
+            "防具": Armor,
             "アセット": Asset,
             ];
         return map[s];
@@ -195,6 +195,21 @@ auto toItem(string s, JSONValue[string] json)
         }
     }
     return item;
+}
+
+auto toString(ItemType type)
+{
+    final switch(type) with(ItemType)
+    {
+    case Others:   return "その他";
+    case Food:     return "食べ物";
+    case Drink:    return "飲み物";
+    case Liquor:   return "酒";
+    case Medicine: return "薬";
+    case Weapon:   return "武器";
+    case Armor:    return "防具";
+    case Asset:    return "アセット";
+    }
 }
 
 auto toSpecialProperties(JSONValue[] vals)

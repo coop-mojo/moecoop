@@ -78,46 +78,46 @@ class ItemEditDialog: Dialog
                         TextWidget { text: "特殊条件" }
                         TableLayout {
                             colCount: 14
-                            TextWidget { text: "NT" }
+                            TextWidget { id: NTcap; text: "NT" }
                             CheckBox { id: NT }
 
-                            TextWidget { text: "OP" }
+                            TextWidget { id: OPcap; text: "OP" }
                             CheckBox { id: OP }
 
-                            TextWidget { text: "CS" }
+                            TextWidget { id: CScap; text: "CS" }
                             CheckBox { id: CS }
 
-                            TextWidget { text: "CR" }
+                            TextWidget { id: CRcap; text: "CR" }
                             CheckBox { id: CR }
 
-                            TextWidget { text: "PM" }
+                            TextWidget { id: PMcap; text: "PM" }
                             CheckBox { id: PM }
 
-                            TextWidget { text: "NC" }
+                            TextWidget { id: NCcap; text: "NC" }
                             CheckBox { id: NC }
 
-                            TextWidget { text: "NB" }
+                            TextWidget { id: NBcap; text: "NB" }
                             CheckBox { id: NB }
 
-                            TextWidget { text: "ND" }
+                            TextWidget { id: NDcap; text: "ND" }
                             CheckBox { id: ND }
 
-                            TextWidget { text: "CA" }
+                            TextWidget { id: CAcap; text: "CA" }
                             CheckBox { id: CA }
 
-                            TextWidget { text: "DL" }
+                            TextWidget { id: DLcap; text: "DL" }
                             CheckBox { id: DL }
 
-                            TextWidget { text: "TC" }
+                            TextWidget { id: TCcap; text: "TC" }
                             CheckBox { id: TC }
 
-                            TextWidget { text: "LO" }
+                            TextWidget { id: LOcap; text: "LO" }
                             CheckBox { id: LO }
 
-                            TextWidget { text: "AL" }
+                            TextWidget { id: ALcap; text: "AL" }
                             CheckBox { id: AL }
 
-                            TextWidget { text: "WA" }
+                            TextWidget { id: WAcap; text: "WA" }
                             CheckBox { id: WA }
                         }
 
@@ -126,7 +126,12 @@ class ItemEditDialog: Dialog
 
                         TextWidget { text: "備考" }
                         EditLine { id: remarks }
+
+                        TextWidget { text: "種別" }
+                        ComboBox { id: type }
                     }
+
+                    
 
                     HorizontalLayout {
                         id: dlgButtons
@@ -138,15 +143,77 @@ class ItemEditDialog: Dialog
             });
         addChild(root);
 
+        auto item = frame_.item;
+
         with(root.childById!EditLine("name"))
         {
-            import std.stdio;
-            writeln("AAA");
-            frame_.item;
-            
-            writeln("BBB");
-            text = frame_.item.name;
+            text = item.name;
             enabled = false;
+        }
+
+        with(root.childById!EditLine("ename"))
+        {
+            if (!item.ename.empty)
+            {
+                text = item.ename;
+                enabled = false;
+            }
+        }
+
+        with(root.childById!EditLine("weight"))
+        {
+            import std.math;
+            import std.format;
+            if (!item.weight.isNaN)
+            {
+                text = format("%.2f"d, item.weight);
+                enabled = false;
+            }
+        }
+
+        with(root.childById!EditLine("price"))
+        {
+            if (item.price != 0)
+            {
+                text = item.price.to!dstring;
+                enabled = false;
+            }
+        }
+
+        with(root.childById!CheckBox("transferable"))
+        {
+            if (item.transferable)
+            {
+                checked = true;
+                enabled = false;
+            }
+        }
+
+        with(root.childById!CheckBox("stackable"))
+        {
+            if (item.stackable)
+            {
+                checked = true;
+                enabled = false;
+            }
+        }
+
+        with(root.childById!EditLine("info"))
+        {
+            if (!item.info.empty)
+            {
+                text = item.info;
+                enabled = false;
+            }
+        }
+
+        with(root.childById!EditLine("remarks"))
+        {
+            if (!item.remarks.empty)
+            {
+                text = item.remarks;
+                enabled = false;
+            }
         }
 
         with(root.childById!ComboBox("petFoodType"))
@@ -170,6 +237,30 @@ class ItemEditDialog: Dialog
             // (types.length-1).to!int を設定した場合には textBox は disabled される
             selectedItemIndex = 0;
             invalidate; // 効いてない
+        }
+
+        auto props = item.properties;
+        foreach(p; [EnumMembers!SpecialProperty])
+        {
+            auto tip = p.toStrings.join.to!dstring;
+            with(root.childById!CheckBox(p.to!string))
+            {
+                if (props & p)
+                {
+                    checked = true;
+                    enabled = false;
+                }
+                tooltipText = tip;
+            }
+            root.childById(p.to!string~"cap").tooltipText = tip;
+        }
+
+        with(root.childById!ComboBox("type"))
+        {
+            import coop.model.item: toStr = toString;
+            auto types = [EnumMembers!ItemType].map!(t => toStr(t)).array.to!(dstring[]);
+            items = types;
+            selectedItemIndex = [EnumMembers!ItemType].enumerate.find!"a[1] == b"(item.type).front[0].to!int;
         }
 
         with(root.childById("dlgButtons"))

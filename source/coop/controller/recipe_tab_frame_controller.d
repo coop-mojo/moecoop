@@ -159,6 +159,8 @@ abstract class RecipeTabFrameController
     }
 
 protected:
+    enum defaultTxtMsg = "見たいレシピ";
+
     abstract dstring[][dstring] recipeChunks(Wisdom);
     abstract dstring[][dstring] recipeChunksFor(Wisdom, dstring);
 
@@ -181,6 +183,4 @@ private:
         }
         assert(false);
     }
-
-    enum defaultTxtMsg = "見たいレシピ";
 }

@@ -101,6 +101,18 @@ class RecipeTabFrame: HorizontalLayout
             characterChanged();
             return true;
         };
+
+        childById!Button("editItem1").click = (Widget _) {
+            import coop.view.item_edit_dialog;
+            showItemEditDialog(root.window, childById!ItemDetailFrame("detail1"));
+            return true;
+        };
+
+        childById!Button("editItem2").click = (Widget _) {
+            import coop.view.item_edit_dialog;
+            showItemEditDialog(root.window, childById!ItemDetailFrame("detail2"));
+            return true;
+        };
     }
 
     @property auto categories(dstring[] cats)
@@ -220,7 +232,7 @@ class RecipeTabFrame: HorizontalLayout
 
     auto setItemDetail(Widget item, int idx)
     {
-        auto frame = childById("detail"~(idx+1).to!string);
+        auto frame = childById("detailFrame"~(idx+1).to!string);
         frame.removeAllChildren;
         frame.addChild(item);
     }
@@ -367,7 +379,7 @@ private:
                     }
 
                     showItemDetail(idx);
-                    setItemDetail(ItemDetailFrame.create(item, wisdom), idx);
+                    setItemDetail(ItemDetailFrame.create(item, idx+1, wisdom), idx);
                 });
         };
         return ret;
@@ -438,9 +450,12 @@ auto recipeDetailsLayout()
 
                 VerticalLayout {
                     id: item1
-                    TextWidget { text: "アイテム情報1" }
+                    HorizontalLayout {
+                        TextWidget { text: "アイテム情報1" }
+                        Button { id: editItem1; text: "編集" }
+                    }
                     FrameLayout {
-                        id: detail1
+                        id: detailFrame1
                         padding: 1
                         backgroundColor: "black"
                     }
@@ -448,9 +463,12 @@ auto recipeDetailsLayout()
 
                 VerticalLayout {
                     id: item2
-                    TextWidget { text: "アイテム情報2" }
+                    HorizontalLayout {
+                        TextWidget { text: "アイテム情報2" }
+                        Button { id: editItem2; text: "編集" }
+                    }
                     FrameLayout {
-                        id: detail2
+                        id: detailFrame2
                         padding: 1
                         backgroundColor: "black"
                     }

@@ -50,7 +50,7 @@ class ItemDetailFrame: ScrollWidget
                         TextWidget { text: "重さ: " }
                         TextWidget { id: weight }
 
-                        /// 食べ物情報
+                        /// 食べ物，飲み物，酒情報
                         TextWidget { id: effCap; text: "効果: "}
                         TextWidget { id: effect }
 
@@ -66,7 +66,6 @@ class ItemDetailFrame: ScrollWidget
                         TextWidget { id: durCap; text: "効果時間: "}
                         TextWidget { id: duration }
 
-                        /// 飲み物
                         /// 武器
                         /// 防具
 
@@ -105,7 +104,7 @@ class ItemDetailFrame: ScrollWidget
 
         with(layout)
         {
-            /// 食べ物情報
+            /// 食べ物，飲み物，酒情報
             childById("effCap").visibility           = Visibility.Gone;
             childById("effect").visibility           = Visibility.Gone;
             childById("addCap").visibility           = Visibility.Gone;
@@ -121,9 +120,9 @@ class ItemDetailFrame: ScrollWidget
         backgroundColor = "white";
     }
 
-    static auto create(Item i, Wisdom wisdom)
+    static auto create(Item i, int idx, Wisdom wisdom)
     {
-        auto ret = new typeof(this)(i.name.to!string);
+        auto ret = new typeof(this)("detail"~idx.to!string);
         ret.item_ = i;
         with(ret)
         {

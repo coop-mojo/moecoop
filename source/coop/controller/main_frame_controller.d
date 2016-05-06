@@ -39,11 +39,11 @@ class MainFrameController
         loadMigemo;
     }
 
-    auto frame() { return frame_; }
-    auto config() { return config_; }
-    auto characters() { return chars_; }
-    auto wisdom() { return wisdom_; }
-    auto migemo() { return migemo_; }
+    @property auto frame() { return frame_; }
+    @property auto config() { return config_; }
+    @property auto characters() { return chars_; }
+    @property auto wisdom() { return wisdom_; }
+    @property auto migemo() { return migemo_; }
 
     auto loadMigemo()
     {
@@ -75,17 +75,17 @@ public:
     mixin(format("alias FrameType = %s;", typeof(this).stringof[0..$-10]));
 
     FrameType frame() { return frame; }
-    auto config()
+    @property auto config()
     {
         return frame_.root.controller.config;
     }
 
-    auto characters()
+    @property auto characters()
     {
         return frame_.root.controller.characters;
     }
 
-    auto wisdom()
+    @property auto wisdom()
     out(ret)
     {
         assert(ret);
@@ -93,7 +93,7 @@ public:
         return frame_.root.controller.wisdom;
     }
 
-    auto migemo()
+    @property auto migemo()
     {
         return frame_.root.controller.migemo;
     }

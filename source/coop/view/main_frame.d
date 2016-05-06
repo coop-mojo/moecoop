@@ -53,7 +53,7 @@ public:
     import std.format;
     mixin(format("alias Controller = %sController;", typeof(this).stringof));
 
-    auto root()
+    @property auto root()
     out(ret)
     {
         assert(ret !is null);

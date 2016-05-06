@@ -289,7 +289,7 @@ class RecipeTabFrame: HorizontalLayout
         childById!CheckBox("migemo").enabled = true;
     }
 
-    auto setCategoryName(dstring cat)
+    @property auto categoryName(dstring cat)
     {
         import std.format;
         childById("categoryCaption").text = cat;

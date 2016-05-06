@@ -135,12 +135,12 @@ class MainFrame : VerticalLayout
 
         auto binderTab = new RecipeTabFrame("binderFrame");
         tabs.addTab(binderTab, "バインダー"d);
-        binderTab.setCategoryName("バインダー"d);
+        binderTab.categoryName = "バインダー"d;
         binderTab.controller = new BinderTabFrameController(binderTab, wisdom.binders);
 
         auto skillTab = new RecipeTabFrame("skillFrame");
         tabs.addTab(skillTab, "スキル"d);
-        skillTab.setCategoryName("スキル"d);
+        skillTab.categoryName = "スキル"d;
         skillTab.controller = new SkillTabFrameController(skillTab, wisdom.recipeCategories);
 
         tabs.tabChanged = (string next, string prev) {

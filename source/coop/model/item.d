@@ -132,13 +132,13 @@ auto toItemType(string s)
     with(ItemType)
     {
         auto map = [
-            "その他": Others,
-            "食べ物": Food,
-            "飲み物": Drink,
-            "酒": Liquor,
-            "薬": Medicine,
-            "武器": Weapon,
-            "防具": Armor,
+            "その他":   Others,
+            "食べ物":   Food,
+            "飲み物":   Drink,
+            "酒":       Liquor,
+            "薬":       Medicine,
+            "武器":     Weapon,
+            "防具":     Armor,
             "アセット": Asset,
             ];
         return map[s];

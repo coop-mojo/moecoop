@@ -19,6 +19,7 @@ import dlangui;
 
 import std.algorithm;
 import std.array;
+import std.conv;
 import std.file;
 import std.path;
 import std.typecons;
@@ -55,8 +56,7 @@ extern(C) int UIAppMain(string[] args)
     auto window = Platform.instance.createWindow(AppName, null, WindowFlag.Resizable,
                                                  config.windowWidth,
                                                  config.windowHeight);
-    auto layout = MainFrame.create(window, wisdom, chars, config);
-    window.mainWidget = layout;
+    window.mainWidget = new MainFrame(wisdom, chars, config);
     window.show;
     window.onClose = {
         version(Windows) {

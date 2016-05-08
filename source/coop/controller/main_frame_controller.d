@@ -74,7 +74,8 @@ public:
     import std.format;
     mixin(format("alias FrameType = %s;", typeof(this).stringof[0..$-10]));
 
-    FrameType frame() { return frame; }
+    FrameType frame() { return frame_; }
+
     @property auto config()
     {
         return frame_.root.controller.config;

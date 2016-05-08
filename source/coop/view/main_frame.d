@@ -18,7 +18,6 @@
 module coop.view.main_frame;
 
 import dlangui;
-import dlangui.widgets.metadata;
 
 import std.algorithm;
 
@@ -26,8 +25,8 @@ import coop.model.character;
 import coop.model.wisdom;
 import coop.model.config;
 import coop.view.recipe_tab_frame;
-import coop.controller.binder_tab_frame_controller;
 import coop.controller.main_frame_controller;
+import coop.controller.binder_tab_frame_controller;
 import coop.controller.skill_tab_frame_controller;
 
 immutable fontName = defaultFontName;
@@ -69,82 +68,72 @@ public:
     Controller controller;
 }
 
-class MainFrame : VerticalLayout
+class MainFrame: AppFrame
 {
-    this(string id)
+    this(Wisdom wisdom, Character[dstring] chars, Config config)
     {
-        super(id);
+        super();
+        controller_ = new MainFrameController(this, wisdom, chars, config);
+        binderTab.controller = new BinderTabFrameController(binderTab, controller.wisdom.binders);
+        skillTab.controller = new SkillTabFrameController(skillTab, controller.wisdom.recipeCategories);
+
+        binderTab.controller.showBinderRecipes;
+
+        statusLine.setStatusText(" "d);
+    }
+
+    @property auto controller()
+    {
+        return controller_;
+    }
+
+    auto enableMigemo()
+    {
+        binderTab.enableMigemoBox;
+        skillTab.enableMigemoBox;
+    }
+
+    auto disableMigemo()
+    {
+        binderTab.disableMigemoBox;
+        skillTab.disableMigemoBox;
+    }
+protected:
+    override protected void initialize()
+    {
+        _appName = "生協の知恵袋";
         ownStyle.theme.fontFamily(FontFamily.SansSerif).fontFace(fontName);
+        super.initialize();
     }
 
-    auto enableMigemo() {
-        if (auto fr = childById!RecipeTabFrame("binderFrame"))
-        {
-            fr.enableMigemoBox;
-        }
-    }
-
-    auto disableMigemo() {
-        if (auto fr = childById!RecipeTabFrame("binderFrame"))
-        {
-            fr.disableMigemoBox;
-        }
-    }
-
-    static auto create(Window parent, Wisdom wisdom, Character[dstring] chars, Config config)
+    override MainMenu createMainMenu()
     {
-        auto root = new MainFrame("root");
-        root.controller = new MainFrameController(root, wisdom, chars, config);
-
-        auto mainMenuItems = new MenuItem;
+        MenuItem mainMenuItems = new MenuItem;
         auto optionItem = new MenuItem(new Action(MENU_ACTION.OPTION, "オプション..."d));
         auto exitItem = new MenuItem(new Action(MENU_ACTION.EXIT, "終了"d));
         mainMenuItems.add(optionItem);
         mainMenuItems.add(exitItem);
         auto mainMenu = new MainMenu(mainMenuItems);
 
-        mainMenu.menuItemClick = (MenuItem item) {
-            auto a = item.action;
-            if (a) {
-                switch(a.id) with(MENU_ACTION)
-                {
-                case EXIT:
-                    parent.close;
-                    break;
-                case OPTION:
-                    import coop.view.config_window;
-                    showConfigWindow(parent, chars, config);
-                    break;
-                default:
-                }
-            }
-            return true;
-        };
-        root.addChild(mainMenu);
+        return mainMenu;
+    }
 
+    override Widget createBody()
+    {
         auto tabs = new TabWidget("tabs");
         tabs.layoutWidth(FILL_PARENT)
             .layoutHeight(FILL_PARENT);
-        root.addChild(tabs);
 
-        // TODO: 下にスペースが残る
-        auto status = new StatusLine;
-        status.id = "status";
-        status.setStatusText(" "d);
-        root.addChild(status);
-
-        auto binderTab = new RecipeTabFrame("binderFrame");
+        binderTab = new RecipeTabFrame("binderFrame");
         tabs.addTab(binderTab, "バインダー"d);
         binderTab.categoryName = "バインダー"d;
-        binderTab.controller = new BinderTabFrameController(binderTab, wisdom.binders);
 
-        auto skillTab = new RecipeTabFrame("skillFrame");
+        skillTab = new RecipeTabFrame("skillFrame");
         tabs.addTab(skillTab, "スキル"d);
         skillTab.categoryName = "スキル"d;
-        skillTab.controller = new SkillTabFrameController(skillTab, wisdom.recipeCategories);
 
         tabs.tabChanged = (string next, string prev) {
-            if (auto recipeTab = cast(RecipeTabFrame)root.childById(prev))
+            if (auto recipeTab = cast(RecipeTabFrame)childById(prev))
             {
                 auto useMetaSearch = recipeTab.useMetaSearch;
                 auto useMigemo = recipeTab.useMigemo;
@@ -157,13 +146,33 @@ class MainFrame : VerticalLayout
                     });
             }
 
-            (cast(RecipeTabFrame)root.childById(next)).controller.showBinderRecipes;
+            if (auto nextTab = cast(RecipeTabFrame)childById(next))
+            {
+                nextTab.controller.showBinderRecipes;
+            }
         };
-
-        (cast(RecipeTabFrame)tabs.selectedTabBody).controller.showBinderRecipes;
-
-        return root;
+        return tabs;
     }
 
-    MainFrameController controller;
+    override bool handleAction(const Action a)
+    {
+        if (a)
+        {
+            switch(a.id) with(MENU_ACTION)
+            {
+            case EXIT:
+                window.close;
+                return true;
+            case OPTION:
+                import coop.view.config_window;
+                showConfigWindow(window, controller.characters, controller.config);
+                return true;
+            default:
+            }
+        }
+        return false;
+    }
+private:
+    MainFrameController controller_;
+    RecipeTabFrame binderTab, skillTab;
 }

@@ -163,13 +163,14 @@ class RecipeTabFrame: HorizontalLayout
         auto scroll = new ScrollWidget;
         auto horizontal = new HorizontalLayout;
 
-        entries
-            .chunks(tableColumnLength(entries.length, numberOfColumns))
-            .map!((rs) {
-                    auto col = new VerticalLayout;
-                    rs.each!(r => col.addChild(r));
-                    return col;
-                })
+        auto chs = entries.empty ? []
+                                 : entries.chunks(tableColumnLength(entries.length,
+                                                                    numberOfColumns)).array;
+        chs.map!((rs) {
+                auto col = new VerticalLayout;
+                rs.each!(r => col.addChild(r));
+                return col;
+            })
             .each!(col => horizontal.addChild(col));
         scroll.contentWidget = horizontal;
         scroll.backgroundColor = "white";

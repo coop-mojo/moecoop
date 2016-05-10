@@ -269,7 +269,12 @@ class ItemEditDialog: Dialog
             import coop.model.item: toStr = toString;
             auto types = [EnumMembers!ItemType].map!(t => toStr(t)).array.to!(dstring[]);
             items = types;
-            selectedItemIndex = [EnumMembers!ItemType].enumerate.find!"a[1] == b"(item.type).front[0].to!int;
+            auto kv = [EnumMembers!ItemType].enumerate.find!"a[1] == b"(item.type).front;
+            selectedItemIndex = kv[0].to!int;
+            if (kv[1] != ItemType.UNKNOWN)
+            {
+                enabled = false;
+            }
         }
 
         with(root.childById("dlgButtons"))

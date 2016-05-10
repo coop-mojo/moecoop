@@ -119,6 +119,7 @@ auto toStrings(ushort sps)
 
 enum ItemType
 {
+    UNKNOWN,
     Others,
     Food,
     Drink,
@@ -134,6 +135,7 @@ auto toItemType(string s)
     with(ItemType)
     {
         auto map = [
+            "不明":     UNKNOWN,
             "その他":   Others,
             "食べ物":   Food,
             "飲み物":   Drink,
@@ -207,6 +209,7 @@ auto toString(ItemType type)
 {
     final switch(type) with(ItemType)
     {
+    case UNKNOWN:  return "不明";
     case Others:   return "その他";
     case Food:     return "食べ物";
     case Drink:    return "飲み物";

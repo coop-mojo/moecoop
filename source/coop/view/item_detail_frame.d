@@ -149,7 +149,7 @@ class ItemDetailFrame: ScrollWidget
             // ペットアイテム情報
             auto petCap = childById("petItemCaption");
             auto pFoodInfo = childById("petItem");
-            if (i.petFoodInfo.keys.empty)
+            if (i.petFoodInfo.keys.empty || i.petFoodInfo.keys[0] == PetFoodType.NoEatable)
             {
                 petCap.visibility = Visibility.Gone;
                 pFoodInfo.visibility = Visibility.Gone;

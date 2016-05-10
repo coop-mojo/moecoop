@@ -47,28 +47,30 @@ enum PetFoodType
     Paper,
     Cloth,
     Others,
+    NoEatable,
 }
 
 auto toString(PetFoodType t)
 {
     final switch(t) with(PetFoodType)
     {
-    case UNKNOWN:  return "不明";
-    case Food:     return "食べ物";
-    case Meat:     return "肉食物";
-    case Weed:     return "草食物";
-    case Drink:    return "飲み物";
-    case Liquor:   return "酒";
-    case Medicine: return "薬";
-    case Metal:    return "金属";
-    case Stone:    return "石";
-    case Bone:     return "骨";
-    case Crystal:  return "クリスタル";
-    case Wood:     return "木";
-    case Leather:  return "皮";
-    case Paper:    return "紙";
-    case Cloth:    return "布";
-    case Others:   return "その他";
+    case UNKNOWN:   return "不明";
+    case Food:      return "食べ物";
+    case Meat:      return "肉食物";
+    case Weed:      return "草食物";
+    case Drink:     return "飲み物";
+    case Liquor:    return "酒";
+    case Medicine:  return "薬";
+    case Metal:     return "金属";
+    case Stone:     return "石";
+    case Bone:      return "骨";
+    case Crystal:   return "クリスタル";
+    case Wood:      return "木";
+    case Leather:   return "皮";
+    case Paper:     return "紙";
+    case Cloth:     return "布";
+    case Others:    return "その他";
+    case NoEatable: return "犬も食わない";
     }
 }
 
@@ -188,6 +190,10 @@ auto toItem(string s, JSONValue[string] json)
         {
             petFoodInfo = (*petFood).object.toPetFoodInfo;
         }
+        else
+        {
+            petFoodInfo = [PetFoodType.NoEatable: 0];
+        }
 
         if (auto props = "特殊条件" in json)
         {
@@ -238,7 +244,10 @@ auto toPetFoodInfo(JSONValue[string] vals)
             "紙": Paper,
             "布": Cloth,
             "その他": Others,
+            "犬も食わない": NoEatable,
             ];
+        enforce(vals.keys.length == 1);
+        enforce(!vals.keys.canFind!(k => FoodTypeMap[k] == NoEatable));
         return vals.keys.map!(k => tuple(FoodTypeMap[k], vals[k].floating.to!real)).assocArray;
     }
 }

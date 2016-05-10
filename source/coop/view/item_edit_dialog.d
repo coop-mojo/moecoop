@@ -219,12 +219,14 @@ class ItemEditDialog: Dialog
         with(root.childById!ComboBox("petFoodType"))
         {
             import coop.model.item: toStr = toString;
-            auto types = chain([EnumMembers!PetFoodType].map!(t => toStr(t)).array, ["犬も食わない"]).array.to!(dstring[]);
+            auto types = [EnumMembers!PetFoodType].map!(t => toStr(t)).array.to!(dstring[]);
+            auto textBox = root.childById!EditLine("petFoodEffect");
+
             items = types;
             itemClick = (Widget src, int idx) {
-                auto textBox = root.childById!EditLine("petFoodEffect");
                 if (idx == 0 || idx == types.length-1)
                 {
+                    textBox.text = "";
                     textBox.enabled = false;
                 }
                 else
@@ -233,10 +235,17 @@ class ItemEditDialog: Dialog
                 }
                 return true;
             };
-            selectedItemIndex = 1;
-            // (types.length-1).to!int を設定した場合には textBox は disabled される
-            selectedItemIndex = 0;
-            invalidate; // 効いてない
+            selectedItemIndex = [EnumMembers!PetFoodType].enumerate.find!"a[1] == b"(item.petFoodInfo.keys[0]).front[0].to!int;
+            auto key = item.petFoodInfo.keys[0];
+            if (key != PetFoodType.UNKNOWN)
+            {
+                if (key != PetFoodType.NoEatable)
+                {
+                    textBox.text = item.petFoodInfo[key].to!dstring;
+                }
+                textBox.enabled = false;
+                enabled = false;
+            }
         }
 
         auto props = item.properties;

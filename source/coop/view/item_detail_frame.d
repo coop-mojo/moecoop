@@ -204,6 +204,24 @@ auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
     }
     case Armor:
         break;
+    case Bullet:{
+        auto info = item.extraInfo.peek!BulletInfo;
+
+        layout.addElem("ダメージ", format("%.1f"d, info.damage));
+        layout.addElem("有効レンジ", format("%.1f"d, info.range));
+        layout.addElem("角度補正角", info.angle.to!dstring);
+        layout.addElem("必要スキル",
+                       info.skills
+                           .byKeyValue
+                           .map!(kv => format("%s (%.1f)"d, kv.key, kv.value))
+                           .join(", "));
+        layout.addElem("装備スロット", "矢/弾");
+        if (info.restriction != ShipRestriction.Any)
+        {
+            layout.addElem("装備可能シップ", info.restriction.to!dstring~"系");
+        }
+        return ""d;
+    }
     case Asset:
         break;
     case Others:

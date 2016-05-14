@@ -58,8 +58,9 @@ class Wisdom {
         auto drinkList = readDrinkList(baseDir_);
         auto liquorList = readLiquorList(baseDir_);
         auto weaponList = readWeaponList(baseDir_);
+        auto bulletList = readBulletList(baseDir_);
 
-        itemList = readItemList(baseDir_, foodList, drinkList, liquorList, weaponList);
+        itemList = readItemList(baseDir_, foodList, drinkList, liquorList, weaponList, bulletList);
     }
 
     auto readBinderList(string basedir)
@@ -86,12 +87,12 @@ class Wisdom {
 
     auto readItemList(string sysBase,
                       FoodInfo[dstring] foodList, FoodInfo[dstring] drinkList, FoodInfo[dstring] liquorList,
-                      WeaponInfo[dstring] weaponList)
+                      WeaponInfo[dstring] weaponList, BulletInfo[dstring] bulletList)
     {
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
         return dirEntries(buildPath(sysBase, "アイテム"), "*.json", SpanMode.breadth)
-            .map!(s => s.readItems(foodList, drinkList, liquorList, weaponList))
+            .map!(s => s.readItems(foodList, drinkList, liquorList, weaponList, bulletList))
             .array
             .joiner
             .assocArray;
@@ -126,6 +127,13 @@ class Wisdom {
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
         return buildPath(sysBase, "武器", "武器.json").readWeapons.assocArray;
+    }
+
+    auto readBulletList(string sysBase)
+    {
+        enforce(sysBase.exists);
+        enforce(sysBase.isDir);
+        return buildPath(sysBase, "武器", "弾.json").readBullets.assocArray;
     }
 
     auto readFoodEffectList(string sysBase)

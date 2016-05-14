@@ -42,7 +42,7 @@ struct Item
     real[PetFoodType] petFoodInfo;
     dstring remarks;
     ItemType type;
-    Algebraic!(FoodInfo, WeaponInfo) extraInfo;
+    Algebraic!(FoodInfo, WeaponInfo, BulletInfo) extraInfo;
     @property auto hasExtraInfo()
     {
         return extraInfo.hasValue;
@@ -51,19 +51,19 @@ struct Item
 
 auto readItems(string fname,
                FoodInfo[dstring] foodList, FoodInfo[dstring] drinkList, FoodInfo[dstring] liquorList,
-               WeaponInfo[dstring] weaponList)
+               WeaponInfo[dstring] weaponList, BulletInfo[dstring] bulletList)
 {
     auto res = fname.readText.parseJSON;
     enforce(res.type == JSON_TYPE.OBJECT);
     auto items = res.object;
     return items.keys.map!(key =>
                            tuple(key.to!dstring,
-                                 key.toItem(items[key].object, foodList, drinkList, liquorList, weaponList)));
+                                 key.toItem(items[key].object, foodList, drinkList, liquorList, weaponList, bulletList)));
 }
 
 auto toItem(string s, JSONValue[string] json,
             FoodInfo[dstring] foodList, FoodInfo[dstring] drinkList, FoodInfo[dstring] liquorList,
-            WeaponInfo[dstring] weaponList)
+            WeaponInfo[dstring] weaponList, BulletInfo[dstring] bulletList)
 {
     Item item;
     with(item)
@@ -119,6 +119,12 @@ auto toItem(string s, JSONValue[string] json,
             }
             break;
         case Armor:
+            break;
+        case Bullet:
+            if (auto info = name in bulletList)
+            {
+                extraInfo = *info;
+            }
             break;
         case Asset:
             break;
@@ -185,9 +191,9 @@ auto toSpecialProperties(JSONValue[] vals)
 }
 
 alias ItemType = ExtendedEnum!(["UNKNOWN", "Others", "Food", "Drink", "Liquor",
-                                "Medicine", "Weapon", "Armor", "Asset"],
+                                "Medicine", "Weapon", "Armor", "Bullet", "Asset"],
                                ["不明", "その他", "食べ物", "飲み物", "酒",
-                                "薬", "武器", "防具", "アセット"]);
+                                "薬", "武器", "防具", "弾", "アセット"]);
 
 /// 料理固有の情報
 struct FoodInfo
@@ -334,7 +340,7 @@ auto toWeaponInfo(JSONValue[string] json)
     return info;
 }
 
-struct Armor
+struct ArmorInfo
 {
     real[Grade] AC;
     real[dstring] skills;
@@ -347,7 +353,57 @@ struct Armor
     dstring additionalEffect;
 }
 
-struct Asset
+struct BulletInfo
+{
+    real damage;
+    real range;
+    int angle;
+    ShipRestriction restriction;
+    real[dstring] skills;
+    dstring effects;
+}
+
+auto readBullets(string fname)
+{
+    auto res = fname.readText.parseJSON;
+    enforce(res.type == JSON_TYPE.OBJECT);
+    auto bullets = res.object;
+    return bullets.keys.map!(key =>
+                             tuple(key.to!dstring,
+                                   bullets[key].object.toBulletInfo));
+}
+
+auto toBulletInfo(JSONValue[string] json)
+{
+    BulletInfo info;
+    with(info)
+    {
+        damage = json["攻撃力"].jto!real;
+        range = json["射程"].jto!real;
+        angle = json["角度補正角"].jto!int;
+        skills = json["必要スキル"].jto!(real[dstring]);
+        // if (auto f = "追加効果" in json) // 追加効果の名前を確認
+        // {
+        //     effects = (*f).jto!(real[dstring]);
+        // }
+        // if (auto af = "付与効果" in json)
+        // {
+        //     additionalEffect = (*af).jto!(int[dstring]);
+        // }
+
+        if (auto rest = "シップ" in json)
+        {
+            restriction = (*rest).jto!ShipRestriction;
+        }
+        else
+        {
+            restriction = ShipRestriction.Any;
+        }
+    }
+    return info;
+}
+
+struct AssetInfo
 {
     uint width, depth, height;
     Material material;

@@ -377,7 +377,7 @@ private:
                     {
                         item.name = name;
                         item.remarks = "細かいことはわかりません（´・ω・｀）";
-                        item.petFoodInfo = [PetFoodType.UNKNOWN: 0];
+                        item.petFoodInfo = [PetFoodType.UNKNOWN.to!PetFoodType: 0];
                     }
 
                     showItemDetail(idx);

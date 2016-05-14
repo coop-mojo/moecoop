@@ -18,62 +18,123 @@
 module coop.model.item;
 
 import std.algorithm;
-import std.container.rbtree;
 import std.conv;
 import std.exception;
 import std.file;
 import std.json;
 import std.range;
 import std.typecons;
+import std.variant;
 
 import coop.util;
 
-
-enum PetFoodType
+/// アイテム一般の情報
+struct Item
 {
-    UNKNOWN,
-    Food,
-    Meat,
-    Weed,
-    Drink,
-    Liquor,
-    Medicine,
-    Metal,
-    Stone,
-    Bone,
-    Crystal,
-    Wood,
-    Leather,
-    Paper,
-    Cloth,
-    Others,
-    NoEatable,
-}
-
-auto toString(PetFoodType t)
-{
-    final switch(t) with(PetFoodType)
+    dstring name;
+    dstring ename;
+    real weight;
+    uint price;
+    dstring info;
+    ushort properties;
+    bool transferable;
+    bool stackable;
+    real[PetFoodType] petFoodInfo;
+    dstring remarks;
+    ItemType type;
+    Algebraic!(FoodInfo, WeaponInfo) extraInfo;
+    @property auto hasExtraInfo()
     {
-    case UNKNOWN:   return "不明";
-    case Food:      return "食べ物";
-    case Meat:      return "肉食物";
-    case Weed:      return "草食物";
-    case Drink:     return "飲み物";
-    case Liquor:    return "酒";
-    case Medicine:  return "薬";
-    case Metal:     return "金属";
-    case Stone:     return "石";
-    case Bone:      return "骨";
-    case Crystal:   return "クリスタル";
-    case Wood:      return "木";
-    case Leather:   return "皮";
-    case Paper:     return "紙";
-    case Cloth:     return "布";
-    case Others:    return "その他";
-    case NoEatable: return "犬も食わない";
+        return extraInfo.hasValue;
     }
 }
 
+auto readItems(string fname,
+               FoodInfo[dstring] foodList, FoodInfo[dstring] drinkList, FoodInfo[dstring] liquorList,
+               WeaponInfo[dstring] weaponList)
+{
+    auto res = fname.readText.parseJSON;
+    enforce(res.type == JSON_TYPE.OBJECT);
+    auto items = res.object;
+    return items.keys.map!(key =>
+                           tuple(key.to!dstring,
+                                 key.toItem(items[key].object, foodList, drinkList, liquorList, weaponList)));
+}
+
+auto toItem(string s, JSONValue[string] json,
+            FoodInfo[dstring] foodList, FoodInfo[dstring] drinkList, FoodInfo[dstring] liquorList,
+            WeaponInfo[dstring] weaponList)
+{
+    Item item;
+    with(item)
+    {
+        name = s.to!dstring;
+        ename = json["英名"].jto!dstring;
+        price = json["NPC売却価格"].jto!uint;
+        weight = json["重さ"].jto!real;
+        info = json["info"].jto!dstring;
+        transferable = json["転送できる"].jto!bool;
+        stackable = json["スタックできる"].jto!bool;
+
+        if (auto petFood = "ペットアイテム" in json)
+        {
+            petFoodInfo = (*petFood).jto!(real[PetFoodType]);
+        }
+        else
+        {
+            petFoodInfo = [PetFoodType.NoEatable.to!PetFoodType: 0];
+        }
+
+        if (auto props = "特殊条件" in json)
+        {
+            properties = (*props).array.toSpecialProperties;
+        }
+        type = json["種類"].jto!ItemType;
+        final switch(type) with(ItemType)
+        {
+        case Food:
+            if (auto info = name in foodList)
+            {
+                extraInfo = *info;
+            }
+            break;
+        case Drink:
+            if (auto info = name in drinkList)
+            {
+                extraInfo = *info;
+            }
+            break;
+        case Liquor:
+            if (auto info = name in liquorList)
+            {
+                extraInfo = *info;
+            }
+            break;
+        case Medicine:
+            break;
+        case Weapon:
+            if (auto info = name in weaponList)
+            {
+                extraInfo = *info;
+            }
+            break;
+        case Armor:
+            break;
+        case Asset:
+            break;
+        case Others:
+            break;
+        case UNKNOWN:
+            break;
+        }
+    }
+    return item;
+}
+
+alias PetFoodType = ExtendedEnum!(["UNKNOWN", "Food", "Meat", "Weed", "Drink", "Liquor", "Medicine", "Metal",
+                                   "Stone", "Bone", "Crystal", "Wood", "Leather", "Paper", "Cloth", "Others", "NoEatable"],
+                                  ["不明", "食べ物", "肉食物", "草食物", "飲み物", "酒", "薬", "金属",
+                                   "石", "骨", "クリスタル", "木", "皮", "紙", "布", "その他", "犬も食わない"]);
 
 enum SpecialProperty: ushort
 {
@@ -117,146 +178,19 @@ auto toStrings(ushort sps)
     }
 }
 
-enum ItemType
-{
-    UNKNOWN,
-    Others,
-    Food,
-    Drink,
-    Liquor,
-    Medicine,
-    Weapon,
-    Armor,
-    Asset,
-}
-
-auto toItemType(string s)
-{
-    with(ItemType)
-    {
-        auto map = [
-            "不明":     UNKNOWN,
-            "その他":   Others,
-            "食べ物":   Food,
-            "飲み物":   Drink,
-            "酒":       Liquor,
-            "薬":       Medicine,
-            "武器":     Weapon,
-            "防具":     Armor,
-            "アセット": Asset,
-            ];
-        return map[s];
-    }
-}
-
-/// アイテム一般の情報
-struct Item
-{
-    dstring name;
-    dstring ename;
-    real weight;
-    uint price;
-    dstring info;
-    ushort properties;
-    bool transferable;
-    bool stackable;
-    real[PetFoodType] petFoodInfo;
-    dstring remarks;
-    ItemType type;
-}
-
-auto readItems(string fname)
-{
-    auto res = fname.readText.parseJSON;
-    enforce(res.type == JSON_TYPE.OBJECT);
-    auto items = res.object;
-    return items.keys.map!(key =>
-                           tuple(key.to!dstring,
-                                 key.toItem(items[key].object)));
-}
-
-auto toItem(string s, JSONValue[string] json)
-{
-    Item item;
-    with(item) {
-        name = s.to!dstring;
-        ename = json["英名"].str.to!dstring;
-        price = json["NPC売却価格"].integer.to!uint;
-        weight = json["重さ"].floating.to!real;
-        info = json["info"].str.to!dstring;
-        transferable = json["転送できる"].toBool;
-        stackable = json["スタックできる"].toBool;
-        type = json["種類"].str.toItemType;
-
-        if (auto petFood = "ペットアイテム" in json)
-        {
-            petFoodInfo = (*petFood).object.toPetFoodInfo;
-        }
-        else
-        {
-            petFoodInfo = [PetFoodType.NoEatable: 0];
-        }
-
-        if (auto props = "特殊条件" in json)
-        {
-            properties = (*props).array.toSpecialProperties;
-        }
-    }
-    return item;
-}
-
-auto toString(ItemType type)
-{
-    final switch(type) with(ItemType)
-    {
-    case UNKNOWN:  return "不明";
-    case Others:   return "その他";
-    case Food:     return "食べ物";
-    case Drink:    return "飲み物";
-    case Liquor:   return "酒";
-    case Medicine: return "薬";
-    case Weapon:   return "武器";
-    case Armor:    return "防具";
-    case Asset:    return "アセット";
-    }
-}
-
 auto toSpecialProperties(JSONValue[] vals)
 {
     auto props = vals.map!"a.str".map!(s => s.to!SpecialProperty).array;
     return props.reduce!((a, b) => a|b).to!ushort;
 }
 
-auto toPetFoodInfo(JSONValue[string] vals)
-{
-    with(PetFoodType) {
-        auto FoodTypeMap = [
-            "不明": UNKNOWN,
-            "食べ物": Food,
-            "肉食物": Meat,
-            "草食物": Weed,
-            "飲み物": Drink,
-            "酒": Liquor,
-            "薬": Medicine,
-            "金属": Metal,
-            "石": Stone,
-            "骨": Bone,
-            "クリスタル": Crystal,
-            "木": Wood,
-            "皮": Leather,
-            "紙": Paper,
-            "布": Cloth,
-            "その他": Others,
-            "犬も食わない": NoEatable,
-            ];
-        enforce(vals.keys.length == 1);
-        enforce(!vals.keys.canFind!(k => FoodTypeMap[k] == NoEatable));
-        return vals.keys.map!(k => tuple(FoodTypeMap[k], vals[k].floating.to!real)).assocArray;
-    }
-}
+alias ItemType = ExtendedEnum!(["UNKNOWN", "Others", "Food", "Drink", "Liquor",
+                                "Medicine", "Weapon", "Armor", "Asset"],
+                               ["不明", "その他", "食べ物", "飲み物", "酒",
+                                "薬", "武器", "防具", "アセット"]);
 
 /// 料理固有の情報
-struct Food
+struct FoodInfo
 {
     dstring name;
     real effect;
@@ -270,21 +204,22 @@ auto readFoods(string fname)
     auto foods = res.object;
     return foods.keys.map!(key =>
                            tuple(key.to!dstring,
-                                 key.toFood(foods[key].object)));
+                                 key.toFoodInfo(foods[key].object)));
 }
 
-auto toFood(string s, JSONValue[string] json)
+auto toFoodInfo(string s, JSONValue[string] json)
 {
-    Food food;
-    with(food) {
+    FoodInfo info;
+    with(info)
+    {
         name = s.to!dstring;
-        effect = json["効果"].floating.to!real;
+        effect = json["効果"].jto!real;
         if (auto addition = "付加効果" in json)
         {
-            additionalEffect = (*addition).str.to!dstring;
+            additionalEffect = (*addition).jto!dstring;
         }
     }
-    return food;
+    return info;
 }
 
 /// 飲食バフのグループ
@@ -317,24 +252,158 @@ auto readFoodEffects(string fname)
 auto toFoodEffect(string s, JSONValue[string] json)
 {
     AdditionalEffect effect;
-    with(effect) {
+    with(effect)
+    {
         name = s.to!dstring;
-        effects = json["効果"].object.toStatusEffect;
+        effects = json["効果"].jto!(int[dstring]);
         if (auto others = "その他効果" in json)
         {
-            otherEffects = (*others).str.to!dstring;
+            otherEffects = (*others).jto!dstring;
         }
-        duration = json["効果時間"].integer.to!uint;
-        group = json["グループ"].str.to!AdditionalEffectGroup;
+        duration = json["効果時間"].jto!uint;
+        group = json["グループ"].jto!AdditionalEffectGroup;
         if (auto rem = "備考" in json)
         {
-            remarks = (*rem).str.to!dstring;
+            remarks = (*rem).jto!dstring;
         }
     }
     return effect;
 }
 
-auto toStatusEffect(JSONValue[string] json)
+struct WeaponInfo
 {
-    return json.keys.map!((key) { return tuple(key.to!dstring, json[key].integer.to!int); }).assocArray;
+    real[Grade] damage;
+    int duration;
+    real range;
+    real[dstring] skills;
+    bool isDoubleHands;
+    WeaponSlot slot;
+    ShipRestriction restriction;
+    Material material;
+    ExhaustionType type;
+    int exhaustion;
+    real[dstring] effects;
+    int[dstring] additionalEffect;
 }
+
+auto readWeapons(string fname)
+{
+    auto res = fname.readText.parseJSON;
+    enforce(res.type == JSON_TYPE.OBJECT);
+    auto weapons = res.object;
+    return weapons.keys.map!(key =>
+                             tuple(key.to!dstring,
+                                   weapons[key].object.toWeaponInfo));
+}
+
+auto toWeaponInfo(JSONValue[string] json)
+{
+    WeaponInfo info;
+    with(info)
+    {
+        damage = json["攻撃力"].jto!(real[Grade]);
+        duration = json["攻撃間隔"].jto!int;
+        range = json["射程"].jto!real;
+        skills = json["必要スキル"].jto!(real[dstring]);
+        slot = json["装備箇所"].jto!WeaponSlot;
+        isDoubleHands = json["両手装備"].jto!bool;
+        material = json["素材"].jto!Material;
+        if (auto t = "消耗タイプ" in json)
+        {
+            type = (*t).jto!ExhaustionType;
+        }
+        exhaustion = json["耐久"].jto!int;
+        if (auto f = "追加効果" in json)
+        {
+            effects = (*f).jto!(real[dstring]);
+        }
+        if (auto af = "付与効果" in json)
+        {
+            additionalEffect = (*af).jto!(int[dstring]);
+        }
+
+        if (auto rest = "シップ" in json)
+        {
+            restriction = (*rest).jto!ShipRestriction;
+        }
+        else
+        {
+            restriction = ShipRestriction.Any;
+        }
+    }
+    return info;
+}
+
+struct Armor
+{
+    real[Grade] AC;
+    real[dstring] skills;
+    ArmorSlot slot;
+    ShipRestriction restriction;
+    Material material;
+    ExhaustionType type;
+    int exhaustion;
+    real[dstring] effects;
+    dstring additionalEffect;
+}
+
+struct Asset
+{
+    uint width, depth, height;
+    Material material;
+    int exhaustion;
+}
+
+alias ShipRestriction = ExtendedEnum!(["UNKNOWN", "Any",],
+                                      ["不明", "なし",
+                                       // 基本シップ
+                                       // 熟練
+                                       // "パンチャー", "剣士", "メイサー", "ランサー", "ガンナー", "アーチャー",
+                                       // "ガーズマン", "投げ士", "レンジャー", "ブラッド サッカー", "キッカー", "ワイルドマン",
+                                       // "ドリンカー", "物まね師", "テイマー", "ウィザード", "プリースト", "シャーマン", //ウィッチは？
+                                       // "エンチャンター", "サモナー", "シャドウ", "魔術師", "野生児", "小悪魔",
+                                       // "ベンダー", "ロックシンガー", "ソングシンガー", "スリ", "目立ちたがり", "ストリートダンサー",
+                                       // // 基本
+                                       // "フォールマン", "スイマー", "デッドマン", "ヘルパー", "休憩人", "マイナー",
+                                       // "木こり", "耕作師", "釣り人", "解読者",
+                                       // // 生産
+                                       // "料理師", "鍛冶師", "バーテンダー", "木工師", "仕立て屋", "調合師",
+                                       // "細工師", "筆記師", "調髪師", "栽培師",
+                                       // // 複合
+                                       // "ウォーリアー", "アルケミスト", "フォレスター", "ネクロマンサー", "クリエイター",
+                                       // "爆弾男", "ブリーダー", "テンプルナイト", "ドルイド", "紺碧の賢者", // 爆弾女は？
+                                       // "グレート クリエイター", "傭兵", "サムライ", "マイン ビショップ", "厨房師",
+                                       // "アサシン", "海戦士", "ブレイブナイト", "イビルナイト", "コスプレイヤー",
+                                       // "物好き", "アスリート", "酔拳士", "荒くれ者", "新人アイドル",
+                                       // "ハウスキーパー", "アドベンチャラー", "スパイ", "レディース", "アカデミアン", // チンピラは？
+                                       // "ブラッドバード", "デュエリスト", "コレクター"
+                                          ]);
+
+alias WeaponSlot = ExtendedEnum!(["UNKNOWN", "Right", "Left", "Both"],
+                                 ["不明", "右手", "左手", "左右"]);
+
+alias ArmorSlot = ExtendedEnum!(["UNKNOWN",
+                                 "HeadProtector", "BodyProtector", "HandProtector",
+                                 "PantsProtector", "ShoesProtector", "ShoulderProtector", "WaistProtector",
+                                 "HeadOrnament", "FaceOrnament", "EarOrnament",
+                                 "FingerOrnament", "BreastOrnament", "BackOrnament", "WaistOrnament"],
+                                ["不明",
+                                 "頭(防)", "胴(防)", "手(防)",
+                                 "パンツ(防)", "靴(防)", "肩(防)", "腰(防)",
+                                 "頭(装)", "顔(装)", "耳(装)",
+                                 "指(装)", "胸(装)", "背中(装)", "腰(装)"]);
+
+alias Material = ExtendedEnum!(["UNKNOWN",
+                                "Copper", "Bronze", "Iron", "Steel", "Silver", "Gold", "Mithril", "Orichalcum",
+                                "Cotton", "Silk", "AnimalSkin", "DragonSkin", "Plant", "Wood", "Treant",
+                                "Paper", "Bamboo", "BlackBamboo", "Bone", "Stone", "Glass", "Crystal", "Cobalt", "Chaos"],
+                               ["不明",
+                                "銅", "青銅", "鉄", "鋼鉄", "銀", "金", "ミスリル", "オリハルコン",
+                                "綿", "絹", "動物の皮", "竜の皮", "プラント", "木", "トレント",
+                                "紙", "竹筒", "黒い竹", "骨", "石", "ガラス", "クリスタル", "コバルト", "カオス"]);
+
+alias Grade = ExtendedEnum!(["UNKNOWN", "Degraded", "NG", "HG", "MG"],
+                            ["不明", "劣化", "NG", "HG", "MG"]);
+
+alias ExhaustionType = ExtendedEnum!(["UNKNOWN", "Points", "Times"],
+                                     ["不明", "耐久値", "使用可能回数"]);

@@ -83,29 +83,19 @@ auto toRecipe(string s, JSONValue[string] json)
     Recipe ret;
     with(ret) {
         name = s.to!dstring;
-        ingredients = json["材料"].object.toMaterails;
-        products = json["生成物"].object.toMaterails;
-        techniques = make!(typeof(techniques))(json["テクニック"].array.map!"a.str.to!dstring");
-        requiredSkills = json["スキル"].object.toRequiredSkills;
-        requiresRecipe = json["レシピが必要"].toBool;
-        isGambledRoulette = json["ギャンブル型"].toBool;
-        isPenaltyRoulette = json["ペナルティ型"].toBool;
+        ingredients = json["材料"].jto!(int[dstring]);
+        products = json["生成物"].jto!(int[dstring]);
+        techniques = make!(typeof(techniques))(json["テクニック"].jto!(dstring[]));
+        requiredSkills = json["スキル"].jto!(real[dstring]);
+        requiresRecipe = json["レシピが必要"].jto!bool;
+        isGambledRoulette = json["ギャンブル型"].jto!bool;
+        isPenaltyRoulette = json["ペナルティ型"].jto!bool;
         if (auto rem = ("備考" in json))
         {
-            remarks = rem.str.to!dstring;
+            remarks = (*rem).jto!dstring;
         }
     }
     return ret;
-}
-
-auto toMaterails(JSONValue[string] json)
-{
-    return json.keys.map!((key) { return tuple(key.to!dstring, json[key].integer.to!int); }).assocArray;
-}
-
-auto toRequiredSkills(JSONValue[string] json)
-{
-    return json.keys.map!((key) { return tuple(key.to!dstring, json[key].floating.to!real); }).assocArray;
 }
 
 unittest

@@ -26,6 +26,7 @@ import std.typecons;
 
 import coop.model.item;
 import coop.model.recipe;
+import coop.util;
 
 alias Binder = Typedef!(dstring, "binder");
 alias Category = Typedef!(dstring, "category");
@@ -40,15 +41,6 @@ class Wisdom {
     /// アイテム一覧
     Item[dstring] itemList;
 
-    /// 料理一覧
-    Food[dstring] foodList;
-
-    /// 飲み物一覧
-    Food[dstring] drinkList;
-
-    /// 酒一覧
-    Food[dstring] liquorList;
-
     /// 飲食バフ一覧
     AdditionalEffect[dstring] foodEffectList;
 
@@ -60,11 +52,14 @@ class Wisdom {
         baseDir_ = baseDir;
         binderList = readBinderList(baseDir_);
         recipeList = readRecipeList(baseDir_);
-        itemList = readItemList(baseDir_);
-        foodList = readFoodList(baseDir_);
-        drinkList = readDrinkList(baseDir_);
-        liquorList = readLiquorList(baseDir_);
         foodEffectList = readFoodEffectList(baseDir_);
+
+        auto foodList = readFoodList(baseDir_);
+        auto drinkList = readDrinkList(baseDir_);
+        auto liquorList = readLiquorList(baseDir_);
+        auto weaponList = readWeaponList(baseDir_);
+
+        itemList = readItemList(baseDir_, foodList, drinkList, liquorList, weaponList);
     }
 
     auto readBinderList(string basedir)
@@ -89,12 +84,14 @@ class Wisdom {
             .assocArray;
     }
 
-    auto readItemList(string sysBase)
+    auto readItemList(string sysBase,
+                      FoodInfo[dstring] foodList, FoodInfo[dstring] drinkList, FoodInfo[dstring] liquorList,
+                      WeaponInfo[dstring] weaponList)
     {
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
         return dirEntries(buildPath(sysBase, "アイテム"), "*.json", SpanMode.breadth)
-            .map!(s => s.readItems)
+            .map!(s => s.readItems(foodList, drinkList, liquorList, weaponList))
             .array
             .joiner
             .assocArray;
@@ -122,6 +119,13 @@ class Wisdom {
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
         return buildPath(sysBase, "飲み物", "酒.json").readFoods.assocArray;
+    }
+
+    auto readWeaponList(string sysBase)
+    {
+        enforce(sysBase.exists);
+        enforce(sysBase.isDir);
+        return buildPath(sysBase, "武器", "武器.json").readWeapons.assocArray;
     }
 
     auto readFoodEffectList(string sysBase)
@@ -194,7 +198,7 @@ auto readBinders(string file)
         .map!((kv) {
                 auto binder = kv.key.to!dstring;
                 enforce(kv.value.type == JSON_TYPE.ARRAY);
-                auto recipes = kv.value.array.map!(e => e.str).array.to!(dstring[]);
+                auto recipes = kv.value.jto!(dstring[]);
                 return tuple(binder, recipes);
             });
 }

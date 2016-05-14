@@ -218,8 +218,7 @@ class ItemEditDialog: Dialog
 
         with(root.childById!ComboBox("petFoodType"))
         {
-            import coop.model.item: toStr = toString;
-            auto types = [EnumMembers!PetFoodType].map!(t => toStr(t)).array.to!(dstring[]);
+            auto types = PetFoodType.svalues.to!(dstring[]);
             auto textBox = root.childById!EditLine("petFoodEffect");
 
             items = types;
@@ -235,7 +234,7 @@ class ItemEditDialog: Dialog
                 }
                 return true;
             };
-            selectedItemIndex = [EnumMembers!PetFoodType].enumerate.find!"a[1] == b"(item.petFoodInfo.keys[0]).front[0].to!int;
+            selectedItemIndex = PetFoodType.values.enumerate.find!"a[1] == b"(item.petFoodInfo.keys[0]).front[0].to!int;
             auto key = item.petFoodInfo.keys[0];
             if (key != PetFoodType.UNKNOWN)
             {
@@ -266,10 +265,9 @@ class ItemEditDialog: Dialog
 
         with(root.childById!ComboBox("type"))
         {
-            import coop.model.item: toStr = toString;
-            auto types = [EnumMembers!ItemType].map!(t => toStr(t)).array.to!(dstring[]);
+            auto types = ItemType.svalues.to!(dstring[]);
             items = types;
-            auto kv = [EnumMembers!ItemType].enumerate.find!"a[1] == b"(item.type).front;
+            auto kv = ItemType.values.enumerate.find!"a[1] == b"(item.type).front;
             selectedItemIndex = kv[0].to!int;
             if (kv[1] != ItemType.UNKNOWN)
             {

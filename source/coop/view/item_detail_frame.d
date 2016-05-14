@@ -19,11 +19,11 @@ module coop.view.item_detail_frame;
 
 import dlangui;
 
-import std.array;
 import std.algorithm;
+import std.array;
 import std.conv;
-import std.math;
 import std.format;
+import std.math;
 
 import coop.model.item;
 import coop.model.wisdom;
@@ -39,83 +39,11 @@ class ItemDetailFrame: ScrollWidget
                 VerticalLayout {
                     padding: 5
                     TableLayout {
+                        id: table
                         colCount: 2
-
-                        TextWidget { text: "名前: " }
-                        TextWidget { id: name }
-
-                        TextWidget { text: "英名: " }
-                        TextWidget { id: ename }
-
-                        TextWidget { text: "重さ: " }
-                        TextWidget { id: weight }
-
-                        /// 食べ物，飲み物，酒情報
-                        TextWidget { id: effCap; text: "効果: "}
-                        TextWidget { id: effect }
-
-                        TextWidget { id: addCap; text: "付加効果: "}
-                        TextWidget { id: additional }
-
-                        TextWidget { id: addDetailCap; text: ""}
-                        TextWidget { id: additionalDetail }
-
-                        TextWidget { id: groupCap; text: "バフグループ: "}
-                        TextWidget { id: group }
-
-                        TextWidget { id: durCap; text: "効果時間: "}
-                        TextWidget { id: duration }
-
-                        /// 武器
-                        /// 防具
-
-                        TextWidget { text: "NPC売却価格: " }
-                        TextWidget { id: price }
-
-                        TextWidget { text: "転送可: " }
-                        TextWidget { id: transferable }
-
-                        TextWidget { text: "スタック可: " }
-                        TextWidget { id: stackable }
-
-                        TextWidget { id: specialPropCap ; text: "特殊条件: " }
-                        TextWidget { id: specialProp }
-
-                        TextWidget {
-                            id: petItemCaption
-                            text: "ペットアイテム: "
-                        }
-                        TextWidget { id: petItem }
-
-                        TextWidget {
-                            id: infoCap
-                            text: "info: "
-                        }
-                        TextWidget { id: info }
-                    }
-
-                    HorizontalLayout {
-                        id: remarksInfo
-                        TextWidget { text: "備考: " }
-                        TextWidget { id: remarks }
                     }
                 }
             });
-
-        with(layout)
-        {
-            /// 食べ物，飲み物，酒情報
-            childById("effCap").visibility           = Visibility.Gone;
-            childById("effect").visibility           = Visibility.Gone;
-            childById("addCap").visibility           = Visibility.Gone;
-            childById("additional").visibility       = Visibility.Gone;
-            childById("addDetailCap").visibility     = Visibility.Gone;
-            childById("additionalDetail").visibility = Visibility.Gone;
-            childById("groupCap").visibility         = Visibility.Gone;
-            childById("group").visibility            = Visibility.Gone;
-            childById("durCap").visibility           = Visibility.Gone;
-            childById("duration").visibility         = Visibility.Gone;
-        }
         contentWidget = layout;
         backgroundColor = "white";
     }
@@ -124,96 +52,51 @@ class ItemDetailFrame: ScrollWidget
     {
         auto ret = new typeof(this)("detail"~idx.to!string);
         ret.item_ = i;
-        with(ret)
+
+        auto table = ret.childById("table");
+        with(table)
         {
-            childById("name").text = i.name;
-            childById("ename").text =
-                i.ename.empty ? "わからん（´・ω・｀）" : i.ename;
-            childById("weight").text =
-                i.weight.isNaN ? "そこそこの重さ" : format("%.2f"d, i.weight);
-            childById("price").text = format("%s g"d, i.price);
-            childById("transferable").text
-                = i.transferable ? "はい" : "いいえ";
-            childById("stackable").text = i.stackable ? "はい": "いいえ";
+            table.addElem("名前", i.name);
+            table.addElem("英名", i.ename.empty ? "わからん（´・ω・｀）" : i.ename);
+            table.addElem("重さ", i.weight.isNaN ? "そこそこの重さ" : format("%.2f"d, i.weight));
 
-            childById("info").text = i.info;
-            childById("info").visibility =
-                i.info.empty ? Visibility.Gone : Visibility.Visible;
-            childById("infoCap").visibility =
-                i.info.empty ? Visibility.Gone : Visibility.Visible;
-
-            childById("remarks").text = i.remarks;
-            childById("remarksInfo").visibility
-                = i.remarks.empty ? Visibility.Gone : Visibility.Visible;
-
-            // ペットアイテム情報
-            auto petCap = childById("petItemCaption");
-            auto pFoodInfo = childById("petItem");
-            if (i.petFoodInfo.keys[0] == PetFoodType.NoEatable)
+            dstring extraRemarks;
+            if (i.hasExtraInfo)
             {
-                petCap.visibility = Visibility.Gone;
-                pFoodInfo.visibility = Visibility.Gone;
-            }
-            else
-            {
-                petCap.visibility = Visibility.Visible;
-                pFoodInfo.visibility = Visibility.Visible;
-                auto str = i.petFoodInfo
-                           .byKeyValue
-                           .map!(kv => format("%s (%.1f)"d,
-                                              kv.key.toString,
-                                              kv.value)).join;
-                pFoodInfo.text = str;
+                extraRemarks = table.addExtraElem(i, wisdom);
             }
 
-            auto spCap = childById("specialPropCap");
-            auto sp = childById("specialProp");
-            if (i.properties == 0)
+            // extrainfo
+            table.addElem("NPC売却価格", format("%s g"d, i.price));
+            table.addElem("転送可", i.transferable ? "はい" : "いいえ");
+            table.addElem("スタック可", i.stackable ? "はい": "いいえ");
+
+            if (i.properties != 0)
             {
-                spCap.visibility = Visibility.Gone;
-                sp.visibility = Visibility.Gone;
+                table.addElem("特殊条件", i.properties.toStrings.join(", ").to!dstring);
             }
-            else
+
+            if (i.petFoodInfo.keys[0] != PetFoodType.NoEatable)
             {
-                spCap.visibility = Visibility.Visible;
-                sp.visibility = Visibility.Visible;
-                sp.text = i.properties.toStrings.join(", ").to!dstring;
+                table.addElem("ペットアイテム",
+                              i.petFoodInfo
+                               .byKeyValue
+                               .map!(kv => format("%s (%.1f)"d,
+                                                  kv.key,
+                                                  kv.value)).join);
+            }
+
+            if (!i.info.empty)
+            {
+                table.addElem("info", i.info);
+            }
+
+            if (!i.remarks.empty || !extraRemarks.empty)
+            {
+                table.addElem("備考", [i.remarks, extraRemarks].filter!"!a.empty".join(", "));
             }
         }
 
-        final switch(i.type) with(ItemType)
-        {
-        case Food:
-            if (auto info = i.name in wisdom.foodList)
-            {
-                ret.setFoodInfo(*info, wisdom);
-            }
-            break;
-        case Drink:
-            if (auto info = i.name in wisdom.drinkList)
-            {
-                ret.setFoodInfo(*info, wisdom);
-            }
-            break;
-        case Liquor:
-            if (auto info = i.name in wisdom.liquorList)
-            {
-                ret.setFoodInfo(*info, wisdom);
-            }
-            break;
-        case Medicine:
-            break;
-        case Weapon:
-            break;
-        case Armor:
-            break;
-        case Asset:
-            break;
-        case Others:
-            break;
-        case UNKNOWN:
-            break;
-        }
         return ret;
     }
 
@@ -221,83 +104,112 @@ class ItemDetailFrame: ScrollWidget
     {
         return item_;
     }
-
-    @property auto foodInfo()
-    {
-        return food_;
-    }
-
-    @property auto setFoodInfo(Food f, Wisdom wisdom)
-    {
-        childById("effCap").visibility = Visibility.Visible;
-        childById("effect").visibility = Visibility.Visible;
-
-        childById("effect").text = format("%.1f"d, f.effect);
-
-        if (auto effectName = f.additionalEffect)
-        {
-            setFoodEffect(effectName, wisdom);
-        }
-    }
-
-    @property auto foodEffect()
-    {
-        return effect_;
-    }
-
-    // AdditionalEffect eff にしたいが，まだデータができてないのでうまくいかない
-    auto setFoodEffect(dstring eff, Wisdom wisdom)
-    {
-        childById("addCap").visibility           = Visibility.Visible;
-        childById("additional").visibility       = Visibility.Visible;
-        childById("addDetailCap").visibility     = Visibility.Visible;
-        childById("additionalDetail").visibility = Visibility.Visible;
-        childById("groupCap").visibility         = Visibility.Visible;
-        childById("group").visibility            = Visibility.Visible;
-        childById("durCap").visibility           = Visibility.Visible;
-        childById("duration").visibility         = Visibility.Visible;
-
-        childById("additional").text = eff;
-        if (auto f = eff in wisdom.foodEffectList)
-        {
-            auto effectInfo = *f;
-            auto effectStr = effectInfo
-                             .effects
-                             .byKeyValue
-                             .map!(kv => format("%s: %s%s"d,
-                                                kv.key,
-                                                kv.value > 0 ? "+" : "",
-                                                kv.value))
-                             .join(", ");
-            if (effectInfo.otherEffects)
-            {
-                if (effectStr)
-                    effectStr ~= ", ";
-                effectStr ~= effectInfo.otherEffects;
-            }
-            childById("additionalDetail").text = effectStr;
-            childById("group").text =
-                effectInfo.group == AdditionalEffectGroup.Others
-                ? "その他"
-                : effectInfo.group.to!dstring;
-            childById("duration").text =
-                format("%s 秒"d, effectInfo.duration);
-
-            if (effectInfo.remarks)
-            {
-                auto rInfo = childById("remarksInfo");
-                auto rText = childById("remarks");
-                rInfo.visibility = Visibility.Visible;
-                rText.visibility = Visibility.Visible;
-                if (rText.text)
-                    rText.text = rText.text ~ ", ";
-                rText.text = rText.text ~ effectInfo.remarks;
-            }
-        }
-    }
 private:
     Item item_;
-    /// 料理固有
-    Food food_;
-    AdditionalEffect effect_;
+}
+
+
+auto addElem(Widget layout, dstring caption, dstring elem, dstring delim = ": ")
+{
+    layout.addChild(new TextWidget("", caption~delim));
+    layout.addChild(new TextWidget("", elem));
+}
+
+auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
+{
+    final switch(item.type) with(ItemType)
+    {
+    case Food, Drink, Liquor:{
+        auto info = item.extraInfo.peek!FoodInfo;
+        layout.addElem("効果", format("%.1f"d, info.effect));
+
+        if (auto effectName = info.additionalEffect)
+        {
+            layout.addElem("付加効果", effectName);
+            if (auto einfo = effectName in wisdom.foodEffectList)
+            {
+                auto effectStr = einfo
+                                 .effects
+                                 .byKeyValue
+                                 .map!(kv => format("%s: %s%s"d,
+                                                    kv.key,
+                                                    kv.value > 0 ? "+" : "",
+                                                    kv.value))
+                                 .join(", ");
+                if (einfo.otherEffects)
+                {
+                    if (effectStr)
+                        effectStr ~= ", ";
+                    effectStr ~= einfo.otherEffects;
+                }
+                layout.addElem("", effectStr, "");
+                layout.addElem("バフグループ",
+                               einfo.group == AdditionalEffectGroup.Others ? "その他"
+                                                                           : einfo.group.to!dstring);
+                layout.addElem("効果時間", format("%s 秒"d, einfo.duration));
+
+
+                return einfo.remarks;
+            }
+        }
+    }
+    case Medicine:
+        break;
+    case Weapon:{
+        auto info = item.extraInfo.peek!WeaponInfo;
+
+        auto damageStr = Grade.values
+                              .filter!(g => info.damage.keys.canFind(g))
+                              .map!(g => format("%s: %.1f"d, g.to!Grade, info.damage[g.to!Grade]))
+                              .join(", ");
+        layout.addElem("ダメージ",
+                       damageStr);
+        layout.addElem("攻撃間隔", info.duration.to!dstring);
+        layout.addElem("有効レンジ", format("%.1f"d, info.range));
+        layout.addElem(info.type == ExhaustionType.Points ? "使用可能回数" : "消耗度",
+                       info.exhaustion.to!dstring);
+        layout.addElem("必要スキル",
+                       info.skills
+                           .byKeyValue
+                           .map!(kv => format("%s (%.1f)"d, kv.key, kv.value))
+                           .join(", "));
+        layout.addElem("装備スロット", format("%s (%s)"d, info.slot, info.isDoubleHands ? "両手" : "片手"));
+        layout.addElem("素材", info.material.to!dstring);
+        if (info.restriction != ShipRestriction.Any)
+        {
+            layout.addElem("装備可能シップ", info.restriction.to!dstring~"系");
+        }
+
+        if (!info.additionalEffect.keys.empty)
+        {
+            layout.addElem("付与効果",
+                           info.additionalEffect
+                               .byKeyValue
+                               .map!(kv => format("%s (%s)"d, kv.key, kv.value))
+                               .join(", "));
+        }
+
+        if (!info.effects.keys.empty)
+        {
+            layout.addElem("追加効果",
+                           info.effects
+                               .byKeyValue
+                               .map!(kv => format("%s: %s%.1f"d,
+                                                  kv.key,
+                                                  kv.value > 0 ? "+" : "",
+                                                  kv.value))
+                               .join(", "));
+        }
+        return ""d;
+    }
+    case Armor:
+        break;
+    case Asset:
+        break;
+    case Others:
+        break;
+    case UNKNOWN:
+        break;
+    }
+    return ""d;
 }

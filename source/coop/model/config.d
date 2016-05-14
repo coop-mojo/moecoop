@@ -23,6 +23,8 @@ import std.file;
 import std.format;
 import std.json;
 
+import coop.util;
+
 class Config {
     this(string file)
     {
@@ -30,11 +32,11 @@ class Config {
         {
             auto json = file.readText.parseJSON;
             enforce(json.type == JSON_TYPE.OBJECT);
-            windowWidth = json["initWindowWidth"].integer.to!uint;
-            windowHeight = json["initWindowHeight"].integer.to!uint;
+            windowWidth = json["initWindowWidth"].jto!uint;
+            windowHeight = json["initWindowHeight"].jto!uint;
             font = json["font"].str;
-            migemoDLL = json["migemoDLL"].str.to!dstring;
-            migemoDict = json["migemoDict"].str.to!dstring;
+            migemoDLL = json["migemoDLL"].jto!dstring;
+            migemoDict = json["migemoDict"].jto!dstring;
         }
         else
         {

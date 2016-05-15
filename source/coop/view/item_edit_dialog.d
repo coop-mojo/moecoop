@@ -21,21 +21,25 @@ import dlangui;
 import dlangui.dialogs.dialog;
 
 import std.algorithm;
+import std.exception;
+import std.format;
+import std.math;
 import std.range;
+import std.regex;
 import std.traits;
 
 import coop.model.item;
+import coop.model.wisdom;
 import coop.view.item_detail_frame;
 
-import std.stdio;
-import std.exception;
+import coop.util;
 
 class ItemEditDialog: Dialog
 {
-    this(Window parent, ItemDetailFrame frame)
+    this(Window parent, Item orig)
     {
         super(UIString("アイテム編集"d), parent, DialogFlag.Popup);
-        frame_ = enforce(frame);
+        original = orig;
     }
 
     override void initialize()
@@ -43,95 +47,11 @@ class ItemEditDialog: Dialog
         auto root = parseML(q{
                 VerticalLayout {
                     TableLayout {
+                        id: main
                         colCount: 2
                         padding: 10
                         minWidth: 400
-
-                        TextWidget { text: "名前" }
-                        EditLine { id: name }
-
-                        TextWidget { text: "英名" }
-                        EditLine { id: ename }
-
-                        TextWidget { text: "重さ" }
-                        EditLine { id: weight }
-
-                        TextWidget { text: "NPC売却価格" }
-                        EditLine { id: price }
-
-                        HorizontalLayout {
-                            TextWidget { text: "転送可" }
-                            CheckBox { id: transferable }
-                        }
-
-                        HorizontalLayout {
-                            TextWidget { text: "スタック可" }
-                            CheckBox { id: stackable }
-                        }
-
-                        TextWidget { text: "ペットアイテム" }
-                        HorizontalLayout {
-                            ComboBox { id: petFoodType }
-                            EditLine { id: petFoodEffect }
-                        }
-
-                        TextWidget { text: "特殊条件" }
-                        TableLayout {
-                            colCount: 14
-                            TextWidget { id: NTcap; text: "NT" }
-                            CheckBox { id: NT }
-
-                            TextWidget { id: OPcap; text: "OP" }
-                            CheckBox { id: OP }
-
-                            TextWidget { id: CScap; text: "CS" }
-                            CheckBox { id: CS }
-
-                            TextWidget { id: CRcap; text: "CR" }
-                            CheckBox { id: CR }
-
-                            TextWidget { id: PMcap; text: "PM" }
-                            CheckBox { id: PM }
-
-                            TextWidget { id: NCcap; text: "NC" }
-                            CheckBox { id: NC }
-
-                            TextWidget { id: NBcap; text: "NB" }
-                            CheckBox { id: NB }
-
-                            TextWidget { id: NDcap; text: "ND" }
-                            CheckBox { id: ND }
-
-                            TextWidget { id: CAcap; text: "CA" }
-                            CheckBox { id: CA }
-
-                            TextWidget { id: DLcap; text: "DL" }
-                            CheckBox { id: DL }
-
-                            TextWidget { id: TCcap; text: "TC" }
-                            CheckBox { id: TC }
-
-                            TextWidget { id: LOcap; text: "LO" }
-                            CheckBox { id: LO }
-
-                            TextWidget { id: ALcap; text: "AL" }
-                            CheckBox { id: AL }
-
-                            TextWidget { id: WAcap; text: "WA" }
-                            CheckBox { id: WA }
-                        }
-
-                        TextWidget { text: "info" }
-                        EditLine { id: info }
-
-                        TextWidget { text: "備考" }
-                        EditLine { id: remarks }
-
-                        TextWidget { text: "種別" }
-                        ComboBox { id: type }
                     }
-
-                    
 
                     HorizontalLayout {
                         id: dlgButtons
@@ -143,87 +63,35 @@ class ItemEditDialog: Dialog
             });
         addChild(root);
 
-        auto item = frame_.item;
+        auto item = original;
 
-        with(root.childById!EditLine("name"))
+        auto main = root.childById("main");
+
+        main.addTextElem("名前", item.name, false);
+        main.addTextElem("英名", item.ename, item.ename.empty);
+        main.addTextElem!r"^\d+(\.\d+)?$"("重さ", item.weight.isNaN ? "" : format("%.2f"d, item.weight), item.weight.isNaN);
+        main.addTextElem!r"^\d+$"("NPC売却価格", item.price.to!dstring, item.price == 0);
+
+        auto tr = new HorizontalLayout;
+        tr.addCheckElem("転送可", item.transferable, !item.transferable);
+
+        auto st = new HorizontalLayout;
+        st.addCheckElem("スタック可", item.stackable, !item.stackable);
+
+        main.addChild(tr);
+        main.addChild(st);
+
+        auto petCap = new TextWidget("", "ペットアイテム"d);
+        auto pet = new HorizontalLayout;
+        with(pet)
         {
-            text = item.name;
-            enabled = false;
-        }
+            auto petTypes = PetFoodType.svalues.to!(dstring[]);
 
-        with(root.childById!EditLine("ename"))
-        {
-            if (!item.ename.empty)
-            {
-                text = item.ename;
-                enabled = false;
-            }
-        }
+            auto petComboBox = new ComboBox("", petTypes);
+            auto textBox = new EditLine("");
 
-        with(root.childById!EditLine("weight"))
-        {
-            import std.math;
-            import std.format;
-            if (!item.weight.isNaN)
-            {
-                text = format("%.2f"d, item.weight);
-                enabled = false;
-            }
-        }
-
-        with(root.childById!EditLine("price"))
-        {
-            if (item.price != 0)
-            {
-                text = item.price.to!dstring;
-                enabled = false;
-            }
-        }
-
-        with(root.childById!CheckBox("transferable"))
-        {
-            if (item.transferable)
-            {
-                checked = true;
-                enabled = false;
-            }
-        }
-
-        with(root.childById!CheckBox("stackable"))
-        {
-            if (item.stackable)
-            {
-                checked = true;
-                enabled = false;
-            }
-        }
-
-        with(root.childById!EditLine("info"))
-        {
-            if (!item.info.empty)
-            {
-                text = item.info;
-                enabled = false;
-            }
-        }
-
-        with(root.childById!EditLine("remarks"))
-        {
-            if (!item.remarks.empty)
-            {
-                text = item.remarks;
-                enabled = false;
-            }
-        }
-
-        with(root.childById!ComboBox("petFoodType"))
-        {
-            auto types = PetFoodType.svalues.to!(dstring[]);
-            auto textBox = root.childById!EditLine("petFoodEffect");
-
-            items = types;
-            itemClick = (Widget src, int idx) {
-                if (idx == 0 || idx == types.length-1)
+            petComboBox.itemClick = (Widget src, int idx) {
+                if (idx == 0 || idx == petTypes.length-1)
                 {
                     textBox.text = "";
                     textBox.enabled = false;
@@ -234,7 +102,7 @@ class ItemEditDialog: Dialog
                 }
                 return true;
             };
-            selectedItemIndex = PetFoodType.values.enumerate.find!"a[1] == b"(item.petFoodInfo.keys[0]).front[0].to!int;
+            petComboBox.selectedItemIndex = PetFoodType.values.indexOf(item.petFoodInfo.keys[0]).to!int;
             auto key = item.petFoodInfo.keys[0];
             if (key != PetFoodType.UNKNOWN)
             {
@@ -243,37 +111,41 @@ class ItemEditDialog: Dialog
                     textBox.text = item.petFoodInfo[key].to!dstring;
                 }
                 textBox.enabled = false;
-                enabled = false;
+                petComboBox.enabled = false;
             }
+            addChild(petComboBox);
+            addChild(textBox);
         }
+        main.addChild(petCap);
+        main.addChild(pet);
 
+
+        auto propCap = new TextWidget("", "特殊条件"d);
+        auto table = new TableLayout;
+        table.colCount = 14;
         auto props = item.properties;
         foreach(p; [EnumMembers!SpecialProperty])
         {
-            auto tip = p.toStrings.join.to!dstring;
-            with(root.childById!CheckBox(p.to!string))
-            {
-                if (props & p)
-                {
-                    checked = true;
-                    enabled = false;
-                }
-                tooltipText = tip;
-            }
-            root.childById(p.to!string~"cap").tooltipText = tip;
+            table.addCheckElem(p.to!dstring, (props&p) != 0, (props&p) == 0, p.toStrings.join.to!dstring);
         }
+        main.addChild(propCap);
+        main.addChild(table);
 
-        with(root.childById!ComboBox("type"))
+        main.addTextElem("info", item.info, item.info.empty);
+        main.addTextElem("備考", item.remarks, item.remarks.empty);
+
+        auto itemTypeCap = new TextWidget("種別");
+        auto itemComboBox = new ComboBox("", ItemType.svalues.to!(dstring[]));
+        auto kv = ItemType.values.enumerate.find!"a[1] == b"(item.type).front;
+        itemComboBox.selectedItemIndex = kv[0].to!int;
+        if (kv[1] != ItemType.UNKNOWN)
         {
-            auto types = ItemType.svalues.to!(dstring[]);
-            items = types;
-            auto kv = ItemType.values.enumerate.find!"a[1] == b"(item.type).front;
-            selectedItemIndex = kv[0].to!int;
-            if (kv[1] != ItemType.UNKNOWN)
-            {
-                enabled = false;
-            }
+            itemComboBox.enabled = false;
         }
+        main.addChild(itemTypeCap);
+        main.addChild(itemComboBox);
+
+        main.addExtraElem(item, null);
 
         with(root.childById("dlgButtons"))
         {
@@ -294,11 +166,73 @@ class ItemEditDialog: Dialog
         _parentWindow.removePopup(_popup);
     }
 private:
-    ItemDetailFrame frame_;
+    Item original;
+    Item updated;
 }
 
-auto showItemEditDialog(Window parent, ItemDetailFrame frame)
+auto showItemEditDialog(Window parent, Item item)
 {
-    auto dlg = new ItemEditDialog(parent, frame);
+    auto dlg = new ItemEditDialog(parent, item);
     dlg.show;
+}
+
+auto addTextElem(dstring AllowedRegex = "")(Widget layout, dstring caption, dstring elem, bool editable)
+{
+    layout.addChild(new TextWidget("", caption));
+    auto editLine = new EditLine("", elem);
+    layout.addChild(editLine);
+    with(editLine)
+    {
+        enabled = editable;
+        static if (AllowedRegex.empty)
+        {
+            alias matchFun = s => true;
+        }
+        else
+        {
+            alias matchFun = (s) {
+                if (s.empty || s.matchFirst(ctRegex!AllowedRegex))
+                {
+                    textColor = "black";
+                    return true;
+                }
+                else
+                {
+                    textColor = "red";
+                    return false;
+                }
+            };
+        }
+        contentChange = (EditableContent content) {
+            if (matchFun(content.text))
+            {
+                // set text to the custom item
+            }
+        };
+    }
+}
+
+auto addCheckElem(Widget layout, dstring caption, bool checked, bool enabled, dstring tooltip = "")
+{
+    auto cap = new TextWidget("", caption);
+    layout.addChild(cap);
+    auto checkBox = new CheckBox("");
+    layout.addChild(checkBox);
+
+    checkBox.checked = checked;
+    checkBox.enabled = enabled;
+
+    if (!tooltip.empty)
+    {
+        cap.tooltipText = tooltip;
+        checkBox.tooltipText = tooltip;
+    }
+    checkBox.checkChange = (Widget _, bool checked) {
+        // set checked to the custom item
+        return true;
+    };
+}
+
+auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
+{
 }

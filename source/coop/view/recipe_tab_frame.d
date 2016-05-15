@@ -104,13 +104,13 @@ class RecipeTabFrame: HorizontalLayout
 
         childById!Button("editItem1").click = (Widget _) {
             import coop.view.item_edit_dialog;
-            showItemEditDialog(root.window, childById!ItemDetailFrame("detail1"));
+            showItemEditDialog(root.window, childById!ItemDetailFrame("detail1").item);
             return true;
         };
 
         childById!Button("editItem2").click = (Widget _) {
             import coop.view.item_edit_dialog;
-            showItemEditDialog(root.window, childById!ItemDetailFrame("detail2"));
+            showItemEditDialog(root.window, childById!ItemDetailFrame("detail2").item);
             return true;
         };
     }

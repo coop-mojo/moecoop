@@ -53,6 +53,12 @@ private:
     Proc proc;
 }
 
+auto indexOf(Range, Elem)(Range r, Elem e)
+    if (isInputRange!Range && is(Elem: ElementType!Range))
+{
+    return r.enumerate.find!"a[1] == b"(e).front[0];
+}
+
 struct BiMap(T, U)
 {
     this(T[U] kvs)

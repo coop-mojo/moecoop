@@ -38,7 +38,7 @@ class ItemEditDialog: Dialog
 {
     this(Window parent, Item orig)
     {
-        super(UIString("アイテム編集"d), parent, DialogFlag.Popup);
+        super(UIString("アイテム情報編集"d), parent, DialogFlag.Popup);
         original = orig;
     }
 
@@ -64,19 +64,29 @@ class ItemEditDialog: Dialog
         addChild(root);
 
         auto item = original;
+        with(updated)
+        {
+            name = item.name;
+            properties = item.properties;
+            remarks = "";
+        }
 
         auto main = root.childById("main");
 
         main.addTextElem("名前", item.name, false);
-        main.addTextElem("英名", item.ename, item.ename.empty);
-        main.addTextElem!r"^\d+(\.\d+)?$"("重さ", item.weight.isNaN ? "" : format("%.2f"d, item.weight), item.weight.isNaN);
-        main.addTextElem!r"^\d+$"("NPC売却価格", item.price.to!dstring, item.price == 0);
+        main.addTextElem("英名", item.ename, item.ename.empty, (txt) { updated.ename = txt; return; });
+        main.addTextElem!(r"^\d+(\.\d+)?$")("重さ", item.weight.isNaN ? "" : format("%.2f"d, item.weight), item.weight.isNaN,
+                                            (txt) { updated.weight = txt.empty ? real.init : txt.to!real; return; });
+        main.addTextElem!(r"^\d+$")("NPC売却価格", item.price.to!dstring, item.price == 0,
+                                    (txt) { updated.price = txt.empty ? int.init : txt.to!int; return; });
 
         auto tr = new HorizontalLayout;
-        tr.addCheckElem("転送可", item.transferable, !item.transferable);
+        tr.addCheckElem("転送可", item.transferable, !item.transferable,
+                        (b) { updated.transferable = b; return; });
 
         auto st = new HorizontalLayout;
-        st.addCheckElem("スタック可", item.stackable, !item.stackable);
+        st.addCheckElem("スタック可", item.stackable, !item.stackable,
+                        (b) { updated.stackable = b; return; });
 
         main.addChild(tr);
         main.addChild(st);
@@ -91,10 +101,12 @@ class ItemEditDialog: Dialog
             auto textBox = new EditLine("");
 
             petComboBox.itemClick = (Widget src, int idx) {
+                updated.petFoodInfo.clear;
                 if (idx == 0 || idx == petTypes.length-1)
                 {
                     textBox.text = "";
                     textBox.enabled = false;
+                    updated.petFoodInfo[idx.to!PetFoodType] = 0;
                 }
                 else
                 {
@@ -103,6 +115,29 @@ class ItemEditDialog: Dialog
                 return true;
             };
             petComboBox.selectedItemIndex = PetFoodType.values.indexOf(item.petFoodInfo.keys[0]).to!int;
+            auto i = petComboBox.selectedItemIndex;
+            if (i == 0 || i == petTypes.length-1)
+            {
+                textBox.enabled = false;
+            }
+
+            textBox.contentChange = (EditableContent content) {
+                auto txt = content.text;
+                auto idx = petComboBox.selectedItemIndex;
+                if(idx == 0 && idx == petTypes.length-1)
+                    return;
+                if (!txt.empty && txt.matchFirst(ctRegex!r"^\d+(\.\d+)?$"d))
+                {
+                    updated.petFoodInfo.clear;
+                    updated.petFoodInfo[idx.to!PetFoodType] = txt.to!real;
+                    textBox.textColor = "black";
+                }
+                else
+                {
+                    textBox.textColor = "red";
+                }
+            };
+
             auto key = item.petFoodInfo.keys[0];
             if (key != PetFoodType.UNKNOWN)
             {
@@ -126,15 +161,25 @@ class ItemEditDialog: Dialog
         auto props = item.properties;
         foreach(p; [EnumMembers!SpecialProperty])
         {
-            table.addCheckElem(p.to!dstring, (props&p) != 0, (props&p) == 0, p.toStrings.join.to!dstring);
-        }
+            alias updateFun = (bool c) {
+                if (c) {
+                    updated.properties |= p;
+                }
+                else
+                {
+                    updated.properties &= ~p;
+                }
+            };
+            table.addCheckElem(p.to!dstring, (props&p) != 0, (props&p) == 0, updateFun, p.toStrings.join.to!dstring);
+            }
         main.addChild(propCap);
         main.addChild(table);
 
-        main.addTextElem("info", item.info, item.info.empty);
-        main.addTextElem("備考", item.remarks, item.remarks.empty);
+        main.addTextElem("info", item.info, item.info.empty, (txt) { updated.info = txt; return; });
+        main.addTextElem("備考", item.remarks, item.remarks.empty || item.remarks == "細かいことはわかりません（´・ω・｀）",
+                         (txt) { updated.remarks = txt; return; });
 
-        auto itemTypeCap = new TextWidget("種別");
+        auto itemTypeCap = new TextWidget("", "種別"d);
         auto itemComboBox = new ComboBox("", ItemType.svalues.to!(dstring[]));
         auto kv = ItemType.values.enumerate.find!"a[1] == b"(item.type).front;
         itemComboBox.selectedItemIndex = kv[0].to!int;
@@ -143,9 +188,22 @@ class ItemEditDialog: Dialog
             itemComboBox.enabled = false;
         }
         main.addChild(itemTypeCap);
-        main.addChild(itemComboBox);
+        itemComboBox.itemClick = (Widget src, int idx) {
+            updated.type = idx;
+            return true;
+        };
 
-        main.addExtraElem(item, null);
+        auto extraItem = new HorizontalLayout;
+        auto extraButton = new Button("", "詳細"d);
+        extraItem.addChild(itemComboBox);
+        extraItem.addChild(extraButton);
+        main.addChild(extraItem);
+
+        extraButton.enabled = false;
+        extraButton.click = (Widget _) {
+            // showExtraInfoEditDialog(this.window, original);
+            return true;
+        };
 
         with(root.childById("dlgButtons"))
         {
@@ -160,6 +218,8 @@ class ItemEditDialog: Dialog
         if (action) {
             if (action.id == StandardAction.Ok)
             {
+                import std.stdio;
+                writeln("Updated: ", updated);
                 /// TODO
             }
         }
@@ -168,6 +228,7 @@ class ItemEditDialog: Dialog
 private:
     Item original;
     Item updated;
+    typeof(Item.init.extraInfo) extra;
 }
 
 auto showItemEditDialog(Window parent, Item item)
@@ -176,7 +237,7 @@ auto showItemEditDialog(Window parent, Item item)
     dlg.show;
 }
 
-auto addTextElem(dstring AllowedRegex = "")(Widget layout, dstring caption, dstring elem, bool editable)
+auto addTextElem(dstring AllowedRegex = "")(Widget layout, dstring caption, dstring elem, bool editable, void delegate(dstring) fun = (txt) {return;})
 {
     layout.addChild(new TextWidget("", caption));
     auto editLine = new EditLine("", elem);
@@ -204,15 +265,16 @@ auto addTextElem(dstring AllowedRegex = "")(Widget layout, dstring caption, dstr
             };
         }
         contentChange = (EditableContent content) {
-            if (matchFun(content.text))
+            auto txt = content.text;
+            if (matchFun(txt))
             {
-                // set text to the custom item
+                fun(txt);
             }
         };
     }
 }
 
-auto addCheckElem(Widget layout, dstring caption, bool checked, bool enabled, dstring tooltip = "")
+auto addCheckElem(Widget layout, dstring caption, bool checked, bool enabled, void delegate(bool) fun, dstring tooltip = "")
 {
     auto cap = new TextWidget("", caption);
     layout.addChild(cap);
@@ -228,11 +290,7 @@ auto addCheckElem(Widget layout, dstring caption, bool checked, bool enabled, ds
         checkBox.tooltipText = tooltip;
     }
     checkBox.checkChange = (Widget _, bool checked) {
-        // set checked to the custom item
+        fun(checked);
         return true;
     };
-}
-
-auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
-{
 }

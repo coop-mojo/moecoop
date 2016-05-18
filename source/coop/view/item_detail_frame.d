@@ -227,7 +227,7 @@ auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
     case Others:
         break;
     case UNKNOWN:
-        break;
+        assert(false);
     }
     return ""d;
 }

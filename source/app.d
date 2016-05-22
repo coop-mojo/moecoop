@@ -37,17 +37,18 @@ extern(C) int UIAppMain(string[] args)
     auto wisdom = new Wisdom(SystemResourceBase);
     auto config = new Config(buildPath(UserResourceBase, "config.json"));
     scope(exit) config.destroy;
-    mkdirRecurse(UserResourceBase);
-    auto dirs = dirEntries(UserResourceBase, SpanMode.shallow)
-                .filter!((string s) => s.isDir)
-                .map!((string s) => [s.dirName, s.baseName].map!(to!dstring).array)
-                .array;
-    if (dirs.empty)
+    auto userDir = buildPath(UserResourceBase, "users");
+    mkdirRecurse(userDir);
+
+    auto userNames = dirEntries(userDir, SpanMode.shallow)
+                     .map!((string s) => s.baseName.to!dstring)
+                     .array;
+    if (userNames.empty)
     {
-        dirs = [[UserResourceBase.to!dstring, "かきあげ"d]];
+        userNames = ["かきあげ"d];
     }
-    auto chars = dirs
-                 .map!(paths => tuple(paths[1], new Character(paths[1], paths[0])))
+    auto chars = userNames
+                 .map!(name => tuple(name, new Character(name, userDir.to!dstring)))
                  .assocArray;
     scope(exit) chars.values.each!(c => c.writeConfig);
 

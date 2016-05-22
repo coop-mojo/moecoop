@@ -50,6 +50,11 @@ class Wisdom {
     this(string baseDir)
     {
         baseDir_ = baseDir;
+        reload;
+    }
+
+    auto reload()
+    {
         binderList = readBinderList(baseDir_);
         recipeList = readRecipeList(baseDir_);
         foodEffectList = readFoodEffectList(baseDir_);
@@ -68,7 +73,12 @@ class Wisdom {
         enforce(basedir.exists);
         enforce(basedir.isDir);
 
-        return dirEntries(buildPath(basedir, "バインダー"), "*.json", SpanMode.breadth)
+        auto files = dirEntries(buildPath(basedir, "バインダー"), "*.json", SpanMode.breadth);
+        if (files.empty)
+        {
+            return typeof(binderList).init;
+        }
+        return files
             .map!(s => s.readBinders)
             .array
             .joiner
@@ -80,7 +90,12 @@ class Wisdom {
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
 
-        return dirEntries(buildPath(sysBase, "レシピ"), "*.json", SpanMode.breadth)
+        auto files = dirEntries(buildPath(sysBase, "レシピ"), "*.json", SpanMode.breadth);
+        if (files.empty)
+        {
+            return typeof(recipeList).init;
+        }
+        return files
             .map!(s => s.readRecipes)
             .assocArray;
     }
@@ -91,7 +106,13 @@ class Wisdom {
     {
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
-        return dirEntries(buildPath(sysBase, "アイテム"), "*.json", SpanMode.breadth)
+
+        auto files = dirEntries(buildPath(sysBase, "アイテム"), "*.json", SpanMode.breadth);
+        if (files.empty)
+        {
+            return typeof(itemList).init;
+        }
+        return files
             .map!(s => s.readItems(foodList, drinkList, liquorList, weaponList, bulletList))
             .array
             .joiner
@@ -102,7 +123,13 @@ class Wisdom {
     {
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
-        return dirEntries(buildPath(sysBase, "食べ物"), "*.json", SpanMode.breadth)
+
+        auto files = dirEntries(buildPath(sysBase, "食べ物"), "*.json", SpanMode.breadth);
+        if (files.empty)
+        {
+            return (FoodInfo[dstring]).init;
+        }
+        return files
             .map!(s => s.readFoods)
             .joiner
             .assocArray;
@@ -112,13 +139,25 @@ class Wisdom {
     {
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
-        return buildPath(sysBase, "飲み物", "飲み物.json").readFoods.assocArray;
+
+        auto file = buildPath(sysBase, "飲み物", "飲み物.json");
+        if (!file.exists)
+        {
+            return (FoodInfo[dstring]).init;
+        }
+        return file.readFoods.assocArray;
     }
 
     auto readLiquorList(string sysBase)
     {
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
+
+        auto file = buildPath(sysBase, "飲み物", "酒.json");
+        if (!file.exists)
+        {
+            return (FoodInfo[dstring]).init;
+        }
         return buildPath(sysBase, "飲み物", "酒.json").readFoods.assocArray;
     }
 
@@ -126,6 +165,12 @@ class Wisdom {
     {
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
+
+        auto file = buildPath(sysBase, "武器", "武器.json");
+        if (!file.exists)
+        {
+            return (WeaponInfo[dstring]).init;
+        }
         return buildPath(sysBase, "武器", "武器.json").readWeapons.assocArray;
     }
 
@@ -133,6 +178,12 @@ class Wisdom {
     {
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
+
+        auto file = buildPath(sysBase, "武器", "弾.json");
+        if (!file.exists)
+        {
+            return (BulletInfo[dstring]).init;
+        }
         return buildPath(sysBase, "武器", "弾.json").readBullets.assocArray;
     }
 
@@ -140,7 +191,13 @@ class Wisdom {
     {
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
-        return dirEntries(buildPath(sysBase, "飲食バフ"), "*.json", SpanMode.breadth)
+
+        auto files = dirEntries(buildPath(sysBase, "飲食バフ"), "*.json", SpanMode.breadth);
+        if (files.empty)
+        {
+            return typeof(foodEffectList).init;
+        }
+        return files
             .map!(s => s.readFoodEffects)
             .joiner
             .assocArray;

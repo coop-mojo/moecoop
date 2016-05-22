@@ -70,10 +70,10 @@ public:
 
 class MainFrame: AppFrame
 {
-    this(Wisdom wisdom, Character[dstring] chars, Config config)
+    this(Wisdom wisdom, Character[dstring] chars, Config config, Wisdom customWisdom)
     {
         super();
-        controller_ = new MainFrameController(this, wisdom, chars, config);
+        controller_ = new MainFrameController(this, wisdom, chars, config, customWisdom);
         binderTab.controller = new BinderTabFrameController(binderTab, controller.wisdom.binders);
         skillTab.controller = new SkillTabFrameController(skillTab, controller.wisdom.recipeCategories);
 

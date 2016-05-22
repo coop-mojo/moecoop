@@ -48,17 +48,19 @@ class ItemDetailFrame: ScrollWidget
         backgroundColor = "white";
     }
 
-    static auto create(Item i, int idx, Wisdom wisdom)
+    static auto create(Item i, int idx, Wisdom wisdom, Wisdom cWisdom)
     {
         auto ret = new typeof(this)("detail"~idx.to!string);
+        auto item = Overlaid!Item(i, i.name in cWisdom.itemList);
         ret.item_ = i;
 
         auto table = ret.childById("table");
         with(table)
         {
-            table.addElem("名前", i.name);
-            table.addElem("英名", i.ename.empty ? "わからん（´・ω・｀）" : i.ename);
-            table.addElem("重さ", i.weight.isNaN ? "そこそこの重さ" : format("%.2f"d, i.weight));
+            table.addElem("名前", item.name);
+
+            table.addElem("英名", item.ename.empty ? "わからん（´・ω・｀）" : item.ename, item.isOverlaid!"ename");
+            table.addElem("重さ", item.weight.isNaN ? "そこそこの重さ" : format("%.2f"d, item.weight), item.isOverlaid!"weight");
 
             dstring extraRemarks;
             if (i.hasExtraInfo)
@@ -67,33 +69,36 @@ class ItemDetailFrame: ScrollWidget
             }
 
             // extrainfo
-            table.addElem("NPC売却価格", format("%s g"d, i.price));
-            table.addElem("転送可", i.transferable ? "はい" : "いいえ");
-            table.addElem("スタック可", i.stackable ? "はい": "いいえ");
+            table.addElem("NPC売却価格", format("%s g"d, item.price), item.isOverlaid!"price");
+            table.addElem("転送可", item.transferable ? "はい" : "いいえ", item.isOverlaid!"transferable");
+            table.addElem("スタック可", item.stackable ? "はい": "いいえ", item.isOverlaid!"stackable");
 
             if (i.properties != 0)
             {
-                table.addElem("特殊条件", i.properties.toStrings.join(", ").to!dstring);
+                // TODO
+                table.addElem("特殊条件", item.properties.toStrings.join(", ").to!dstring, item.isOverlaid!"properties");
             }
 
             if (i.petFoodInfo.keys[0] != PetFoodType.NoEatable)
             {
                 table.addElem("ペットアイテム",
-                              i.petFoodInfo
-                               .byKeyValue
-                               .map!(kv => format("%s (%.1f)"d,
-                                                  kv.key,
-                                                  kv.value)).join);
+                              item.petFoodInfo
+                                  .byKeyValue
+                                  .map!(kv => format("%s (%.1f)"d,
+                                                     kv.key,
+                                                     kv.value)).join,
+                              item.isOverlaid!"petFoodInfo");
             }
 
             if (!i.info.empty)
             {
-                table.addElem("info", i.info);
+                table.addElem("info", item.info, item.isOverlaid!"info");
             }
 
-            if (!i.remarks.empty || !extraRemarks.empty)
+            auto rem = i.name in wisdom.itemList ? i.remarks : "細かいことはわかりません（´・ω・｀）";
+            if (!rem.empty || !extraRemarks.empty)
             {
-                table.addElem("備考", [i.remarks, extraRemarks].filter!"!a.empty".join(", "));
+                table.addElem("備考", [rem, extraRemarks].filter!"!a.empty".join(", "));
             }
         }
 
@@ -109,10 +114,15 @@ private:
 }
 
 
-auto addElem(Widget layout, dstring caption, dstring elem, dstring delim = ": ")
+auto addElem(dstring delim = ": ")(Widget layout, dstring caption, dstring elem, bool overlaid = false)
 {
     layout.addChild(new TextWidget("", caption~delim));
-    layout.addChild(new TextWidget("", elem));
+    auto text = new TextWidget("", elem);
+    layout.addChild(text);
+    if (overlaid)
+    {
+        text.textColor = "red";
+    }
 }
 
 auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
@@ -142,7 +152,7 @@ auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
                         effectStr ~= ", ";
                     effectStr ~= einfo.otherEffects;
                 }
-                layout.addElem("", effectStr, "");
+                layout.addElem!""("", effectStr);
                 layout.addElem("バフグループ",
                                einfo.group == AdditionalEffectGroup.Others ? "その他"
                                                                            : einfo.group.to!dstring);

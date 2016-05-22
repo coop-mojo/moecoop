@@ -22,7 +22,9 @@ import std.conv;
 import std.exception;
 import std.file;
 import std.json;
+import std.math;
 import std.range;
+import std.traits;
 import std.typecons;
 import std.variant;
 
@@ -31,6 +33,11 @@ import coop.util;
 /// アイテム一般の情報
 struct Item
 {
+    this(this)
+    {
+        petFoodInfo = petFoodInfo.dup;
+    }
+
     dstring name;
     dstring ename;
     real weight;
@@ -43,9 +50,78 @@ struct Item
     dstring remarks;
     ItemType type;
     Algebraic!(FoodInfo, WeaponInfo, BulletInfo) extraInfo;
-    @property auto hasExtraInfo()
+    @property auto hasExtraInfo() const
     {
         return extraInfo.hasValue;
+    }
+
+    auto toJSON()
+    {
+        auto hash = [
+            "英名": JSONValue(ename.to!string),
+            "NPC売却価格": JSONValue(price),
+            "重さ": JSONValue(weight.isNaN ? 0 : weight),
+            "info": JSONValue(info.to!string),
+            "転送できる": JSONValue(transferable),
+            "スタックできる": JSONValue(stackable),
+            "種類": JSONValue(type.to!string),
+            ];
+
+        assert(petFoodInfo.keys.length == 1);
+        if (petFoodInfo.keys[0] != PetFoodType.NoEatable)
+        {
+            hash["ペットアイテム"] = JSONValue(petFoodInfo.to!(real[string]));
+        }
+
+        if (properties)
+        {
+            hash["特殊条件"] = JSONValue(properties.toStrings(true));
+        }
+        return JSONValue(hash);
+    }
+
+    auto opEquals(const typeof(this) other)
+    {
+        auto prop(string p)(in typeof(this) item)
+        {
+            return mixin("item."~p);
+        }
+        foreach(field; FieldNameTuple!(typeof(this)))
+        {
+            static if (field == "weight")
+            {
+                import std.math;
+                if (!prop!field(this).isNaN && !prop!field(other).isNaN &&
+                    !prop!field(this).approxEqual(prop!field(other)))
+                {
+                    return false;
+                }
+                else if (prop!field(this).isNaN ^ prop!field(other).isNaN)
+                {
+                    return false;
+                }
+            }
+            else static if (field == "extraInfo")
+            {
+                if (this.hasExtraInfo && other.hasExtraInfo &&
+                    this.extraInfo != other.extraInfo)
+                {
+                    return false;
+                }
+                else if (this.hasExtraInfo ^ other.hasExtraInfo)
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                if (prop!field(this) != prop!field(other))
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }
 
@@ -160,7 +236,7 @@ enum SpecialProperty: ushort
     WA = 0b10000000000000,
 }
 
-auto toStrings(ushort sps)
+auto toStrings(ushort sps, bool detailed = false)
 {
     with(SpecialProperty)
     {
@@ -180,7 +256,12 @@ auto toStrings(ushort sps)
             AL: "現在のエリア限定",
             WA: "WarAgeでは性能が低下する",
             ];
-        return propMap.keys.filter!(p => sps&p).map!(p => propMap[p]).array;
+        auto str(SpecialProperty p)
+        {
+            return detailed ? propMap[p] : p.to!string;
+        }
+        // return propMap.keys.filter!(p => sps&p).map!(p => propMap[p]).array;
+        return propMap.keys.filter!(p => sps&p).map!(p => str(p)).array;
     }
 }
 
@@ -463,3 +544,96 @@ alias Grade = ExtendedEnum!(["UNKNOWN", "Degraded", "NG", "HG", "MG"],
 
 alias ExhaustionType = ExtendedEnum!(["UNKNOWN", "Points", "Times"],
                                      ["不明", "耐久値", "使用可能回数"]);
+
+struct Overlaid(T)
+{
+    this(T orig, T* ol)
+    {
+        original = orig;
+        overlaid = ol;
+    }
+
+    @property auto opDispatch(string field)()
+        if (hasMember!(T, field))
+    {
+        if (isOverlaid!field)
+        {
+            return mixin("overlaid."~field);
+        }
+        else
+        {
+            return mixin("original."~field);
+        }
+    }
+
+    @property auto isOverlaid(string field)()
+        if (hasMember!(T, field))
+    {
+        return overlaid !is null &&
+            !isValidValue(mixin("original."~field)) && isValidValue(mixin("overlaid."~field));
+    }
+private:
+    static auto isValidValue(T)(T val)
+    {
+        static if (isFloatingPoint!T)
+            return !val.isNaN;
+        else static if (isSomeString!T)
+            return !val.empty;
+        else static if (isIntegral!T)
+            return val > 0;
+        else static if (is(T == bool))
+            return val;
+        else static if (is(T == real[PetFoodType])) /// petFoodInfo
+            return val.keys[0] != PetFoodType.UNKNOWN;
+        else
+            return val == T.init;
+    }
+
+    T original;
+    T* overlaid;
+}
+
+unittest
+{
+    Item orig;
+    with(orig)
+    {
+        name = "テスト";
+        ename = "test";
+        weight = 0.3;
+        price = 100;
+        info = "Info";
+        petFoodInfo[PetFoodType.UNKNOWN.to!PetFoodType] = 0;
+    }
+
+    auto overlaid = Overlaid!Item(orig, null);
+    foreach(field; FieldNameTuple!Item)
+    {
+        assert(!overlaid.isOverlaid!field);
+    }
+    assert(overlaid.name == "テスト");
+}
+
+unittest
+{
+    Item orig;
+    orig.name = "テスト";
+
+    Item item;
+    item.name = "テスト";
+    item.ename = "test";
+    item.weight = 1.4;
+
+    auto overlaid = Overlaid!Item(orig, &item);
+    assert(!overlaid.isOverlaid!"name");
+    assert(overlaid.name == "テスト");
+
+    assert(overlaid.isOverlaid!"ename");
+    assert(overlaid.ename == "test");
+
+    assert(overlaid.isOverlaid!"weight");
+    assert(overlaid.weight == 1.4);
+
+    assert(!overlaid.isOverlaid!"price");
+    assert(overlaid.price == 0);
+}

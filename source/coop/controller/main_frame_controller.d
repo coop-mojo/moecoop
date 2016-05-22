@@ -29,12 +29,13 @@ import std.exception;
 
 class MainFrameController
 {
-    this(MainFrame frame, Wisdom wisdom, Character[dstring] chars, Config config)
+    this(MainFrame frame, Wisdom wisdom, Character[dstring] chars, Config config, Wisdom customWisdom)
     {
         frame_ = frame;
         wisdom_ = wisdom;
         chars_ = chars;
         config_ = config;
+        cWisdom_ = customWisdom;
 
         loadMigemo;
     }
@@ -43,6 +44,7 @@ class MainFrameController
     @property auto config() { return config_; }
     @property auto characters() { return chars_; }
     @property auto wisdom() { return wisdom_; }
+    @property auto cWisdom() { return cWisdom_; }
     @property auto migemo() { return migemo_; }
 
     auto loadMigemo()
@@ -63,7 +65,7 @@ class MainFrameController
 
     Config config_;
     Character[dstring] chars_;
-    Wisdom wisdom_;
+    Wisdom wisdom_, cWisdom_;
     Migemo migemo_;
     MainFrame frame_;
 }
@@ -92,6 +94,14 @@ public:
         assert(ret);
     } body {
         return frame_.root.controller.wisdom;
+    }
+
+    @property auto cWisdom()
+    out(ret)
+    {
+        assert(ret);
+    } body {
+        return frame_.root.controller.cWisdom;
     }
 
     @property auto migemo()

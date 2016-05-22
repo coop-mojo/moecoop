@@ -104,13 +104,13 @@ class RecipeTabFrame: HorizontalLayout
 
         childById!Button("editItem1").click = (Widget _) {
             import coop.view.item_edit_dialog;
-            showItemEditDialog(root.window, childById!ItemDetailFrame("detail1").item);
+            showItemEditDialog(root.window, childById!ItemDetailFrame("detail1").item, controller.cWisdom);
             return true;
         };
 
         childById!Button("editItem2").click = (Widget _) {
             import coop.view.item_edit_dialog;
-            showItemEditDialog(root.window, childById!ItemDetailFrame("detail2").item);
+            showItemEditDialog(root.window, childById!ItemDetailFrame("detail2").item, controller.cWisdom);
             return true;
         };
     }
@@ -325,6 +325,7 @@ private:
     {
         auto ret = new RecipeEntryWidget(recipe);
         auto wisdom = controller.wisdom;
+        auto cWisdom = controller.cWisdom;
         auto characters = controller.characters;
         auto binders = relatedBindersFor(recipe, category);
 
@@ -376,12 +377,11 @@ private:
                     else
                     {
                         item.name = name;
-                        item.remarks = "細かいことはわかりません（´・ω・｀）";
                         item.petFoodInfo = [PetFoodType.UNKNOWN.to!PetFoodType: 0];
                     }
 
                     showItemDetail(idx);
-                    setItemDetail(ItemDetailFrame.create(item, idx+1, wisdom), idx);
+                    setItemDetail(ItemDetailFrame.create(item, idx+1, wisdom, cWisdom), idx);
                 });
         };
         return ret;

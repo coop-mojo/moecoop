@@ -70,7 +70,7 @@ class Config {
         configFile = file;
     }
 
-    ~this()
+    auto save()
     {
         import std.stdio;
         import std.path;

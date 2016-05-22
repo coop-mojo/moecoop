@@ -35,8 +35,14 @@ mixin APP_ENTRY_POINT;
 extern(C) int UIAppMain(string[] args)
 {
     auto wisdom = new Wisdom(SystemResourceBase);
+
+    auto cWisdomDir = buildPath(UserResourceBase, "wisdom");
+    mkdirRecurse(cWisdomDir);
+    auto customWisdom = new Wisdom(cWisdomDir);
+    scope(success) customWisdom.save;
+
     auto config = new Config(buildPath(UserResourceBase, "config.json"));
-    scope(exit) config.destroy;
+    scope(success) config.save;
     auto userDir = buildPath(UserResourceBase, "users");
     mkdirRecurse(userDir);
 
@@ -57,7 +63,7 @@ extern(C) int UIAppMain(string[] args)
     auto window = Platform.instance.createWindow(AppName, null, WindowFlag.Resizable,
                                                  config.windowWidth,
                                                  config.windowHeight);
-    window.mainWidget = new MainFrame(wisdom, chars, config);
+    window.mainWidget = new MainFrame(wisdom, chars, config, customWisdom);
     window.show;
     window.onClose = {
         version(Windows) {

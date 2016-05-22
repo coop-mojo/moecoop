@@ -187,8 +187,9 @@ auto jto(T)(JSONValue json)
     }
     else static if (isFloatingPoint!T)
     {
-        enforce(json.type == JSON_TYPE.FLOAT);
-        return json.floating.to!T;
+        enforce(json.type == JSON_TYPE.FLOAT || json.type == JSON_TYPE.INTEGER);
+        return json.type == JSON_TYPE.FLOAT ? json.floating.to!T :
+            json.integer.to!T;
     }
     else static if (isAssociativeArray!T)
     {

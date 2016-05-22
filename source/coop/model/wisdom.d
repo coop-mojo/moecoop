@@ -21,6 +21,7 @@ import std.algorithm;
 import std.array;
 import std.exception;
 import std.file;
+import std.json;
 import std.path;
 import std.typecons;
 
@@ -73,29 +74,29 @@ class Wisdom {
         enforce(basedir.exists);
         enforce(basedir.isDir);
 
-        auto files = dirEntries(buildPath(basedir, "バインダー"), "*.json", SpanMode.breadth);
-        if (files.empty)
+        auto dir = buildPath(basedir, "バインダー");
+        if (!dir.exists)
         {
             return typeof(binderList).init;
         }
-        return files
+        return dirEntries(dir, "*.json", SpanMode.breadth)
             .map!(s => s.readBinders)
             .array
             .joiner
             .assocArray;
     }
 
-    auto readRecipeList(string sysBase)
+    auto readRecipeList(string basedir)
     {
-        enforce(sysBase.exists);
-        enforce(sysBase.isDir);
+        enforce(basedir.exists);
+        enforce(basedir.isDir);
 
-        auto files = dirEntries(buildPath(sysBase, "レシピ"), "*.json", SpanMode.breadth);
-        if (files.empty)
+        auto dir = buildPath(basedir, "レシピ");
+        if (!dir.exists)
         {
             return typeof(recipeList).init;
         }
-        return files
+        return dirEntries(dir, "*.json", SpanMode.breadth)
             .map!(s => s.readRecipes)
             .assocArray;
     }
@@ -107,12 +108,12 @@ class Wisdom {
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
 
-        auto files = dirEntries(buildPath(sysBase, "アイテム"), "*.json", SpanMode.breadth);
-        if (files.empty)
+        auto dir = buildPath(sysBase, "アイテム");
+        if (!dir.exists)
         {
             return typeof(itemList).init;
         }
-        return files
+        return dirEntries(dir, "*.json", SpanMode.breadth)
             .map!(s => s.readItems(foodList, drinkList, liquorList, weaponList, bulletList))
             .array
             .joiner
@@ -124,12 +125,12 @@ class Wisdom {
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
 
-        auto files = dirEntries(buildPath(sysBase, "食べ物"), "*.json", SpanMode.breadth);
-        if (files.empty)
+        auto dir = buildPath(sysBase, "食べ物");
+        if (!dir.exists)
         {
             return (FoodInfo[dstring]).init;
         }
-        return files
+        return dirEntries(dir, "*.json", SpanMode.breadth)
             .map!(s => s.readFoods)
             .joiner
             .assocArray;
@@ -192,12 +193,12 @@ class Wisdom {
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
 
-        auto files = dirEntries(buildPath(sysBase, "飲食バフ"), "*.json", SpanMode.breadth);
-        if (files.empty)
+        auto dir = buildPath(sysBase, "飲食バフ");
+        if (!dir.exists)
         {
             return typeof(foodEffectList).init;
         }
-        return files
+        return dirEntries(dir, "*.json", SpanMode.breadth)
             .map!(s => s.readFoodEffects)
             .joiner
             .assocArray;
@@ -244,6 +245,23 @@ class Wisdom {
     auto bindersFor(dstring recipeName)
     {
         return binders.filter!(b => recipesIn(Binder(b)).canFind(recipeName)).array;
+    }
+
+    auto save()
+    {
+        import std.stdio;
+        import std.conv;
+
+        foreach(dir; ["アイテム", "バインダー", "レシピ", "飲み物", "飲食バフ",
+                      "食べ物", "武器", "防具"])
+        {
+            mkdirRecurse(buildPath(baseDir_, dir));
+        }
+
+        auto f = File(buildPath(baseDir_, "アイテム", "アイテム.json"), "w");
+        f.write(JSONValue(itemList.values
+                          .map!(item => tuple(item.name.to!string, item.toJSON))
+                          .assocArray).toPrettyString);
     }
 }
 

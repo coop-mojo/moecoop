@@ -36,10 +36,19 @@ import coop.util;
 
 class ItemEditDialog: Dialog
 {
-    this(Window parent, Item orig)
+    this(Window parent, Item orig, Wisdom cw)
     {
         super(UIString("アイテム情報編集"d), parent, DialogFlag.Popup);
         original = orig;
+        cWisdom = cw;
+        if (auto item = original.name in cw.itemList)
+        {
+            updated = *item;
+        }
+        else
+        {
+            updated = original;
+        }
     }
 
     override void initialize()
@@ -73,12 +82,10 @@ class ItemEditDialog: Dialog
 
         auto main = root.childById("main");
 
-        main.addTextElem("名前", item.name, false);
-        main.addTextElem("英名", item.ename, item.ename.empty, (txt) { updated.ename = txt; return; });
-        main.addTextElem!(r"^\d+(\.\d+)?$")("重さ", item.weight.isNaN ? "" : format("%.2f"d, item.weight), item.weight.isNaN,
-                                            (txt) { updated.weight = txt.empty ? real.init : txt.to!real; return; });
-        main.addTextElem!(r"^\d+$")("NPC売却価格", item.price.to!dstring, item.price == 0,
-                                    (txt) { updated.price = txt.empty ? int.init : txt.to!int; return; });
+        main.addTextElem!("name", true)("名前", item, updated);
+        main.addTextElem!"ename"("英名", item, updated);
+        main.addTextElem!"weight"("重さ", item, updated);
+        main.addTextElem!"price"("NPC売却価格", item, updated);
 
         auto tr = new HorizontalLayout;
         tr.addCheckElem("転送可", item.transferable, !item.transferable,
@@ -175,9 +182,8 @@ class ItemEditDialog: Dialog
         main.addChild(propCap);
         main.addChild(table);
 
-        main.addTextElem("info", item.info, item.info.empty, (txt) { updated.info = txt; return; });
-        main.addTextElem("備考", item.remarks, item.remarks.empty || item.remarks == "細かいことはわかりません（´・ω・｀）",
-                         (txt) { updated.remarks = txt; return; });
+        main.addTextElem!"info"("info", item, updated);
+        main.addTextElem!"remarks"("備考", item, updated);
 
         auto itemTypeCap = new TextWidget("", "種別"d);
         auto itemComboBox = new ComboBox("", ItemType.svalues.to!(dstring[]));
@@ -218,9 +224,10 @@ class ItemEditDialog: Dialog
         if (action) {
             if (action.id == StandardAction.Ok)
             {
-                import std.stdio;
-                writeln("Updated: ", updated);
-                /// TODO
+                if (original != updated)
+                {
+                    cWisdom.itemList[updated.name] = updated;
+                }
             }
         }
         _parentWindow.removePopup(_popup);
@@ -228,47 +235,74 @@ class ItemEditDialog: Dialog
 private:
     Item original;
     Item updated;
-    typeof(Item.init.extraInfo) extra;
+    Wisdom cWisdom;
 }
 
-auto showItemEditDialog(Window parent, Item item)
+auto showItemEditDialog(Window parent, Item item, Wisdom cw)
 {
-    auto dlg = new ItemEditDialog(parent, item);
+    auto dlg = new ItemEditDialog(parent, item, cw);
     dlg.show;
 }
 
-auto addTextElem(dstring AllowedRegex = "")(Widget layout, dstring caption, dstring elem, bool editable, void delegate(dstring) fun = (txt) {return;})
+
+auto addTextElem(dstring prop, bool frozen = false)(Widget layout, dstring caption, Item original, ref Item updated)
+    if (hasMember!(Item, prop))
 {
-    layout.addChild(new TextWidget("", caption));
-    auto editLine = new EditLine("", elem);
-    layout.addChild(editLine);
-    with(editLine)
+    mixin("alias PropType = typeof(Item.init."~prop~");");
+    auto ref getProp(ref Item i) {
+        return mixin("i."~prop);
+    }
+    auto isValidValue(PropType val)
     {
-        enabled = editable;
-        static if (AllowedRegex.empty)
+        static if (isFloatingPoint!PropType)
+            return !val.isNaN;
+        else static if (is(PropType == dstring))
+            return !val.empty;
+        else static if (isIntegral!PropType)
+            return val > 0;
+        else
+            static assert(false, "Invalid property type: "~PropType.stringof);
+    }
+    auto toPropString(PropType val)
+    {
+        static if (isFloatingPoint!PropType)
         {
-            alias matchFun = s => true;
+            return val.isNaN ? "" : format("%.2f"d, val);
         }
         else
         {
-            alias matchFun = (s) {
-                if (s.empty || s.matchFirst(ctRegex!AllowedRegex))
-                {
-                    textColor = "black";
-                    return true;
-                }
-                else
-                {
-                    textColor = "red";
-                    return false;
-                }
-            };
+            return val.to!dstring;
         }
+    }
+    layout.addChild(new TextWidget("", caption));
+
+    dstring elm;
+    if (isValidValue(getProp(original)))
+    {
+        elm = toPropString(getProp(original));
+    }
+    else
+    {
+        elm = toPropString(getProp(updated));
+    }
+    auto editLine = new EditLine("", elm);
+    layout.addChild(editLine);
+
+    with(editLine)
+    {
+        enabled = !isValidValue(getProp(original)) && !frozen;
+        enum regex = isFloatingPoint!PropType ? r"^\d+(\.\d+)?$"d :
+                     isIntegral!PropType      ? r"^\d+$"d : ""d;
         contentChange = (EditableContent content) {
             auto txt = content.text;
-            if (matchFun(txt))
+            if (txt.empty || regex.empty || txt.matchFirst(ctRegex!regex))
             {
-                fun(txt);
+                textColor = "black";
+                getProp(updated) = txt.empty ? PropType.init : txt.to!PropType;
+            }
+            else
+            {
+                textColor = "red";
             }
         };
     }

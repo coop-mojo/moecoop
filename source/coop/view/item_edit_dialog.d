@@ -72,28 +72,21 @@ class ItemEditDialog: Dialog
             });
         addChild(root);
 
-        auto item = original;
-        with(updated)
-        {
-            name = item.name;
-            properties = item.properties;
-            remarks = "";
-        }
-
+        auto item = Overlaid!Item(original, &updated);
         auto main = root.childById("main");
 
-        main.addTextElem!("name", true)("名前", item, updated);
-        main.addTextElem!"ename"("英名", item, updated);
-        main.addTextElem!"weight"("重さ", item, updated);
-        main.addTextElem!"price"("NPC売却価格", item, updated);
+        main.addTextElem!"name"("名前", item);
+        main.addTextElem!"ename"("英名", item);
+        main.addTextElem!"weight"("重さ", item);
+        main.addTextElem!"price"("NPC売却価格", item);
 
         auto tr = new HorizontalLayout;
-        tr.addCheckElem("転送可", item.transferable, !item.transferable,
-                        (b) { updated.transferable = b; return; });
+        tr.addCheckElem("転送可", item.transferable, item.isOverlaid!"transferable",
+                        (b) { item.transferable = b; return; });
 
         auto st = new HorizontalLayout;
-        st.addCheckElem("スタック可", item.stackable, !item.stackable,
-                        (b) { updated.stackable = b; return; });
+        st.addCheckElem("スタック可", item.stackable, item.isOverlaid!"stackable",
+                        (b) { item.stackable = b; return; });
 
         main.addChild(tr);
         main.addChild(st);
@@ -107,13 +100,14 @@ class ItemEditDialog: Dialog
             auto petComboBox = new ComboBox("", petTypes);
             auto textBox = new EditLine("");
 
+            petComboBox.selectedItemIndex = PetFoodType.values.indexOf(item.petFoodInfo.keys[0]).to!int;
             petComboBox.itemClick = (Widget src, int idx) {
                 updated.petFoodInfo.clear;
                 if (idx == 0 || idx == petTypes.length-1)
                 {
                     textBox.text = "";
                     textBox.enabled = false;
-                    updated.petFoodInfo[idx.to!PetFoodType] = 0;
+                    item.petFoodInfo[idx.to!PetFoodType] = 0;
                 }
                 else
                 {
@@ -121,7 +115,6 @@ class ItemEditDialog: Dialog
                 }
                 return true;
             };
-            petComboBox.selectedItemIndex = PetFoodType.values.indexOf(item.petFoodInfo.keys[0]).to!int;
             auto i = petComboBox.selectedItemIndex;
             if (i == 0 || i == petTypes.length-1)
             {
@@ -146,14 +139,12 @@ class ItemEditDialog: Dialog
             };
 
             auto key = item.petFoodInfo.keys[0];
-            if (key != PetFoodType.UNKNOWN)
+            textBox.enabled = item.isOverlaid!"petFoodInfo" || key != PetFoodType.UNKNOWN ||
+                              key != PetFoodType.NoEatable;
+            petComboBox.enabled = item.isOverlaid!"petFoodInfo";
+            if (key != PetFoodType.UNKNOWN || key != PetFoodType.NoEatable)
             {
-                if (key != PetFoodType.NoEatable)
-                {
-                    textBox.text = item.petFoodInfo[key].to!dstring;
-                }
-                textBox.enabled = false;
-                petComboBox.enabled = false;
+                textBox.text = item.petFoodInfo[key].to!dstring;
             }
             addChild(petComboBox);
             addChild(textBox);
@@ -177,22 +168,19 @@ class ItemEditDialog: Dialog
                     updated.properties &= ~p;
                 }
             };
-            table.addCheckElem(p.to!dstring, (props&p) != 0, (props&p) == 0, updateFun, p.toStrings.join.to!dstring);
+            table.addCheckElem(p.to!dstring, (props&p) != 0, item.isOverlaid!"properties", updateFun, p.toStrings.join.to!dstring);
             }
         main.addChild(propCap);
         main.addChild(table);
 
-        main.addTextElem!"info"("info", item, updated);
-        main.addTextElem!"remarks"("備考", item, updated);
+        main.addTextElem!"info"("info", item);
+        main.addTextElem!"remarks"("備考", item);
 
         auto itemTypeCap = new TextWidget("", "種別"d);
         auto itemComboBox = new ComboBox("", ItemType.svalues.to!(dstring[]));
         auto kv = ItemType.values.enumerate.find!"a[1] == b"(item.type).front;
         itemComboBox.selectedItemIndex = kv[0].to!int;
-        if (kv[1] != ItemType.UNKNOWN)
-        {
-            itemComboBox.enabled = false;
-        }
+        itemComboBox.enabled = item.isOverlaid!"type";
         main.addChild(itemTypeCap);
         itemComboBox.itemClick = (Widget src, int idx) {
             updated.type = idx;
@@ -245,24 +233,10 @@ auto showItemEditDialog(Window parent, Item item, Wisdom cw)
 }
 
 
-auto addTextElem(dstring prop, bool frozen = false)(Widget layout, dstring caption, Item original, ref Item updated)
+auto addTextElem(dstring prop)(Widget layout, dstring caption, Overlaid!Item item)
     if (hasMember!(Item, prop))
 {
     mixin("alias PropType = typeof(Item.init."~prop~");");
-    auto ref getProp(ref Item i) {
-        return mixin("i."~prop);
-    }
-    auto isValidValue(PropType val)
-    {
-        static if (isFloatingPoint!PropType)
-            return !val.isNaN;
-        else static if (is(PropType == dstring))
-            return !val.empty;
-        else static if (isIntegral!PropType)
-            return val > 0;
-        else
-            static assert(false, "Invalid property type: "~PropType.stringof);
-    }
     auto toPropString(PropType val)
     {
         static if (isFloatingPoint!PropType)
@@ -276,21 +250,12 @@ auto addTextElem(dstring prop, bool frozen = false)(Widget layout, dstring capti
     }
     layout.addChild(new TextWidget("", caption));
 
-    dstring elm;
-    if (isValidValue(getProp(original)))
-    {
-        elm = toPropString(getProp(original));
-    }
-    else
-    {
-        elm = toPropString(getProp(updated));
-    }
-    auto editLine = new EditLine("", elm);
+    auto editLine = new EditLine("", toPropString(mixin("item."~prop)));
     layout.addChild(editLine);
 
     with(editLine)
     {
-        enabled = !isValidValue(getProp(original)) && !frozen;
+        enabled = item.isOverlaid!prop;
         enum regex = isFloatingPoint!PropType ? r"^\d+(\.\d+)?$"d :
                      isIntegral!PropType      ? r"^\d+$"d : ""d;
         contentChange = (EditableContent content) {
@@ -298,7 +263,10 @@ auto addTextElem(dstring prop, bool frozen = false)(Widget layout, dstring capti
             if (txt.empty || regex.empty || txt.matchFirst(ctRegex!regex))
             {
                 textColor = "black";
-                getProp(updated) = txt.empty ? PropType.init : txt.to!PropType;
+                if (enabled)
+                {
+                    mixin("item."~prop) = txt.empty ? PropType.init : txt.to!PropType;
+                }
             }
             else
             {

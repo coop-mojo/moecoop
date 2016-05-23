@@ -75,7 +75,7 @@ struct Item
 
         if (properties)
         {
-            hash["特殊条件"] = JSONValue(properties.toStrings(true));
+            hash["特殊条件"] = JSONValue(properties.toStrings(false));
         }
         return JSONValue(hash);
     }
@@ -236,7 +236,7 @@ enum SpecialProperty: ushort
     WA = 0b10000000000000,
 }
 
-auto toStrings(ushort sps, bool detailed = false)
+auto toStrings(ushort sps, bool detailed = true)
 {
     with(SpecialProperty)
     {
@@ -553,7 +553,7 @@ struct Overlaid(T)
         overlaid = ol;
     }
 
-    @property auto opDispatch(string field)()
+    @property auto ref opDispatch(string field)()
         if (hasMember!(T, field))
     {
         if (isOverlaid!field)
@@ -569,8 +569,7 @@ struct Overlaid(T)
     @property auto isOverlaid(string field)()
         if (hasMember!(T, field))
     {
-        return overlaid !is null &&
-            !isValidValue(mixin("original."~field)) && isValidValue(mixin("overlaid."~field));
+        return overlaid !is null && !isValidValue(mixin("original."~field));
     }
 private:
     static auto isValidValue(T)(T val)
@@ -583,10 +582,12 @@ private:
             return val > 0;
         else static if (is(T == bool))
             return val;
-        else static if (is(T == real[PetFoodType])) /// petFoodInfo
+        else static if (is(T == real[PetFoodType]))
+        {
             return val.keys[0] != PetFoodType.UNKNOWN;
+        }
         else
-            return val == T.init;
+            return val != T.init;
     }
 
     T original;
@@ -634,6 +635,6 @@ unittest
     assert(overlaid.isOverlaid!"weight");
     assert(overlaid.weight == 1.4);
 
-    assert(!overlaid.isOverlaid!"price");
+    assert(overlaid.isOverlaid!"price");
     assert(overlaid.price == 0);
 }

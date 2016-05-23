@@ -73,13 +73,12 @@ class ItemDetailFrame: ScrollWidget
             table.addElem("転送可", item.transferable ? "はい" : "いいえ", item.isOverlaid!"transferable");
             table.addElem("スタック可", item.stackable ? "はい": "いいえ", item.isOverlaid!"stackable");
 
-            if (i.properties != 0)
+            if (item.properties != 0)
             {
-                // TODO
                 table.addElem("特殊条件", item.properties.toStrings.join(", ").to!dstring, item.isOverlaid!"properties");
             }
 
-            if (i.petFoodInfo.keys[0] != PetFoodType.NoEatable)
+            if (item.petFoodInfo.keys[0] != PetFoodType.NoEatable)
             {
                 table.addElem("ペットアイテム",
                               item.petFoodInfo
@@ -90,12 +89,12 @@ class ItemDetailFrame: ScrollWidget
                               item.isOverlaid!"petFoodInfo");
             }
 
-            if (!i.info.empty)
+            if (!item.info.empty)
             {
                 table.addElem("info", item.info, item.isOverlaid!"info");
             }
 
-            auto rem = i.name in wisdom.itemList ? i.remarks : "細かいことはわかりません（´・ω・｀）";
+            auto rem = item.name in wisdom.itemList ? item.remarks : "細かいことはわかりません（´・ω・｀）";
             if (!rem.empty || !extraRemarks.empty)
             {
                 table.addElem("備考", [rem, extraRemarks].filter!"!a.empty".join(", "));

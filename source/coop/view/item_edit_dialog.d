@@ -31,15 +31,18 @@ import std.traits;
 import coop.model.item;
 import coop.model.wisdom;
 import coop.view.item_detail_frame;
+import coop.view.recipe_tab_frame;
 
 import coop.util;
 
 class ItemEditDialog: Dialog
 {
-    this(Window parent, Item orig, Wisdom cw)
+    this(Window parent, RecipeTabFrame fr, Item orig, int index, Wisdom cw)
     {
         super(UIString("アイテム情報編集"d), parent, DialogFlag.Popup);
+        tabFrame = fr;
         original = orig;
+        idx = index;
         cWisdom = cw;
         if (auto item = original.name in cw.itemList)
         {
@@ -169,7 +172,7 @@ class ItemEditDialog: Dialog
                 }
             };
             table.addCheckElem(p.to!dstring, (props&p) != 0, item.isOverlaid!"properties", updateFun, p.toStrings.join.to!dstring);
-            }
+        }
         main.addChild(propCap);
         main.addChild(table);
 
@@ -215,20 +218,29 @@ class ItemEditDialog: Dialog
                 if (original != updated)
                 {
                     cWisdom.itemList[updated.name] = updated;
+                    updateFrame;
                 }
             }
         }
         _parentWindow.removePopup(_popup);
     }
 private:
+
+    auto updateFrame()
+    {
+        tabFrame.setItemDetail(ItemDetailFrame.create(original, idx+1, tabFrame.controller.wisdom, cWisdom), idx);
+    }
+
     Item original;
     Item updated;
     Wisdom cWisdom;
+    RecipeTabFrame tabFrame;
+    int idx;
 }
 
-auto showItemEditDialog(Window parent, Item item, Wisdom cw)
+auto showItemEditDialog(Window parent, RecipeTabFrame frame, Item item, int index, Wisdom cw)
 {
-    auto dlg = new ItemEditDialog(parent, item, cw);
+    auto dlg = new ItemEditDialog(parent, frame, item, index, cw);
     dlg.show;
 }
 

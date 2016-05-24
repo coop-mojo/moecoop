@@ -160,9 +160,9 @@ class ItemEditDialog: Dialog
         auto table = new TableLayout;
         table.colCount = 14;
         auto props = item.properties;
-        foreach(p; [EnumMembers!SpecialProperty])
+        foreach(pr; [EnumMembers!SpecialProperty])
         {
-            alias updateFun = (bool c) {
+            alias updateFun = (ushort p) => (bool c) {
                 if (c) {
                     updated.properties |= p;
                 }
@@ -171,7 +171,8 @@ class ItemEditDialog: Dialog
                     updated.properties &= ~p;
                 }
             };
-            table.addCheckElem(p.to!dstring, (props&p) != 0, item.isOverlaid!"properties", updateFun, p.toStrings.join.to!dstring);
+            table.addCheckElem(pr.to!dstring, (props&pr) != 0, item.isOverlaid!"properties",
+                               updateFun(pr), pr.toStrings.join.to!dstring);
         }
         main.addChild(propCap);
         main.addChild(table);

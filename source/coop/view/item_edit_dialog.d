@@ -115,6 +115,15 @@ class ItemEditDialog: Dialog
                 else
                 {
                     textBox.enabled = true;
+                    auto txt = textBox.text;
+                    if (!txt.empty && txt.matchFirst(ctRegex!r"^\d+(\.\d+)?$"d))
+                    {
+                        item.petFoodInfo[idx.to!PetFoodType] = txt.to!real;
+                    }
+                    else
+                    {
+                        item.petFoodInfo[idx.to!PetFoodType] = 0;
+                    }
                 }
                 return true;
             };

@@ -30,6 +30,8 @@ import std.variant;
 
 import coop.util;
 
+alias ExtraInfo = Algebraic!(FoodInfo, WeaponInfo, BulletInfo, MedicineInfo);
+
 /// アイテム一般の情報
 struct Item
 {
@@ -49,11 +51,6 @@ struct Item
     real[PetFoodType] petFoodInfo;
     dstring remarks;
     ItemType type;
-    Algebraic!(FoodInfo, WeaponInfo, BulletInfo) extraInfo;
-    @property auto hasExtraInfo() const
-    {
-        return extraInfo.hasValue;
-    }
 
     auto toJSON()
     {
@@ -101,18 +98,6 @@ struct Item
                     return false;
                 }
             }
-            else static if (field == "extraInfo")
-            {
-                if (this.hasExtraInfo && other.hasExtraInfo &&
-                    this.extraInfo != other.extraInfo)
-                {
-                    return false;
-                }
-                else if (this.hasExtraInfo ^ other.hasExtraInfo)
-                {
-                    return false;
-                }
-            }
             else
             {
                 if (prop!field(this) != prop!field(other))
@@ -125,21 +110,17 @@ struct Item
     }
 }
 
-auto readItems(string fname,
-               FoodInfo[dstring] foodList, FoodInfo[dstring] drinkList, FoodInfo[dstring] liquorList,
-               WeaponInfo[dstring] weaponList, BulletInfo[dstring] bulletList)
+auto readItems(string fname)
 {
     auto res = fname.readText.parseJSON;
     enforce(res.type == JSON_TYPE.OBJECT);
     auto items = res.object;
     return items.keys.map!(key =>
                            tuple(key.to!dstring,
-                                 key.toItem(items[key].object, foodList, drinkList, liquorList, weaponList, bulletList)));
+                                 key.toItem(items[key].object)));
 }
 
-auto toItem(string s, JSONValue[string] json,
-            FoodInfo[dstring] foodList, FoodInfo[dstring] drinkList, FoodInfo[dstring] liquorList,
-            WeaponInfo[dstring] weaponList, BulletInfo[dstring] bulletList)
+auto toItem(string s, JSONValue[string] json)
 {
     Item item;
     with(item)
@@ -166,49 +147,6 @@ auto toItem(string s, JSONValue[string] json,
             properties = (*props).array.toSpecialProperties;
         }
         type = json["種類"].jto!ItemType;
-        final switch(type) with(ItemType)
-        {
-        case Food:
-            if (auto info = name in foodList)
-            {
-                extraInfo = *info;
-            }
-            break;
-        case Drink:
-            if (auto info = name in drinkList)
-            {
-                extraInfo = *info;
-            }
-            break;
-        case Liquor:
-            if (auto info = name in liquorList)
-            {
-                extraInfo = *info;
-            }
-            break;
-        case Medicine:
-            break;
-        case Weapon:
-            if (auto info = name in weaponList)
-            {
-                extraInfo = *info;
-            }
-            break;
-        case Armor:
-            break;
-        case Bullet:
-            if (auto info = name in bulletList)
-            {
-                extraInfo = *info;
-            }
-            break;
-        case Asset:
-            break;
-        case Others:
-            break;
-        case UNKNOWN:
-            break;
-        }
     }
     return item;
 }
@@ -544,6 +482,37 @@ alias Grade = ExtendedEnum!(["UNKNOWN", "Degraded", "NG", "HG", "MG"],
 
 alias ExhaustionType = ExtendedEnum!(["UNKNOWN", "Points", "Times"],
                                      ["不明", "耐久値", "使用可能回数"]);
+
+/// 薬と包帯固有の情報
+struct MedicineInfo
+{
+    real[dstring] skill;
+    dstring effect;
+}
+
+auto readMedicines(string fname)
+{
+    auto res = fname.readText.parseJSON;
+    enforce(res.type == JSON_TYPE.OBJECT);
+    auto medicines = res.object;
+    return medicines.keys.map!(key =>
+                             tuple(key.to!dstring,
+                                   medicines[key].object.toMedicineInfo));
+}
+
+auto toMedicineInfo(JSONValue[string] json)
+{
+    MedicineInfo info;
+    with(info)
+    {
+        effect = json["効果"].jto!dstring;
+        if (auto f = "必要スキル" in json)
+        {
+            skill = (*f).jto!(real[dstring]);
+        }
+    }
+    return info;
+}
 
 struct Overlaid(T)
 {

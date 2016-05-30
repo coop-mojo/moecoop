@@ -62,13 +62,8 @@ class ItemDetailFrame: ScrollWidget
             table.addElem("英名", item.ename.empty ? "わからん（´・ω・｀）" : item.ename, item.isOverlaid!"ename");
             table.addElem("重さ", item.weight.isNaN ? "そこそこの重さ" : format("%.2f"d, item.weight), item.isOverlaid!"weight");
 
-            dstring extraRemarks;
-            if (i.hasExtraInfo)
-            {
-                extraRemarks = table.addExtraElem(i, wisdom);
-            }
+            dstring extraRemarks = table.addExtraElem(i, wisdom);
 
-            // extrainfo
             table.addElem("NPC売却価格", format("%s g"d, item.price), item.isOverlaid!"price");
             table.addElem("転送可", item.transferable ? "はい" : "いいえ", item.isOverlaid!"transferable");
             table.addElem("スタック可", item.stackable ? "はい": "いいえ", item.isOverlaid!"stackable");
@@ -126,10 +121,17 @@ auto addElem(dstring delim = ": ")(Widget layout, dstring caption, dstring elem,
 
 auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
 {
+    if (item.type !in wisdom.extraInfoList ||
+        item.name !in wisdom.extraInfoList[item.type])
+    {
+        return ""d;
+    }
+    auto ei = wisdom.extraInfoList[item.type][item.name];
+
     final switch(item.type) with(ItemType)
     {
     case Food, Drink, Liquor:{
-        auto info = item.extraInfo.peek!FoodInfo;
+        auto info = ei.peek!FoodInfo;
         layout.addElem("効果", format("%.1f"d, info.effect));
 
         if (auto effectName = info.additionalEffect)
@@ -157,22 +159,33 @@ auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
                                                                            : einfo.group.to!dstring);
                 layout.addElem("効果時間", format("%s 秒"d, einfo.duration));
 
-
                 return einfo.remarks;
             }
         }
-    }
-    case Medicine:
         break;
+    }
+    case Medicine:{
+        auto info = ei.peek!MedicineInfo;
+        if (!info.skill.keys.empty)
+        {
+            layout.addElem("必要スキル",
+                           info.skill
+                               .byKeyValue
+                               .map!(kv => format("%s (%.1f)"d, kv.key, kv.value))
+                               .join(", "));
+        }
+        layout.addElem("効果", info.effect);
+        // TODO: 具体的な効果を wisdom に問い合わせて表示
+        break;
+    }
     case Weapon:{
-        auto info = item.extraInfo.peek!WeaponInfo;
+        auto info = ei.peek!WeaponInfo;
 
         auto damageStr = Grade.values
                               .filter!(g => info.damage.keys.canFind(g))
                               .map!(g => format("%s: %.1f"d, g.to!Grade, info.damage[g.to!Grade]))
                               .join(", ");
-        layout.addElem("ダメージ",
-                       damageStr);
+        layout.addElem("ダメージ", damageStr);
         layout.addElem("攻撃間隔", info.duration.to!dstring);
         layout.addElem("有効レンジ", format("%.1f"d, info.range));
         layout.addElem(info.type == ExhaustionType.Points ? "使用可能回数" : "消耗度",
@@ -209,12 +222,13 @@ auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
                                                   kv.value))
                                .join(", "));
         }
-        return ""d;
-    }
-    case Armor:
         break;
+    }
+    case Armor:{
+        break;
+    }
     case Bullet:{
-        auto info = item.extraInfo.peek!BulletInfo;
+        auto info = ei.peek!BulletInfo;
 
         layout.addElem("ダメージ", format("%.1f"d, info.damage));
         layout.addElem("有効レンジ", format("%.1f"d, info.range));
@@ -229,12 +243,14 @@ auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
         {
             layout.addElem("装備可能シップ", info.restriction.to!dstring~"系");
         }
-        return ""d;
+        break;
     }
-    case Asset:
+    case Asset:{
         break;
-    case Others:
+    }
+    case Others:{
         break;
+    }
     case UNKNOWN:
         assert(false);
     }

@@ -19,6 +19,7 @@ module coop.model.wisdom;
 
 import std.algorithm;
 import std.array;
+import std.conv;
 import std.exception;
 import std.file;
 import std.json;
@@ -45,6 +46,9 @@ class Wisdom {
     /// 飲食バフ一覧
     AdditionalEffect[dstring] foodEffectList;
 
+    /// アイテム種別ごとの固有情報一覧
+    ExtraInfo[dstring][ItemType] extraInfoList;
+
     /// システムデータが保存してあるパス
     immutable string baseDir_;
 
@@ -60,13 +64,15 @@ class Wisdom {
         recipeList = readRecipeList(baseDir_);
         foodEffectList = readFoodEffectList(baseDir_);
 
-        auto foodList = readFoodList(baseDir_);
-        auto drinkList = readDrinkList(baseDir_);
-        auto liquorList = readLiquorList(baseDir_);
-        auto weaponList = readWeaponList(baseDir_);
-        auto bulletList = readBulletList(baseDir_);
-
-        itemList = readItemList(baseDir_, foodList, drinkList, liquorList, weaponList, bulletList);
+        with(ItemType)
+        {
+            extraInfoList[Food.to!ItemType] = readFoodList(baseDir_).to!(ExtraInfo[dstring]);
+            extraInfoList[Drink.to!ItemType] = readDrinkList(baseDir_).to!(ExtraInfo[dstring]);
+            extraInfoList[Liquor.to!ItemType] = readLiquorList(baseDir_).to!(ExtraInfo[dstring]);
+            extraInfoList[Weapon.to!ItemType] = readWeaponList(baseDir_).to!(ExtraInfo[dstring]);
+            extraInfoList[Bullet.to!ItemType] = readBulletList(baseDir_).to!(ExtraInfo[dstring]);
+        }
+        itemList = readItemList(baseDir_);
     }
 
     auto readBinderList(string basedir)
@@ -101,9 +107,7 @@ class Wisdom {
             .assocArray;
     }
 
-    auto readItemList(string sysBase,
-                      FoodInfo[dstring] foodList, FoodInfo[dstring] drinkList, FoodInfo[dstring] liquorList,
-                      WeaponInfo[dstring] weaponList, BulletInfo[dstring] bulletList)
+    auto readItemList(string sysBase)
     {
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
@@ -114,7 +118,7 @@ class Wisdom {
             return typeof(itemList).init;
         }
         return dirEntries(dir, "*.json", SpanMode.breadth)
-            .map!(s => s.readItems(foodList, drinkList, liquorList, weaponList, bulletList))
+            .map!(s => s.readItems)
             .array
             .joiner
             .assocArray;

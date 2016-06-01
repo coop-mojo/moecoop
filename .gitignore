@@ -6,3 +6,4 @@ __test__library__
 libfreetype-*.dll
 ui.log
 moecoop*.zip
+.fldd.cache

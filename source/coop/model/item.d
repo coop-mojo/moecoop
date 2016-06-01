@@ -151,10 +151,12 @@ auto toItem(string s, JSONValue[string] json)
     return item;
 }
 
-alias PetFoodType = ExtendedEnum!(["UNKNOWN", "Food", "Meat", "Weed", "Drink", "Liquor", "Medicine", "Metal",
-                                   "Stone", "Bone", "Crystal", "Wood", "Leather", "Paper", "Cloth", "Others", "NoEatable"],
-                                  ["不明", "食べ物", "肉食物", "草食物", "飲み物", "酒", "薬", "金属",
-                                   "石", "骨", "クリスタル", "木", "皮", "紙", "布", "その他", "犬も食わない"]);
+alias PetFoodType = ExtendedEnum!(
+    UNKNOWN => "不明", Food => "食べ物", Meat => "肉食物", Weed => "草食物",
+    Drink => "飲み物", Liquor => "酒", Medicine => "薬", Metal => "金属",
+    Stone => "石", Bone => "骨", Crystal => "クリスタル", Wood => "木",
+    Leather => "皮", Paper => "紙", Cloth => "布", Others => "その他",
+    NoEatable => "犬も喰わない",);
 
 enum SpecialProperty: ushort
 {
@@ -198,7 +200,6 @@ auto toStrings(ushort sps, bool detailed = true)
         {
             return detailed ? propMap[p] : p.to!string;
         }
-        // return propMap.keys.filter!(p => sps&p).map!(p => propMap[p]).array;
         return propMap.keys.filter!(p => sps&p).map!(p => str(p)).array;
     }
 }
@@ -209,10 +210,10 @@ auto toSpecialProperties(JSONValue[] vals)
     return props.reduce!((a, b) => a|b).to!ushort;
 }
 
-alias ItemType = ExtendedEnum!(["UNKNOWN", "Others", "Food", "Drink", "Liquor",
-                                "Medicine", "Weapon", "Armor", "Bullet", "Asset"],
-                               ["不明", "その他", "食べ物", "飲み物", "酒",
-                                "薬", "武器", "防具", "弾", "アセット"]);
+alias ItemType = ExtendedEnum!(
+    UNKNOWN => "不明", Others => "その他", Food => "食べ物", Drink => "飲み物",
+    Liquor => "酒", Medicine => "薬", Weapon => "武器", Armor => "防具",
+    Bullet => "弾", Asset => "アセット",);
 
 /// 料理固有の情報
 struct FoodInfo
@@ -250,7 +251,7 @@ auto toFoodInfo(string s, JSONValue[string] json)
 /// 飲食バフのグループ
 enum AdditionalEffectGroup
 {
-    A, B1, B2, C1, C2, D1, D2, D3, D4, E, F, Others
+    A, B1, B2, C1, C2, D1, D2, D3, D4, E, F, Others,
 }
 
 /// 飲食バフの効果情報
@@ -429,59 +430,58 @@ struct AssetInfo
     int exhaustion;
 }
 
-alias ShipRestriction = ExtendedEnum!(["UNKNOWN", "Any",],
-                                      ["不明", "なし",
-                                       // 基本シップ
-                                       // 熟練
-                                       // "パンチャー", "剣士", "メイサー", "ランサー", "ガンナー", "アーチャー",
-                                       // "ガーズマン", "投げ士", "レンジャー", "ブラッド サッカー", "キッカー", "ワイルドマン",
-                                       // "ドリンカー", "物まね師", "テイマー", "ウィザード", "プリースト", "シャーマン", //ウィッチは？
-                                       // "エンチャンター", "サモナー", "シャドウ", "魔術師", "野生児", "小悪魔",
-                                       // "ベンダー", "ロックシンガー", "ソングシンガー", "スリ", "目立ちたがり", "ストリートダンサー",
-                                       // // 基本
-                                       // "フォールマン", "スイマー", "デッドマン", "ヘルパー", "休憩人", "マイナー",
-                                       // "木こり", "耕作師", "釣り人", "解読者",
-                                       // // 生産
-                                       // "料理師", "鍛冶師", "バーテンダー", "木工師", "仕立て屋", "調合師",
-                                       // "細工師", "筆記師", "調髪師", "栽培師",
-                                       // // 複合
-                                       // "ウォーリアー", "アルケミスト", "フォレスター", "ネクロマンサー", "クリエイター",
-                                       // "爆弾男", "ブリーダー", "テンプルナイト", "ドルイド", "紺碧の賢者", // 爆弾女は？
-                                       // "グレート クリエイター", "傭兵", "サムライ", "マイン ビショップ", "厨房師",
-                                       // "アサシン", "海戦士", "ブレイブナイト", "イビルナイト", "コスプレイヤー",
-                                       // "物好き", "アスリート", "酔拳士", "荒くれ者", "新人アイドル",
-                                       // "ハウスキーパー", "アドベンチャラー", "スパイ", "レディース", "アカデミアン", // チンピラは？
-                                       // "ブラッドバード", "デュエリスト", "コレクター"
-                                          ]);
+alias ShipRestriction = ExtendedEnum!(
+    UNKNOWN => "不明", Any => "なし",
+    );
+//                                        // 基本シップ
+//                                        // 熟練
+//                                        // "パンチャー", "剣士", "メイサー", "ランサー", "ガンナー", "アーチャー",
+//                                        // "ガーズマン", "投げ士", "レンジャー", "ブラッド サッカー", "キッカー", "ワイルドマン",
+//                                        // "ドリンカー", "物まね師", "テイマー", "ウィザード", "プリースト", "シャーマン", //ウィッチは？
+//                                        // "エンチャンター", "サモナー", "シャドウ", "魔術師", "野生児", "小悪魔",
+//                                        // "ベンダー", "ロックシンガー", "ソングシンガー", "スリ", "目立ちたがり", "ストリートダンサー",
+//                                        // // 基本
+//                                        // "フォールマン", "スイマー", "デッドマン", "ヘルパー", "休憩人", "マイナー",
+//                                        // "木こり", "耕作師", "釣り人", "解読者",
+//                                        // // 生産
+//                                        // "料理師", "鍛冶師", "バーテンダー", "木工師", "仕立て屋", "調合師",
+//                                        // "細工師", "筆記師", "調髪師", "栽培師",
+//                                        // // 複合
+//                                        // "ウォーリアー", "アルケミスト", "フォレスター", "ネクロマンサー", "クリエイター",
+//                                        // "爆弾男", "ブリーダー", "テンプルナイト", "ドルイド", "紺碧の賢者", // 爆弾女は？
+//                                        // "グレート クリエイター", "傭兵", "サムライ", "マイン ビショップ", "厨房師",
+//                                        // "アサシン", "海戦士", "ブレイブナイト", "イビルナイト", "コスプレイヤー",
+//                                        // "物好き", "アスリート", "酔拳士", "荒くれ者", "新人アイドル",
+//                                        // "ハウスキーパー", "アドベンチャラー", "スパイ", "レディース", "アカデミアン", // チンピラは？
+//                                        // "ブラッドバード", "デュエリスト", "コレクター"
 
-alias WeaponSlot = ExtendedEnum!(["UNKNOWN", "Right", "Left", "Both"],
-                                 ["不明", "右手", "左手", "左右"]);
+alias WeaponSlot = ExtendedEnum!(
+    UNKNOWN => "不明", Right => "右手", Left => "左手", Both => "左右",
+    );
 
-alias ArmorSlot = ExtendedEnum!(["UNKNOWN",
-                                 "HeadProtector", "BodyProtector", "HandProtector",
-                                 "PantsProtector", "ShoesProtector", "ShoulderProtector", "WaistProtector",
-                                 "HeadOrnament", "FaceOrnament", "EarOrnament",
-                                 "FingerOrnament", "BreastOrnament", "BackOrnament", "WaistOrnament"],
-                                ["不明",
-                                 "頭(防)", "胴(防)", "手(防)",
-                                 "パンツ(防)", "靴(防)", "肩(防)", "腰(防)",
-                                 "頭(装)", "顔(装)", "耳(装)",
-                                 "指(装)", "胸(装)", "背中(装)", "腰(装)"]);
+alias ArmorSlot = ExtendedEnum!(
+    UNKNOWN => "不明", HeadProtector => "頭(防)", BodyProtector => "胴(防)",
+    HandProtector => "手(防)", PantsProtector => "パンツ(防)", ShoesProtector => "靴(防)",
+    ShoulderProtector => "肩(防)", WaistProtector => "腰(防)",
+    HeadOrnament => "頭(装)", FaceOrnament => "顔(装)", EarOrnament => "耳(装)",
+    FingerOrnament => "手(装)", BreastOrnament => "胸(装)", BackOrnament => "背中(装)",
+    WaistOrnament => "腰(装)",);
 
-alias Material = ExtendedEnum!(["UNKNOWN",
-                                "Copper", "Bronze", "Iron", "Steel", "Silver", "Gold", "Mithril", "Orichalcum",
-                                "Cotton", "Silk", "AnimalSkin", "DragonSkin", "Plant", "Wood", "Treant",
-                                "Paper", "Bamboo", "BlackBamboo", "Bone", "Stone", "Glass", "Crystal", "Cobalt", "Chaos"],
-                               ["不明",
-                                "銅", "青銅", "鉄", "鋼鉄", "銀", "金", "ミスリル", "オリハルコン",
-                                "綿", "絹", "動物の皮", "竜の皮", "プラント", "木", "トレント",
-                                "紙", "竹筒", "黒い竹", "骨", "石", "ガラス", "クリスタル", "コバルト", "カオス"]);
+alias Material = ExtendedEnum!(
+    UNKNOWN => "不明", Copper => "銅", Bronze => "青銅", Iron => "鉄", Steel => "鋼鉄",
+    Silver => "銀", Gold => "金", Mithril => "ミスリル", Orichalcum => "オリハルコン",
+    Cotton => "綿", Silk => "絹", AnimalSkin => "動物の皮", DragonSkin => "竜の皮",
+    Plant => "プラント", Wood => "木", Treant => "トレント", Paper => "紙",
+    Bamboo => "竹筒", BlackBamboo => "黒い竹", Bone => "骨", Stone => "石",
+    Glass => "ガラス", Crystal => "クリスタル", Cobalt => "コバルト", Chaos => "カオス",);
 
-alias Grade = ExtendedEnum!(["UNKNOWN", "Degraded", "NG", "HG", "MG"],
-                            ["不明", "劣化", "NG", "HG", "MG"]);
+alias Grade = ExtendedEnum!(
+    UNKNOWN => "不明", Degraded => "劣化", NG => "NG", HG => "HG", MG => "MG",
+    );
 
-alias ExhaustionType = ExtendedEnum!(["UNKNOWN", "Points", "Times"],
-                                     ["不明", "耐久値", "使用可能回数"]);
+alias ExhaustionType = ExtendedEnum!(
+    UNKNOWN => "不明", Points => "耐久値", Times => "使用可能回数",
+    );
 
 /// 薬と包帯固有の情報
 struct MedicineInfo

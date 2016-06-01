@@ -23,6 +23,7 @@ import std.conv;
 import std.exception;
 import std.format;
 import std.json;
+import std.meta;
 import std.range;
 import std.traits;
 
@@ -54,7 +55,7 @@ private:
 }
 
 auto indexOf(Range, Elem)(Range r, Elem e)
-    if (isInputRange!Range && is(Elem: ElementType!Range))
+    if (isInputRange!Range && is(Elem: ElementType!Range) && !isSomeChar!(ElementType!Range))
 {
     return r.enumerate.find!"a[1] == b"(e).front[0];
 }
@@ -111,16 +112,15 @@ private:
     U[T] bmap;
 }
 
-
-struct ExtendedEnum(string[] Keys, string[] Values)
+struct ExtendedEnum(KVs...)
 {
-    static assert(Keys.length == Values.length);
-
     mixin(format(q{
                 enum{
                     %s
                 }
-            }, Keys.join(", ")));
+            }, [staticMap!(ParamName, KVs)].join(", ")));
+    enum svalues = [staticMap!(ReturnValue, KVs)];
+    enum values = mixin("["~[staticMap!(ParamName, KVs)].join(", ")~"]");
 
     int val;
     alias val this;
@@ -140,37 +140,37 @@ struct ExtendedEnum(string[] Keys, string[] Values)
         return bimap[val];
     }
 
-    @property static auto values()
-    {
-        return mixin(format("[%s]", Keys.join(", ")));
-    }
-
-    @property static auto svalues()
-    {
-        return values.map!(m => bimap[m]).array;
-    }
-
 private:
     static BiMap!(string, int) bimap;
     static this()
     {
-        mixin(format(q{
-                    bimap = [
-                        %s
-                        ];
-                }, zip(Keys, Values).map!(kv => format(q{%s: "%s"}, kv[0], kv[1])).join(", ")));
+        bimap = zip(values, svalues).assocArray;
     }
 }
 
+private enum ReturnValue(alias T) = T!string("");
+
+private enum ParamName(alias T) = {
+    import std.string: indexOf;
+    auto str = typeof(T!string).stringof;
+    str = str[str.indexOf("function(string ") + "function(string ".length .. $];
+    return str[0 .. str.indexOf(")")];
+}();
+
+version(unittest)
+{
+    alias util_EEnum = ExtendedEnum!(
+        A => "い", B => "ろ", C => "は",
+        );
+}
 unittest
 {
-    alias EEnum = ExtendedEnum!(["A", "B", "C"],
-                                ["い", "ろ", "は"]);
-    assert(EEnum.values == [EEnum.A, EEnum.B, EEnum.C]);
-    assert(EEnum.svalues == ["い", "ろ", "は"]);
+    static assert(util_EEnum.values == [util_EEnum.A, util_EEnum.B, util_EEnum.C]);
+    static assert(util_EEnum.svalues == ["い", "ろ", "は"]);
 
-    EEnum val = EEnum.A;
+    util_EEnum val = util_EEnum.A;
     assert(val.to!string == "い");
+    assert("い".to!util_EEnum == val);
 }
 
 auto jto(T)(JSONValue json)
@@ -258,10 +258,8 @@ unittest
     }
 
     {
-        alias EEnum = ExtendedEnum!(["A", "B", "C"],
-                                    ["い", "ろ", "は"]);
-        EEnum e = EEnum.A;
+        util_EEnum e = util_EEnum.A;
         auto eval = JSONValue(e.to!string);
-        assert(eval.jto!EEnum == e);
+        assert(eval.jto!util_EEnum == e);
     }
 }

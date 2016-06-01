@@ -21,8 +21,13 @@ import dlangui;
 
 import std.algorithm;
 import std.container;
+import std.math;
 import std.range;
+import std.regex;
+import std.string;
+import std.typecons;
 
+import coop.model.item;
 import coop.model.recipe;
 import coop.view.recipe_material_tab_frame;
 import coop.view.recipe_detail_frame;
@@ -52,15 +57,120 @@ class RecipeMaterialTabFrameController
         {
             frame_.disableMigemoBox;
         }
+
+        with(frame_.childById!EditLine("numQuery"))
+        {
+            contentChange = (EditableContent content) {
+                enum regex = r"^\d+$"d;
+                auto txt = content.text;
+                if (txt.matchFirst(ctRegex!regex))
+                {
+                    textColor = "black";
+                    auto product = frame_.childById("itemQuery").text;
+                    if (product in wisdom.rrecipeList && txt.to!int > 0)
+                    {
+                        showRecipeMaterials(product, txt.to!int);
+                    }
+                }
+                else
+                {
+                    textColor = "red";
+                }
+            };
+        }
+
+        with(frame_.childById!EditLine("itemQuery"))
+        {
+            contentChange = (EditableContent content) {
+                showProductCandidate(content.text);
+            };
+        }
     }
 
-    auto showRecipeMaterials()
+    auto showProductCandidate(dstring queryText)
     {
-        // target のアイテムと個数を取得
-        // 所持済みアイテムと個数を取得
+        enum regex = r"^\d+$"d;
+        auto query = queryText.removechars(r"/[ 　]/");
+        if (query.empty)
+        {
+            return;
+        }
+        auto queryFun = matchFunFor(query);
+        auto candidates = wisdom.rrecipeList.keys.filter!queryFun.array;
+
+        frame_.showCandidates(candidates);
+        auto nq = frame_.childById("numQuery").text;
+        if (queryText in wisdom.rrecipeList && nq.matchFirst(ctRegex!regex) && nq.to!int > 0)
+        {
+            showRecipeMaterials(queryText, nq.to!int);
+        }
+    }
+
+    auto showRecipeMaterials(dstring item, int num)
+    {
+        alias TargetTuple = Tuple!(dstring, "target", int, "num");
+        auto rList = wisdom.rrecipeList;
+        int[Recipe] requiredRecipes;
+        int[dstring] requiredMaterials;
+        int[dstring] leftovers;
+
+        TargetTuple[] queue = [TargetTuple(item, num)];
+        while(!queue.empty)
+        {
+            auto it = queue.front;
+            queue.popFront;
+            if (it.target !in rList)
+            {
+                requiredMaterials[it.target] += it.num;
+                continue;
+            }
+            auto rNames = rList[it.target];
+            auto recipe = wisdom.recipeFor(rNames[0]);
+
+            auto numApplied = (it.num.to!real/recipe.products[it.target]).ceil.to!int;
+            requiredRecipes[recipe] += numApplied;
+
+            // コンバイン時の余り物を追加
+            foreach(mat, n; recipe.products)
+            {
+                if (mat == it.target)
+                {
+                    if (n*numApplied > it.num)
+                    {
+                        leftovers[mat] += n*numApplied-it.num;
+                    }
+                }
+                else
+                {
+                    leftovers[mat] += n*numApplied;
+                }
+            }
+
+            queue ~= recipe.ingredients.byKeyValue.map!(kv => TargetTuple(kv.key, kv.value*numApplied)).array;
+        }
 
         // DAG を構成
         // トポロジカルソートで表示順を決定
-        // 表示
+        return frame_.showRecipeMaterials(requiredRecipes, requiredMaterials, leftovers);
     }
+private:
+    auto matchFunFor(dstring query)
+    {
+        import std.regex;
+        if (frame_.useMigemo)
+        {
+            try{
+                auto q = migemo.query(query).regex;
+                return (dstring s) => !s.removechars(r"/[ 　]/").matchFirst(q).empty;
+            } catch(RegexException e) {
+                // use default matchFun
+            }
+        }
+        else
+        {
+            return (dstring s) => !find(s.removechars(r"/[ 　]/"), boyerMooreFinder(query)).empty;
+        }
+        assert(false);
+    }
+
 }

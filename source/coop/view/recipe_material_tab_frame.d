@@ -20,9 +20,16 @@ module coop.view.recipe_material_tab_frame;
 import dlangui;
 
 import std.algorithm;
+import std.exception;
+import std.format;
+import std.range;
+import std.regex;
 
+import coop.model.item;
+import coop.model.recipe;
 import coop.view.main_frame;
 import coop.view.recipe_tab_frame;
+import coop.view.item_detail_frame;
 import coop.view.recipe_detail_frame;
 import coop.controller.recipe_material_tab_frame_controller;
 
@@ -82,6 +89,16 @@ class RecipeMaterialTabFrame: HorizontalLayout
         frame.addChild(recipe);
     }
 
+    @property auto useMigemo()
+    {
+        return childById!CheckBox("migemo").checked;
+    }
+
+    @property auto useMigemo(bool use)
+    {
+        childById!CheckBox("migemo").checked = use;
+    }
+
     @property auto disableMigemoBox()
     {
         with(childById!CheckBox("migemo"))
@@ -94,6 +111,84 @@ class RecipeMaterialTabFrame: HorizontalLayout
     @property auto enableMigemoBox()
     {
         childById!CheckBox("migemo").enabled = true;
+    }
+
+    auto setItemDetail(Widget item, int idx)
+    {
+        auto frame = childById("detailFrame"~(idx+1).to!string);
+        frame.removeAllChildren;
+        frame.addChild(item);
+    }
+
+    auto showCandidates(dstring[] candidates)
+    {
+        auto lst = new StringListWidget("candidates", candidates);
+        lst.itemClick = (Widget _, int idx) {
+            childById("itemQuery").text = lst.selectedItem;
+            return true;
+        };
+
+        auto candidateFrame = new VerticalLayout;
+        candidateFrame.addChild(new TextWidget(null, "作成候補"d));
+        candidateFrame.addChild(lst);
+
+        auto helperFrame = childById("helper");
+        helperFrame.removeAllChildren;
+        helperFrame.addChild(candidateFrame);
+    }
+
+    auto showRecipeMaterials(int[Recipe] recipes, int[dstring] materials, int[dstring] leftovers)
+    {
+        auto resultFrame = childById("result");
+        resultFrame.removeAllChildren;
+
+        resultFrame.addChild(new TextWidget(null, "必要レシピ"d));
+        auto rList = new StringListWidget("recipes");
+        rList.items = recipes.byKeyValue.map!(kv => format("%s: コンバイン %s 回"d, kv.key.name, kv.value)).array;
+        rList.itemClick = (Widget _, int idx) {
+            auto txt = rList.selectedItem;
+            auto rName = txt.matchFirst(ctRegex!r"^([^:]+): "d)[1];
+            auto rDetail = controller.wisdom.recipeFor(rName);
+            recipeDetail = RecipeDetailFrame.create(rDetail, controller.wisdom, controller.characters);
+            auto itemNames = rDetail.products.keys;
+            enforce(itemNames.length <= 2);
+
+            hideItemDetail(1);
+
+            itemNames.enumerate(0).each!((idx_name) {
+                    auto idx = idx_name[0];
+                    dstring name = idx_name[1];
+                    Item item;
+                    if (auto i = name in controller.wisdom.itemList)
+                    {
+                        item = *i;
+                    }
+                    else
+                    {
+                        item.name = name;
+                        item.petFoodInfo = [PetFoodType.UNKNOWN.to!PetFoodType: 0];
+                    }
+
+                    showItemDetail(idx);
+                    setItemDetail(ItemDetailFrame.create(item, idx+1, controller.wisdom, controller.cWisdom), idx);
+                });
+            return true;
+        };
+        resultFrame.addChild(rList);
+
+        resultFrame.addChild(new TextWidget(null, ""d));
+        resultFrame.addChild(new TextWidget(null, "必要素材"d));
+        auto mList = new StringListWidget("materials",
+                                          materials.byKeyValue.map!(kv => format("%s: %s 個"d, kv.key, kv.value)).array);
+        resultFrame.addChild(mList);
+
+        resultFrame.addChild(new TextWidget(null, ""d));
+        resultFrame.addChild(new TextWidget(null, "余り物"d));
+        auto lList = new StringListWidget("leftovers",
+                                          leftovers.keys.empty
+                                          ? ["なし"d]
+                                          : leftovers.byKeyValue.map!(kv => format("%s: %s 個"d, kv.key, kv.value)).array);
+        resultFrame.addChild(lList);
     }
 }
 
@@ -113,7 +208,6 @@ auto recipeMaterialLayout()
                         id: itemQuery
                         minWidth: 200
                         text: "作りたいアイテム"
-                        /// 候補を出したい
                     }
                     EditLine {
                         id: numQuery
@@ -123,29 +217,15 @@ auto recipeMaterialLayout()
                     CheckBox { id: migemo; text: "Migemo 検索" }
                 }
 
-                HorizontalLayout {
-                    EditLine {
-                        id: ownMaterial
-                        minWidth: 200
-                        text: "既に持っている素材"
-                    }
-                    EditLine {
-                        id: ownMaterial
-                        minWidth: 60
-                        text: "個数"
-                    }
+                TableLayout {
+                    id: helper
+                    padding: 1
+                    colCount: 2
                 }
 
+                TextWidget { text: "必要レシピ情報" }
                 VerticalLayout {
-                    TextWidget { text: "検索結果" }
-                    TableLayout {
-                        padding: 5
-                        colCount: 2
-                        // 必要素材一覧を表示
-                    }
-                }
-                FrameLayout {
-                    id: recipeGraph
+                    id: result
                     padding: 1
                 }
             }

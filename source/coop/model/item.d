@@ -77,7 +77,7 @@ struct Item
         return JSONValue(hash);
     }
 
-    auto opEquals(const typeof(this) other)
+    auto opEquals(ref const typeof(this) other) const
     {
         auto prop(string p)(in typeof(this) item)
         {

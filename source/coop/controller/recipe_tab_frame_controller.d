@@ -63,7 +63,7 @@ abstract class RecipeTabFrameController
             assert(frame_);
             if (frame_.controller)
             {
-                showBinderRecipes;
+                showRecipeNames;
             }
         };
 
@@ -87,7 +87,7 @@ abstract class RecipeTabFrameController
         frame_.categories = cats;
     }
 
-    auto showBinderRecipes()
+    auto showRecipeNames()
     {
         if (frame_.queryText == defaultTxtMsg)
         {

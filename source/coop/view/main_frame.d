@@ -80,7 +80,7 @@ class MainFrame: AppFrame
         skillTab.controller = new SkillTabFrameController(skillTab, controller.wisdom.recipeCategories);
         materialTab.controller = new RecipeMaterialTabFrameController(materialTab);
 
-        binderTab.controller.showBinderRecipes;
+        binderTab.controller.showRecipeNames;
 
         statusLine.setStatusText(" "d);
     }
@@ -154,7 +154,7 @@ protected:
 
             if (auto nextTab = cast(RecipeTabFrame)childById(next))
             {
-                nextTab.controller.showBinderRecipes;
+                nextTab.controller.showRecipeNames;
             }
         };
         return tabs;

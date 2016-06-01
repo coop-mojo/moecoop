@@ -138,12 +138,6 @@ class RecipeTabFrame: HorizontalLayout
         charBox.selectedItemIndex = newIdx == -1 ? 0 : newIdx;
     }
 
-    auto updateCharacters(dstring[] chars)
-    {
-        characters = chars;
-        characterChanged();
-    }
-
     @property auto selectedCharacter()
     {
         return childById!ComboBox("characters").selectedItem;

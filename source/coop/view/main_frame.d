@@ -25,9 +25,11 @@ import coop.model.character;
 import coop.model.wisdom;
 import coop.model.config;
 import coop.view.recipe_tab_frame;
+import coop.view.recipe_material_tab_frame;
 import coop.controller.main_frame_controller;
 import coop.controller.binder_tab_frame_controller;
 import coop.controller.skill_tab_frame_controller;
+import coop.controller.recipe_material_tab_frame_controller;
 
 immutable fontName = defaultFontName;
 
@@ -76,6 +78,7 @@ class MainFrame: AppFrame
         controller_ = new MainFrameController(this, wisdom, chars, config, customWisdom);
         binderTab.controller = new BinderTabFrameController(binderTab, controller.wisdom.binders);
         skillTab.controller = new SkillTabFrameController(skillTab, controller.wisdom.recipeCategories);
+        materialTab.controller = new RecipeMaterialTabFrameController(materialTab);
 
         binderTab.controller.showBinderRecipes;
 
@@ -132,6 +135,9 @@ protected:
         tabs.addTab(skillTab, "スキル"d);
         skillTab.categoryName = "スキル"d;
 
+        materialTab = new RecipeMaterialTabFrame("materialFrame");
+        tabs.addTab(materialTab, "レシピ材料"d);
+
         tabs.tabChanged = (string next, string prev) {
             if (auto recipeTab = cast(RecipeTabFrame)childById(prev))
             {
@@ -175,4 +181,5 @@ protected:
 private:
     MainFrameController controller_;
     RecipeTabFrame binderTab, skillTab;
+    RecipeMaterialTabFrame materialTab;
 }

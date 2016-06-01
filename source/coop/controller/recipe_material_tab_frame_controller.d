@@ -106,15 +106,32 @@ class RecipeMaterialTabFrameController
         }
     }
 
-    auto showRecipeMaterials(dstring item, int num)
+    auto showRecipeMaterials(dstring item, int num, int[dstring] leftovers = (int[dstring]).init)
     {
         alias TargetTuple = Tuple!(dstring, "target", int, "num");
         auto rList = wisdom.rrecipeList;
         int[Recipe] requiredRecipes;
         int[dstring] requiredMaterials;
-        int[dstring] leftovers;
 
-        TargetTuple[] queue = [TargetTuple(item, num)];
+        auto useLeftovers(dstring it, int n)
+        {
+            if (auto left = it in leftovers)
+            {
+                if (n < *left)
+                {
+                    leftovers[item] -= n;
+                    n = 0;
+                }
+                else
+                {
+                    n -= *left;
+                    leftovers.remove(it);
+                }
+            }
+            return TargetTuple(it, n);
+        }
+
+        TargetTuple[] queue = [useLeftovers(item, num)];
         while(!queue.empty)
         {
             auto it = queue.front;
@@ -146,7 +163,11 @@ class RecipeMaterialTabFrameController
                 }
             }
 
-            queue ~= recipe.ingredients.byKeyValue.map!(kv => TargetTuple(kv.key, kv.value*numApplied)).array;
+            queue ~= recipe.ingredients
+                           .byKeyValue
+                           .map!(kv => tuple(kv.key, kv.value*numApplied))
+                           .map!(kv => useLeftovers(kv[0], kv[1])) // leftovers に対して破壊的なので注意！
+                           .array;
         }
 
         // DAG を構成

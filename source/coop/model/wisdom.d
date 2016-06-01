@@ -40,6 +40,9 @@ class Wisdom {
     /// カテゴリごとのレシピ一覧
     Recipe[dstring][dstring] recipeList;
 
+    /// 素材を作成するレシピ名一覧
+    dstring[][dstring] rrecipeList;
+
     /// アイテム一覧
     Item[dstring] itemList;
 
@@ -62,6 +65,7 @@ class Wisdom {
     {
         binderList = readBinderList(baseDir_);
         recipeList = readRecipeList(baseDir_);
+        rrecipeList = genRRecipeList(recipeList.values.map!(a => a.values).join);
         foodEffectList = readFoodEffectList(baseDir_);
 
         with(ItemType)
@@ -105,6 +109,17 @@ class Wisdom {
         return dirEntries(dir, "*.json", SpanMode.breadth)
             .map!(s => s.readRecipes)
             .assocArray;
+    }
+
+    auto genRRecipeList(Recipe[] recipes)
+    {
+        dstring[][dstring] ret;
+        recipes.each!((r) {
+                r.products.keys.each!((p) {
+                        ret[p] ~= r.name;
+                    });
+            });
+        return ret;
     }
 
     auto readItemList(string sysBase)

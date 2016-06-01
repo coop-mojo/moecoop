@@ -207,11 +207,13 @@ auto recipeMaterialLayout()
                     EditLine {
                         id: itemQuery
                         minWidth: 200
+                        minHeight: 10
                         text: "作りたいアイテム"
                     }
                     EditLine {
                         id: numQuery
                         minWidth: 60
+                        minHeight: 10
                         text: "個数"
                     }
                     CheckBox { id: migemo; text: "Migemo 検索" }

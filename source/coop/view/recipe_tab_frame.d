@@ -328,10 +328,12 @@ private:
             if (marked)
             {
                 binders.each!(b => characters[c].markFiledRecipe(recipe, b));
+                ret.backgroundColor = 0xdcdcdc;
             }
             else
             {
                 binders.each!(b => characters[c].unmarkFiledRecipe(recipe, b));
+                ret.backgroundColor = "white";
             }
         };
         ret.checked = binders.canFind!(b => characters[selectedCharacter].hasRecipe(recipe, b));

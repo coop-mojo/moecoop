@@ -27,6 +27,7 @@ import std.regex;
 import std.string;
 import std.typecons;
 
+import coop.util;
 import coop.model.item;
 import coop.model.recipe;
 import coop.view.recipe_material_tab_frame;
@@ -109,7 +110,7 @@ class RecipeMaterialTabFrameController
     {
         alias TargetTuple = Tuple!(dstring, "target", int, "num");
         auto rList = wisdom.rrecipeList;
-        int[Recipe] requiredRecipes;
+        OrderedMap!(int[Recipe]) requiredRecipes;
         int[dstring] requiredMaterials;
 
         auto useLeftovers(dstring it, int n)

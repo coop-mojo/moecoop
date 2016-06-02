@@ -52,11 +52,21 @@ struct Recipe
 
     dstring remarks;
 
-    auto opCmp(ref const Recipe other) const
+    auto opCmp(ref const typeof(this) other) const
     {
         if (name == other.name) return 0;
         else if (name < other.name) return -1;
         else return 1;
+    }
+
+    bool opEquals(ref const typeof(this) other) const @safe pure nothrow
+    {
+        return name == other.name;
+    }
+
+    size_t toHash() const @safe pure nothrow
+    {
+        return name.hashOf;
     }
 }
 

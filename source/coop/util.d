@@ -26,6 +26,7 @@ import std.json;
 import std.meta;
 import std.range;
 import std.traits;
+import std.typecons;
 
 immutable SystemResourceBase = "resource";
 immutable UserResourceBase = "userdata";
@@ -262,4 +263,69 @@ unittest
         auto eval = JSONValue(e.to!string);
         assert(eval.jto!util_EEnum == e);
     }
+}
+
+struct OrderedMap(T: V[K], V, K)
+{
+    auto opIndex(K k)
+    {
+        return payload_[k];
+    }
+
+    auto opIndexAssign(V v, K k)
+    {
+        if (k !in payload_)
+        {
+            keys_ ~= k;
+        }
+        payload_[k] = v;
+    }
+
+    auto opIndexOpAssign(string op)(V v, K k) if (op == "+")
+    {
+        if (k !in payload_)
+        {
+            keys_ ~= k;
+        }
+        payload_[k] += v;
+    }
+
+    auto keys()
+    {
+        return keys_;
+    }
+
+    auto values()
+    {
+        return keys_.map!(k => payload_[k]).array;
+    }
+
+    auto byKeyValue()
+    {
+        alias Pair = Tuple!(K, "key", V, "value");
+        return keys_.map!(k => Pair(k, payload_[k]));
+    }
+private:
+    V[K] payload_;
+    K[] keys_;
+
+    invariant()
+    {
+        assert(payload_.keys.length == keys_.length);
+    }
+}
+
+unittest
+{
+    OrderedMap!(int[string]) aa;
+    aa["foo"] = 3;
+    aa["bar"] = 4;
+    assert(aa.keys == ["foo", "bar"]);
+    assert(aa.values == [3, 4]);
+    assert(aa.byKeyValue.map!"a.key".array == aa.keys);
+    assert(aa.byKeyValue.map!"a.value".array == aa.values);
+
+    aa["foo"] += 4;
+    assert(aa["foo"] == 7);
+    assert(aa.keys == ["foo", "bar"]);
 }

@@ -39,14 +39,6 @@ class CheckableEntryWidget: HorizontalLayout
         addChild(link);
         box.checkChange = (Widget src, bool checked) {
             checkStateChanged(checked);
-            if (checked)
-            {
-                this.backgroundColor = 0xdcdcdc;
-            }
-            else
-            {
-                this.backgroundColor = "white";
-            }
             return true;
         };
         link.click = (Widget src) {

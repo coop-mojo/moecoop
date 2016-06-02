@@ -25,6 +25,7 @@ import std.format;
 import std.range;
 import std.regex;
 
+import coop.util;
 import coop.model.item;
 import coop.model.recipe;
 import coop.view.controls;
@@ -139,7 +140,7 @@ class RecipeMaterialTabFrame: HorizontalLayout
         helperFrame.addChild(candidateFrame);
     }
 
-    auto showRecipeMaterials(int[Recipe] recipes, int[dstring] materials, int[dstring] leftovers)
+    auto showRecipeMaterials(OrderedMap!(int[Recipe]) recipes, int[dstring] materials, int[dstring] leftovers)
     {
         auto resultFrame = childById("result");
         scope(exit) showResult;

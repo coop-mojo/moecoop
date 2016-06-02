@@ -35,9 +35,9 @@ alias ExtraInfo = Algebraic!(FoodInfo, WeaponInfo, BulletInfo, MedicineInfo);
 /// アイテム一般の情報
 struct Item
 {
-    this(this)
+    this(this) @safe pure nothrow
     {
-        petFoodInfo = petFoodInfo.dup;
+        petFoodInfo = assumeWontThrow(petFoodInfo.dup);
     }
 
     dstring name;
@@ -77,7 +77,7 @@ struct Item
         return JSONValue(hash);
     }
 
-    auto opEquals(ref const typeof(this) other) const
+    bool opEquals(ref const typeof(this) other) const @safe pure nothrow
     {
         auto prop(string p)(in typeof(this) item)
         {
@@ -107,6 +107,11 @@ struct Item
             }
         }
         return true;
+    }
+
+    size_t toHash() const @safe pure nothrow
+    {
+        return name.hashOf;
     }
 }
 

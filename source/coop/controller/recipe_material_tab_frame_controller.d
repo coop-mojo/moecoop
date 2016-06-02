@@ -61,20 +61,15 @@ class RecipeMaterialTabFrameController
         with(frame_.childById!EditLine("numQuery"))
         {
             contentChange = (EditableContent content) {
-                enum regex = r"^\d+$"d;
                 auto txt = content.text;
-                if (txt.matchFirst(ctRegex!regex))
+                auto product = frame_.childById("itemQuery").text;
+                if (!txt.empty && txt.to!int > 0 && product in wisdom.rrecipeList)
                 {
-                    textColor = "black";
-                    auto product = frame_.childById("itemQuery").text;
-                    if (product in wisdom.rrecipeList && txt.to!int > 0)
-                    {
-                        showRecipeMaterials(product, txt.to!int);
-                    }
+                    showRecipeMaterials(product, txt.to!int);
                 }
                 else
                 {
-                    textColor = "red";
+                    frame_.hideResult;
                 }
             };
         }
@@ -103,6 +98,10 @@ class RecipeMaterialTabFrameController
         if (queryText in wisdom.rrecipeList && nq.matchFirst(ctRegex!regex) && nq.to!int > 0)
         {
             showRecipeMaterials(queryText, nq.to!int);
+        }
+        else
+        {
+            frame_.hideResult;
         }
     }
 
@@ -193,5 +192,4 @@ private:
         }
         assert(false);
     }
-
 }

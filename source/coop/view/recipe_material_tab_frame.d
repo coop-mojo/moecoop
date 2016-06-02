@@ -27,6 +27,8 @@ import std.regex;
 
 import coop.model.item;
 import coop.model.recipe;
+import coop.view.controls;
+import coop.view.editors;
 import coop.view.main_frame;
 import coop.view.recipe_tab_frame;
 import coop.view.item_detail_frame;
@@ -140,55 +142,109 @@ class RecipeMaterialTabFrame: HorizontalLayout
     auto showRecipeMaterials(int[Recipe] recipes, int[dstring] materials, int[dstring] leftovers)
     {
         auto resultFrame = childById("result");
+        scope(exit) showResult;
         resultFrame.removeAllChildren;
 
-        resultFrame.addChild(new TextWidget(null, "必要レシピ"d));
-        auto rList = new StringListWidget("recipes");
-        rList.items = recipes.byKeyValue.map!(kv => format("%s: コンバイン %s 回"d, kv.key.name, kv.value)).array;
-        rList.itemClick = (Widget _, int idx) {
-            auto txt = rList.selectedItem;
-            auto rName = txt.matchFirst(ctRegex!r"^([^:]+): "d)[1];
-            auto rDetail = controller.wisdom.recipeFor(rName);
-            recipeDetail = RecipeDetailFrame.create(rDetail, controller.wisdom, controller.characters);
-            auto itemNames = rDetail.products.keys;
-            enforce(itemNames.length <= 2);
+        auto lhs = new VerticalLayout;
+        lhs.addChild(new TextWidget(null, "必要レシピ"d));
+        auto rList = new ScrollWidget;
+        auto rContents = new VerticalLayout;
+        recipes.byKeyValue.map!((kv) {
+                auto r = kv.key;
+                auto layout = new HorizontalLayout;
+                auto w = new CheckableEntryWidget(r.name);
+                if (r.requiresRecipe && !controller.characters[selectedCharacter].hasRecipe(r.name))
+                {
+                    w.textColor = "gray";
+                }
+                w.detailClicked = {
+                    recipeDetail = RecipeDetailFrame.create(r, controller.wisdom, controller.characters);
+                };
+                layout.addChild(w);
+                auto times = new TextWidget(null, format(": %s 回"d, kv.value));
+                layout.addChild(times);
+                return layout;
+            }).each!(w => rContents.addChild(w));
+        rList.contentWidget = rContents;
+        rList.backgroundColor = "white";
+        lhs.addChild(rList);
 
-            hideItemDetail(1);
+        lhs.addChild(new TextWidget(null, ""d));
+        lhs.addChild(new TextWidget(null, "余り物"d));
+        auto lList = new ScrollWidget;
+        auto lContents = new VerticalLayout;
+        auto lefts = leftovers.keys.empty
+                     ? [cast(Widget)new TextWidget(null, "なし"d)]
+                     : leftovers.byKeyValue.map!((kv) {
+                             auto layout = new HorizontalLayout;
+                             auto w = new LinkWidget(null, kv.key);
+                             w.click = (Widget _) {
+                                 Item item;
+                                 if (auto i = kv.key in controller.wisdom.itemList)
+                                 {
+                                     item = *i;
+                                 }
+                                 else
+                                 {
+                                     item.name = kv.key;
+                                     item.petFoodInfo = [PetFoodType.UNKNOWN.to!PetFoodType: 0];
+                                 }
+                                 showItemDetail(0);
+                                 setItemDetail(ItemDetailFrame.create(item, 1, controller.wisdom, controller.cWisdom), 0);
+                                 return true;
+                             };
+                             layout.addChild(w);
+                             auto times = new TextWidget(null, format(": %s 個"d, kv.value));
+                             layout.addChild(times);
+                             return cast(Widget)layout;
+                         }).array;
+        lefts.each!(w => lContents.addChild(w));
+        lList.contentWidget = lContents;
+        lList.backgroundColor = "white";
+        lhs.addChild(lList);
+        resultFrame.addChild(lhs);
 
-            itemNames.enumerate(0).each!((idx_name) {
-                    auto idx = idx_name[0];
-                    dstring name = idx_name[1];
+        auto rhs = new VerticalLayout;
+        rhs.addChild(new TextWidget(null, "必要素材"d));
+        auto mList = new ScrollWidget;
+        auto mContents = new VerticalLayout;
+        materials.byKeyValue.map!((kv) {
+                auto layout = new HorizontalLayout;
+                auto w = new CheckableEntryWidget(kv.key);
+                w.detailClicked = {
                     Item item;
-                    if (auto i = name in controller.wisdom.itemList)
+                    if (auto i = kv.key in controller.wisdom.itemList)
                     {
                         item = *i;
                     }
                     else
                     {
-                        item.name = name;
+                        item.name = kv.key;
                         item.petFoodInfo = [PetFoodType.UNKNOWN.to!PetFoodType: 0];
                     }
+                    showItemDetail(0);
+                    setItemDetail(ItemDetailFrame.create(item, 1, controller.wisdom, controller.cWisdom), 0);
+                };
+                layout.addChild(w);
+                auto times = new TextWidget(null, format(": %s 個"d, kv.value));
+                layout.addChild(times);
+                return layout;
+            }).each!(w => mContents.addChild(w));
+        mList.contentWidget = mContents;
+        mList.backgroundColor = "white";
 
-                    showItemDetail(idx);
-                    setItemDetail(ItemDetailFrame.create(item, idx+1, controller.wisdom, controller.cWisdom), idx);
-                });
-            return true;
-        };
-        resultFrame.addChild(rList);
+        rhs.addChild(mList);
+        resultFrame.addChild(rhs);
+    }
 
-        resultFrame.addChild(new TextWidget(null, ""d));
-        resultFrame.addChild(new TextWidget(null, "必要素材"d));
-        auto mList = new StringListWidget("materials",
-                                          materials.byKeyValue.map!(kv => format("%s: %s 個"d, kv.key, kv.value)).array);
-        resultFrame.addChild(mList);
+    auto hideResult()
+    {
+        childById("resultBase").visibility = Visibility.Gone;
+    }
 
-        resultFrame.addChild(new TextWidget(null, ""d));
-        resultFrame.addChild(new TextWidget(null, "余り物"d));
-        auto lList = new StringListWidget("leftovers",
-                                          leftovers.keys.empty
-                                          ? ["なし"d]
-                                          : leftovers.byKeyValue.map!(kv => format("%s: %s 個"d, kv.key, kv.value)).array);
-        resultFrame.addChild(lList);
+    auto showResult()
+    {
+        childById("resultBase").visibility = Visibility.Visible;
     }
 }
 
@@ -206,15 +262,13 @@ auto recipeMaterialLayout()
                 HorizontalLayout {
                     EditLine {
                         id: itemQuery
-                        minWidth: 200
+                        minWidth: 300
                         minHeight: 10
-                        text: "作りたいアイテム"
                     }
-                    EditLine {
+                    EditIntLine {
                         id: numQuery
-                        minWidth: 60
+                        minWidth: 80
                         minHeight: 10
-                        text: "個数"
                     }
                     CheckBox { id: migemo; text: "Migemo 検索" }
                 }
@@ -225,10 +279,13 @@ auto recipeMaterialLayout()
                     colCount: 2
                 }
 
-                TextWidget { text: "必要レシピ情報" }
                 VerticalLayout {
-                    id: result
-                    padding: 1
+                    id: resultBase
+                    TextWidget { text: "必要レシピ情報" }
+                    HorizontalLayout {
+                        id: result
+                        padding: 1
+                    }
                 }
             }
         });

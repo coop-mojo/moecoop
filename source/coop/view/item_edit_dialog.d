@@ -30,6 +30,7 @@ import std.traits;
 
 import coop.model.item;
 import coop.model.wisdom;
+import coop.view.editors;
 import coop.view.item_detail_frame;
 import coop.view.recipe_tab_frame;
 
@@ -101,7 +102,7 @@ class ItemEditDialog: Dialog
             auto petTypes = PetFoodType.svalues.to!(dstring[]);
 
             auto petComboBox = new ComboBox("", petTypes);
-            auto textBox = new EditLine("");
+            auto textBox = new EditRealLine("");
 
             petComboBox.selectedItemIndex = PetFoodType.values.indexOf(item.petFoodInfo.keys[0]).to!int;
             petComboBox.itemClick = (Widget src, int idx) {
@@ -116,14 +117,7 @@ class ItemEditDialog: Dialog
                 {
                     textBox.enabled = true;
                     auto txt = textBox.text;
-                    if (!txt.empty && txt.matchFirst(ctRegex!r"^\d+(\.\d+)?$"d))
-                    {
-                        item.petFoodInfo[idx.to!PetFoodType] = txt.to!real;
-                    }
-                    else
-                    {
-                        item.petFoodInfo[idx.to!PetFoodType] = 0;
-                    }
+                    item.petFoodInfo[idx.to!PetFoodType] = txt.empty ? 0 : txt.to!real;
                 }
                 return true;
             };
@@ -138,15 +132,10 @@ class ItemEditDialog: Dialog
                 auto idx = petComboBox.selectedItemIndex;
                 if(idx == 0 && idx == petTypes.length-1)
                     return;
-                if (!txt.empty && txt.matchFirst(ctRegex!r"^\d+(\.\d+)?$"d))
+                if (!txt.empty)
                 {
                     updated.petFoodInfo.clear;
                     updated.petFoodInfo[idx.to!PetFoodType] = txt.to!real;
-                    textBox.textColor = "black";
-                }
-                else
-                {
-                    textBox.textColor = "red";
                 }
             };
 
@@ -272,27 +261,37 @@ auto addTextElem(dstring prop)(Widget layout, dstring caption, Overlaid!Item ite
     }
     layout.addChild(new TextWidget("", caption));
 
-    auto editLine = new EditLine("", toPropString(mixin("item."~prop)));
+    static if (isFloatingPoint!PropType)
+    {
+        alias ELine = EditRealLine;
+    }
+    else static if (isIntegral!PropType)
+    {
+        alias ELine = EditIntLine;
+    }
+    else
+    {
+        alias ELine = EditLine;
+    }
+    auto editLine = new ELine("", toPropString(mixin("item."~prop)));
     layout.addChild(editLine);
 
     with(editLine)
     {
         enabled = item.isOverlaid!prop;
-        enum regex = isFloatingPoint!PropType ? r"^\d+(\.\d+)?$"d :
-                     isIntegral!PropType      ? r"^\d+$"d : ""d;
         contentChange = (EditableContent content) {
             auto txt = content.text;
-            if (txt.empty || regex.empty || txt.matchFirst(ctRegex!regex))
+            if (enabled)
             {
-                textColor = "black";
-                if (enabled)
+                static if (isFloatingPoint!PropType)
                 {
-                    mixin("item."~prop) = txt.empty ? PropType.init : txt.to!PropType;
+                    enum initVal = 0;
                 }
-            }
-            else
-            {
-                textColor = "red";
+                else
+                {
+                    enum initVal = PropType.init;
+                }
+                mixin("item."~prop) = txt.empty ? initVal : txt.to!PropType;
             }
         };
     }

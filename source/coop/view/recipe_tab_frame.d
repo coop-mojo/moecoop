@@ -18,7 +18,6 @@
 module coop.view.recipe_tab_frame;
 
 import dlangui;
-import dlangui.widgets.metadata;
 
 import std.algorithm;
 import std.exception;
@@ -28,6 +27,7 @@ import std.traits;
 import coop.model.item;
 import coop.util;
 
+import coop.view.controls;
 import coop.view.main_frame;
 import coop.view.item_detail_frame;
 import coop.view.recipe_detail_frame;
@@ -206,7 +206,7 @@ class RecipeTabFrame: HorizontalLayout
         if (auto detailFrame = recipeDetail)
         {
             auto shownRecipe = detailFrame.name;
-            if (auto item = childById("recipeList").childById!RecipeEntryWidget(shownRecipe.to!string))
+            if (auto item = childById("recipeList").childById!CheckableEntryWidget(shownRecipe.to!string))
             {
                 item.highlight;
             }
@@ -218,7 +218,7 @@ class RecipeTabFrame: HorizontalLayout
         if (auto detailFrame = recipeDetail)
         {
             auto shownRecipe = detailFrame.name;
-            if (auto item = childById("recipeList").childById!RecipeEntryWidget(shownRecipe.to!string))
+            if (auto item = childById("recipeList").childById!CheckableEntryWidget(shownRecipe.to!string))
             {
                 item.unhighlight;
             }
@@ -317,13 +317,13 @@ class RecipeTabFrame: HorizontalLayout
 private:
     Widget toRecipeWidget(dstring recipe, dstring category)
     {
-        auto ret = new RecipeEntryWidget(recipe);
+        auto ret = new CheckableEntryWidget(recipe);
         auto wisdom = controller.wisdom;
         auto cWisdom = controller.cWisdom;
         auto characters = controller.characters;
         auto binders = relatedBindersFor(recipe, category);
 
-        ret.filedStateChanged = (bool marked) {
+        ret.checkStateChanged = (bool marked) {
             auto c = selectedCharacter;
             if (marked)
             {
@@ -401,7 +401,7 @@ auto recipeListLayout()
                 HorizontalLayout {
                     EditLine {
                         id: searchQuery
-                        minWidth: 200
+                        minWidth: 300
                         text: "見たいレシピ"
                     }
                     CheckBox {
@@ -474,84 +474,5 @@ auto recipeDetailsLayout()
     return layout;
 }
 
-class RecipeEntryWidget: HorizontalLayout
-{
-    this()
-    {
-        super();
-    }
-
-    this(dstring recipe)
-    {
-        super(recipe.to!string);
-        box = new CheckBox(null, ""d);
-        link = new LinkWidget(null, recipe);
-        addChild(box);
-        addChild(link);
-        box.checkChange = (Widget src, bool checked) {
-            filedStateChanged(checked);
-            if (checked)
-            {
-                this.backgroundColor = 0xdcdcdc;
-            }
-            else
-            {
-                this.backgroundColor = "white";
-            }
-            return true;
-        };
-        link.click = (Widget src) {
-            detailClicked();
-            return true;
-        };
-    }
-
-    override @property bool checked() { return box.checked; }
-    override @property Widget checked(bool c) {
-        box.checked = c;
-        return this;
-    }
-
-    override @property Widget enabled(bool c) {
-        box.enabled = c;
-        return this;
-    }
-
-    auto highlight()
-    {
-        link.backgroundColor = 0xfffacd;
-    }
-    auto unhighlight()
-    {
-        link.backgroundColor = backgroundColor;
-    }
-
-    EventHandler!(bool) filedStateChanged;
-    EventHandler!() detailClicked;
-private:
-    CheckBox box;
-    LinkWidget link;
-}
-
-class LinkWidget: TextWidget
-{
-    this()
-    {
-        super();
-        clickable = true;
-        styleId = STYLE_CHECKBOX_LABEL;
-        enabled = true;
-        trackHover = true;
-    }
-
-    this(string id, dstring txt)
-    {
-        super(id, txt);
-        clickable = true;
-        styleId = STYLE_CHECKBOX_LABEL;
-        enabled = true;
-        trackHover = true;
-    }
-}
-
-mixin(registerWidgets!(RecipeTabFrame, RecipeEntryWidget));
+import dlangui.widgets.metadata;
+mixin(registerWidgets!RecipeTabFrame);

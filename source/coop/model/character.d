@@ -81,8 +81,7 @@ class Character
         name_ = newName;
     }
 
-
-    auto writeConfig()
+    auto save()
     {
         writeBindersInfo;
     }
@@ -106,6 +105,7 @@ private:
     auto writeBindersInfo()
     {
         auto binderDir = buildPath(dir_, name_, "バインダー"d).to!string;
+        rmdirRecurse(binderDir);
         mkdirRecurse(binderDir);
 
         JSONValue[string] binderFiles;
@@ -131,15 +131,12 @@ private:
             }
         }
 
-        auto existingBinders = make!(RedBlackTree!string)(dirEntries(buildPath(dir_, name_, "バインダー"d).to!string,
-                                                                     "*.json", SpanMode.breadth));
         foreach(kv; binderFiles.byKeyValue)
         {
             import std.stdio;
             auto path = buildPath(binderDir, kv.key~".json");
             auto f = File(path, "w");
             f.write(kv.value.toPrettyString);
-            existingBinders.removeKey(path);
         }
     }
 

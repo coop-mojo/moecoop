@@ -56,7 +56,7 @@ extern(C) int UIAppMain(string[] args)
     auto chars = userNames
                  .map!(name => tuple(name, new Character(name, userDir.to!dstring)))
                  .assocArray;
-    scope(exit) chars.values.each!(c => c.writeConfig);
+    scope(exit) chars.values.each!(c => c.save);
 
     Platform.instance.uiLanguage = "ja";
     Platform.instance.uiTheme = "theme_default";

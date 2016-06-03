@@ -119,14 +119,16 @@ class RecipeMaterialTabFrameController
             {
                 if (n < *left)
                 {
-                    leftovers[item] -= n;
+                    leftovers[it] -= n;
                     n = 0;
+                    assert(leftovers[it] > 0);
                 }
                 else
                 {
                     n -= *left;
                     leftovers.remove(it);
                 }
+                assert(n >= 0);
             }
             return TargetTuple(it, n);
         }

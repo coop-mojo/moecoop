@@ -140,7 +140,7 @@ class RecipeMaterialTabFrame: HorizontalLayout
         helperFrame.addChild(candidateFrame);
     }
 
-    auto showRecipeMaterials(OrderedMap!(int[Recipe]) recipes, int[dstring] materials, int[dstring] leftovers)
+    auto showRecipeMaterials(OrderedMap!(int[Recipe]) recipes, OrderedMap!(int[dstring]) materials, int[dstring] leftovers)
     {
         auto resultFrame = childById("result");
         scope(exit) showResult;

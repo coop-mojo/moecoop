@@ -111,7 +111,7 @@ class RecipeMaterialTabFrameController
         alias TargetTuple = Tuple!(dstring, "target", int, "num");
         auto rList = wisdom.rrecipeList;
         OrderedMap!(int[Recipe]) requiredRecipes;
-        int[dstring] requiredMaterials;
+        OrderedMap!(int[dstring]) requiredMaterials;
 
         auto useLeftovers(dstring it, int n)
         {
@@ -172,7 +172,7 @@ class RecipeMaterialTabFrameController
 
         // DAG を構成
         // トポロジカルソートで表示順を決定
-        return frame_.showRecipeMaterials(requiredRecipes, requiredMaterials, leftovers);
+        return frame_ .showRecipeMaterials(requiredRecipes, requiredMaterials, leftovers);
     }
 private:
     auto matchFunFor(dstring query)

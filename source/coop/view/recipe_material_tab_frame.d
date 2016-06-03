@@ -24,6 +24,7 @@ import std.exception;
 import std.format;
 import std.range;
 import std.regex;
+import std.typecons;
 
 import coop.util;
 import coop.model.item;
@@ -140,20 +141,55 @@ class RecipeMaterialTabFrame: HorizontalLayout
         helperFrame.addChild(candidateFrame);
     }
 
-    auto showRecipeMaterials(OrderedMap!(int[Recipe]) recipes, OrderedMap!(int[dstring]) materials, int[dstring] leftovers)
+    auto showRequiredElements(OrderedMap!(int[Recipe]) recipes, OrderedMap!(MaterialTuple[dstring]) materials, int[dstring] leftovers)
     {
-        auto resultFrame = childById("result");
         scope(exit) showResult;
-        resultFrame.removeAllChildren;
 
-        auto lhs = new VerticalLayout;
-        lhs.addChild(new TextWidget(null, "必要レシピ"d));
+        showRequiredRecipes(recipes, leftovers);
+        showRequiredMaterials(materials);
+    }
+
+    auto hideResult()
+    {
+        childById("result").visibility = Visibility.Gone;
+    }
+
+    auto showResult()
+    {
+        childById("result").visibility = Visibility.Visible;
+    }
+
+    auto requiredMaterialsAreAlreadyShown()
+    {
+        return childById("reqMatsBase").childCount > 0;
+    }
+
+    auto ownedMaterials()
+    in{
+        assert(requiredMaterialsAreAlreadyShown);
+    } body {
+        auto tbl = childById!TableLayout("reqMats");
+        return iota(0, tbl.childCount, tbl.colCount).filter!((idx) {
+                auto txt = tbl.child(idx+1).text;
+                return !txt.empty && txt.to!int > 0;
+            }).map!((idx) {
+                return tuple(tbl.child(idx).text[0..$-2],
+                             tbl.child(idx+1).text.to!int);
+            }).assocArray;
+    }
+
+    auto showRequiredRecipes(OrderedMap!(int[Recipe]) recipes, int[dstring] leftovers)
+    {
+        auto reqFrame = childById("reqRecipesBase");
+        reqFrame.removeAllChildren;
+
+        reqFrame.addChild(new TextWidget(null, "必要レシピ"d));
         auto rList = new ScrollWidget;
-        auto rContents = new VerticalLayout;
+        auto rContents = new TableLayout;
+        rContents.colCount = 2;
         recipes.byKeyValue.map!((kv) {
                 auto r = kv.key;
-                auto layout = new HorizontalLayout;
-                auto w = new CheckableEntryWidget(r.name);
+                auto w = new CheckableEntryWidget(r.name~": ");
                 if (r.requiresRecipe && !controller.characters[selectedCharacter].hasRecipe(r.name))
                 {
                     w.textColor = "gray";
@@ -161,24 +197,21 @@ class RecipeMaterialTabFrame: HorizontalLayout
                 w.detailClicked = {
                     recipeDetail = RecipeDetailFrame.create(r, controller.wisdom, controller.characters);
                 };
-                layout.addChild(w);
-                auto times = new TextWidget(null, format(": %s 回"d, kv.value));
-                layout.addChild(times);
-                return layout;
-            }).each!(w => rContents.addChild(w));
+                auto times = new TextWidget(null, format("%s 回"d, kv.value));
+                return [w, times];
+            }).each!(ws => rContents.addChildren(ws));
         rList.contentWidget = rContents;
         rList.backgroundColor = "white";
-        lhs.addChild(rList);
+        reqFrame.addChild(rList);
 
-        lhs.addChild(new TextWidget(null, ""d));
-        lhs.addChild(new TextWidget(null, "余り物"d));
+        reqFrame.addChild(new TextWidget(null, "余り物"d));
         auto lList = new ScrollWidget;
-        auto lContents = new VerticalLayout;
+        auto lContents = new TableLayout;
+        lContents.colCount = 2;
         auto lefts = leftovers.keys.empty
-                     ? [cast(Widget)new TextWidget(null, "なし"d)]
+                     ? [[new TextWidget(null, "なし"d)]]
                      : leftovers.byKeyValue.map!((kv) {
-                             auto layout = new HorizontalLayout;
-                             auto w = new LinkWidget(null, kv.key);
+                             auto w = new LinkWidget(null, kv.key~": ");
                              w.click = (Widget _) {
                                  Item item;
                                  if (auto i = kv.key in controller.wisdom.itemList)
@@ -194,24 +227,35 @@ class RecipeMaterialTabFrame: HorizontalLayout
                                  setItemDetail(ItemDetailFrame.create(item, 1, controller.wisdom, controller.cWisdom), 0);
                                  return true;
                              };
-                             layout.addChild(w);
-                             auto times = new TextWidget(null, format(": %s 個"d, kv.value));
-                             layout.addChild(times);
-                             return cast(Widget)layout;
+                             auto num = new TextWidget(null, format("%s 個"d, kv.value));
+                             return [w, num];
                          }).array;
-        lefts.each!(w => lContents.addChild(w));
+        lefts.to!(Widget[][]).each!(ws => lContents.addChildren(ws));
         lList.contentWidget = lContents;
         lList.backgroundColor = "white";
-        lhs.addChild(lList);
-        resultFrame.addChild(lhs);
+        reqFrame.addChild(lList);
+    }
 
-        auto rhs = new VerticalLayout;
-        rhs.addChild(new TextWidget(null, "必要素材"d));
+    void showRequiredMaterials(OrderedMap!(MaterialTuple[dstring]) materials)
+    {
+        auto reqFrame = childById("reqMatsBase");
+        reqFrame.removeAllChildren;
+
+        auto matCap = new HorizontalLayout;
+        matCap.addChild(new TextWidget(null, "必要素材 (所持数/必要数)"d));
+        auto clearButton = new Button(null, "全部しまう"d);
+        matCap.addChild(clearButton);
+        reqFrame.addChild(matCap);
+
         auto mList = new ScrollWidget;
-        auto mContents = new VerticalLayout;
+        auto mContents = new TableLayout("reqMats");
+        mContents.colCount = 3;
         materials.byKeyValue.map!((kv) {
-                auto layout = new HorizontalLayout;
-                auto w = new CheckableEntryWidget(kv.key);
+                auto w = new CheckableEntryWidget(kv.key~": ");
+                if (kv.value.intermediate)
+                {
+                    w.textColor = "blue";
+                }
                 w.detailClicked = {
                     Item item;
                     if (auto i = kv.key in controller.wisdom.itemList)
@@ -226,26 +270,30 @@ class RecipeMaterialTabFrame: HorizontalLayout
                     showItemDetail(0);
                     setItemDetail(ItemDetailFrame.create(item, 1, controller.wisdom, controller.cWisdom), 0);
                 };
-                layout.addChild(w);
-                auto times = new TextWidget(null, format(": %s 個"d, kv.value));
-                layout.addChild(times);
-                return layout;
-            }).each!(w => mContents.addChild(w));
+                auto own = new EditIntLine("own");
+                // own.contentChange = (EditableContent content) {
+                //     auto product = childById("itemQuery").text;
+                //     assert(product in controller.wisdom.rrecipeList);
+                //     auto txt = childById("numQuery").text;
+                //     if (!txt.empty)
+                //     {
+                //         auto owned = ownedMaterials;
+                //         controller.showRecipeMaterials(product, txt.to!int, owned);
+                //     }
+                // };
+                auto num = new TextWidget(null, format("/%s 個"d, kv.value.num));
+                return [w, own, num];
+            }).each!(ws => mContents.addChildren(ws));
+
         mList.contentWidget = mContents;
         mList.backgroundColor = "white";
 
-        rhs.addChild(mList);
-        resultFrame.addChild(rhs);
-    }
+        reqFrame.addChild(mList);
 
-    auto hideResult()
-    {
-        childById("resultBase").visibility = Visibility.Gone;
-    }
-
-    auto showResult()
-    {
-        childById("resultBase").visibility = Visibility.Visible;
+        clearButton.click = (Widget _) {
+            iota(1, mContents.childCount, mContents.colCount).each!(idx => mContents.child(idx).text = "0");
+            return true;
+        };
     }
 }
 
@@ -281,11 +329,16 @@ auto recipeMaterialLayout()
                 }
 
                 VerticalLayout {
-                    id: resultBase
+                    id: result
                     TextWidget { text: "必要レシピ情報" }
                     HorizontalLayout {
-                        id: result
                         padding: 1
+                        VerticalLayout {
+                            id: reqRecipesBase
+                        }
+                        VerticalLayout {
+                            id: reqMatsBase
+                        }
                     }
                 }
             }

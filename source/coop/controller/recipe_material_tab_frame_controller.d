@@ -34,6 +34,8 @@ import coop.view.recipe_material_tab_frame;
 import coop.view.recipe_detail_frame;
 import coop.controller.main_frame_controller;
 
+alias MaterialTuple = Tuple!(int, "num", bool, "intermediate");
+
 class RecipeMaterialTabFrameController
 {
     mixin TabController;
@@ -64,9 +66,22 @@ class RecipeMaterialTabFrameController
             contentChange = (EditableContent content) {
                 auto txt = content.text;
                 auto product = frame_.childById("itemQuery").text;
-                if (!txt.empty && txt.to!int > 0 && product in wisdom.rrecipeList)
+                if (txt.empty || txt.to!int == 0)
                 {
-                    showRecipeMaterials(product, txt.to!int);
+                    return;
+                }
+                else if (product in wisdom.rrecipeList)
+                {
+                    if (frame_.requiredMaterialsAreAlreadyShown)
+                    {
+                        // 素材の母数が変わるので表示しなおしでいい
+                        auto owned = frame_.ownedMaterials;
+                        showRecipeMaterials(product, txt.to!int, owned);
+                    }
+                    else
+                    {
+                        showRecipeMaterials(product, txt.to!int);
+                    }
                 }
                 else
                 {
@@ -85,7 +100,6 @@ class RecipeMaterialTabFrameController
 
     auto showProductCandidate(dstring queryText)
     {
-        enum regex = r"^\d+$"d;
         auto query = queryText.removechars(r"/[ 　]/");
         if (query.empty)
         {
@@ -96,7 +110,7 @@ class RecipeMaterialTabFrameController
 
         frame_.showCandidates(candidates);
         auto nq = frame_.childById("numQuery").text;
-        if (queryText in wisdom.rrecipeList && nq.matchFirst(ctRegex!regex) && nq.to!int > 0)
+        if (queryText in wisdom.rrecipeList && nq.to!int > 0)
         {
             showRecipeMaterials(queryText, nq.to!int);
         }
@@ -108,10 +122,11 @@ class RecipeMaterialTabFrameController
 
     auto showRecipeMaterials(dstring item, int num, int[dstring] leftovers = (int[dstring]).init)
     {
+        auto forRecipeOnly = !leftovers.keys.empty;
         alias TargetTuple = Tuple!(dstring, "target", int, "num");
         auto rList = wisdom.rrecipeList;
         OrderedMap!(int[Recipe]) requiredRecipes;
-        OrderedMap!(int[dstring]) requiredMaterials;
+        OrderedMap!(MaterialTuple[dstring]) requiredMaterials;
 
         auto useLeftovers(dstring it, int n)
         {
@@ -140,14 +155,30 @@ class RecipeMaterialTabFrameController
             queue.popFront;
             if (it.target !in rList)
             {
-                requiredMaterials[it.target] += it.num;
+                if (it.target !in requiredMaterials)
+                {
+                    requiredMaterials[it.target] = MaterialTuple.init;
+                }
+                requiredMaterials[it.target].num += it.num;
                 continue;
+            }
+            else if (it.target != item)
+            {
+                if (it.target !in requiredMaterials)
+                {
+                    requiredMaterials[it.target] = MaterialTuple.init;
+                }
+                requiredMaterials[it.target].num += it.num;
+                requiredMaterials[it.target].intermediate = true;
             }
             auto rNames = rList[it.target];
             auto recipe = wisdom.recipeFor(rNames[0]);
 
             auto numApplied = (it.num.to!real/recipe.products[it.target]).ceil.to!int;
-            requiredRecipes[recipe] += numApplied;
+            if (numApplied > 0)
+            {
+                requiredRecipes[recipe] += numApplied;
+            }
 
             // コンバイン時の余り物を追加
             foreach(mat, n; recipe.products)
@@ -174,7 +205,14 @@ class RecipeMaterialTabFrameController
 
         // DAG を構成
         // トポロジカルソートで表示順を決定
-        return frame_ .showRecipeMaterials(requiredRecipes, requiredMaterials, leftovers);
+        if (forRecipeOnly)
+        {
+            frame_.showRequiredRecipes(requiredRecipes, leftovers);
+        }
+        else
+        {
+            frame_.showRequiredElements(requiredRecipes, requiredMaterials, leftovers);
+        }
     }
 private:
     auto matchFunFor(dstring query)

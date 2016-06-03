@@ -267,7 +267,7 @@ unittest
 
 struct OrderedMap(T: V[K], V, K)
 {
-    auto opIndex(K k)
+    auto ref opIndex(K k)
     {
         return payload_[k];
     }
@@ -288,6 +288,11 @@ struct OrderedMap(T: V[K], V, K)
             keys_ ~= k;
         }
         payload_[k] += v;
+    }
+
+    auto opBinaryRight(string op)(K k) if (op == "in")
+    {
+        return k in payload_;
     }
 
     auto keys()

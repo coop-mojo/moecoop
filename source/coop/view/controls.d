@@ -67,6 +67,12 @@ class CheckableEntryWidget: HorizontalLayout
         link.backgroundColor = backgroundColor;
     }
 
+    @property override dstring text()
+    {
+        return link.text;
+    }
+    alias text = Widget.text;
+
     @property override Widget textColor(string col)
     {
         link.textColor = col;

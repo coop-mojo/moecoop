@@ -271,16 +271,16 @@ class RecipeMaterialTabFrame: HorizontalLayout
                     setItemDetail(ItemDetailFrame.create(item, 1, controller.wisdom, controller.cWisdom), 0);
                 };
                 auto own = new EditIntLine("own");
-                // own.contentChange = (EditableContent content) {
-                //     auto product = childById("itemQuery").text;
-                //     assert(product in controller.wisdom.rrecipeList);
-                //     auto txt = childById("numQuery").text;
-                //     if (!txt.empty)
-                //     {
-                //         auto owned = ownedMaterials;
-                //         controller.showRecipeMaterials(product, txt.to!int, owned);
-                //     }
-                // };
+                own.contentChange = (EditableContent content) {
+                    auto product = childById("itemQuery").text;
+                    assert(product in controller.wisdom.rrecipeList);
+                    auto txt = childById("numQuery").text;
+                    if (!txt.empty)
+                    {
+                        auto owned = ownedMaterials;
+                        controller.showRecipeMaterials(product, txt.to!int, owned, true);
+                    }
+                };
                 auto num = new TextWidget(null, format("/%s 個"d, kv.value.num));
                 return [w, own, num];
             }).each!(ws => mContents.addChildren(ws));

@@ -72,16 +72,9 @@ class RecipeMaterialTabFrameController
                 }
                 else if (product in wisdom.rrecipeList)
                 {
-                    if (frame_.requiredMaterialsAreAlreadyShown)
-                    {
-                        // 素材の母数が変わるので表示しなおしでいい
-                        auto owned = frame_.ownedMaterials;
-                        showRecipeMaterials(product, txt.to!int, owned);
-                    }
-                    else
-                    {
-                        showRecipeMaterials(product, txt.to!int);
-                    }
+                    auto owned = frame_.requiredMaterialsAreAlreadyShown
+                                 ? frame_.ownedMaterials : (int[dstring]).init;
+                    showRecipeMaterials(product, txt.to!int, owned);
                 }
                 else
                 {
@@ -120,14 +113,37 @@ class RecipeMaterialTabFrameController
         }
     }
 
-    auto showRecipeMaterials(dstring item, int num, int[dstring] leftovers = (int[dstring]).init)
+    auto showRecipeMaterials(dstring item, int num, int[dstring] owned = (int[dstring]).init, bool forRecipeOnly = false)
     {
-        auto forRecipeOnly = !leftovers.keys.empty;
         alias TargetTuple = Tuple!(dstring, "target", int, "num");
+
+        auto leftovers = owned.dup;
         auto rList = wisdom.rrecipeList;
         OrderedMap!(int[Recipe]) requiredRecipes;
         OrderedMap!(MaterialTuple[dstring]) requiredMaterials;
 
+        assert(false, "この関数はまるごと書き換える可能性あり");
+        auto consumeLeftOvers(dstring it, int n, int usedForRecipe = 0) {
+            if (auto left = it in leftovers)
+            {
+                if (n+usedForRecipe < *left)
+                {
+                    leftovers[it] -= n;
+                    n = 0;
+                    assert(leftovers[it] > 0);
+                }
+                else
+                {
+                    n -= *left;
+                    leftovers.remove(it);
+                }
+                assert(n >= 0);
+            }
+            else
+            {
+            }
+            return n;
+        }
         auto useLeftovers(dstring it, int n)
         {
             if (auto left = it in leftovers)
@@ -174,11 +190,18 @@ class RecipeMaterialTabFrameController
             auto rNames = rList[it.target];
             auto recipe = wisdom.recipeFor(rNames[0]);
 
-            auto numApplied = (it.num.to!real/recipe.products[it.target]).ceil.to!int;
-            if (numApplied > 0)
+            auto req = it.target in leftovers ? max(it.num-leftovers[it.target], 0) : it.num;
+            auto nGen = recipe.products[it.target];
+            auto numApplied = (req.to!real/nGen).ceil.to!int;
+            assert(it.num-leftovers.get(it.target, 0) <= nGen*numApplied);
+            it.num = consumeLeftOvers(it.target, it.num, nGen*numApplied);
+            assert(true);
+            if (numApplied == 0)
             {
-                requiredRecipes[recipe] += numApplied;
+                continue;
             }
+
+            requiredRecipes[recipe] += numApplied;
 
             // コンバイン時の余り物を追加
             foreach(mat, n; recipe.products)
@@ -198,8 +221,7 @@ class RecipeMaterialTabFrameController
 
             queue ~= recipe.ingredients
                            .byKeyValue
-                           .map!(kv => tuple(kv.key, kv.value*numApplied))
-                           .map!(kv => useLeftovers(kv[0], kv[1])) // leftovers に対して破壊的なので注意！
+                           .map!(kv => TargetTuple(kv.key, kv.value*numApplied))
                            .array;
         }
 

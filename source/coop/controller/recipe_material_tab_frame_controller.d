@@ -122,28 +122,6 @@ class RecipeMaterialTabFrameController
         OrderedMap!(int[Recipe]) requiredRecipes;
         OrderedMap!(MaterialTuple[dstring]) requiredMaterials;
 
-        assert(false, "この関数はまるごと書き換える可能性あり");
-        auto consumeLeftOvers(dstring it, int n, int usedForRecipe = 0) {
-            if (auto left = it in leftovers)
-            {
-                if (n+usedForRecipe < *left)
-                {
-                    leftovers[it] -= n;
-                    n = 0;
-                    assert(leftovers[it] > 0);
-                }
-                else
-                {
-                    n -= *left;
-                    leftovers.remove(it);
-                }
-                assert(n >= 0);
-            }
-            else
-            {
-            }
-            return n;
-        }
         auto useLeftovers(dstring it, int n)
         {
             if (auto left = it in leftovers)
@@ -190,16 +168,7 @@ class RecipeMaterialTabFrameController
             auto rNames = rList[it.target];
             auto recipe = wisdom.recipeFor(rNames[0]);
 
-            auto req = it.target in leftovers ? max(it.num-leftovers[it.target], 0) : it.num;
-            auto nGen = recipe.products[it.target];
-            auto numApplied = (req.to!real/nGen).ceil.to!int;
-            assert(it.num-leftovers.get(it.target, 0) <= nGen*numApplied);
-            it.num = consumeLeftOvers(it.target, it.num, nGen*numApplied);
-            assert(true);
-            if (numApplied == 0)
-            {
-                continue;
-            }
+            auto numApplied = (it.num.to!real/recipe.products[it.target]).ceil.to!int;
 
             requiredRecipes[recipe] += numApplied;
 
@@ -222,6 +191,7 @@ class RecipeMaterialTabFrameController
             queue ~= recipe.ingredients
                            .byKeyValue
                            .map!(kv => TargetTuple(kv.key, kv.value*numApplied))
+                           .map!(kv => useLeftovers(kv.target, kv.num))
                            .array;
         }
 

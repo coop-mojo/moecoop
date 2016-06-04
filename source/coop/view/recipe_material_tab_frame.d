@@ -271,16 +271,16 @@ class RecipeMaterialTabFrame: HorizontalLayout
                     setItemDetail(ItemDetailFrame.create(item, 1, controller.wisdom, controller.cWisdom), 0);
                 };
                 auto own = new EditIntLine("own");
-                own.contentChange = (EditableContent content) {
-                    auto product = childById("itemQuery").text;
-                    assert(product in controller.wisdom.rrecipeList);
-                    auto txt = childById("numQuery").text;
-                    if (!txt.empty)
-                    {
-                        auto owned = ownedMaterials;
-                        controller.showRecipeMaterials(product, txt.to!int, owned, true);
-                    }
-                };
+                // own.contentChange = (EditableContent content) {
+                //     auto product = childById("itemQuery").text;
+                //     assert(product in controller.wisdom.rrecipeList);
+                //     auto txt = childById("numQuery").text;
+                //     if (!txt.empty)
+                //     {
+                //         auto owned = ownedMaterials;
+                //         controller.showRecipeMaterials(product, txt.to!int, owned, true);
+                //     }
+                // };
                 auto num = new TextWidget(null, format("/%s 個"d, kv.value.num));
                 return [w, own, num];
             }).each!(ws => mContents.addChildren(ws));
@@ -312,12 +312,10 @@ auto recipeMaterialLayout()
                     EditLine {
                         id: itemQuery
                         minWidth: 300
-                        minHeight: 10
                     }
                     EditIntLine {
                         id: numQuery
                         minWidth: 80
-                        minHeight: 10
                     }
                     CheckBox { id: migemo; text: "Migemo 検索" }
                 }

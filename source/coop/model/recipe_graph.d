@@ -30,8 +30,26 @@ class RecipeGraph
 {
     this(dstring name, Wisdom w, dstring[dstring] pref = defaultPreference)
     {
-        preferences = pref;
+        preferences_ = pref;
         root = init(name, cast(RecipeContainer)null, w);
+    }
+
+    @property auto recipes()
+    {
+        if (orderedRecipes_.empty)
+        {
+            visit;
+        }
+        return orderedRecipes_;
+    }
+
+    @property auto materials()
+    {
+        if (orderedMaterials_.empty)
+        {
+            visit;
+        }
+        return orderedMaterials_;
     }
 
     override string toString()
@@ -89,22 +107,22 @@ private:
      +/
     auto init(dstring name, RecipeContainer parent, Wisdom w)
     {
-        auto mat = materials.get(name, new MaterialContainer(name));
+        auto mat = materials_.get(name, new MaterialContainer(name));
         if (parent !is null && parent.name !in mat.parents)
         {
             mat.parents.insert(parent.name);
         }
 
-        if (name in materials)
+        if (name in materials_)
         {
             return mat;
         }
-        materials[name] = mat;
+        materials_[name] = mat;
 
         if (auto rs = name in w.rrecipeList)
         {
             dstring[] arr;
-            if (auto elem = name in preferences)
+            if (auto elem = name in preferences_)
             {
                 arr = [*elem];
             }
@@ -116,7 +134,7 @@ private:
         }
         else
         {
-            materials[name].isProduct = false;
+            materials_[name].isProduct = false;
         }
         return mat;
     }
@@ -126,16 +144,16 @@ private:
      +/
     auto init(dstring name, MaterialContainer parent, Wisdom w)
     {
-        auto recipe = recipes.get(name, new RecipeContainer(name));
+        auto recipe = recipes_.get(name, new RecipeContainer(name));
         if (parent.name !in recipe.parents)
         {
             recipe.parents.insert(parent.name);
         }
-        if (name in recipes)
+        if (name in recipes_)
         {
             return recipe;
         }
-        recipes[name] = recipe;
+        recipes_[name] = recipe;
 
         assert(w.recipeFor(name).name == name);
         recipe.children = w.recipeFor(name)
@@ -145,11 +163,34 @@ private:
         return recipe;
     }
 
+    auto visit()
+    {
+        orderedRecipes_ = [];
+        orderedMaterials_ = [];
+        visit(root);
+        orderedRecipes_.reverse();
+        orderedMaterials_.reverse();
+    }
+
+    void visit(MaterialContainer material)
+    {
+        material.children.filter!(c => !orderedRecipes_.canFind(c.name)).each!(c => this.visit(c));
+        orderedMaterials_ ~= material.name;
+    }
+
+    void visit(RecipeContainer recipe)
+    {
+        recipe.children.filter!(c => !orderedMaterials_.canFind(c.name)).each!(c => this.visit(c));
+        orderedRecipes_ ~= recipe.name;
+    }
+
     MaterialContainer root;
 
-    MaterialContainer[dstring] materials;
-    RecipeContainer[dstring] recipes;
-    dstring[dstring] preferences;
+    MaterialContainer[dstring] materials_;
+    RecipeContainer[dstring] recipes_;
+    dstring[dstring] preferences_;
+    dstring[] orderedRecipes_;
+    dstring[] orderedMaterials_;
 }
 
 

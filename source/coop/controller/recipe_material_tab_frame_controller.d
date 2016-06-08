@@ -30,6 +30,7 @@ import std.typecons;
 import coop.util;
 import coop.model.item;
 import coop.model.recipe;
+import coop.model.recipe_graph;
 import coop.view.recipe_material_tab_frame;
 import coop.view.recipe_detail_frame;
 import coop.controller.main_frame_controller;
@@ -46,7 +47,7 @@ class RecipeMaterialTabFrameController
         frame_.characters = characters.keys.sort().array;
 
         Recipe dummy;
-        dummy.techniques = make!(typeof(dummy.techniques))(cast(dstring)[]);
+        dummy.techniques = make!(typeof(dummy.techniques))(null);
         frame_.recipeDetail = RecipeDetailFrame.create(dummy, wisdom, characters);
 
         frame_.hideItemDetail(0);
@@ -166,7 +167,7 @@ class RecipeMaterialTabFrameController
                 requiredMaterials[it.target].intermediate = true;
             }
             auto rNames = rList[it.target];
-            auto recipe = wisdom.recipeFor(rNames[0]);
+            auto recipe = wisdom.recipeFor(rNames.front);
 
             auto numApplied = (it.num.to!real/recipe.products[it.target]).ceil.to!int;
 

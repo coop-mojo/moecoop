@@ -20,6 +20,7 @@ module coop.model.wisdom;
 import std.algorithm;
 import std.array;
 import std.conv;
+import std.container;
 import std.exception;
 import std.file;
 import std.json;
@@ -41,7 +42,7 @@ class Wisdom {
     Recipe[dstring][dstring] recipeList;
 
     /// 素材を作成するレシピ名一覧
-    dstring[][dstring] rrecipeList;
+    RedBlackTree!dstring[dstring] rrecipeList;
 
     /// アイテム一覧
     Item[dstring] itemList;
@@ -113,10 +114,17 @@ class Wisdom {
 
     auto genRRecipeList(Recipe[] recipes)
     {
-        dstring[][dstring] ret;
+        RedBlackTree!dstring[dstring] ret;
         recipes.each!((r) {
                 r.products.keys.each!((p) {
-                        ret[p] ~= r.name;
+                        if (r.name !in ret)
+                        {
+                            ret[p] = make!(RedBlackTree!dstring)(r.name);
+                        }
+                        else
+                        {
+                            ret[p].insert(r.name);
+                        }
                     });
             });
         return ret;
@@ -252,7 +260,7 @@ class Wisdom {
         {
             import std.container.util;
             Recipe dummy;
-            dummy.techniques = make!(typeof(dummy.techniques))(cast(dstring)[]);
+            dummy.techniques = make!(typeof(dummy.techniques))(null);
             return dummy;
         }
         else

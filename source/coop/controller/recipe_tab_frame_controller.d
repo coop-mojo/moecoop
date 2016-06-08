@@ -68,7 +68,7 @@ abstract class RecipeTabFrameController
         };
 
         Recipe dummy;
-        dummy.techniques = make!(typeof(dummy.techniques))(cast(dstring)[]);
+        dummy.techniques = make!(typeof(dummy.techniques))(null);
         frame_.recipeDetail = RecipeDetailFrame.create(dummy, wisdom, characters);
 
         frame_.characters = characters.keys.sort().array;

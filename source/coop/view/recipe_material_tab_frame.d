@@ -197,6 +197,10 @@ class RecipeMaterialTabFrame: HorizontalLayout
         recipes.map!((r) {
                 auto w = new CheckableEntryWidget(r~": ");
                 auto t = new TextWidget("times", format("%s 回"d, 0));
+                w.detailClicked = {
+                    auto rDetail = controller.wisdom.recipeFor(r);
+                    recipeDetail = RecipeDetailFrame.create(rDetail, controller.wisdom, controller.characters);
+                };
                 return [w, t];
             }).each!(c => tbl.addChildren(c));
 
@@ -218,6 +222,21 @@ class RecipeMaterialTabFrame: HorizontalLayout
         leftovers.map!((lo) {
                 auto w = new LinkWidget(null, lo~": ");
                 auto n = new TextWidget("num", format("%s 個"d, 0));
+                w.click = (Widget _) {
+                    Item item;
+                    if (auto i = lo in controller.wisdom.itemList)
+                    {
+                        item = *i;
+                    }
+                    else
+                    {
+                        item.name = lo;
+                        item.petFoodInfo = [PetFoodType.UNKNOWN.to!PetFoodType: 0];
+                    }
+                    showItemDetail(0);
+                    setItemDetail(ItemDetailFrame.create(item, 1, controller.wisdom, controller.cWisdom), 0);
+                    return true;
+                };
                 return cast(Widget[])[w, n];
             }).each!(c => tbl.addChildren(c));
         tbl.addChild(new TextWidget("なし", "なし"d));
@@ -247,6 +266,20 @@ class RecipeMaterialTabFrame: HorizontalLayout
                 auto o = new EditIntLine("own");
                 auto t = new TextWidget("times", format("/%s 個"d, 0));
 
+                w.detailClicked = {
+                    Item item;
+                    if (auto i = lo in controller.wisdom.itemList)
+                    {
+                        item = *i;
+                    }
+                    else
+                    {
+                        item.name = lo;
+                        item.petFoodInfo = [PetFoodType.UNKNOWN.to!PetFoodType: 0];
+                    }
+                    showItemDetail(0);
+                    setItemDetail(ItemDetailFrame.create(item, 1, controller.wisdom, controller.cWisdom), 0);
+                };
                 o.contentChange = (EditableContent content) {
                     auto product = childById("itemQuery").text;
                     auto txt = childById("numQuery").text;

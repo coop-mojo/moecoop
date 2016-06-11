@@ -45,24 +45,6 @@ class RecipeGraph
         return Ret(orderedRecipes_, orderedMaterials_);
     }
 
-    @property auto recipes()
-    {
-        if (orderedRecipes_.empty)
-        {
-            visit;
-        }
-        return orderedRecipes_;
-    }
-
-    @property auto materials()
-    {
-        if (orderedMaterials_.empty)
-        {
-            visit;
-        }
-        return orderedMaterials_;
-    }
-
     /++
      + root を n 個作るのに必要なレシピ，素材，作成時のあまり素材を返す
      + TODO: コンバインしない素材列が引数に必要
@@ -71,7 +53,7 @@ class RecipeGraph
     {
         int[dstring] ms, rs, leftover;
         ms[root.name] = targetNum;
-        foreach(r; recipes)
+        foreach(r; elements.recipes)
         {
             auto re = w.recipeFor(r);
             auto tar = setIntersection(recipes_[r].parents[].array.sort(), re.products.keys.sort()).front;
@@ -116,7 +98,8 @@ class RecipeGraph
                 continue;
             }
         }
-        return tuple(ms, rs, leftover);
+        alias Ret = Tuple!(int[dstring], "recipes", int[dstring], "materials", int[dstring], "leftovers");
+        return Ret(rs, ms, leftover);
     }
 
     @property auto target()
@@ -239,20 +222,34 @@ private:
     {
         orderedRecipes_ = [];
         orderedMaterials_ = [];
-        visit(root);
+        auto visitedRecipes = make!(RedBlackTree!dstring)(null);
+        auto visitedMaterials = make!(RedBlackTree!dstring)(null);
+        visit(root, visitedRecipes, visitedMaterials);
         orderedRecipes_.reverse();
         orderedMaterials_.reverse();
+        assert(orderedMaterials_.front == root.name);
+        orderedMaterials_ = orderedMaterials_[1..$];
     }
 
-    void visit(MaterialContainer material)
+    void visit(MaterialContainer material, ref RedBlackTree!dstring rs, ref RedBlackTree!dstring ms)
     {
-        material.children.filter!(c => !orderedRecipes_.canFind(c.name)).each!(c => this.visit(c));
+        if (material.name in ms)
+        {
+            return;
+        }
+        ms.insert(material.name);
+        material.children.filter!(c => !orderedRecipes_.canFind(c.name)).each!(c => this.visit(c, rs, ms));
         orderedMaterials_ ~= material.name;
     }
 
-    void visit(RecipeContainer recipe)
+    void visit(RecipeContainer recipe, ref RedBlackTree!dstring rs, ref RedBlackTree!dstring ms)
     {
-        recipe.children.filter!(c => !orderedMaterials_.canFind(c.name)).each!(c => this.visit(c));
+        if (recipe.name in rs)
+        {
+            return;
+        }
+        rs.insert(recipe.name);
+        recipe.children.filter!(c => !orderedMaterials_.canFind(c.name)).each!(c => this.visit(c, rs, ms));
         orderedRecipes_ ~= recipe.name;
     }
 
@@ -305,7 +302,7 @@ class MaterialContainer
 
     auto isLeaf()
     {
-        return !isProduct || false;
+        return !isProduct;
     }
 
     override string toString()

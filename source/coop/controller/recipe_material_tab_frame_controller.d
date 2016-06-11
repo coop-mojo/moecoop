@@ -65,6 +65,7 @@ class RecipeMaterialTabFrameController
         with(frame_.childById!EditLine("numQuery"))
         {
             contentChange = (EditableContent content) {
+                // TODO 必要アイテム数の再計算のみ
                 auto txt = content.text;
                 auto product = frame_.childById("itemQuery").text;
                 if (txt.empty || txt.to!int == 0)
@@ -73,9 +74,11 @@ class RecipeMaterialTabFrameController
                 }
                 else if (product in wisdom.rrecipeList)
                 {
-                    auto owned = frame_.requiredMaterialsAreAlreadyShown
-                                 ? frame_.ownedMaterials : (int[dstring]).init;
-                    showRecipeMaterials(product, txt.to!int, owned);
+                    if (!frame_.hasShownResult)
+                    {
+                        initializeTables(product);
+                    }
+                    updateTables(product, txt.to!int, frame_.ownedMaterials);
                 }
                 else
                 {
@@ -106,7 +109,8 @@ class RecipeMaterialTabFrameController
         auto nq = frame_.childById("numQuery").text;
         if (queryText in wisdom.rrecipeList && nq.to!int > 0)
         {
-            showRecipeMaterials(queryText, nq.to!int);
+            initializeTables(queryText);
+            updateTables(queryText, nq.to!int);
         }
         else
         {
@@ -114,99 +118,35 @@ class RecipeMaterialTabFrameController
         }
     }
 
-    auto showRecipeMaterials(dstring item, int num, int[dstring] owned = (int[dstring]).init, bool forRecipeOnly = false)
+    auto initializeTables(dstring item)
     {
-        alias TargetTuple = Tuple!(dstring, "target", int, "num");
+        fullGraph = new RecipeGraph(item, wisdom, null);
 
-        auto leftovers = owned.dup;
-        auto rList = wisdom.rrecipeList;
-        OrderedMap!(int[Recipe]) requiredRecipes;
-        OrderedMap!(MaterialTuple[dstring]) requiredMaterials;
-
-        auto useLeftovers(dstring it, int n)
-        {
-            if (auto left = it in leftovers)
-            {
-                if (n < *left)
-                {
-                    leftovers[it] -= n;
-                    n = 0;
-                    assert(leftovers[it] > 0);
-                }
-                else
-                {
-                    n -= *left;
-                    leftovers.remove(it);
-                }
-                assert(n >= 0);
-            }
-            return TargetTuple(it, n);
-        }
-
-        TargetTuple[] queue = [useLeftovers(item, num)];
-        while(!queue.empty)
-        {
-            auto it = queue.front;
-            queue.popFront;
-            if (it.target !in rList)
-            {
-                if (it.target !in requiredMaterials)
-                {
-                    requiredMaterials[it.target] = MaterialTuple.init;
-                }
-                requiredMaterials[it.target].num += it.num;
-                continue;
-            }
-            else if (it.target != item)
-            {
-                if (it.target !in requiredMaterials)
-                {
-                    requiredMaterials[it.target] = MaterialTuple.init;
-                }
-                requiredMaterials[it.target].num += it.num;
-                requiredMaterials[it.target].intermediate = true;
-            }
-            auto rNames = rList[it.target];
-            auto recipe = wisdom.recipeFor(rNames.front);
-
-            auto numApplied = (it.num.to!real/recipe.products[it.target]).ceil.to!int;
-
-            requiredRecipes[recipe] += numApplied;
-
-            // コンバイン時の余り物を追加
-            foreach(mat, n; recipe.products)
-            {
-                if (mat == it.target)
-                {
-                    if (n*numApplied > it.num)
-                    {
-                        leftovers[mat] += n*numApplied-it.num;
-                    }
-                }
-                else
-                {
-                    leftovers[mat] += n*numApplied;
-                }
-            }
-
-            queue ~= recipe.ingredients
-                           .byKeyValue
-                           .map!(kv => TargetTuple(kv.key, kv.value*numApplied))
-                           .map!(kv => useLeftovers(kv.target, kv.num))
-                           .array;
-        }
-
-        // DAG を構成
-        // トポロジカルソートで表示順を決定
-        if (forRecipeOnly)
-        {
-            frame_.showRequiredRecipes(requiredRecipes, leftovers);
-        }
-        else
-        {
-            frame_.showRequiredElements(requiredRecipes, requiredMaterials, leftovers);
-        }
+        auto elems = fullGraph.elements;
+        frame_.initRecipeTable(elems.recipes);
+        frame_.initLeftoverTable(elems.materials);
+        frame_.initMaterialTable(elems.materials);
     }
+
+    auto updateTables(dstring item, int num, int[dstring] owned = null)
+    {
+        static RecipeGraph graph;
+        if (graph is null || fullGraph.target != graph.target)
+        {
+            // pref && アイテム情報取得
+            graph = new RecipeGraph(item, wisdom);
+        }
+        auto elems = graph.elements(num, owned, wisdom);
+        auto ms = elems[0];
+        auto rs = elems[1];
+        auto lo = elems[2];
+
+        frame_.updateRecipeTable(elems.recipes);
+        frame_.updateLeftoverTable(elems.leftovers);
+        frame_.updateMaterialTable(elems.materials);
+        frame_.showResult;
+    }
+
 private:
     auto matchFunFor(dstring query)
     {
@@ -226,4 +166,6 @@ private:
         }
         assert(false);
     }
+
+    RecipeGraph fullGraph;
 }

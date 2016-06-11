@@ -117,7 +117,7 @@ class Wisdom {
         RedBlackTree!dstring[dstring] ret;
         recipes.each!((r) {
                 r.products.keys.each!((p) {
-                        if (r.name !in ret)
+                        if (p !in ret)
                         {
                             ret[p] = make!(RedBlackTree!dstring)(r.name);
                         }

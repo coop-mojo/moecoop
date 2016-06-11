@@ -59,6 +59,7 @@ class RecipeMaterialTabFrame: HorizontalLayout
         layout.layoutHeight(FILL_PARENT);
         layout.layoutWidth(FILL_PARENT);
 
+        hideResult;
         childById!CheckBox("migemo").checkChange = (Widget src, bool checked) {
             migemoOptionChanged();
             return true;
@@ -197,9 +198,13 @@ class RecipeMaterialTabFrame: HorizontalLayout
         recipes.map!((r) {
                 auto w = new CheckableEntryWidget(r~": ");
                 auto t = new TextWidget("times", format("%s 回"d, 0));
+                auto detail = controller.wisdom.recipeFor(r);
+                if (detail.requiresRecipe && !controller.characters[selectedCharacter].hasRecipe(r))
+                {
+                    w.textColor = "gray";
+                }
                 w.detailClicked = {
-                    auto rDetail = controller.wisdom.recipeFor(r);
-                    recipeDetail = RecipeDetailFrame.create(rDetail, controller.wisdom, controller.characters);
+                    recipeDetail = RecipeDetailFrame.create(detail, controller.wisdom, controller.characters);
                 };
                 return [w, t];
             }).each!(c => tbl.addChildren(c));

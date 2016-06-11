@@ -123,9 +123,14 @@ class RecipeGraph
         return root.toGraphString(ms, rs);
     }
 
+    @property static auto preference()
+    {
+        return defaultPreference;
+    }
+
     // material -> recipe
     enum defaultPreference = [
-        "魚の餌": "魚の餌(ヘビの肉)",
+        "魚の餌"d: "魚の餌(ヘビの肉)"d,
         "砂糖": "砂糖(臼)",
         "塩": "塩(岩塩)",
         "パン粉": "パン粉",

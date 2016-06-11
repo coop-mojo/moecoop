@@ -363,6 +363,7 @@ class RecipeMaterialTabFrame: HorizontalLayout
     auto initializeTables(dstring item)
     {
         fullGraph = new RecipeGraph(item, controller.wisdom, null);
+        preference = RecipeGraph.preference;
 
         auto elems = fullGraph.elements;
         initRecipeTable(elems.recipes);
@@ -376,7 +377,7 @@ class RecipeMaterialTabFrame: HorizontalLayout
         if (graph is null || fullGraph.target != graph.target)
         {
             // pref && アイテム情報取得
-            graph = new RecipeGraph(item, controller.wisdom);
+            graph = new RecipeGraph(item, controller.wisdom, preference);
         }
         auto elems = graph.elements(num, owned, controller.wisdom);
         updateRecipeTable(elems.recipes);
@@ -387,6 +388,7 @@ class RecipeMaterialTabFrame: HorizontalLayout
 
     EventHandler!() migemoOptionChanged;
     RecipeGraph fullGraph;
+    dstring[dstring] preference;
 }
 
 auto recipeMaterialLayout()

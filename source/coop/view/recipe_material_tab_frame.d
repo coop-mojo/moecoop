@@ -30,6 +30,7 @@ import std.typecons;
 import coop.util;
 import coop.model.item;
 import coop.model.recipe;
+import coop.model.recipe_graph;
 import coop.view.controls;
 import coop.view.editors;
 import coop.view.layouts;
@@ -57,6 +58,11 @@ class RecipeMaterialTabFrame: HorizontalLayout
         layout.addChild(recipeDetailsLayout);
         layout.layoutHeight(FILL_PARENT);
         layout.layoutWidth(FILL_PARENT);
+
+        childById!CheckBox("migemo").checkChange = (Widget src, bool checked) {
+            migemoOptionChanged();
+            return true;
+        };
     }
 
     @property auto characters(dstring[] chars)
@@ -214,6 +220,7 @@ class RecipeMaterialTabFrame: HorizontalLayout
                 auto n = new TextWidget("num", format("%s 個"d, 0));
                 return cast(Widget[])[w, n];
             }).each!(c => tbl.addChildren(c));
+        tbl.addChild(new TextWidget("なし", "なし"d));
 
         scr.contentWidget = tbl;
         scr.backgroundColor = "white";
@@ -239,6 +246,17 @@ class RecipeMaterialTabFrame: HorizontalLayout
                 auto w = new CheckableEntryWidget(lo~": ");
                 auto o = new EditIntLine("own");
                 auto t = new TextWidget("times", format("/%s 個"d, 0));
+
+                o.contentChange = (EditableContent content) {
+                    auto product = childById("itemQuery").text;
+                    auto txt = childById("numQuery").text;
+                    if (txt.empty || txt.to!int == 0)
+                    {
+                        return;
+                    }
+                    assert(product in controller.wisdom.rrecipeList);
+                    updateTables(product, txt.to!int, ownedMaterials);
+                };
                 return [w, o, t];
             }).each!(c => tbl.addChildren(c));
 
@@ -281,16 +299,21 @@ class RecipeMaterialTabFrame: HorizontalLayout
                     rs.each!(w => w.visibility = Visibility.Gone);
                 }
             });
+        if (leftovers.keys.empty)
+        {
+            tbl.childById("なし").visibility = Visibility.Visible;
+        }
     }
 
-    auto updateMaterialTable(int[dstring] materials)
+    auto updateMaterialTable(MatTuple[dstring] materials)
     {
         auto tbl = enforce(childById!TableLayout("materials"));
         tbl.rows.each!((rs) {
                 if (auto n = rs[0].text.chomp(": ") in materials)
                 {
                     rs.each!(w => w.visibility = Visibility.Visible);
-                    rs[2].text = format("/%s 個"d, *n);
+                    rs[2].text = format("/%s 個"d, (*n).num);
+                    rs[0].textColor = (*n).isIntermediate ? "blue" : "black";
                 }
                 else
                 {
@@ -298,6 +321,34 @@ class RecipeMaterialTabFrame: HorizontalLayout
                 }
             });
     }
+
+    auto initializeTables(dstring item)
+    {
+        fullGraph = new RecipeGraph(item, controller.wisdom, null);
+
+        auto elems = fullGraph.elements;
+        initRecipeTable(elems.recipes);
+        initLeftoverTable(elems.materials);
+        initMaterialTable(elems.materials);
+    }
+
+    auto updateTables(dstring item, int num, int[dstring] owned = null)
+    {
+        static RecipeGraph graph;
+        if (graph is null || fullGraph.target != graph.target)
+        {
+            // pref && アイテム情報取得
+            graph = new RecipeGraph(item, controller.wisdom);
+        }
+        auto elems = graph.elements(num, owned, controller.wisdom);
+        updateRecipeTable(elems.recipes);
+        updateLeftoverTable(elems.leftovers);
+        updateMaterialTable(elems.materials);
+        showResult;
+    }
+
+    EventHandler!() migemoOptionChanged;
+    RecipeGraph fullGraph;
 }
 
 auto recipeMaterialLayout()

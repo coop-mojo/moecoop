@@ -59,7 +59,7 @@ class Character
     auto markFiledRecipe(dstring recipe, dstring binder)
     {
         if (binder !in filedMap_)
-            filedMap_[binder] = make!(RedBlackTree!dstring)(null);
+            filedMap_[binder] = new RedBlackTree!dstring;
         filedMap_[binder].insert(recipe);
     }
 

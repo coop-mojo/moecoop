@@ -30,7 +30,6 @@ import std.typecons;
 import coop.util;
 import coop.model.item;
 import coop.model.recipe;
-import coop.model.recipe_graph;
 import coop.view.recipe_material_tab_frame;
 import coop.view.recipe_detail_frame;
 import coop.controller.main_frame_controller;
@@ -61,6 +60,10 @@ class RecipeMaterialTabFrameController
         {
             frame_.disableMigemoBox;
         }
+        frame_.migemoOptionChanged = {
+            auto txtBox = frame_.childById("itemQuery");
+            showProductCandidate(txtBox.text);
+        };
 
         with(frame_.childById!EditLine("numQuery"))
         {
@@ -76,9 +79,9 @@ class RecipeMaterialTabFrameController
                 {
                     if (!frame_.hasShownResult)
                     {
-                        initializeTables(product);
+                        frame_.initializeTables(product);
                     }
-                    updateTables(product, txt.to!int, frame_.ownedMaterials);
+                    frame_.updateTables(product, txt.to!int, frame_.ownedMaterials);
                 }
                 else
                 {
@@ -109,42 +112,13 @@ class RecipeMaterialTabFrameController
         auto nq = frame_.childById("numQuery").text;
         if (queryText in wisdom.rrecipeList && nq.to!int > 0)
         {
-            initializeTables(queryText);
-            updateTables(queryText, nq.to!int);
+            frame_.initializeTables(queryText);
+            frame_.updateTables(queryText, nq.to!int);
         }
         else
         {
             frame_.hideResult;
         }
-    }
-
-    auto initializeTables(dstring item)
-    {
-        fullGraph = new RecipeGraph(item, wisdom, null);
-
-        auto elems = fullGraph.elements;
-        frame_.initRecipeTable(elems.recipes);
-        frame_.initLeftoverTable(elems.materials);
-        frame_.initMaterialTable(elems.materials);
-    }
-
-    auto updateTables(dstring item, int num, int[dstring] owned = null)
-    {
-        static RecipeGraph graph;
-        if (graph is null || fullGraph.target != graph.target)
-        {
-            // pref && アイテム情報取得
-            graph = new RecipeGraph(item, wisdom);
-        }
-        auto elems = graph.elements(num, owned, wisdom);
-        auto ms = elems[0];
-        auto rs = elems[1];
-        auto lo = elems[2];
-
-        frame_.updateRecipeTable(elems.recipes);
-        frame_.updateLeftoverTable(elems.leftovers);
-        frame_.updateMaterialTable(elems.materials);
-        frame_.showResult;
     }
 
 private:
@@ -166,6 +140,4 @@ private:
         }
         assert(false);
     }
-
-    RecipeGraph fullGraph;
 }

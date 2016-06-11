@@ -27,6 +27,8 @@ import std.math;
 import std.range;
 import std.typecons;
 
+alias MatTuple = Tuple!(int, "num", bool, "isIntermediate");
+
 class RecipeGraph
 {
     this(dstring name, Wisdom w, dstring[dstring] pref = defaultPreference)
@@ -49,10 +51,11 @@ class RecipeGraph
      + root を n 個作るのに必要なレシピ，素材，作成時のあまり素材を返す
      + TODO: コンバインしない素材列が引数に必要
      +/
-    auto elements(int targetNum, int[dstring] owned, Wisdom w, RedBlackTree!dstring mats = make!(RedBlackTree!dstring)(null))
+    auto elements(int targetNum, int[dstring] owned, Wisdom w, RedBlackTree!dstring mats = new RedBlackTree!dstring)
     {
-        int[dstring] ms, rs, leftover;
-        ms[root.name] = targetNum;
+        int[dstring] rs, leftover;
+        MatTuple[dstring] ms;
+        ms[root.name] = MatTuple(targetNum, false);
         foreach(r; elements.recipes)
         {
             auto re = w.recipeFor(r);
@@ -60,36 +63,42 @@ class RecipeGraph
             auto nPerComb = re.products[tar];
             if (auto o = tar in ms)
             {
-                auto req = *o;
+                auto req = (*o).num;
                 auto ow = owned.get(tar, 0);
                 int nApply;
-                if (req >= ow)
+                if (req > ow)
                 {
                     nApply = ((req-ow)/nPerComb.to!real).ceil.to!int;
                     leftover[tar] = nApply*nPerComb - (req-ow);
                     rs[r] = nApply;
-                    if (rs[r] == 0)
-                    {
-                        rs.remove(r);
-                    }
+                    assert(rs[r] > 0);
+                    recipes_[r].parents[].each!(m => ms[m].isIntermediate = true);
                 }
                 else
                 {
                     nApply = 0;
                     leftover[tar] = ow-req;
                 }
+
                 if (leftover[tar] == 0)
                 {
                     leftover.remove(tar);
                 }
-                foreach(kv; re.products.byKeyValue.filter!(kv => kv.key != tar))
+                if (nApply > 0)
                 {
-                    leftover[kv.key] += kv.value*nApply;
-                }
+                    foreach(kv; re.products.byKeyValue.filter!(kv => kv.key != tar))
+                    {
+                        leftover[kv.key] += kv.value*nApply;
+                    }
 
-                foreach(mat, n; re.ingredients)
-                {
-                    ms[mat] += n*nApply;
+                    foreach(mat, n; re.ingredients)
+                    {
+                        if (mat !in ms)
+                        {
+                            ms[mat] = MatTuple.init;
+                        }
+                        ms[mat].num += n*nApply;
+                    }
                 }
             }
             else
@@ -98,7 +107,7 @@ class RecipeGraph
                 continue;
             }
         }
-        alias Ret = Tuple!(int[dstring], "recipes", int[dstring], "materials", int[dstring], "leftovers");
+        alias Ret = Tuple!(int[dstring], "recipes", MatTuple[dstring], "materials", int[dstring], "leftovers");
         return Ret(rs, ms, leftover);
     }
 
@@ -109,8 +118,8 @@ class RecipeGraph
 
     override string toString()
     {
-        auto rs = make!(RedBlackTree!string)(null);
-        auto ms = make!(RedBlackTree!string)(null);
+        auto rs = new RedBlackTree!string;
+        auto ms = new RedBlackTree!string;
         return root.toGraphString(ms, rs);
     }
 
@@ -222,8 +231,8 @@ private:
     {
         orderedRecipes_ = [];
         orderedMaterials_ = [];
-        auto visitedRecipes = make!(RedBlackTree!dstring)(null);
-        auto visitedMaterials = make!(RedBlackTree!dstring)(null);
+        auto visitedRecipes = new RedBlackTree!dstring;
+        auto visitedMaterials = new RedBlackTree!dstring;
         visit(root, visitedRecipes, visitedMaterials);
         orderedRecipes_.reverse();
         orderedMaterials_.reverse();
@@ -268,7 +277,7 @@ class RecipeContainer
     this(dstring name_)
     {
         name = name_;
-        parents = make!(RedBlackTree!dstring)(null);
+        parents = new RedBlackTree!dstring;
     }
 
     override string toString()
@@ -297,7 +306,7 @@ class MaterialContainer
     this(dstring name_)
     {
         name = name_;
-        parents = make!(RedBlackTree!dstring)(null);
+        parents = new RedBlackTree!dstring;
     }
 
     auto isLeaf()

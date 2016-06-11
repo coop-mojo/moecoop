@@ -23,6 +23,7 @@ import std.algorithm;
 import std.container;
 import std.conv;
 import std.format;
+import std.math;
 import std.range;
 import std.typecons;
 
@@ -32,6 +33,16 @@ class RecipeGraph
     {
         preferences_ = pref;
         root = init(name, cast(RecipeContainer)null, w);
+    }
+
+    auto elements()
+    {
+        if (orderedRecipes_.empty)
+        {
+            visit;
+        }
+        alias Ret = Tuple!(dstring[], "recipes", dstring[], "materials");
+        return Ret(orderedRecipes_, orderedMaterials_);
     }
 
     @property auto recipes()
@@ -50,6 +61,67 @@ class RecipeGraph
             visit;
         }
         return orderedMaterials_;
+    }
+
+    /++
+     + root を n 個作るのに必要なレシピ，素材，作成時のあまり素材を返す
+     + TODO: コンバインしない素材列が引数に必要
+     +/
+    auto elements(int targetNum, int[dstring] owned, Wisdom w, RedBlackTree!dstring mats = make!(RedBlackTree!dstring)(null))
+    {
+        int[dstring] ms, rs, leftover;
+        ms[root.name] = targetNum;
+        foreach(r; recipes)
+        {
+            auto re = w.recipeFor(r);
+            auto tar = setIntersection(recipes_[r].parents[].array.sort(), re.products.keys.sort()).front;
+            auto nPerComb = re.products[tar];
+            if (auto o = tar in ms)
+            {
+                auto req = *o;
+                auto ow = owned.get(tar, 0);
+                int nApply;
+                if (req >= ow)
+                {
+                    nApply = ((req-ow)/nPerComb.to!real).ceil.to!int;
+                    leftover[tar] = nApply*nPerComb - (req-ow);
+                    rs[r] = nApply;
+                    if (rs[r] == 0)
+                    {
+                        rs.remove(r);
+                    }
+                }
+                else
+                {
+                    nApply = 0;
+                    leftover[tar] = ow-req;
+                }
+                if (leftover[tar] == 0)
+                {
+                    leftover.remove(tar);
+                }
+                foreach(kv; re.products.byKeyValue.filter!(kv => kv.key != tar))
+                {
+                    leftover[kv.key] += kv.value*nApply;
+                }
+
+                foreach(mat, n; re.ingredients)
+                {
+                    ms[mat] += n*nApply;
+                }
+            }
+            else
+            {
+                // 上流はもうこのアイテムを必要としていない
+                continue;
+            }
+        }
+        return tuple(ms, rs, leftover);
+    }
+
+    @property auto target()
+    {
+        return root.name;
     }
 
     override string toString()

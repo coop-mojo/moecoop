@@ -117,6 +117,8 @@ struct Item
 
 auto readItems(string fname)
 {
+    import std.stdio;
+    writeln("Read items in ", fname);
     auto res = fname.readText.parseJSON;
     enforce(res.type == JSON_TYPE.OBJECT);
     auto items = res.object;

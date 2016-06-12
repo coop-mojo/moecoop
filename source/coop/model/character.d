@@ -151,7 +151,6 @@ private:
 auto readBindersInfo(string file)
 {
     import std.typecons;
-    import std.conv;
     auto json = file.readText.parseJSON;
     enforce(json.type == JSON_TYPE.OBJECT);
     return json.object.byKeyValue.map!((kv) {

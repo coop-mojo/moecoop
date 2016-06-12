@@ -7,3 +7,5 @@ libfreetype-*.dll
 ui.log
 moecoop*.zip
 .fldd.cache
+docs.json
+docs/

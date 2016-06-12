@@ -105,7 +105,10 @@ private:
     auto writeBindersInfo()
     {
         auto binderDir = buildPath(dir_, name_, "バインダー"d).to!string;
-        rmdirRecurse(binderDir);
+        if (binderDir.exists)
+        {
+            rmdirRecurse(binderDir);
+        }
         mkdirRecurse(binderDir);
 
         JSONValue[string] binderFiles;

@@ -203,6 +203,16 @@ class RecipeMaterialTabFrame: HorizontalLayout
                 {
                     w.textColor = "gray";
                 }
+                w.checkStateChanged = (bool checked) {
+                    if (checked)
+                    {
+                        /// product にチェックを入れる
+                    }
+                    else
+                    {
+                        /// ここに来る場合があるか？
+                    }
+                };
                 w.detailClicked = {
                     recipeDetail = RecipeDetailFrame.create(detail, controller.wisdom, controller.characters);
                 };
@@ -271,6 +281,16 @@ class RecipeMaterialTabFrame: HorizontalLayout
                 auto o = new EditIntLine("own");
                 auto t = new TextWidget("times", format("/%s 個"d, 0));
 
+                w.checkStateChanged = (bool checked) {
+                    if (checked)
+                    {
+                        o.text = t.text.matchFirst(r"/(\d+) 個"d)[1];
+                    }
+                    else
+                    {
+                        o.text = "0";
+                    }
+                };
                 w.detailClicked = {
                     Item item;
                     if (auto i = lo in controller.wisdom.itemList)

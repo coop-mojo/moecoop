@@ -196,27 +196,18 @@ class RecipeMaterialTabFrame: HorizontalLayout
         tbl.colCount = 2;
 
         recipes.map!((r) {
-                auto w = new CheckableEntryWidget(r~": ");
+                auto w = new TextWidget("recipe", r~": ");
+                w.clickable = true;
+                w.styleId = STYLE_CHECKBOX_LABEL;
+                w.enabled = true;
+                w.trackHover = true;
                 auto t = new TextWidget("times", format("%s 回"d, 0));
                 auto detail = controller.wisdom.recipeFor(r);
-                if (detail.requiresRecipe && !controller.characters[selectedCharacter].hasRecipe(r))
-                {
-                    w.textColor = "gray";
-                }
-                w.checkStateChanged = (bool checked) {
-                    if (checked)
-                    {
-                        /// product にチェックを入れる
-                    }
-                    else
-                    {
-                        /// ここに来る場合があるか？
-                    }
-                };
-                w.detailClicked = {
+                w.click = (Widget _) {
                     recipeDetail = RecipeDetailFrame.create(detail, controller.wisdom, controller.characters);
+                    return true;
                 };
-                return [w, t];
+                return cast(Widget[])[w, t];
             }).each!(c => tbl.addChildren(c));
 
         scr.contentWidget = tbl;
@@ -314,6 +305,10 @@ class RecipeMaterialTabFrame: HorizontalLayout
                     }
                     assert(product in controller.wisdom.rrecipeList);
                     updateTables(product, txt.to!int, ownedMaterials);
+                    if (txt == t.text.matchFirst(r"/(\d+) 個"d)[1])
+                    {
+                        w.checked = true;
+                    }
                 };
                 return [w, o, t];
             }).each!(c => tbl.addChildren(c));
@@ -331,10 +326,24 @@ class RecipeMaterialTabFrame: HorizontalLayout
     {
         auto tbl = enforce(childById!TableLayout("recipes"));
         tbl.rows.each!((rs) {
-                if (auto n  = rs[0].text.chomp(": ") in recipes)
+                auto r = rs[0].text.chomp(": ");
+                if (auto n  = r in recipes)
                 {
                     rs.each!(w => w.visibility = Visibility.Visible);
                     rs[1].text = format("%s 回"d, *n);
+                    auto detail = controller.wisdom.recipeFor(r);
+                    if (detail.requiresRecipe && !controller.characters[selectedCharacter].hasRecipe(r))
+                    {
+                        rs[0].textColor = "gray";
+                    }
+                    else if (detail.ingredients.keys.all!(ing => childById!TableLayout("materials").row(format("%s: ", ing))[0].checked))
+                    {
+                        rs[0].textColor = "red";
+                    }
+                    else
+                    {
+                        rs[0].textColor = "black";
+                    }
                 }
                 else
                 {
@@ -372,6 +381,14 @@ class RecipeMaterialTabFrame: HorizontalLayout
                     rs.each!(w => w.visibility = Visibility.Visible);
                     rs[2].text = format("/%s 個"d, (*n).num);
                     rs[0].textColor = (*n).isIntermediate ? "blue" : "black";
+                    if (!rs[1].text.empty && rs[1].text.to!int >= (*n).num)
+                    {
+                        rs[0].checked = true;
+                    }
+                    else
+                    {
+                        rs[0].checked = false;
+                    }
                 }
                 else
                 {
@@ -400,9 +417,9 @@ class RecipeMaterialTabFrame: HorizontalLayout
             graph = new RecipeGraph(item, controller.wisdom, preference);
         }
         auto elems = graph.elements(num, owned, controller.wisdom);
+        updateMaterialTable(elems.materials); // 最初にすること！
         updateRecipeTable(elems.recipes);
         updateLeftoverTable(elems.leftovers);
-        updateMaterialTable(elems.materials);
         showResult;
     }
 

@@ -19,7 +19,13 @@ module coop.view.controls;
 
 import dlangui;
 
+import std.algorithm;
+import std.array;
 import std.conv;
+import std.functional;
+import std.range;
+import std.traits;
+import std.typecons;
 
 import coop.util;
 
@@ -67,6 +73,17 @@ class CheckableEntryWidget: HorizontalLayout
         link.backgroundColor = backgroundColor;
     }
 
+    override typeof(this) popupMenu(Fn)(Tuple!(dstring, Fn)[] items) if (isCallable!Fn)
+    {
+        _menuItems = items.map!"a[1].toDelegate".array;
+        auto menu = new MenuItem(null);
+        items.map!"a[0]".enumerate.each!((vals) {
+                menu.add(new Action(vals[0].to!int, vals[1]));
+            });
+        popupMenu = menu;
+        return this;
+    }
+
     @property override dstring text()
     {
         return link.text;
@@ -86,7 +103,7 @@ private:
     LinkWidget link;
 }
 
-class LinkWidget: TextWidget
+class LinkWidget: TextWidget, MenuItemActionHandler
 {
     this()
     {
@@ -105,6 +122,68 @@ class LinkWidget: TextWidget
         enabled = true;
         trackHover = true;
     }
+
+    @property MenuItem popupMenu() { return _popupMenu; }
+    @property typeof(this) popupMenu(Fn)(Tuple!(dstring, Fn)[] items) if (isCallable!Fn)
+    {
+        _menuItems = items.map!"a[1].toDelegate".array;
+        auto menu = new MenuItem(null);
+        items.map!"a[0]".enumerate.each!((vals) {
+                menu.add(new Action(vals[0].to!int, vals[1]));
+            });
+        popupMenu = menu;
+        return this;
+    }
+
+    override bool canShowPopupMenu(int x, int y)
+    {
+        if (_popupMenu is null)
+        {
+            return false;
+        }
+        if (_popupMenu.openingSubmenu.assigned &&
+            !_popupMenu.openingSubmenu(_popupMenu))
+        {
+                return false;
+        }
+        return true;
+    }
+
+    override void showPopupMenu(int x, int y) {
+        if (_popupMenu.openingSubmenu.assigned &&
+            !_popupMenu.openingSubmenu(_popupMenu))
+        {
+            return;
+        }
+        _popupMenu.updateActionState(this);
+        PopupMenu popupMenu = new PopupMenu(_popupMenu);
+        popupMenu.menuItemAction = this;
+        PopupWidget popup = window.showPopup(popupMenu, this, PopupAlign.Point | PopupAlign.Right, x, y);
+        popup.flags = PopupFlags.CloseOnClickOutside;
+    }
+
+    override bool onMenuItemAction(const Action action)
+    {
+        auto a = action.clone;
+        a.objectParam = this;
+        return dispatchAction(a);
+    }
+
+    override bool handleAction(const Action a)
+    {
+        if (a)
+        {
+            if (a.id < _menuItems.length)
+            {
+                _menuItems[a.id]();
+                return true;
+            }
+        }
+        return false;
+    }
+private:
+    MenuItem _popupMenu;
+    void delegate()@safe[] _menuItems;
 }
 
 import dlangui.widgets.metadata;

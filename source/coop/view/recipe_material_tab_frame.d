@@ -196,11 +196,7 @@ class RecipeMaterialTabFrame: HorizontalLayout
         tbl.colCount = 2;
 
         recipes.map!((r) {
-                auto w = new TextWidget("recipe", r~": ");
-                w.clickable = true;
-                w.styleId = STYLE_CHECKBOX_LABEL;
-                w.enabled = true;
-                w.trackHover = true;
+                auto w = new LinkWidget("recipe", r~": ");
                 auto t = new TextWidget("times", format("%s 回"d, 0));
                 auto detail = controller.wisdom.recipeFor(r);
                 w.click = (Widget _) {
@@ -344,6 +340,29 @@ class RecipeMaterialTabFrame: HorizontalLayout
                     {
                         rs[0].textColor = "black";
                     }
+
+                    auto rNode = fullGraph.recipeNodes[r];
+                    if (!rNode.parents.empty)
+                    {
+                        auto bros = rNode.parents[]
+                                         .map!(p => fullGraph.materialNodes[p].children)
+                                         .join
+                                         .map!"a.name"
+                                         .array
+                                         .sort()
+                                         .uniq
+                                         .array;
+                        if (bros.length > 1)
+                        {
+                            auto menu = bros.filter!(b => b != r)
+                                            .map!(b => tuple(format("%s を使う"d, b), () @safe {
+                                                        preference[rNode.parents[].front] = b;
+                                                        ()@trusted {reload;}();
+                                                    }))
+                                            .array;
+                            (cast(LinkWidget)rs[0]).popupMenu = menu;
+                        }
+                    }
                 }
                 else
                 {
@@ -410,21 +429,34 @@ class RecipeMaterialTabFrame: HorizontalLayout
 
     auto updateTables(dstring item, int num, int[dstring] owned = null)
     {
-        static RecipeGraph graph;
-        if (graph is null || fullGraph.target != graph.target)
+        if (subGraph is null || fullGraph.target != subGraph.target)
         {
-            // pref && アイテム情報取得
-            graph = new RecipeGraph(item, controller.wisdom, preference);
+            subGraph = new RecipeGraph(item, controller.wisdom, preference);
         }
-        auto elems = graph.elements(num, owned, controller.wisdom);
+        auto elems = subGraph.elements(num, owned, controller.wisdom);
         updateMaterialTable(elems.materials); // 最初にすること！
         updateRecipeTable(elems.recipes);
         updateLeftoverTable(elems.leftovers);
         showResult;
     }
 
+    void reload()
+    in{
+        assert(hasShownResult);
+    } body {
+        auto numText = childById("numQuery").text;
+        if (numText.empty || numText.to!int == 0)
+        {
+            return;
+        }
+        auto product = childById("itemQuery").text;
+        subGraph = null;
+        updateTables(product, numText.to!int, ownedMaterials);
+     }
+
     EventHandler!() migemoOptionChanged;
     RecipeGraph fullGraph;
+    RecipeGraph subGraph;
     dstring[dstring] preference;
 }
 

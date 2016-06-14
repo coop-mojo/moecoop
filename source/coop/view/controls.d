@@ -73,16 +73,7 @@ class CheckableEntryWidget: HorizontalLayout
         link.backgroundColor = backgroundColor;
     }
 
-    override typeof(this) popupMenu(Fn)(Tuple!(dstring, Fn)[] items) if (isCallable!Fn)
-    {
-        _menuItems = items.map!"a[1].toDelegate".array;
-        auto menu = new MenuItem(null);
-        items.map!"a[0]".enumerate.each!((vals) {
-                menu.add(new Action(vals[0].to!int, vals[1]));
-            });
-        popupMenu = menu;
-        return this;
-    }
+    alias popupMenu = link.popupMenu;
 
     @property override dstring text()
     {
@@ -131,7 +122,7 @@ class LinkWidget: TextWidget, MenuItemActionHandler
         items.map!"a[0]".enumerate.each!((vals) {
                 menu.add(new Action(vals[0].to!int, vals[1]));
             });
-        popupMenu = menu;
+        _popupMenu = menu;
         return this;
     }
 
@@ -164,9 +155,7 @@ class LinkWidget: TextWidget, MenuItemActionHandler
 
     override bool onMenuItemAction(const Action action)
     {
-        auto a = action.clone;
-        a.objectParam = this;
-        return dispatchAction(a);
+        return dispatchAction(action);
     }
 
     override bool handleAction(const Action a)

@@ -169,6 +169,15 @@ class RecipeGraph
         "オリハルコンインゴット": "オリハルコンインゴット(鉱石)",
         ];
 
+    @property auto recipeNodes()
+    {
+        return recipes_;
+    }
+
+    @property auto materialNodes()
+    {
+        return materials_;
+    }
 private:
 
     /++

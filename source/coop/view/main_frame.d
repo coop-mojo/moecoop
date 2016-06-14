@@ -43,7 +43,7 @@ else version(OSX) {
     immutable defaultFontName = "游ゴシック体";
 }
 
-enum MENU_ACTION{
+enum MENU_ACTION {
     EXIT,
     OPTION,
 }

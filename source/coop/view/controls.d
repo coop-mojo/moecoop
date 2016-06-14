@@ -29,7 +29,7 @@ import std.typecons;
 
 import coop.util;
 
-class CheckableEntryWidget: HorizontalLayout
+class CheckableEntryWidget: HorizontalLayout, MenuItemActionHandler
 {
     this()
     {
@@ -73,7 +73,11 @@ class CheckableEntryWidget: HorizontalLayout
         link.backgroundColor = backgroundColor;
     }
 
-    alias popupMenu = link.popupMenu;
+    @property typeof(this) popupMenu(Fn)(Tuple!(dstring, Fn)[] items) if (isCallable!Fn)
+    {
+        link.popupMenu(items);
+        return this;
+    }
 
     @property override dstring text()
     {
@@ -85,6 +89,26 @@ class CheckableEntryWidget: HorizontalLayout
     {
         link.textColor = col;
         return this;
+    }
+
+    override bool canShowPopupMenu(int x, int y)
+    {
+        return link.canShowPopupMenu(x, y);
+    }
+
+    override void showPopupMenu(int x, int y)
+    {
+        link.showPopupMenu(x, y);
+    }
+
+    override bool onMenuItemAction(const Action action)
+    {
+        return link.onMenuItemAction(action);
+    }
+
+    override bool handleAction(const Action a)
+    {
+        return link.handleAction(a);
     }
 
     EventHandler!(bool) checkStateChanged;
@@ -114,7 +138,6 @@ class LinkWidget: TextWidget, MenuItemActionHandler
         trackHover = true;
     }
 
-    @property MenuItem popupMenu() { return _popupMenu; }
     @property typeof(this) popupMenu(Fn)(Tuple!(dstring, Fn)[] items) if (isCallable!Fn)
     {
         _menuItems = items.map!"a[1].toDelegate".array;
@@ -140,7 +163,8 @@ class LinkWidget: TextWidget, MenuItemActionHandler
         return true;
     }
 
-    override void showPopupMenu(int x, int y) {
+    override void showPopupMenu(int x, int y)
+    {
         if (_popupMenu.openingSubmenu.assigned &&
             !_popupMenu.openingSubmenu(_popupMenu))
         {
@@ -172,7 +196,7 @@ class LinkWidget: TextWidget, MenuItemActionHandler
     }
 private:
     MenuItem _popupMenu;
-    void delegate()@safe[] _menuItems;
+    void delegate()[] _menuItems;
 }
 
 import dlangui.widgets.metadata;

@@ -60,6 +60,10 @@ class RecipeGraph
         {
             auto re = w.recipeFor(r);
             auto tar = setIntersection(recipes_[r].parents[].array.sort(), re.products.keys.sort()).front;
+            if (tar in mats)
+            {
+                continue;
+            }
             auto nPerComb = re.products[tar];
             if (auto o = tar in ms)
             {

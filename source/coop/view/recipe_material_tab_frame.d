@@ -20,6 +20,7 @@ module coop.view.recipe_material_tab_frame;
 import dlangui;
 
 import std.algorithm;
+import std.container;
 import std.exception;
 import std.format;
 import std.range;
@@ -58,6 +59,7 @@ class RecipeMaterialTabFrame: HorizontalLayout
         layout.addChild(recipeDetailsLayout);
         layout.layoutHeight(FILL_PARENT);
         layout.layoutWidth(FILL_PARENT);
+        leafMaterials = new RedBlackTree!dstring;
 
         hideResult;
         childById!CheckBox("migemo").checkChange = (Widget src, bool checked) {
@@ -355,9 +357,9 @@ class RecipeMaterialTabFrame: HorizontalLayout
                         if (bros.length > 1)
                         {
                             auto menu = bros.filter!(b => b != r)
-                                            .map!(b => tuple(format("%s を使う"d, b), () @safe {
+                                            .map!(b => tuple(format("%s を使う"d, b), () {
                                                         preference[rNode.parents[].front] = b;
-                                                        ()@trusted {reload;}();
+                                                        reload;
                                                     }))
                                             .array;
                             (cast(LinkWidget)rs[0]).popupMenu = menu;
@@ -395,7 +397,8 @@ class RecipeMaterialTabFrame: HorizontalLayout
     {
         auto tbl = enforce(childById!TableLayout("materials"));
         tbl.rows.each!((rs) {
-                if (auto n = rs[0].text.chomp(": ") in materials)
+                auto m = rs[0].text.chomp(": ");
+                if (auto n = m in materials)
                 {
                     rs.each!(w => w.visibility = Visibility.Visible);
                     rs[2].text = format("/%s 個"d, (*n).num);
@@ -407,6 +410,27 @@ class RecipeMaterialTabFrame: HorizontalLayout
                     else
                     {
                         rs[0].checked = false;
+                    }
+
+                    auto mNode = fullGraph.materialNodes[m];
+                    if (!mNode.isLeaf)
+                    {
+                        Tuple!(dstring, void delegate()) menuItem;
+                        if (mNode.name in leafMaterials)
+                        {
+                            menuItem = tuple("材料から用意する"d, () {
+                                    leafMaterials.removeKey(mNode.name);
+                                    reload;
+                                });
+                        }
+                        else
+                        {
+                            menuItem = tuple("直接用意する"d, () {
+                                    leafMaterials.insert(mNode.name);
+                                    reload;
+                                });
+                        }
+                        (cast(CheckableEntryWidget)rs[0]).popupMenu = [menuItem];
                     }
                 }
                 else
@@ -433,7 +457,7 @@ class RecipeMaterialTabFrame: HorizontalLayout
         {
             subGraph = new RecipeGraph(item, controller.wisdom, preference);
         }
-        auto elems = subGraph.elements(num, owned, controller.wisdom);
+        auto elems = subGraph.elements(num, owned, controller.wisdom, leafMaterials);
         updateMaterialTable(elems.materials); // 最初にすること！
         updateRecipeTable(elems.recipes);
         updateLeftoverTable(elems.leftovers);
@@ -458,6 +482,7 @@ class RecipeMaterialTabFrame: HorizontalLayout
     RecipeGraph fullGraph;
     RecipeGraph subGraph;
     dstring[dstring] preference;
+    RedBlackTree!dstring leafMaterials;
 }
 
 auto recipeMaterialLayout()

@@ -317,7 +317,7 @@ class RecipeTabFrame: HorizontalLayout
 private:
     Widget toRecipeWidget(dstring recipe, dstring category)
     {
-        auto ret = new CheckableEntryWidget(recipe);
+        auto ret = new CheckableEntryWidget(recipe.to!string, recipe);
         auto wisdom = controller.wisdom;
         auto cWisdom = controller.cWisdom;
         auto characters = controller.characters;

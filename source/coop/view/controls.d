@@ -36,9 +36,9 @@ class CheckableEntryWidget: HorizontalLayout, MenuItemActionHandler
         super();
     }
 
-    this(dstring text)
+    this(string id, dstring text)
     {
-        super(text.to!string);
+        super(id);
         box = new CheckBox(null, ""d);
         link = new LinkWidget(null, text);
         addChild(box);
@@ -64,13 +64,14 @@ class CheckableEntryWidget: HorizontalLayout, MenuItemActionHandler
         return this;
     }
 
-    auto highlight()
+    @property auto highlight()
     {
-        link.backgroundColor = 0xfffacd;
+        link.highlight;
     }
-    auto unhighlight()
+
+    @property auto unhighlight()
     {
-        link.backgroundColor = backgroundColor;
+        link.unhighlight;
     }
 
     @property typeof(this) popupMenu(Fn)(Tuple!(dstring, Fn)[] items) if (isCallable!Fn)
@@ -89,6 +90,11 @@ class CheckableEntryWidget: HorizontalLayout, MenuItemActionHandler
     {
         link.textColor = col;
         return this;
+    }
+
+    @property override Widget textFlags(uint value)
+    {
+        return link.textFlags(value);
     }
 
     override bool canShowPopupMenu(int x, int y)
@@ -127,6 +133,7 @@ class LinkWidget: TextWidget, MenuItemActionHandler
         styleId = STYLE_CHECKBOX_LABEL;
         enabled = true;
         trackHover = true;
+        defaultBackgroundColor = backgroundColor;
     }
 
     this(string id, dstring txt)
@@ -136,6 +143,17 @@ class LinkWidget: TextWidget, MenuItemActionHandler
         styleId = STYLE_CHECKBOX_LABEL;
         enabled = true;
         trackHover = true;
+        defaultBackgroundColor = backgroundColor;
+    }
+
+    @property auto highlight()
+    {
+        backgroundColor = 0xfffacd;
+    }
+
+    @property auto unhighlight()
+    {
+        backgroundColor = defaultBackgroundColor;
     }
 
     @property typeof(this) popupMenu(Fn)(Tuple!(dstring, Fn)[] items) if (isCallable!Fn)
@@ -194,6 +212,8 @@ class LinkWidget: TextWidget, MenuItemActionHandler
         }
         return false;
     }
+
+    immutable uint defaultBackgroundColor;
 private:
     MenuItem _popupMenu;
     void delegate()[] _menuItems;

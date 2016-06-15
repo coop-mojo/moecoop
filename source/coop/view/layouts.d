@@ -26,18 +26,23 @@ auto rows(TableLayout l)
 {
     return iota(0, l.childCount)
         .map!(i => l.child(i))
+        .array
         .chunks(l.colCount)
         .array;
 }
 
-auto row(TableLayout l, int i)
+Widget[] row(TableLayout l, int i)
 {
     return l.rows[i];
 }
 
-auto row(TableLayout l, string name)
+Widget[] row(TableLayout l, string name)
 {
     auto ch = l.childById(name);
+    if (ch is null)
+    {
+        return [];
+    }
     auto idx = l.childIndex(ch);
     return l.row(idx/l.colCount);
 }

@@ -198,10 +198,12 @@ class RecipeMaterialTabFrame: HorizontalLayout
         tbl.colCount = 2;
 
         recipes.map!((r) {
-                auto w = new LinkWidget("recipe", r~": ");
+                auto w = new LinkWidget(r.to!string, r~": ");
                 auto t = new TextWidget("times", format("%s 回"d, 0));
                 auto detail = controller.wisdom.recipeFor(r);
                 w.click = (Widget _) {
+                    unhighlightDetailRecipe;
+                    scope(exit) highlightDetailRecipe;
                     recipeDetail = RecipeDetailFrame.create(detail, controller.wisdom, controller.characters);
                     return true;
                 };
@@ -224,9 +226,12 @@ class RecipeMaterialTabFrame: HorizontalLayout
         tbl.colCount = 2;
 
         leftovers.map!((lo) {
-                auto w = new LinkWidget(null, lo~": ");
+                auto w = new LinkWidget(lo.to!string, lo~": ");
                 auto n = new TextWidget("num", format("%s 個"d, 0));
                 w.click = (Widget _) {
+                    unhighlightDetailItems;
+                    scope(exit) highlightDetailItems;
+
                     Item item;
                     if (auto i = lo in controller.wisdom.itemList)
                     {
@@ -266,7 +271,7 @@ class RecipeMaterialTabFrame: HorizontalLayout
         tbl.colCount = 3;
 
         materials.map!((lo) {
-                auto w = new CheckableEntryWidget(lo~": ");
+                auto w = new CheckableEntryWidget(lo.to!string, lo~": ");
                 auto o = new EditIntLine("own");
                 auto t = new TextWidget("times", format("/%s 個"d, 0));
 
@@ -281,6 +286,9 @@ class RecipeMaterialTabFrame: HorizontalLayout
                     }
                 };
                 w.detailClicked = {
+                    unhighlightDetailItems;
+                    scope(exit) highlightDetailItems;
+
                     Item item;
                     if (auto i = lo in controller.wisdom.itemList)
                     {
@@ -303,7 +311,7 @@ class RecipeMaterialTabFrame: HorizontalLayout
                     }
                     assert(product in controller.wisdom.rrecipeList);
                     updateTables(product, txt.to!int, ownedMaterials);
-                    if (txt == t.text.matchFirst(r"/(\d+) 個"d)[1])
+                    if (content.text >= t.text.matchFirst(r"/(\d+) 個"d)[1])
                     {
                         w.checked = true;
                     }
@@ -322,7 +330,10 @@ class RecipeMaterialTabFrame: HorizontalLayout
 
     auto updateRecipeTable(int[dstring] recipes)
     {
+        unhighlightDetailRecipe;
+        scope(exit) highlightDetailRecipe;
         auto tbl = enforce(childById!TableLayout("recipes"));
+
         tbl.rows.each!((rs) {
                 auto r = rs[0].text.chomp(": ");
                 if (auto n  = r in recipes)
@@ -334,7 +345,7 @@ class RecipeMaterialTabFrame: HorizontalLayout
                     {
                         rs[0].textColor = "gray";
                     }
-                    else if (detail.ingredients.keys.all!(ing => childById!TableLayout("materials").row(format("%s: ", ing))[0].checked))
+                    else if (detail.ingredients.keys.all!(ing => childById!TableLayout("materials").row(ing.to!string)[0].checked))
                     {
                         rs[0].textColor = "red";
                     }
@@ -362,7 +373,9 @@ class RecipeMaterialTabFrame: HorizontalLayout
                                                         reload;
                                                     }))
                                             .array;
-                            (cast(LinkWidget)rs[0]).popupMenu = menu;
+                            auto lw = (cast(LinkWidget)rs[0]);
+                            lw.popupMenu = menu;
+                            lw.textFlags = TextFlag.Underline;
                         }
                     }
                 }
@@ -375,6 +388,8 @@ class RecipeMaterialTabFrame: HorizontalLayout
 
     auto updateLeftoverTable(int[dstring] leftovers)
     {
+        unhighlightDetailItems;
+        scope(exit) highlightDetailItems;
         auto tbl = enforce(childById!TableLayout("leftovers"));
         tbl.rows.each!((rs) {
                 if (auto n = rs[0].text.chomp(": ") in leftovers)
@@ -395,6 +410,8 @@ class RecipeMaterialTabFrame: HorizontalLayout
 
     auto updateMaterialTable(MatTuple[dstring] materials)
     {
+        unhighlightDetailItems;
+        scope(exit) highlightDetailItems;
         auto tbl = enforce(childById!TableLayout("materials"));
         tbl.rows.each!((rs) {
                 auto m = rs[0].text.chomp(": ");
@@ -430,7 +447,9 @@ class RecipeMaterialTabFrame: HorizontalLayout
                                     reload;
                                 });
                         }
-                        (cast(CheckableEntryWidget)rs[0]).popupMenu = [menuItem];
+                        auto cew = (cast(CheckableEntryWidget)rs[0]);
+                        cew.popupMenu = [menuItem];
+                        cew.textFlags = TextFlag.Underline;
                     }
                 }
                 else
@@ -477,6 +496,63 @@ class RecipeMaterialTabFrame: HorizontalLayout
         subGraph = null;
         updateTables(product, numText.to!int, ownedMaterials);
      }
+
+    auto highlightDetailRecipe()
+    {
+        // if (recipeDetail)
+        // {
+        //     if (auto tbl = childById!TableLayout("recipes"))
+        //     {
+        //         if (auto r = tbl.row(recipeDetail.name.to!string))
+        //         {
+        //             (cast(LinkWidget)r[0]).highlight;
+        //         }
+        //     }
+        // }
+    }
+
+    auto unhighlightDetailRecipe()
+    {
+        // if (auto tbl = childById!TableLayout("recipes"))
+        // {
+        //     tbl.rows.map!(r => cast(LinkWidget)r[0]).each!(r => r.unhighlight);
+        // }
+    }
+
+    auto highlightDetailItems()
+    {
+        // if (auto fr = childById!ItemDetailFrame("detail1"))
+        // {
+        //     auto shownItem = fr.item.name.to!string;
+        //     if (auto loTable = childById!TableLayout("leftovers"))
+        //     {
+        //         if (auto r = loTable.row(shownItem))
+        //         {
+        //             (cast(LinkWidget)r[0]).highlight;
+        //         }
+        //     }
+
+        //     if (auto matTable = childById!TableLayout("materials"))
+        //     {
+        //         if (auto r = matTable.row(shownItem))
+        //         {
+        //             (cast(CheckableEntryWidget)r[0]).highlight;
+        //         }
+        //     }
+        // }
+    }
+
+    auto unhighlightDetailItems()
+    {
+        // if (auto loTable = childById!TableLayout("leftovers"))
+        // {
+        //     loTable.rows.filter!(r => r[0].id != "なし").map!(r => cast(LinkWidget)r[0]).each!(r => r.unhighlight);
+        // }
+        // if (auto matTable = childById!TableLayout("materials"))
+        // {
+        //     matTable.rows.map!(r => cast(CheckableEntryWidget)r[0]).each!(r => r.unhighlight);
+        // }
+    }
 
     EventHandler!() migemoOptionChanged;
     RecipeGraph fullGraph;

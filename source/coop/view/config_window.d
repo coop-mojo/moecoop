@@ -113,8 +113,13 @@ class ConfigDialog: Dialog
             auto newChar = wLayout.childById("toBeAdded").text;
             chars_[newChar] = new Character(newChar, baseDir);
             charList.add(newChar);
-            // TODO: 全てのタブに notify する必要がある
-            _parentWindow.mainWidget.childById!RecipeTabFrame("binderFrame").characters = chars_.keys;
+            auto mainWidget = _parentWindow.mainWidget;
+            with(mainWidget)
+            {
+                childById!RecipeTabFrame("binderFrame").characters = chars_.keys;
+                childById!RecipeTabFrame("skillFrame").characters = chars_.keys;
+                childById!RecipeMaterialTabFrame("materialFrame").characters = chars_.keys;
+            }
             return true;
         };
         wLayout.childById("deleteCharacter").click = (Widget src) {

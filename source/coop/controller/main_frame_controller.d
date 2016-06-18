@@ -49,10 +49,10 @@ class MainFrameController
 
     auto loadMigemo()
     {
-        if (config.migemoDLL.exists && config.migemoDict.exists)
+        if (config.migemoLib.exists)
         {
             try{
-                migemo_ = new Migemo(config_.migemoDLL, config_.migemoDict);
+                migemo_ = new Migemo(config_.migemoLib, config_.migemoDict);
                 migemo_.load(buildPath("resource", "dict", "moe-dict"));
                 enforce(migemo_.isEnable);
                 frame_.enableMigemo;

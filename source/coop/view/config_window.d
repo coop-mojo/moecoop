@@ -74,25 +74,14 @@ class ConfigDialog: Dialog
                     }
 
                     TextWidget {
-                        id: DLLCaption
+                        text: "Migemo ライブラリ"
                     }
-                    EditLine {
-                        id: migemoDLLPath
+                    TextWidget {
+                        id: migemoStatus
                     }
                     Button {
-                        id: migemoDLLSelecter
-                        text: "変更"
-                    }
-
-                    TextWidget {
-                        id: DictCaption
-                    }
-                    EditLine {
-                        id: migemoDictPath
-                    }
-                    TextWidget {
-                        id: migemoDictSelecter
-                        text: ""
+                        id: migemoInstaller
+                        text: "インストール"
                     }
                 }
             });
@@ -141,79 +130,30 @@ class ConfigDialog: Dialog
             return true;
         };
 
-        auto dllCaption = "Migemo ライブラリのパス"d;
-        auto dictCaption = "Migemo 辞書のある"d~directory;
+        import std.stdio;
+        writeln("KK", config_.migemoLib);
 
-        wLayout.childById("DLLCaption").text = dllCaption;
-        wLayout.childById("DictCaption").text = dictCaption;
-
-        with(wLayout.childById("migemoDLLPath"))
+        if (config_.migemoLib.exists)
         {
-            text = config_.migemoDLL;
-            if (!text.exists)
+            wLayout.childById("migemoStatus").text = "インストールされています";
+            wLayout.childById("migemoInstaller").enabled = false;
+        }
+        else
+        {
+            wLayout.childById("migemoStatus").text = "インストールされていません";
+            version(Posix)
             {
-                textColor = "red";
+                wLayout.childById("migemoInstaller").enabled = false;
             }
-            keyEvent = (Widget src, KeyEvent e) {
-                import std.file;
-                if (text.exists)
-                {
-                    textColor = "black";
-                }
-                else
-                {
-
-                    textColor = "red";
-                }
-                return false;
-            };
         }
 
-        wLayout.childById("migemoDLLSelecter").click = (Widget src) {
-            auto dlg = new FileDialog(UIString(dllCaption), window, null, FileDialogFlag.FileMustExist);
-            dlg.dialogResult = (Dialog dlg, const Action result) {
-                import dlangui.core.stdaction;
-                if (result.id == ACTION_OPEN.id)
-                {
-                    import std.conv;
-                    import std.file;
-                    auto path = result.stringParam.to!dstring;
-                    with(wLayout.childById!EditLine("migemoDLLPath"))
-                    {
-                        text = path;
-                        if (text.exists)
-                        {
-                            textColor = "black";
-                        }
-                        else
-                        {
-                            textColor = "red";
-                        }
-                    }
-                }
-            };
-            dlg.show;
-            return true;
-        };
-
-        with(wLayout.childById("migemoDictPath"))
+        version(Windows)
         {
-            text = config_.migemoDict;
-            if (!text.exists)
-            {
-                textColor = "red";
-            }
-            keyEvent = (Widget src, KeyEvent e) {
-                import std.file;
-                if (text.exists && text.isDir)
-                {
-                    textColor = "black";
-                }
-                else
-                {
-                    textColor = "red";
-                }
-                return false;
+            wLayout.childById("migemoInstaller").click = (Widget src) {
+                import std.path;
+                installMigemo(config_.migemoLib.dirName);
+                wLayout.childById("migemoInstaller").enabled = false;
+                wLayout.childById("migemoStatus").text = "インストールされています";
             };
         }
 
@@ -237,8 +177,6 @@ class ConfigDialog: Dialog
         if (action) {
             if (action.id == StandardAction.Ok)
             {
-                config_.migemoDLL = childById("migemoDLLPath").text;
-                config_.migemoDict = childById("migemoDictPath").text;
                 (cast(MainFrame)_parentWindow.mainWidget).controller.loadMigemo;
             }
         }
@@ -253,4 +191,26 @@ auto showConfigWindow(Window parent, Character[dstring] chars, Config config)
 {
     auto dlg = new ConfigDialog(parent, chars, config);
     dlg.show;
+}
+
+auto installMigemo()(string dest)
+{
+    version(Windows)
+    {
+        enum baseURL = "http://files.kaoriya.net/cmigemo/";
+        enum ver = "20110227";
+        version(X86)
+        {
+            enum arch = "32";
+        }
+        else
+        {
+            enum arch = "64";
+        }
+        // install
+    }
+    else
+    {
+        static assert(false, "It should not be called from non-Windows systems.");
+    }
 }

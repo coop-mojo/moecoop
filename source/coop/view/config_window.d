@@ -25,6 +25,7 @@ import coop.model.config;
 import coop.model.character;
 import coop.view.main_frame;
 import coop.view.recipe_tab_frame;
+import coop.view.recipe_material_tab_frame;
 
 import std.algorithm;
 import std.file;
@@ -125,8 +126,13 @@ class ConfigDialog: Dialog
             c.deleteConfig;
             charList.clear;
             chars_.keys.each!(c => charList.add(c));
-            // TODO: 全てのタブに notify する必要がある
-            _parentWindow.mainWidget.childById!RecipeTabFrame("binderFrame").characters = chars_.keys;
+            auto mainWidget = _parentWindow.mainWidget;
+            with(mainWidget)
+            {
+                childById!RecipeTabFrame("binderFrame").characters = chars_.keys;
+                childById!RecipeTabFrame("skillFrame").characters = chars_.keys;
+                childById!RecipeMaterialTabFrame("materialFrame").characters = chars_.keys;
+            }
             return true;
         };
 

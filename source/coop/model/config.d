@@ -135,6 +135,7 @@ class Config {
             {
                 version(Windows)
                 {
+                    import std.algorithm;
                     import std.regex;
                     import std.string;
                     // ジャンクション先を調べる方法がない

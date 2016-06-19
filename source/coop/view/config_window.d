@@ -148,9 +148,17 @@ class ConfigDialog: Dialog
         version(Windows)
         {
             wLayout.childById("migemoInstaller").click = (Widget src) {
-                installMigemo(config_.migemoLib.dirName);
                 wLayout.childById("migemoInstaller").enabled = false;
-                wLayout.childById("migemoStatus").text = "インストールされています";
+                childById("button-action1").enabled = false;
+                scope(exit) childById("button-action1").enabled = true;
+
+                childById("button-action2").enabled = false;
+                scope(exit) childById("button-action2").enabled = true;
+
+                wLayout.childById("migemoStatus").text = "インストール中...";
+                scope(success) wLayout.childById("migemoStatus").text = "インストールできました！";
+                scope(failure) wLayout.childById("migemoStatus").text = "インストールに失敗しました";
+                installMigemo(config_.migemoLib.dirName);
                 return true;
             };
         }
@@ -167,7 +175,6 @@ class ConfigDialog: Dialog
         exits.addChild(new Button(ACTION_CANCEL));
         _buttonActions = [ACTION_OK, ACTION_CANCEL];
         addChild(exits);
-
     }
 
     override void close(const Action action)

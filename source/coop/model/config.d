@@ -181,7 +181,7 @@ auto ln(string target, string linkname)
     version(Windows)
     {
         // ジャンクションを作る API が無い
-        enforce(executeShell(format("mklink /j '%s' '%s'", linkname, target)) != 0);
+        enforce(executeShell(format("mklink /j '%s' '%s'", linkname, target)).status != 0);
     }
     else version(Posix)
     {

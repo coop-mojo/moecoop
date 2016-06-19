@@ -28,8 +28,8 @@ import coop.view.recipe_tab_frame;
 import coop.view.recipe_material_tab_frame;
 
 import std.algorithm;
-import std.file;
 import std.array;
+import std.file;
 import std.path;
 
 class ConfigDialog: Dialog
@@ -195,7 +195,9 @@ auto installMigemo()(string dest)
     version(Windows)
     {
         import std.net.curl;
+        import std.format;
         import std.zip;
+
         enum baseURL = "http://files.kaoriya.net/cmigemo/";
         enum ver = "20110227";
         version(X86)

@@ -47,16 +47,18 @@ class Config {
         version(Windows)
         {
             migemoLib = buildPath(migemoDir, "migemo.dll");
+            migemoDict = buildPath(migemoDir, "dict", "utf-8");
         }
         else version(linux)
         {
             migemoLib = buildPath(migemoDir, "libmigemo.so");
+            migemoDict = buildPath(migemoDir, "dict");
         }
         else version(OSX)
         {
             migemoLib = buildPath(migemoDir, "libmigemo.dylib");
+            migemoDict = buildPath(migemoDir, "dict");
         }
-        migemoDict = buildPath(migemoDir, "dict");
         initMigemoDir();
     }
 
@@ -156,6 +158,7 @@ class Config {
                 {
                     mkdirRecurse(libDir);
                     ln(cand.lib, migemoLib);
+                    mkdirRecurse(migemoDict.dirName);
                     ln(cand.dict, migemoDict);
                     break;
                 }

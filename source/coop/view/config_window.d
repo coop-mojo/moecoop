@@ -30,6 +30,7 @@ import coop.view.recipe_material_tab_frame;
 import std.algorithm;
 import std.file;
 import std.array;
+import std.path;
 
 class ConfigDialog: Dialog
 {
@@ -130,9 +131,6 @@ class ConfigDialog: Dialog
             return true;
         };
 
-        import std.stdio;
-        writeln("KK", config_.migemoLib);
-
         if (config_.migemoLib.exists)
         {
             wLayout.childById("migemoStatus").text = "インストールされています";
@@ -150,7 +148,6 @@ class ConfigDialog: Dialog
         version(Windows)
         {
             wLayout.childById("migemoInstaller").click = (Widget src) {
-                import std.path;
                 installMigemo(config_.migemoLib.dirName);
                 wLayout.childById("migemoInstaller").enabled = false;
                 wLayout.childById("migemoStatus").text = "インストールされています";
@@ -197,6 +194,8 @@ auto installMigemo()(string dest)
 {
     version(Windows)
     {
+        import std.net.curl;
+        import std.zip;
         enum baseURL = "http://files.kaoriya.net/cmigemo/";
         enum ver = "20110227";
         version(X86)
@@ -207,10 +206,40 @@ auto installMigemo()(string dest)
         {
             enum arch = "64";
         }
-        // install
+
+        auto src = format("%s/cmigemo-default-win%s-%s.zip", baseURL, arch, ver);
+        auto archive = src.baseName;
+        download(src, archive);
+        assert(archive.exists);
+        scope(exit) archive.remove;
+
+        unzip(archive, dest);
     }
     else
     {
         static assert(false, "It should not be called from non-Windows systems.");
+    }
+}
+
+auto unzip(string srcFile, string destDir)
+{
+    import std.exception;
+    import std.zip;
+
+    enforce(srcFile.exists);
+
+    auto zip = new ZipArchive(read(srcFile));
+    foreach(name, am; zip.directory)
+    {
+        if (name.endsWith("/"))
+        {
+            continue;
+        }
+        auto dir = name.dirName;
+        mkdirRecurse(dir);
+        assert(am.expandedData.length == 0);
+        zip.expand(am);
+        assert(am.expandedData.length == am.expandedSize);
+        buildPath(destDir, name).write(am.expandedData);
     }
 }

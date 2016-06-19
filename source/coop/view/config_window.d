@@ -151,6 +151,7 @@ class ConfigDialog: Dialog
                 installMigemo(config_.migemoLib.dirName);
                 wLayout.childById("migemoInstaller").enabled = false;
                 wLayout.childById("migemoStatus").text = "インストールされています";
+                return true;
             };
         }
 

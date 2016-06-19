@@ -128,7 +128,6 @@ class Config {
         }
 
         auto libDir = migemoLib.dirName;
-        import std.stdio: writeln;
         if (migemoLib.exists)
         {
             if (migemoLib.isSymlink)
@@ -148,6 +147,7 @@ class Config {
                 }
                 if (!libExists)
                 {
+                    import std.file: remove;
                     migemoLib.remove;
                     migemoDict.remove;
                 }

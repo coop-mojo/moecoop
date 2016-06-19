@@ -136,8 +136,9 @@ class Config {
                 version(Windows)
                 {
                     import std.regex;
+                    import std.string;
                     // ジャンクション先を調べる方法がない
-                    auto line = spawnShell(format("dir %s", libDir)).split.filter!(a => a.matchFirst(ctRegex!"<JUNCTION>")).front;
+                    auto line = executeShell(format("dir %s", libDir)).lineSplitter.filter!(a => a.matchFirst(ctRegex!"<JUNCTION>")).front;
                     auto libExists = line.matchFirst(ctRegex!`\s\[(.+)\]$`)[1].exists;
                 }
                 else version(Posix)

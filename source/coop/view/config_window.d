@@ -198,6 +198,7 @@ auto installMigemo()(string dest)
         import std.net.curl;
         import std.format;
         import std.zip;
+        import std.file: remove;
 
         enum baseURL = "http://files.kaoriya.net/cmigemo/";
         enum ver = "20110227";
@@ -227,6 +228,7 @@ auto installMigemo()(string dest)
 auto unzip(string srcFile, string destDir)
 {
     import std.exception;
+    import std.regex;
     import std.zip;
 
     enforce(srcFile.exists);
@@ -238,11 +240,12 @@ auto unzip(string srcFile, string destDir)
         {
             continue;
         }
-        auto dir = name.dirName;
+        auto target = buildPath(destDir, name.replaceFirst(ctRegex!r"^.+?/", ""));
+        auto dir = target.dirName;
         mkdirRecurse(dir);
         assert(am.expandedData.length == 0);
         zip.expand(am);
         assert(am.expandedData.length == am.expandedSize);
-        buildPath(destDir, name).write(am.expandedData);
+        target.write(am.expandedData);
     }
 }

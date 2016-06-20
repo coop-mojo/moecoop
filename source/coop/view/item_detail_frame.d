@@ -164,8 +164,8 @@ auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
         }
         break;
     }
-    case Medicine:{
-        auto info = ei.peek!MedicineInfo;
+    case Expendable:{
+        auto info = ei.peek!ExpendableInfo;
         if (!info.skill.keys.empty)
         {
             layout.addElem("必要スキル",

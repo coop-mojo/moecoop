@@ -30,7 +30,7 @@ import std.variant;
 
 import coop.util;
 
-alias ExtraInfo = Algebraic!(FoodInfo, WeaponInfo, BulletInfo, MedicineInfo);
+alias ExtraInfo = Algebraic!(FoodInfo, WeaponInfo, BulletInfo, ExpendableInfo);
 
 /// アイテム一般の情報
 struct Item
@@ -219,7 +219,7 @@ auto toSpecialProperties(JSONValue[] vals)
 
 alias ItemType = ExtendedEnum!(
     UNKNOWN => "不明", Others => "その他", Food => "食べ物", Drink => "飲み物",
-    Liquor => "酒", Medicine => "薬", Weapon => "武器", Armor => "防具",
+    Liquor => "酒", Expendable => "消耗品", Weapon => "武器", Armor => "防具",
     Bullet => "弾", Asset => "アセット",);
 
 /// 料理固有の情報
@@ -490,26 +490,26 @@ alias ExhaustionType = ExtendedEnum!(
     UNKNOWN => "不明", Points => "耐久値", Times => "使用可能回数",
     );
 
-/// 薬と包帯固有の情報
-struct MedicineInfo
+/// 消耗品固有の情報
+struct ExpendableInfo
 {
     real[dstring] skill;
     dstring effect;
 }
 
-auto readMedicines(string fname)
+auto readExpendables(string fname)
 {
     auto res = fname.readText.parseJSON;
     enforce(res.type == JSON_TYPE.OBJECT);
-    auto medicines = res.object;
-    return medicines.keys.map!(key =>
+    auto expendables = res.object;
+    return expendables.keys.map!(key =>
                              tuple(key.to!dstring,
-                                   medicines[key].object.toMedicineInfo));
+                                   expendables[key].object.toExpendableInfo));
 }
 
-auto toMedicineInfo(JSONValue[string] json)
+auto toExpendableInfo(JSONValue[string] json)
 {
-    MedicineInfo info;
+    ExpendableInfo info;
     with(info)
     {
         effect = json["効果"].jto!dstring;

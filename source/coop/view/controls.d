@@ -59,6 +59,9 @@ class CheckableEntryWidget: HorizontalLayout, MenuItemActionHandler
         return this;
     }
 
+    override @property bool enabled() {
+        return box.enabled;
+    }
     override @property Widget enabled(bool c) {
         box.enabled = c;
         return this;

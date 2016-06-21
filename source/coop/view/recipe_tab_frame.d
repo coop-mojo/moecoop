@@ -160,12 +160,20 @@ class RecipeTabFrame: HorizontalLayout
         auto chs = entries.empty ? []
                                  : entries.chunks(tableColumnLength(entries.length,
                                                                     numberOfColumns)).array;
-        chs.map!((rs) {
-                auto col = new VerticalLayout;
-                rs.each!(r => col.addChild(r));
+        auto cols = chs.map!((rs) {
+                Widget col = new VerticalLayout;
+                auto box = new CheckableEntryWidget("markall", "全部所持"d);
+                box.backgroundColor = "gray";
+                box.textColor = "white";
+                box.checkStateChanged = (bool checked) {
+                    rs.filter!(r => r.id != box.id && r.enabled)
+                      .each!(r => r.checked = checked);
+                };
+                col.addChild(box);
+                col.addChildren(rs);
                 return col;
-            })
-            .each!(col => horizontal.addChild(col));
+            }).array;
+        horizontal.addChildren(cols);
         scroll.contentWidget = horizontal;
         scroll.backgroundColor = "white";
         recipeList.addChild(scroll);

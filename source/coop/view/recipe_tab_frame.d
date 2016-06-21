@@ -169,6 +169,9 @@ class RecipeTabFrame: HorizontalLayout
                     rs.filter!(r => r.id != box.id && r.enabled)
                       .each!(r => r.checked = checked);
                 };
+                box.detailClicked = {
+                    box.checked = !box.checked;
+                };
                 col.addChild(box);
                 col.addChildren(rs);
                 return col;

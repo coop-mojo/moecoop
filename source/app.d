@@ -77,3 +77,9 @@ extern(C) int UIAppMain(string[] args)
     };
     return Platform.instance.enterMessageLoop();
 }
+
+unittest
+{
+    import std.exception;
+    assertNotThrown(new Wisdom(SystemResourceBase));
+}

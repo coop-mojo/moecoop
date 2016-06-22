@@ -86,6 +86,7 @@ test_script:
 
 artifacts:
  - path: moecoop-trunk.zip
+   name: 生協の知恵袋 生焼け版
 
 after_build:
  - archive.bat

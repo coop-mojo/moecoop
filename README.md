@@ -1,5 +1,7 @@
 # 生協の知恵袋
 
+[![Build Status](https://travis-ci.org/coop-mojo/moecoop.svg?branch=master)](https://travis-ci.org/coop-mojo/moecoop)
+
 生協の知恵袋は，[Master of Epic](http://moepic.com/top.php?mid=_) のバインダーやアイテム・レシピ情報を見るためのツールです．
 
 [リンク先](https://github.com/coop-mojo/moecoop/releases/latest)から moecoop-*-64bit.zip をダウンロードしてご利用ください．

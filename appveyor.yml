@@ -83,3 +83,6 @@ test_script:
  - echo %PATH%
  - '%DC% --version'
  - dub test --arch=%Darch% --compiler=%DC%
+
+build_success:
+ - archive.bat

@@ -1,0 +1,8 @@
+language: d
+
+os:
+  - linux
+  - osx
+
+env:
+  - ARCH=x86_64

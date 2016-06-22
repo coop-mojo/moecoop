@@ -88,5 +88,5 @@ artifacts:
  - path: moecoop.zip
    name: moecoop-trunk
 
-on_success:
+after_build:
  - archive.bat

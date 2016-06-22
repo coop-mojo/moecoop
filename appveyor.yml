@@ -84,5 +84,9 @@ test_script:
  - '%DC% --version'
  - dub test --arch=%Darch% --compiler=%DC%
 
-build_success:
+artifacts:
+ - path: moecoop.zip
+   name: moecoop-trunk
+
+on_success:
  - archive.bat

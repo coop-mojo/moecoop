@@ -63,54 +63,57 @@ auto indexOf(Range, Elem)(Range r, Elem e)
 
 struct BiMap(T, U)
 {
-    this(T[U] kvs)
+    this(const T[U] kvs)
     in{
         auto len = kvs.keys.length;
         auto keys = kvs.keys.sort().uniq.array;
         assert(keys.length == len);
-        auto vals = kvs.values.sort().uniq.array;
+        auto vals = kvs.values.dup.sort().uniq.array;
         assert(vals.length == len);
     } body {
         fmap = kvs;
-        foreach(kv; kvs.byKeyValue())
-        {
-            bmap[kv.value] = kv.key;
-        }
+        bmap = kvs.byKeyValue().map!(kv => tuple(kv.value, kv.key)).assocArray;
     }
 
-    auto opUnary(string op)(U key) if (op == "in")
+    auto opBinaryRight(string op)(U key)
+        @safe const pure nothrow if (op == "in")
     {
         return key in fmap;
     }
 
-    auto opUnary(string op)(T key) if (op == "in")
+    auto opBinaryRight(string op)(T key)
+        @safe const pure nothrow if (op == "in")
     {
         return key in bmap;
     }
 
-    auto ref opIndex(U k) const
-    {
+    auto ref opIndex(U k) const pure nothrow
+    in {
+        assert(k in fmap);
+    } body {
         return fmap[k];
     }
 
-    auto ref opIndex(T k) const
-    {
+    auto ref opIndex(T k) const pure nothrow
+    in {
+        assert(k in bmap);
+    } body {
         return bmap[k];
     }
 
-    @property auto length()
+    @property auto length() @safe const pure nothrow
     {
         return fmap.length;
     }
 
-    @property auto empty()
+    @property auto empty() const pure nothrow
     {
         return fmap.values.length == 0;
     }
 
 private:
-    T[U] fmap;
-    U[T] bmap;
+    const T[U] fmap;
+    const U[T] bmap;
 }
 
 struct ExtendedEnum(KVs...)
@@ -126,26 +129,36 @@ struct ExtendedEnum(KVs...)
     int val;
     alias val this;
 
-    this(int m)
-    {
+    this(int m) @safe nothrow
+    in {
+        assert(m in bimap);
+    } body {
         val = m;
     }
 
-    this(S)(S s) if (isSomeString!S)
-    {
+    this(S)(S s) @safe nothrow if (isSomeString!S)
+    in {
+        assert(s in bimap);
+    } body {
         val = bimap[s];
     }
 
-    auto toString()
+    auto toString() @safe const nothrow
     {
         return bimap[val];
     }
 
 private:
-    static BiMap!(string, int) bimap;
+    // _aaRange cannot be interpreted at compile time
+    static const BiMap!(string, int) bimap;
     static this()
     {
         bimap = zip(values, svalues).assocArray;
+    }
+
+    invariant
+    {
+        assert(val in bimap);
     }
 }
 
@@ -164,13 +177,13 @@ version(unittest)
         A => "い", B => "ろ", C => "は",
         );
 }
-unittest
+@safe nothrow unittest
 {
     static assert(util_EEnum.values == [util_EEnum.A, util_EEnum.B, util_EEnum.C]);
     static assert(util_EEnum.svalues == ["い", "ろ", "は"]);
 
     util_EEnum val = util_EEnum.A;
-    assert(val.to!string == "い");
+    assert(assertNotThrown(val.to!string) == "い");
     assert("い".to!util_EEnum == val);
 }
 
@@ -179,7 +192,9 @@ auto jto(T)(JSONValue json)
     static if (isSomeString!T || is(T == enum))
     {
         enforce(json.type == JSON_TYPE.STRING);
-        return json.str.to!T;
+        // JSONValue#str is not safe until 2.071.0
+        auto s = () @trusted { return json.str; }();
+        return s.to!T;
     }
     else static if (isIntegral!T)
     {
@@ -211,7 +226,9 @@ auto jto(T)(JSONValue json)
     else static if (__traits(isSame, TemplateOf!T, ExtendedEnum))
     {
         enforce(json.type == JSON_TYPE.STRING);
-        return json.str.to!T;
+        // JSONValue#str is not safe until 2.071.0
+        auto s = () @trusted { return json.str; }();
+        return s.to!T;
     }
     else
     {
@@ -231,37 +248,37 @@ auto jto(Array: T[], T)(JSONValue[] json)
     return json.map!(jto!T).array;
 }
 
-unittest
+@safe nothrow unittest
 {
     {
         auto i = 3;
         auto ival = JSONValue(i);
-        assert(ival.jto!int == i);
+        assert(assertNotThrown(ival.jto!int) == i);
     }
 
     {
         auto s = "foobar";
         auto sval = JSONValue(s);
-        assert(sval.jto!string == s);
+        assert(assertNotThrown(sval.jto!string) == s);
     }
 
     {
         auto f = 3.14;
         auto fval = JSONValue(f);
-        assert(fval.jto!real == f);
+        assert(assertNotThrown(fval.jto!real) == f);
     }
 
     {
         enum E { A, B, C }
         auto e = E.A;
-        auto eval = JSONValue(e.to!string);
-        assert(eval.jto!E == e);
+        auto eval = JSONValue(assertNotThrown((e.to!string)));
+        assert(assertNotThrown(eval.jto!E) == e);
     }
 
     {
         util_EEnum e = util_EEnum.A;
-        auto eval = JSONValue(e.to!string);
-        assert(eval.jto!util_EEnum == e);
+        auto eval = JSONValue(assertNotThrown(e.to!string));
+        assert(assertNotThrown(eval.jto!util_EEnum) == e);
     }
 }
 
@@ -320,7 +337,7 @@ private:
     }
 }
 
-unittest
+@safe pure nothrow unittest
 {
     OrderedMap!(int[string]) aa;
     aa["foo"] = 3;

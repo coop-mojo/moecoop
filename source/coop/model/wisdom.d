@@ -312,3 +312,8 @@ auto readBinders(string file)
                 return tuple(binder, recipes);
             });
 }
+
+unittest
+{
+    assertNotThrown(new Wisdom(SystemResourceBase));
+}

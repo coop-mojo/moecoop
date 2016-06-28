@@ -74,24 +74,20 @@ before_build:
   - '"%compilersetup%" %compilersetupargs%'
 
 build_script:
-  - echo dummy build script - dont remove me
+ - echo dummy build script - dont remove me
 
 test_script:
-  - echo %PLATFORM%
-  - echo %Darch%
-  - echo %DC%
-  - echo %PATH%
-  - '%DC% --version'
-  - dub test --coverage --arch=%Darch% --compiler=%DC%
-
-after_test:
-  - dub fetch doveralls
-  - dub run doveralls
+ - echo %PLATFORM%
+ - echo %Darch%
+ - echo %DC%
+ - echo %PATH%
+ - '%DC% --version'
+ - dub test --arch=%Darch% --compiler=%DC%
 
 artifacts:
-  - path: moecoop-trunk.zip
-    name: 生協の知恵袋 生焼け版
+ - path: moecoop-trunk.zip
+   name: 生協の知恵袋 生焼け版
 
 after_build:
-  - archive.bat
-  - mv moecoop.zip moecoop-trunk.zip
+ - archive.bat
+ - mv moecoop.zip moecoop-trunk.zip

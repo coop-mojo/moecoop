@@ -387,7 +387,8 @@ struct BulletInfo
     int angle;
     ShipRestriction restriction;
     real[dstring] skills;
-    dstring effects;
+    real[dstring] effects;
+    dstring additionalEffect;
 }
 
 auto readBullets(string fname)
@@ -405,8 +406,8 @@ auto toBulletInfo(JSONValue[string] json)
     BulletInfo info;
     with(info)
     {
-        damage = json["攻撃力"].jto!real;
-        range = json["射程"].jto!real;
+        damage = json["ダメージ"].jto!real;
+        range = json["有効レンジ"].jto!real;
         angle = json["角度補正角"].jto!int;
         skills = json["必要スキル"].jto!(real[dstring]);
         // if (auto f = "追加効果" in json) // 追加効果の名前を確認

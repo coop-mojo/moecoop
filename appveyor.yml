@@ -7,9 +7,8 @@ environment:
 
 skip_tags: true
 branches:
-  only:
-    - master
-    - stable
+  except:
+    - sandbox
 
 install:
   - ps: function SetUpDCompiler

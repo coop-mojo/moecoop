@@ -311,7 +311,7 @@ struct WeaponInfo
     real[dstring] skills;
     bool isDoubleHands;
     WeaponSlot slot;
-    ShipRestriction restriction;
+    ShipRestriction[] restriction;
     Material material;
     ExhaustionType type;
     int exhaustion;
@@ -355,13 +355,13 @@ auto toWeaponInfo(JSONValue[string] json)
             additionalEffect = (*af).jto!(int[dstring]);
         }
 
-        if (auto rest = "シップ" in json)
+        if (auto rest = "使用可能シップ" in json)
         {
-            restriction = (*rest).jto!ShipRestriction;
+            restriction = (*rest).jto!(ShipRestriction[]);
         }
         else
         {
-            restriction = ShipRestriction.Any;
+            restriction = [ShipRestriction.Any.to!ShipRestriction];
         }
     }
     return info;
@@ -372,7 +372,7 @@ struct ArmorInfo
     real[Grade] AC;
     real[dstring] skills;
     ArmorSlot slot;
-    ShipRestriction restriction;
+    ShipRestriction[] restriction;
     Material material;
     ExhaustionType type;
     int exhaustion;
@@ -385,10 +385,10 @@ struct BulletInfo
     real damage;
     real range;
     int angle;
-    ShipRestriction restriction;
-    real[dstring] skills;
+    ShipRestriction[] restriction;
+    real[dstring] skills; // ステータス上の効果
     real[dstring] effects;
-    dstring additionalEffect;
+    dstring additionalEffect; // 攻撃に用いた時の付加効果
 }
 
 auto readBullets(string fname)
@@ -410,22 +410,22 @@ auto toBulletInfo(JSONValue[string] json)
         range = json["有効レンジ"].jto!real;
         angle = json["角度補正角"].jto!int;
         skills = json["必要スキル"].jto!(real[dstring]);
-        // if (auto f = "追加効果" in json) // 追加効果の名前を確認
-        // {
-        //     effects = (*f).jto!(real[dstring]);
-        // }
+        if (auto f = "追加効果" in json)
+        {
+            effects = (*f).jto!(real[dstring]);
+        }
         // if (auto af = "付与効果" in json)
         // {
         //     additionalEffect = (*af).jto!(int[dstring]);
         // }
 
-        if (auto rest = "シップ" in json)
+        if (auto rest = "使用可能シップ" in json)
         {
-            restriction = (*rest).jto!ShipRestriction;
+            restriction = (*rest).jto!(ShipRestriction[]);
         }
         else
         {
-            restriction = ShipRestriction.Any;
+            restriction = [ShipRestriction.Any.to!ShipRestriction];
         }
     }
     return info;
@@ -440,28 +440,54 @@ struct AssetInfo
 
 alias ShipRestriction = ExtendedEnum!(
     UNKNOWN => "不明", Any => "なし",
+    // 基本シップ
+    // 熟練
+    // "パンチャー", "剣士", "メイサー",
+    Lancer => "ランサー", //"ガンナー", "アーチャー",
+    Guardsman => "ガーズマン",
+    //"投げ士", "レンジャー", "ブラッド サッカー",
+    Kicker => "キッカー", Wildman => "ワイルドマン", Drinker => "ドリンカー",
+    //"物まね師",
+    Tamer => "テイマー", //"ウィザード", "プリースト", "シャーマン", //ウィッチは？
+    Enchanter => "エンチャンター",
+    //"サモナー", "シャドウ", "魔術師", "野生児", "小悪魔",
+    Vendor =>"ベンダー", //"ロックシンガー",
+    Songsinger => "ソングシンガー", //"スリ",
+    Showboat => "目立ちたがり", StreetDancer => "ストリートダンサー",
+
+    // 基本
+    // "フォールマン",
+    Swimmer => "スイマー", //"デッドマン",
+    Helper => "ヘルパー",
+    //"休憩人",
+    Miner => "マイナー",
+    // "木こり", "耕作師", "釣り人", "解読者",
+
+    // 生産
+    Cook => "料理師",
+    //"鍛冶師", "バーテンダー", "木工師",
+    Tailor => "仕立て屋",
+    // "調合師",
+    Decorator => "細工師",
+    //"筆記師", "調髪師", "栽培師",
+
+    // 複合
+    Warrior => "ウォーリアー",  Alchemist => "アルケミスト", Forester => "フォレスター",
+    Necromancer => "ネクロマンサー", Creator => "クリエイター", Bomberman => "爆弾男",
+    Breeder => "ブリーダー", TempleKnight => "テンプルナイト", Druid => "ドルイド",
+    SageOfCerulean => "紺碧の賢者", GreatCreator => "グレート クリエイター",
+    Mercenary => "傭兵", Samurai => "サムライ", MineBishop => "マイン ビショップ",
+    KitchenMaster => "厨房師", Assassin => "アサシン", SeaFighter => "海戦士",
+    BraveKnight => "ブレイブナイト", EvilKnight => "イビルナイト",
+    CosPlayer => "コスプレイヤー", Dabster => "物好き", Athlete => "アスリート",
+    DrunkenFighter => "酔拳士", Rowdy => "荒くれ者", NewIdol => "新人アイドル",
+    HouseKeeper => "ハウスキーパー", Adventurer => "アドベンチャラー",
+    Spy => "スパイ", Punk => "チンピラ", Academian => "アカデミアン",
+    BloodBard => "ブラッドバード", Duelist => "デュエリスト", Collector => "コレクター",
+
+    // 二次シップ
+    Sniper => "スナイパー",
     );
-//                                        // 基本シップ
-//                                        // 熟練
-//                                        // "パンチャー", "剣士", "メイサー", "ランサー", "ガンナー", "アーチャー",
-//                                        // "ガーズマン", "投げ士", "レンジャー", "ブラッド サッカー", "キッカー", "ワイルドマン",
-//                                        // "ドリンカー", "物まね師", "テイマー", "ウィザード", "プリースト", "シャーマン", //ウィッチは？
-//                                        // "エンチャンター", "サモナー", "シャドウ", "魔術師", "野生児", "小悪魔",
-//                                        // "ベンダー", "ロックシンガー", "ソングシンガー", "スリ", "目立ちたがり", "ストリートダンサー",
-//                                        // // 基本
-//                                        // "フォールマン", "スイマー", "デッドマン", "ヘルパー", "休憩人", "マイナー",
-//                                        // "木こり", "耕作師", "釣り人", "解読者",
-//                                        // // 生産
-//                                        // "料理師", "鍛冶師", "バーテンダー", "木工師", "仕立て屋", "調合師",
-//                                        // "細工師", "筆記師", "調髪師", "栽培師",
-//                                        // // 複合
-//                                        // "ウォーリアー", "アルケミスト", "フォレスター", "ネクロマンサー", "クリエイター",
-//                                        // "爆弾男", "ブリーダー", "テンプルナイト", "ドルイド", "紺碧の賢者", // 爆弾女は？
-//                                        // "グレート クリエイター", "傭兵", "サムライ", "マイン ビショップ", "厨房師",
-//                                        // "アサシン", "海戦士", "ブレイブナイト", "イビルナイト", "コスプレイヤー",
-//                                        // "物好き", "アスリート", "酔拳士", "荒くれ者", "新人アイドル",
-//                                        // "ハウスキーパー", "アドベンチャラー", "スパイ", "レディース", "アカデミアン", // チンピラは？
-//                                        // "ブラッドバード", "デュエリスト", "コレクター"
 
 alias WeaponSlot = ExtendedEnum!(
     UNKNOWN => "不明", Right => "右手", Left => "左手", Both => "左右",
@@ -473,7 +499,8 @@ alias ArmorSlot = ExtendedEnum!(
     ShoulderProtector => "肩(防)", WaistProtector => "腰(防)",
     HeadOrnament => "頭(装)", FaceOrnament => "顔(装)", EarOrnament => "耳(装)",
     FingerOrnament => "手(装)", BreastOrnament => "胸(装)", BackOrnament => "背中(装)",
-    WaistOrnament => "腰(装)",);
+    WaistOrnament => "腰(装)",
+    );
 
 alias Material = ExtendedEnum!(
     UNKNOWN => "不明", Copper => "銅", Bronze => "青銅", Iron => "鉄", Steel => "鋼鉄",

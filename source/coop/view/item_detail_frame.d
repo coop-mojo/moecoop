@@ -197,9 +197,9 @@ auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
                            .join(", "));
         layout.addElem("装備スロット", format("%s (%s)"d, info.slot, info.isDoubleHands ? "両手" : "片手"));
         layout.addElem("素材", info.material.to!dstring);
-        if (info.restriction != ShipRestriction.Any)
+        if (info.restriction.front != ShipRestriction.Any)
         {
-            layout.addElem("装備可能シップ", info.restriction.to!dstring~"系");
+            layout.addElem("装備可能シップ", info.restriction.map!(a => a.to!dstring~"系").join(", "));
         }
 
         if (!info.additionalEffect.keys.empty)
@@ -239,9 +239,9 @@ auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
                            .map!(kv => format("%s (%.1f)"d, kv.key, kv.value))
                            .join(", "));
         layout.addElem("装備スロット", "矢/弾");
-        if (info.restriction != ShipRestriction.Any)
+        if (info.restriction.front != ShipRestriction.Any)
         {
-            layout.addElem("装備可能シップ", info.restriction.to!dstring~"系");
+            layout.addElem("装備可能シップ", info.restriction.map!(a => a.to!dstring~"系").join(", "));
         }
         break;
     }

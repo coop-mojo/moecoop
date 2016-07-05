@@ -214,7 +214,7 @@ auto jto(T)(JSONValue json)
     }
     else static if (isArray!T)
     {
-        enforce(json.type == JSON_TYPE.ARRAY);
+        enforce(json.type == JSON_TYPE.ARRAY, "Invalid value: "~json.to!string);
         return json.array.jto!T;
     }
     else static if (is(T == bool))

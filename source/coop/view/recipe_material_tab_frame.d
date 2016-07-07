@@ -41,6 +41,13 @@ import coop.view.item_detail_frame;
 import coop.view.recipe_detail_frame;
 import coop.controller.recipe_material_tab_frame_controller;
 
+import etc.linux.memoryerror;
+
+static this()
+{
+    assert(registerMemoryErrorHandler());
+}
+
 class RecipeMaterialTabFrame: HorizontalLayout
 {
     mixin TabFrame;
@@ -66,6 +73,7 @@ class RecipeMaterialTabFrame: HorizontalLayout
             migemoOptionChanged();
             return true;
         };
+        preference = RecipeGraph.preference;
     }
 
     @property auto characters(dstring[] chars)
@@ -137,15 +145,88 @@ class RecipeMaterialTabFrame: HorizontalLayout
 
     auto showCandidates(dstring[] candidates)
     {
-        auto lst = new StringListWidget("candidates", candidates);
-        lst.itemClick = (Widget _, int idx) {
-            childById("itemQuery").text = lst.selectedItem;
-            return true;
-        };
+        auto scr = new ScrollWidget;
+        auto tbl = new TableLayout("candidates");
+        tbl.colCount = 3;
+        scr.contentWidget = tbl;
+        scr.backgroundColor = "white";
+
+        auto mats = chain(toBeMade.keys, candidates.filter!(c => !toBeMade.keys.canFind(c))).map!((c) {
+                auto w = new CheckableEntryWidget(c.to!string, c);
+                auto o = new EditIntLine("own");
+                auto t = new TextWidget(null, "個"d);
+                o.enabled = false;
+                if (auto num = c in toBeMade)
+                {
+                    w.checked = true;
+                    o.text = (*num).to!dstring;
+                    o.enabled = true;
+                }
+                else
+                {
+                    o.text = "0";
+                }
+
+                w.checkStateChanged = (bool checked) {
+                    if (checked)
+                    {
+                        assert(c !in toBeMade);
+                        assert(!o.enabled);
+                        if (o.text.empty || o.text == "0")
+                        {
+                            o.text = "1";
+                        }
+                        toBeMade[c] = o.text.to!int;
+                        o.enabled = true;
+                    }
+                    else
+                    {
+                        assert(c in toBeMade);
+                        assert(o.enabled);
+                        toBeMade.remove(c);
+                        o.enabled = false;
+                        o.text = "0";
+                    }
+                    if (toBeMade.keys.empty)
+                    {
+                        hideResult;
+                    }
+                    else
+                    {
+                        auto targets = toBeMade.byKeyValue.filter!(kv => kv.value > 0).map!(kv => tuple(kv.key, kv.value)).assocArray;
+                        initializeTables(toBeMade.keys);
+                        if (!targets.keys.empty)
+                        {
+                            updateTables(targets);
+                        }
+                    }
+                };
+
+                o.contentChange = (EditableContent content) {
+                    if (!w.checked || !o.enabled)
+                    {
+                        return;
+                    }
+                    assert(c in toBeMade || c !in toBeMade); // 両方ありうる！
+                    toBeMade[c] = content.text.empty ? 0 : content.text.to!int;
+                    auto targets = toBeMade.byKeyValue.filter!(kv => kv.value > 0).map!(kv => tuple(kv.key, kv.value)).assocArray;
+                    if (!hasShownResult)
+                    {
+                        initializeTables(toBeMade.keys);
+                    }
+                    if (!targets.keys.empty)
+                    {
+                        updateTables(targets, ownedMaterials);
+                    }
+                };
+
+                return [w, o, t];
+            });
+        mats.each!(ms => tbl.addChildren(ms));
 
         auto candidateFrame = new VerticalLayout;
         candidateFrame.addChild(new TextWidget(null, "作成候補"d));
-        candidateFrame.addChild(lst);
+        candidateFrame.addChild(scr);
 
         auto helperFrame = childById("helper");
         helperFrame.removeAllChildren;
@@ -303,14 +384,7 @@ class RecipeMaterialTabFrame: HorizontalLayout
                     setItemDetail(ItemDetailFrame.create(item, 1, controller.wisdom, controller.cWisdom), 0);
                 };
                 o.contentChange = (EditableContent content) {
-                    auto product = childById("itemQuery").text;
-                    auto txt = childById("numQuery").text;
-                    if (txt.empty || txt.to!int == 0)
-                    {
-                        return;
-                    }
-                    assert(product in controller.wisdom.rrecipeList);
-                    updateTables(product, txt.to!int, ownedMaterials);
+                    updateTables(toBeMade, ownedMaterials);
                     if (content.text >= t.text.matchFirst(r"/(\d+) 個"d)[1])
                     {
                         w.checked = true;
@@ -459,10 +533,9 @@ class RecipeMaterialTabFrame: HorizontalLayout
             });
     }
 
-    auto initializeTables(dstring item)
+    auto initializeTables(dstring[] items)
     {
-        fullGraph = new RecipeGraph(item, controller.wisdom, null);
-        preference = RecipeGraph.preference;
+        fullGraph = new RecipeGraph(items, controller.wisdom, null);
 
         auto elems = fullGraph.elements;
         initRecipeTable(elems.recipes);
@@ -470,14 +543,18 @@ class RecipeMaterialTabFrame: HorizontalLayout
         initMaterialTable(elems.materials);
     }
 
-    auto updateTables(dstring item, int num, int[dstring] owned = null)
+    auto updateTables(int[dstring] targets, int[dstring] owned = null)
     {
-        if (subGraph is null || fullGraph.target != subGraph.target)
+        if (subGraph is null || !fullGraph.targets.equal(subGraph.targets))
         {
-            subGraph = new RecipeGraph(item, controller.wisdom, preference);
+            subGraph = new RecipeGraph(targets.keys, controller.wisdom, preference);
         }
-        auto elems = subGraph.elements(num, owned, controller.wisdom, leafMaterials);
-        updateMaterialTable(elems.materials); // 最初にすること！
+        auto elems = subGraph.elements(targets, owned, controller.wisdom, leafMaterials);
+        auto mats = setDifference!"a.key < b.key"(elems.materials.byKeyValue.array.schwartzSort!"a.key",
+                                                  targets.byKeyValue.array.schwartzSort!"a.key").map!"tuple(a.key, a.value)".assocArray;
+        import std.stdio;
+        writefln("Mats: %s", mats);
+        updateMaterialTable(mats); // 最初にすること！
         updateRecipeTable(elems.recipes);
         updateLeftoverTable(elems.leftovers);
         showResult;
@@ -487,14 +564,8 @@ class RecipeMaterialTabFrame: HorizontalLayout
     in{
         assert(hasShownResult);
     } body {
-        auto numText = childById("numQuery").text;
-        if (numText.empty || numText.to!int == 0)
-        {
-            return;
-        }
-        auto product = childById("itemQuery").text;
         subGraph = null;
-        updateTables(product, numText.to!int, ownedMaterials);
+        updateTables(toBeMade.byKeyValue.filter!(kv => kv.value > 0).map!(kv => tuple(kv.key, kv.value)).assocArray, ownedMaterials);
      }
 
     auto highlightDetailRecipe()
@@ -554,6 +625,7 @@ class RecipeMaterialTabFrame: HorizontalLayout
         // }
     }
 
+    static int[dstring] toBeMade;
     EventHandler!() migemoOptionChanged;
     RecipeGraph fullGraph;
     RecipeGraph subGraph;
@@ -576,10 +648,6 @@ auto recipeMaterialLayout()
                     EditLine {
                         id: itemQuery
                         minWidth: 300
-                    }
-                    EditIntLine {
-                        id: numQuery
-                        minWidth: 80
                     }
                     CheckBox { id: migemo; text: "Migemo 検索" }
                 }

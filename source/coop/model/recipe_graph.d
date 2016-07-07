@@ -31,13 +31,13 @@ alias MatTuple = Tuple!(int, "num", bool, "isIntermediate");
 
 class RecipeGraph
 {
-    this(dstring name, Wisdom w, dstring[dstring] pref = defaultPreference)
+    this(dstring[] names, Wisdom w, dstring[dstring] pref = defaultPreference) pure
     {
         preferences_ = pref;
-        root = init(name, cast(RecipeContainer)null, w);
+        roots = names.sort().map!(n => init(n, cast(RecipeContainer)null, w)).array;
     }
 
-    auto elements()
+    auto elements() pure
     {
         if (orderedRecipes_.empty)
         {
@@ -48,14 +48,15 @@ class RecipeGraph
     }
 
     /++
-     + root を n 個作るのに必要なレシピ，素材，作成時のあまり素材を返す
-     + TODO: コンバインしない素材列が引数に必要
+     + targets を作るのに必要なレシピ，素材，作成時の余り素材を返す
      +/
-    auto elements(int targetNum, int[dstring] owned, Wisdom w, RedBlackTree!dstring mats = new RedBlackTree!dstring)
-    {
+    auto elements(int[dstring] targets, int[dstring] owned, Wisdom w, RedBlackTree!dstring mats = new RedBlackTree!dstring) pure
+    in {
+        import std.format;
+        assert(targets.keys.all!(t => roots.map!"a.name".canFind(t)), format("Invalid input: %s but roots are %s", targets, roots.map!"a.name".array));
+    } body {
         int[dstring] rs, leftover;
-        MatTuple[dstring] ms;
-        ms[root.name] = MatTuple(targetNum, false);
+        MatTuple[dstring] ms = targets.byKeyValue.map!(kv => tuple(kv.key, MatTuple(kv.value, false))).assocArray;
         foreach(r; elements.recipes)
         {
             auto re = w.recipeFor(r);
@@ -115,19 +116,21 @@ class RecipeGraph
         return Ret(rs, ms, leftover);
     }
 
-    @property auto target()
-    {
-        return root.name;
+    @property auto targets() const @safe pure nothrow
+    out(result) {
+        assert(result.isSorted);
+    } body {
+        return roots.map!"a.name".array;
     }
 
-    override string toString()
-    {
-        auto rs = new RedBlackTree!string;
-        auto ms = new RedBlackTree!string;
-        return root.toGraphString(ms, rs);
-    }
+    // override string toString()
+    // {
+    //     auto rs = new RedBlackTree!string;
+    //     auto ms = new RedBlackTree!string;
+    //     return root.toGraphString(ms, rs);
+    // }
 
-    @property static auto preference()
+    @property static auto preference() @safe pure nothrow
     {
         return defaultPreference;
     }
@@ -173,12 +176,12 @@ class RecipeGraph
         "オリハルコンインゴット": "オリハルコンインゴット(鉱石)",
         ];
 
-    @property auto recipeNodes()
+    @property auto recipeNodes() @safe pure nothrow
     {
         return recipes_;
     }
 
-    @property auto materialNodes()
+    @property auto materialNodes() @safe pure nothrow
     {
         return materials_;
     }
@@ -187,7 +190,7 @@ private:
     /++
      + Init tree from a given material name
      +/
-    auto init(dstring name, RecipeContainer parent, Wisdom w)
+    auto init(dstring name, RecipeContainer parent, Wisdom w) pure
     {
         auto mat = materials_.get(name, new MaterialContainer(name));
         if (parent !is null && parent.name !in mat.parents)
@@ -224,7 +227,7 @@ private:
     /++
      + Init tree from agiven recipe name
      +/
-    auto init(dstring name, MaterialContainer parent, Wisdom w)
+    auto init(dstring name, MaterialContainer parent, Wisdom w) pure
     {
         auto recipe = recipes_.get(name, new RecipeContainer(name));
         if (parent.name !in recipe.parents)
@@ -245,20 +248,20 @@ private:
         return recipe;
     }
 
-    auto visit()
-    {
+    auto visit() pure
+    out {
+        assert(targets.all!(t => orderedMaterials_.canFind(t)));
+    } body {
         orderedRecipes_ = [];
         orderedMaterials_ = [];
         auto visitedRecipes = new RedBlackTree!dstring;
         auto visitedMaterials = new RedBlackTree!dstring;
-        visit(root, visitedRecipes, visitedMaterials);
+        roots.each!(r => visit(r, visitedRecipes, visitedMaterials));
         orderedRecipes_.reverse();
         orderedMaterials_.reverse();
-        assert(orderedMaterials_.front == root.name);
-        orderedMaterials_ = orderedMaterials_[1..$];
     }
 
-    void visit(MaterialContainer material, ref RedBlackTree!dstring rs, ref RedBlackTree!dstring ms)
+    void visit(MaterialContainer material, ref RedBlackTree!dstring rs, ref RedBlackTree!dstring ms) pure
     {
         if (material.name in ms)
         {
@@ -269,7 +272,7 @@ private:
         orderedMaterials_ ~= material.name;
     }
 
-    void visit(RecipeContainer recipe, ref RedBlackTree!dstring rs, ref RedBlackTree!dstring ms)
+    void visit(RecipeContainer recipe, ref RedBlackTree!dstring rs, ref RedBlackTree!dstring ms) pure
     {
         if (recipe.name in rs)
         {
@@ -280,7 +283,7 @@ private:
         orderedRecipes_ ~= recipe.name;
     }
 
-    MaterialContainer root;
+    MaterialContainer[] roots;
 
     MaterialContainer[dstring] materials_;
     RecipeContainer[dstring] recipes_;
@@ -292,18 +295,18 @@ private:
 
 class RecipeContainer
 {
-    this(dstring name_)
+    this(dstring name_) @safe pure nothrow
     {
         name = name_;
         parents = new RedBlackTree!dstring;
     }
 
-    override string toString()
+    override string toString() const @safe pure
     {
         return name.to!string;
     }
 
-    string toGraphString(ref RedBlackTree!string ms, ref RedBlackTree!string rs, int lv = 0)
+    string toGraphString(ref RedBlackTree!string ms, ref RedBlackTree!string rs, int lv = 0) const pure
     {
         if (name.to!string in rs)
         {
@@ -321,23 +324,23 @@ class RecipeContainer
 
 class MaterialContainer
 {
-    this(dstring name_)
+    this(dstring name_) @safe pure nothrow
     {
         name = name_;
         parents = new RedBlackTree!dstring;
     }
 
-    auto isLeaf()
+    auto isLeaf() const @safe pure nothrow
     {
         return !isProduct;
     }
 
-    override string toString()
+    override string toString() const @safe pure
     {
         return name.to!string;
     }
 
-    string toGraphString(ref RedBlackTree!string ms, ref RedBlackTree!string rs, int lv = 0)
+    string toGraphString(ref RedBlackTree!string ms, ref RedBlackTree!string rs, int lv = 0) const pure
     {
         if (!isProduct)
         {

@@ -65,31 +65,6 @@ class RecipeMaterialTabFrameController
             showProductCandidate(txtBox.text);
         };
 
-        with(frame_.childById!EditLine("numQuery"))
-        {
-            contentChange = (EditableContent content) {
-                // TODO 必要アイテム数の再計算のみ
-                auto txt = content.text;
-                auto product = frame_.childById("itemQuery").text;
-                if (txt.empty || txt.to!int == 0)
-                {
-                    return;
-                }
-                else if (product in wisdom.rrecipeList)
-                {
-                    if (!frame_.hasShownResult)
-                    {
-                        frame_.initializeTables(product);
-                    }
-                    frame_.updateTables(product, txt.to!int, frame_.ownedMaterials);
-                }
-                else
-                {
-                    frame_.hideResult;
-                }
-            };
-        }
-
         with(frame_.childById!EditLine("itemQuery"))
         {
             contentChange = (EditableContent content) {
@@ -109,16 +84,6 @@ class RecipeMaterialTabFrameController
         auto candidates = wisdom.rrecipeList.keys.filter!queryFun.array;
 
         frame_.showCandidates(candidates);
-        auto nq = frame_.childById("numQuery").text;
-        if (queryText in wisdom.rrecipeList && nq.to!int > 0)
-        {
-            frame_.initializeTables(queryText);
-            frame_.updateTables(queryText, nq.to!int);
-        }
-        else
-        {
-            frame_.hideResult;
-        }
     }
 
 private:

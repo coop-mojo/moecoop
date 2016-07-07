@@ -411,12 +411,12 @@ auto recipeListLayout()
                     }
                 }
 
+                EditLine {
+                    id: searchQuery
+                    minWidth: 300
+                    text: "見たいレシピ"
+                }
                 HorizontalLayout {
-                    EditLine {
-                        id: searchQuery
-                        minWidth: 300
-                        text: "見たいレシピ"
-                    }
                     CheckBox {
                         id: metaSearch;
                     }

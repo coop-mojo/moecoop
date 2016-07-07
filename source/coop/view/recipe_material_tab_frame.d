@@ -143,6 +143,7 @@ class RecipeMaterialTabFrame: HorizontalLayout
         tbl.colCount = 3;
         scr.contentWidget = tbl;
         scr.backgroundColor = "white";
+        scr.maxHeight = 300;
 
         auto mats = chain(toBeMade.keys, candidates.filter!(c => !toBeMade.keys.canFind(c))).map!((c) {
                 auto w = new CheckableEntryWidget(c.to!string, c);
@@ -654,13 +655,11 @@ auto recipeMaterialLayout()
                     }
                 }
 
-                HorizontalLayout {
-                    EditLine {
-                        id: itemQuery
-                        minWidth: 300
-                    }
-                    CheckBox { id: migemo; text: "Migemo 検索" }
+                EditLine {
+                    id: itemQuery
+                    minWidth: 300
                 }
+                CheckBox { id: migemo; text: "Migemo 検索" }
 
                 TableLayout {
                     id: helper

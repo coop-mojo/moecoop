@@ -41,13 +41,6 @@ import coop.view.item_detail_frame;
 import coop.view.recipe_detail_frame;
 import coop.controller.recipe_material_tab_frame_controller;
 
-import etc.linux.memoryerror;
-
-static this()
-{
-    assert(registerMemoryErrorHandler());
-}
-
 class RecipeMaterialTabFrame: HorizontalLayout
 {
     mixin TabFrame;

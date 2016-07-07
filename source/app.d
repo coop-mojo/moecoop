@@ -30,6 +30,15 @@ import coop.model.wisdom;
 import coop.view.main_frame;
 import coop.util;
 
+version(linux)
+{
+    static this()
+    {
+        import etc.linux.memoryerror;
+        assert(registerMemoryErrorHandler());
+    }
+}
+
 mixin APP_ENTRY_POINT;
 
 extern(C) int UIAppMain(string[] args)

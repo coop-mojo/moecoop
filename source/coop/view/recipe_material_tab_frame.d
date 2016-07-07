@@ -167,6 +167,23 @@ class RecipeMaterialTabFrame: HorizontalLayout
                     o.text = "0";
                 }
 
+                w.detailClicked = {
+                    unhighlightDetailItems;
+                    scope(exit) highlightDetailItems;
+
+                    Item item;
+                    if (auto i = c in controller.wisdom.itemList)
+                    {
+                        item = *i;
+                    }
+                    else
+                    {
+                        item.name = c;
+                        item.petFoodInfo = [PetFoodType.UNKNOWN.to!PetFoodType: 0];
+                    }
+                    showItemDetail(0);
+                    setItemDetail(ItemDetailFrame.create(item, 1, controller.wisdom, controller.cWisdom), 0);
+                };
                 w.checkStateChanged = (bool checked) {
                     if (checked)
                     {

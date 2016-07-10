@@ -137,6 +137,7 @@ class RecipeMaterialTabFrame: HorizontalLayout
                 auto o = new EditIntLine("own");
                 auto t = new TextWidget(null, "個"d);
                 o.enabled = false;
+                o.minWidth = 55;
                 if (auto num = c in toBeMade)
                 {
                     w.checked = true;
@@ -353,6 +354,7 @@ class RecipeMaterialTabFrame: HorizontalLayout
                 auto w = new CheckableEntryWidget(lo.to!string, lo~": ");
                 auto o = new EditIntLine("own");
                 auto t = new TextWidget("times", format("/%s 個"d, 0));
+                o.minWidth = 55;
 
                 w.checkStateChanged = (bool checked) {
                     if (checked)

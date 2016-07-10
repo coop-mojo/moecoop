@@ -5,8 +5,15 @@ homepage "https://github.com/coop-mojo/moecoop/"
 copyright "Copyright © 2016, もじょんぬ"
 license "GPL-3.0 or later"
 authors "もじょんぬ@E鯖 <moe.e.coop@gmail.com>"
+
 dependency "dlangui" version="0.8.35"
 dependency "derelict-util" version="2.0.6"
+
+stringImportPaths "views" "views/res"
+
 dflags "-m32mscoff" platform="windows-x86"
 copyFiles "libs/windows/x86/libcurl.dll" platform="windows-x86"
 copyFiles "libs/windows/x86_64/libcurl.dll" platform="windows-x86_64"
+
+sourceFiles "source/icon.res" platform="windows"
+preBuildCommands "rc source/icon.rc" platform="windows"

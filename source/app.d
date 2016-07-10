@@ -30,6 +30,8 @@ mixin APP_ENTRY_POINT;
 
 extern(C) int UIAppMain(string[] args)
 {
+    embeddedResourceList.addResources(embedResourcesFromList!"resources.list"());
+
     auto wisdom = new Wisdom(SystemResourceBase);
 
     auto cWisdomDir = buildPath(UserResourceBase, "wisdom");
@@ -60,6 +62,7 @@ extern(C) int UIAppMain(string[] args)
                                                  config.windowWidth,
                                                  config.windowHeight);
     window.mainWidget = new MainFrame(wisdom, chars, config, customWisdom);
+    window.windowIcon = drawableCache.getImage("coop-icon");
     window.show;
     window.onClose = {
         version(Windows) {

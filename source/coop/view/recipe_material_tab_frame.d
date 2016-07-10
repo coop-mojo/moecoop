@@ -563,8 +563,6 @@ class RecipeMaterialTabFrame: HorizontalLayout
         auto elems = subGraph.elements(targets, owned, controller.wisdom, leafMaterials);
         auto mats = setDifference!"a.key < b.key"(elems.materials.byKeyValue.array.schwartzSort!"a.key",
                                                   targets.byKeyValue.array.schwartzSort!"a.key").map!"tuple(a.key, a.value)".assocArray;
-        import std.stdio;
-        writefln("Mats: %s", mats);
         updateMaterialTable(mats); // 最初にすること！
         updateRecipeTable(elems.recipes);
         updateLeftoverTable(elems.leftovers);

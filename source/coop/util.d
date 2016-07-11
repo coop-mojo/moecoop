@@ -268,3 +268,13 @@ auto jto(Array: T[], T)(JSONValue[] json)
         assert(assertNotThrown(eval.jto!util_EEnum) == e);
     }
 }
+
+version(D_Coverage)
+{
+    version(unittest)
+    {
+        extern(C) int UIAppMain(string[] args) {
+            return 0;
+        }
+    }
+}

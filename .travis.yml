@@ -7,11 +7,11 @@ os:
 env:
   - ARCH=x86_64
 
-# before_install:
-#   - dub fetch doveralls
+before_install:
+  - dub fetch doveralls
 
-# script:
-#   - dub test --coverage
+script:
+  - dub test --coverage
 
-# after_success:
-#   - dub run doveralls
+after_success:
+  - dub run doveralls

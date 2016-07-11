@@ -427,34 +427,38 @@ alias ShipRestriction = ExtendedEnum!(
     UNKNOWN => "不明", Any => "なし",
     // 基本シップ
     // 熟練
-    Puncher => "パンチャー", //"剣士", "メイサー",
-    Lancer => "ランサー", //"ガンナー", "アーチャー",
+    Puncher => "パンチャー", //"剣士",
+    Macer => "メイサー",
+    Lancer => "ランサー", Gunner => "ガンナー", Archer => "アーチャー",
     Guardsman => "ガーズマン",
-    //"投げ士", "レンジャー", "ブラッド サッカー",
+    //"投げ士",
+    Ranger => "レンジャー", BloodSucker => "ブラッド サッカー",
     Kicker => "キッカー", Wildman => "ワイルドマン", Drinker => "ドリンカー",
     //"物まね師",
-    Tamer => "テイマー", //"ウィザード", "プリースト", "シャーマン", //ウィッチは？
+    Tamer => "テイマー", Wizard => "ウィザード", Priest => "プリースト", Shaman => "シャーマン",
     Enchanter => "エンチャンター",
-    //"サモナー", "シャドウ", "魔術師", "野生児", "小悪魔",
-    Vendor =>"ベンダー", //"ロックシンガー",
+    Summoner => "サモナー", Shadow => "シャドウ", //"魔術師", "野生児", "小悪魔",
+    Vendor =>"ベンダー", RockSinger => "ロックシンガー",
     Songsinger => "ソングシンガー", //"スリ",
     Showboat => "目立ちたがり", StreetDancer => "ストリートダンサー",
 
     // 基本
-    // "フォールマン",
-    Swimmer => "スイマー", //"デッドマン",
+    // FallMan => "フォールマン",
+    Swimmer => "スイマー", // DeadMan => "デッドマン",
     Helper => "ヘルパー",
-    //"休憩人",
+    Recoverer => "休憩人",
     Miner => "マイナー",
-    // "木こり", "耕作師", "釣り人", "解読者",
+    // "木こり", "耕作師",
+    Angler => "釣り人", // "解読者",
 
     // 生産
     Cook => "料理師",
-    //"鍛冶師", "バーテンダー", "木工師",
+    //"鍛冶師", Bartender => "バーテンダー", "木工師",
     Tailor => "仕立て屋",
     // "調合師",
     Decorator => "細工師",
-    //"筆記師", "調髪師", "栽培師",
+    //"筆記師", "調髪師",
+    Cultivator => "栽培師",
 
     // 複合
     Warrior => "ウォーリアー",  Alchemist => "アルケミスト", Forester => "フォレスター",
@@ -471,7 +475,7 @@ alias ShipRestriction = ExtendedEnum!(
     BloodBard => "ブラッドバード", Duelist => "デュエリスト", Collector => "コレクター",
 
     // 二次シップ
-    Sniper => "スナイパー",
+    Sniper => "スナイパー", Hawkeye => "ホークアイ",
     );
 
 alias WeaponSlot = ExtendedEnum!(

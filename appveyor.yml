@@ -51,6 +51,7 @@ install:
   - 7z x dub.zip -odub > nul
   - set PATH=%CD%\%binpath%;%CD%\dub;%PATH%
   - dub --version
+  - dub fetch doveralls
 
 before_build:
   - ps: if($env:arch -eq "x86"){
@@ -81,7 +82,7 @@ test_script:
   - echo %DC%
   - echo %PATH%
   - '%DC% --version'
-  - dub test --arch=%Darch% --compiler=%DC%
+  - dub test --arch=%Darch% --compiler=%DC% --coverage
 
 artifacts:
   - path: moecoop-trunk.zip
@@ -90,3 +91,6 @@ artifacts:
 after_build:
   - archive.bat
   - mv moecoop.zip moecoop-trunk.zip
+
+after_test:
+  - dub run dovealls

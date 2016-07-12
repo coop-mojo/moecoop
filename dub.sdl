@@ -3,7 +3,7 @@ targetName "fukuro"
 description "生協の知恵袋"
 homepage "https://github.com/coop-mojo/moecoop/"
 copyright "Copyright © 2016, もじょんぬ"
-license "GPL-3.0 or later"
+license "MIT"
 authors "もじょんぬ@E鯖 <moe.e.coop@gmail.com>"
 
 dependency "dlangui" version="0.8.35"

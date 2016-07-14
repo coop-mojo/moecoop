@@ -33,7 +33,8 @@ class VersionDialog: Dialog
                     }
                 }
             });
-        wLayout.childById("icon").addChild(new ImageWidget(null, "coop-icon"));
+        wLayout.childById("icon").addChild(new ImageWidget(null, "coop-icon-large"));
+
         wLayout.childById("name").text = verString;
         auto urlButton = new UrlImageTextButton(null, URL, URL);
         urlButton.click = (Widget _) {

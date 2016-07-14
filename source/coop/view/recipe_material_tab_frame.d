@@ -623,7 +623,7 @@ class RecipeMaterialTabFrame: HorizontalLayout
         // }
     }
 
-    static int[dstring] toBeMade;
+    int[dstring] toBeMade;
     EventHandler!() migemoOptionChanged;
     RecipeGraph fullGraph;
     RecipeGraph subGraph;

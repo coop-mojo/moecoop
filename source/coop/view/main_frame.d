@@ -33,6 +33,7 @@ else version(OSX) {
 enum MENU_ACTION {
     EXIT,
     OPTION,
+    VERSION,
 }
 
 mixin template TabFrame()
@@ -99,8 +100,10 @@ protected:
     {
         MenuItem mainMenuItems = new MenuItem;
         auto optionItem = new MenuItem(new Action(MENU_ACTION.OPTION, "オプション..."d));
+        auto versionItem = new MenuItem(new Action(MENU_ACTION.VERSION, "バージョン..."d));
         auto exitItem = new MenuItem(new Action(MENU_ACTION.EXIT, "終了"d));
         mainMenuItems.add(optionItem);
+        mainMenuItems.add(versionItem);
         mainMenuItems.add(exitItem);
         auto mainMenu = new MainMenu(mainMenuItems);
 
@@ -158,6 +161,10 @@ protected:
             case OPTION:
                 import coop.view.config_window;
                 showConfigWindow(window, controller.characters, controller.config);
+                return true;
+            case VERSION:
+                import coop.view.version_window;
+                showVersionWindow(window);
                 return true;
             default:
             }

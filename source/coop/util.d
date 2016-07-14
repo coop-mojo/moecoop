@@ -18,6 +18,8 @@ import std.typecons;
 immutable SystemResourceBase = "resource";
 immutable UserResourceBase = "userdata";
 immutable AppName = "生協の知恵袋"d;
+immutable Version = import("version");
+enum URL = "http://docs.fukuro.coop.moe/";
 
 struct EventHandler(T...)
 {

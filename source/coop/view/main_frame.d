@@ -91,7 +91,6 @@ class MainFrame: AppFrame
 protected:
     override protected void initialize()
     {
-        _appName = "生協の知恵袋";
         ownStyle.theme.fontFamily(FontFamily.SansSerif).fontFace(fontName);
         super.initialize();
     }

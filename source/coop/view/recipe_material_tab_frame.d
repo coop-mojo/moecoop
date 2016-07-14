@@ -357,6 +357,13 @@ class RecipeMaterialTabFrame: HorizontalLayout
                 o.minWidth = 55;
 
                 w.checkStateChanged = (bool checked) {
+                    if (isLocked)
+                    {
+                        return;
+                    }
+
+                    isLocked = true;
+                    scope(exit) isLocked = false;
                     if (checked)
                     {
                         o.text = t.text.matchFirst(r"/(\d+) 個"d)[1];
@@ -385,6 +392,12 @@ class RecipeMaterialTabFrame: HorizontalLayout
                 };
                 o.contentChange = (EditableContent content) {
                     updateTables(toBeMade, ownedMaterials);
+                    if (isLocked)
+                    {
+                        return;
+                    }
+                    isLocked = true;
+                    scope(exit) isLocked = false;
                     if (content.text >= t.text.matchFirst(r"/(\d+) 個"d)[1])
                     {
                         w.checked = true;
@@ -488,6 +501,9 @@ class RecipeMaterialTabFrame: HorizontalLayout
         scope(exit) highlightDetailItems;
         auto tbl = enforce(childById!TableLayout("materials"));
         tbl.rows.each!((rs) {
+                isLocked = true;
+                scope(exit) isLocked = false;
+
                 auto m = rs[0].text.chomp(": ");
                 if (auto n = m in materials)
                 {
@@ -624,6 +640,7 @@ class RecipeMaterialTabFrame: HorizontalLayout
     }
 
     int[dstring] toBeMade;
+    bool isLocked;
     EventHandler!() migemoOptionChanged;
     RecipeGraph fullGraph;
     RecipeGraph subGraph;

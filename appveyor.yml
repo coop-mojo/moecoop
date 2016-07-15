@@ -84,9 +84,12 @@ test_script:
   - dub test --arch=%Darch% --compiler=%DC%
 
 artifacts:
-  - path: moecoop-trunk.zip
-    name: 生協の知恵袋 生焼け版
+  - path: moecoop-trunk-64bit.zip
+    name: 生協の知恵袋 生焼け版(64bit)
+  - path: moecoop-trunk-32bit.zip
+    name: 生協の知恵袋 生焼け版(32bit)
 
 after_build:
   - archive.bat
-  - mv moecoop.zip moecoop-trunk.zip
+  - mv moecoop-64bit.zip moecoop-trunk-64bit.zip
+  - mv moecoop-32bit.zip moecoop-trunk-32bit.zip

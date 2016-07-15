@@ -14,4 +14,6 @@ script:
   - dub test --coverage
 
 after_success:
+  # workaround for doveralls issue #17
+  - rm ..-*.lst
   - dub run doveralls

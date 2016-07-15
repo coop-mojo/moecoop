@@ -130,6 +130,10 @@ class ConfigDialog: Dialog
             {
                 wLayout.childById("migemoInstaller").enabled = false;
             }
+            else version(Win32)
+            {
+                wLayout.childById("migemoInstaller").enabled = false;
+            }
         }
 
         version(Windows)

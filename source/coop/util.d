@@ -12,14 +12,20 @@ import std.format;
 import std.json;
 import std.meta;
 import std.range;
+import std.string;
 import std.traits;
 import std.typecons;
 
 immutable SystemResourceBase = "resource";
 immutable UserResourceBase = "userdata";
 immutable AppName = "生協の知恵袋"d;
-immutable Version = import("version");
+immutable Version = import("version").chomp;
 enum URL = "http://docs.fukuro.coop.moe/";
+
+@property auto isRelease() @safe pure nothrow
+{
+    return !Version.canFind("-");
+}
 
 struct EventHandler(T...)
 {

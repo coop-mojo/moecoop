@@ -36,9 +36,10 @@ class VersionDialog: Dialog
         wLayout.childById("icon").addChild(new ImageWidget(null, "coop-icon-large"));
 
         wLayout.childById("name").text = verString;
-        auto urlButton = new UrlImageTextButton(null, URL, URL);
-        urlButton.click = (Widget _) {
-            Platform.instance.openURL(URL);
+        import std.format;
+        auto urlButton = new UrlImageTextButton(null, URL, format("%sja/%s/", URL, isRelease ? Version : "latest"));
+        urlButton.click = (Widget w) {
+            Platform.instance.openURL(w.action.stringParam);
             return true;
         };
         wLayout.childById("info").addChild(urlButton);
@@ -57,9 +58,8 @@ class VersionDialog: Dialog
 
     auto verString()
     {
-        import std.algorithm;
         import std.format;
-        auto fmt = Version.canFind("-") ? "%s 生焼け版 (%s)"d: "%s %s"d;
+        auto fmt = isRelease ? "%s %s"d : "%s 生焼け版 (%s)"d;
         return format(fmt, AppName, Version);
     }
 }

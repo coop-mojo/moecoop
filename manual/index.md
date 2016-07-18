@@ -2,6 +2,7 @@
 
 [![GitHub version](https://badge.fury.io/gh/coop-mojo%2Fmoecoop.svg)](https://badge.fury.io/gh/coop-mojo%2Fmoecoop)
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/coop-mojo/moecoop/blob/master/LICENSE)
+[![Documentation Status](https://readthedocs.org/projects/moecoop/badge/?version=latest)](http://docs.fukuro.coop.moe/ja/latest/?badge=latest)
 [![Build Status](https://travis-ci.org/coop-mojo/moecoop.svg?branch=master)](https://travis-ci.org/coop-mojo/moecoop)
 [![Build status](https://ci.appveyor.com/api/projects/status/9lju6b2f0y411x2a/branch/master?svg=true)](https://ci.appveyor.com/project/coop-mojo/moecoop/branch/master)
 [![Coverage Status](https://coveralls.io/repos/github/coop-mojo/moecoop/badge.svg?branch=master)](https://coveralls.io/github/coop-mojo/moecoop?branch=master)

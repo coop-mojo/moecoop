@@ -22,9 +22,15 @@ immutable AppName = "生協の知恵袋"d;
 immutable Version = import("version").chomp;
 enum URL = "http://docs.fukuro.coop.moe/";
 
-@property auto isRelease() @safe pure nothrow
+@property auto isRelease(in string ver) @safe pure nothrow
 {
-    return !Version.canFind("-");
+    return !ver.canFind("-");
+}
+
+@safe pure nothrow unittest
+{
+    assert(!"v1.0.2-2-norelease".isRelease);
+    assert("v1.0.2".isRelease);
 }
 
 struct EventHandler(T...)

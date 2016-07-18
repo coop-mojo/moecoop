@@ -37,7 +37,7 @@ class VersionDialog: Dialog
 
         wLayout.childById("name").text = verString;
         import std.format;
-        auto urlButton = new UrlImageTextButton(null, URL, format("%sja/%s/", URL, isRelease ? Version : "latest"));
+        auto urlButton = new UrlImageTextButton(null, URL, format("%sja/%s/", URL, Version.isRelease ? Version : "latest"));
         urlButton.click = (Widget w) {
             Platform.instance.openURL(w.action.stringParam);
             return true;
@@ -59,7 +59,7 @@ class VersionDialog: Dialog
     auto verString()
     {
         import std.format;
-        auto fmt = isRelease ? "%s %s"d : "%s 生焼け版 (%s)"d;
+        auto fmt = Version.isRelease ? "%s %s"d : "%s 生焼け版 (%s)"d;
         return format(fmt, AppName, Version);
     }
 }

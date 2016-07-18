@@ -266,6 +266,12 @@ auto jto(Array: T[], T)(JSONValue[] json)
     }
 
     {
+        auto i = 3;
+        auto fval = JSONValue(i);
+        assert(assertNotThrown(fval.jto!real) == i.to!real);
+    }
+
+    {
         enum E { A, B, C }
         auto e = E.A;
         auto eval = JSONValue(assertNotThrown((e.to!string)));

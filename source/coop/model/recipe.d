@@ -95,6 +95,30 @@ auto toRecipe(string s, JSONValue[string] json)
     return ret;
 }
 
+@safe pure nothrow unittest
+{
+    Recipe r1;
+    r1.name = "ロースト スネーク ミート"d;
+    assert(r1 == r1);
+    assert(r1.toHash == r1.toHash);
+}
+
+@safe pure nothrow unittest
+{
+    Recipe r1;
+    r1.name = "ロースト スネーク ミート"d;
+
+    Recipe r2;
+    r2.name = "ライス";
+    assert(r1 > r2);
+    assert(r1.toHash != r2.toHash);
+
+    Recipe r3;
+    r3.name = "ワイン"d;
+    assert(r1 < r3);
+    assert(r1.toHash != r3.toHash);
+}
+
 unittest
 {
     auto name = "ロースト スネーク ミート";

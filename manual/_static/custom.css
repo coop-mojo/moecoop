@@ -1,0 +1,31 @@
+img[alt="メイン画面"] {
+  max-width: 600px;
+}
+
+img[alt="タブ"] {
+  max-height: 30px;
+}
+
+img[alt="オプション"] {
+  max-height: 60px;
+}
+
+img[alt="レシピ一覧"] {
+  max-height: 250px;
+}
+
+img[alt="レシピ項目"] {
+  max-height: 30px;
+}
+
+img[alt="詳細"] {
+  max-height: 300px;
+}
+
+img[alt="オプション画面"] {
+  max-width: 400px;
+}
+
+img[alt="材料検索画面"] {
+  max-width: 200px;
+}

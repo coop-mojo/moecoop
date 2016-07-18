@@ -108,17 +108,6 @@ struct BiMap(T, U)
     } body {
         return bmap[k];
     }
-
-    @property auto length() @safe const pure nothrow
-    {
-        return fmap.length;
-    }
-
-    @property auto empty() const pure nothrow
-    {
-        return fmap.values.length == 0;
-    }
-
 private:
     const T[U] fmap;
     const U[T] bmap;

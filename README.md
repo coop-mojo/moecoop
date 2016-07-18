@@ -14,6 +14,9 @@
 
 また，開発中の生焼け版の公開を始めました([64bit版](https://ci.appveyor.com/api/projects/coop-mojo/moecoop/artifacts/moecoop-trunk-64bit.zip?branch=master)、[32bit版](https://ci.appveyor.com/api/projects/coop-mojo/moecoop/artifacts/moecoop-trunk-32bit.zip?branch=master))．登録されているアイテム情報や新機能が増えているかもしれないですが，生焼けなので試すとお腹を壊したり爆発したり，鼻から LoC が出てくるかもしれません．
 
+## 使い方
+[マニュアル](http://docs.fukuro.coop.moe)をご覧ください。
+
 ## できること
 - バインダーに登録されているレシピの管理
   - キャラクターごとのバインダー管理

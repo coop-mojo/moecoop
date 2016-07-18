@@ -9,7 +9,7 @@
 
 生協の知恵袋は，[Master of Epic](http://moepic.com/top.php?mid=_) のバインダーやアイテム・レシピ情報を見るためのツールです．
 
-リリース版は[リンク先](https://github.com/coop-mojo/moecoop/releases/latest)から moecoop-*-64bit.zip をダウンロードしてご利用ください．
+リリース版は[リンク先](https://github.com/coop-mojo/moecoop/releases/latest)から`moecoop-*.zip`をダウンロードしてご利用ください．
 
 また，開発中の生焼け版の公開を始めました([64bit版](https://ci.appveyor.com/api/projects/coop-mojo/moecoop/artifacts/moecoop-trunk-64bit.zip?branch=master)、[32bit版](https://ci.appveyor.com/api/projects/coop-mojo/moecoop/artifacts/moecoop-trunk-32bit.zip?branch=master))．登録されているアイテム情報や新機能が増えているかもしれないですが，生焼けなので試すとお腹を壊したり爆発したり，鼻から LoC が出てくるかもしれません．
 

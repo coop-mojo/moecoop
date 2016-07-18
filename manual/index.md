@@ -13,7 +13,7 @@
 # ダウンロード
 知恵袋には以下の2種類のバージョンがあります。
 
-- リリース版: ([ダウンロードページ](https://github.com/coop-mojo/moecoop/releases/latest) の `moecoop-*-64bit.zip`)
+- リリース版: ([ダウンロードページ](https://github.com/coop-mojo/moecoop/releases/latest) の `moecoop-*.zip`)
   - ある程度バグが取れて、安定したバージョンです。
 
 - 生焼け版: ([64bit版](https://ci.appveyor.com/api/projects/coop-mojo/moecoop/artifacts/moecoop-trunk-64bit.zip?branch=master)、[32bit版](https://ci.appveyor.com/api/projects/coop-mojo/moecoop/artifacts/moecoop-trunk-32bit.zip?branch=master))

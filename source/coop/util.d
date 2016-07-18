@@ -59,7 +59,14 @@ private:
 auto indexOf(Range, Elem)(Range r, Elem e)
     if (isInputRange!Range && is(Elem: ElementType!Range) && !isSomeChar!(ElementType!Range))
 {
-    return r.enumerate.find!"a[1] == b"(e).front[0];
+    auto elm = r.enumerate.find!"a[1] == b"(e);
+    return elm.empty ? -1 : elm.front[0];
+}
+
+@safe pure nothrow unittest
+{
+    assert([1, 2, 3, 4].indexOf(2) == 1);
+    assert([1, 2, 3, 4].indexOf(5) == -1);
 }
 
 struct BiMap(T, U)

@@ -46,7 +46,7 @@ struct EventHandler(T...)
         }
     }
 
-    auto opAssign(Proc p)
+    auto opAssign(Proc p) @safe pure nothrow
     {
         proc = p;
         return p;
@@ -54,6 +54,16 @@ struct EventHandler(T...)
 private:
     alias Proc = void delegate(T);
     Proc proc;
+}
+
+nothrow unittest
+{
+    EventHandler!int eh1;
+    assertNotThrown(eh1(0));
+
+    EventHandler!int eh2;
+    eh2 = (int x) { /* nop */ };
+    assertNotThrown(eh2(0));
 }
 
 auto indexOf(Range, Elem)(Range r, Elem e)

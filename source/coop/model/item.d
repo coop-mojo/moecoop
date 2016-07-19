@@ -39,7 +39,7 @@ struct Item
     dstring remarks;
     ItemType type;
 
-    auto toJSON()
+    auto toJSON() const
     {
         auto hash = [
             "英名": JSONValue(ename.to!string),
@@ -168,7 +168,7 @@ enum SpecialProperty: ushort
     WA = 0b10000000000000,
 }
 
-auto toStrings(ushort sps, bool detailed = true)
+auto toStrings(ushort sps, bool detailed = true) pure
 {
     with(SpecialProperty)
     {
@@ -196,7 +196,7 @@ auto toStrings(ushort sps, bool detailed = true)
     }
 }
 
-auto toSpecialProperties(JSONValue[] vals)
+auto toSpecialProperties(JSONValue[] vals) pure
 {
     auto props = vals.map!"a.str".map!(s => s.to!SpecialProperty).array;
     return props.reduce!((a, b) => a|b).to!ushort;
@@ -225,7 +225,7 @@ auto readFoods(string fname)
                                  key.toFoodInfo(foods[key].object)));
 }
 
-auto toFoodInfo(string s, JSONValue[string] json)
+auto toFoodInfo(string s, JSONValue[string] json) @safe pure
 {
     FoodInfo info;
     with(info)
@@ -267,7 +267,7 @@ auto readFoodEffects(string fname)
                                    key.toFoodEffect(effects[key].object)));
 }
 
-auto toFoodEffect(string s, JSONValue[string] json)
+auto toFoodEffect(string s, JSONValue[string] json) pure
 {
     AdditionalEffect effect;
     with(effect)
@@ -524,7 +524,7 @@ auto readExpendables(string fname)
                                    expendables[key].object.toExpendableInfo));
 }
 
-auto toExpendableInfo(JSONValue[string] json)
+auto toExpendableInfo(JSONValue[string] json) pure
 {
     ExpendableInfo info;
     with(info)
@@ -559,13 +559,13 @@ struct Overlaid(T)
         }
     }
 
-    @property auto isOverlaid(string field)()
+    @property auto isOverlaid(string field)() const pure nothrow
         if (hasMember!(T, field))
     {
         return overlaid !is null && !isValidValue(mixin("original."~field));
     }
 private:
-    static auto isValidValue(T)(T val)
+    static auto isValidValue(T)(T val) pure nothrow
     {
         static if (isFloatingPoint!T)
             return !val.isNaN;
@@ -587,7 +587,7 @@ private:
     T* overlaid;
 }
 
-unittest
+@safe nothrow unittest
 {
     Item orig;
     with(orig)
@@ -608,7 +608,7 @@ unittest
     assert(overlaid.name == "テスト");
 }
 
-unittest
+pure nothrow unittest
 {
     Item orig;
     orig.name = "テスト";

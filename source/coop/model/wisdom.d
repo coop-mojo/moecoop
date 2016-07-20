@@ -40,9 +40,6 @@ class Wisdom {
     /// アイテム種別ごとの固有情報一覧
     ExtraInfo[dstring][ItemType] extraInfoList;
 
-    /// システムデータが保存してあるパス
-    immutable string baseDir_;
-
     this(string baseDir)
     {
         baseDir_ = baseDir;
@@ -279,6 +276,9 @@ private:
             .joiner
             .assocArray;
     }
+
+    /// データが保存してあるパス
+    immutable string baseDir_;
 }
 
 auto readBinders(string file)
@@ -325,4 +325,25 @@ unittest
     auto w = assertNotThrown(new Wisdom("."));
     assert(w.binders.empty);
     assert(w.recipeCategories.empty);
+}
+
+unittest
+{
+    enum invalidDir = "__invalid__";
+    mkdir(invalidDir);
+    scope(exit) rmdirRecurse(invalidDir);
+
+    auto w = assertNotThrown(new Wisdom(invalidDir));
+    w.save;
+
+    foreach(dir; ["アイテム", "バインダー", "レシピ", "飲み物", "飲食バフ",
+                  "食べ物", "武器", "防具"])
+    {
+        auto d = buildPath(invalidDir, dir);
+        assert(d.exists);
+        assert(d.isDir);
+    }
+    auto itemFile = buildPath(invalidDir, "アイテム", "アイテム.json");
+    assert(itemFile.exists);
+    assert(itemFile.readText == "{}");
 }

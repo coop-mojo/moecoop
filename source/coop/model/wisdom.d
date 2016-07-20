@@ -302,5 +302,18 @@ auto readBinders(string file)
 
 unittest
 {
-    assertNotThrown(new Wisdom(SystemResourceBase));
+    auto w = assertNotThrown(new Wisdom(SystemResourceBase));
+    assert(w.recipeCategories.equal(["合成"d, "料理", "木工", "薬調合", "裁縫", "装飾細工", "複合", "醸造", "鍛冶"]));
+    assert(w.binders.equal(["QoAクエスト"d, "アクセサリー", "アクセサリー No.2", "カオス", "家", "家具", "木工", "木工 No.2",
+                            "材料/道具", "材料/道具 No.2", "楽器", "罠", "裁縫", "裁縫 No.2", "複製",
+                            "鍛冶 No.1", "鍛冶 No.2", "鍛冶 No.3", "鍛冶 No.4", "鍛冶 No.5", "鍛冶 No.6", "鍛冶 No.7",
+                            "食べ物", "食べ物 No.2", "食べ物 No.3", "飲み物"]));
+
+    assert(w.recipesIn(Binder("食べ物")).length == 128);
+    assert("ロースト スネーク ミート"d in w.recipesIn(Category("料理")));
+
+    assert(w.recipeFor("とても美味しい食べ物").name.empty);
+    assert(w.recipeFor("ロースト スネーク ミート").ingredients == ["ヘビの肉"d: 1]);
+
+    assert(w.bindersFor("ロースト スネーク ミート").equal(["食べ物"d]));
 }

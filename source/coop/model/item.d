@@ -17,6 +17,7 @@ import std.variant;
 
 import coop.util;
 
+/// アイテムの追加情報
 alias ExtraInfo = Algebraic!(FoodInfo, WeaponInfo, BulletInfo, ExpendableInfo);
 
 /// アイテム一般の情報
@@ -194,6 +195,14 @@ auto toStrings(ushort sps, bool detailed = true) pure
         }
         return propMap.keys.filter!(p => sps&p).map!(p => str(p)).array;
     }
+}
+
+pure unittest
+{
+    assert(SpecialProperty.OP.toStrings.equal(["一人一個のみ"]));
+    assert((SpecialProperty.CS | SpecialProperty.CR).toStrings.sort().equal(["修理できない", "売ることができない"]));
+
+    assert(SpecialProperty.OP.toStrings(false).equal(["OP"]));
 }
 
 auto toSpecialProperties(JSONValue[] vals) pure

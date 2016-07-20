@@ -319,3 +319,10 @@ unittest
 
     assert(w.bindersFor("ロースト スネーク ミート").equal(["食べ物"d]));
 }
+
+unittest
+{
+    auto w = assertNotThrown(new Wisdom("."));
+    assert(w.binders.empty);
+    assert(w.recipeCategories.empty);
+}

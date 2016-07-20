@@ -67,31 +67,31 @@ class Wisdom {
         itemList = readItemList(baseDir_);
     }
 
-    @property auto recipeCategories()
+    @property auto recipeCategories() const pure nothrow
     {
         return recipeList.keys.sort().array;
     }
 
-    auto recipesIn(Category name)
+    auto recipesIn(Category name) @safe pure nothrow
     in {
         assert(name in recipeList);
     } body {
         return recipeList[cast(dstring)name];
     }
 
-    @property auto binders()
+    @property auto binders() const pure nothrow
     {
         return binderList.keys.sort().array;
     }
 
-    auto recipesIn(Binder name)
+    auto recipesIn(Binder name) @safe pure nothrow
     in {
         assert(name in binderList);
     } body {
         return binderList[cast(dstring)name];
     }
 
-    auto recipeFor(dstring recipeName)
+    auto recipeFor(dstring recipeName) pure
     {
         auto ret = recipeCategories.find!(c => recipeName in recipesIn(Category(c)));
         if (ret.empty)
@@ -107,7 +107,7 @@ class Wisdom {
         }
     }
 
-    auto bindersFor(dstring recipeName)
+    auto bindersFor(dstring recipeName) pure nothrow
     {
         return binders.filter!(b => recipesIn(Binder(b)).canFind(recipeName)).array;
     }

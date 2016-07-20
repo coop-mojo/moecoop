@@ -161,7 +161,7 @@ private:
             .assocArray;
     }
 
-    auto genRRecipeList(Recipe[] recipes)
+    auto genRRecipeList(Recipe[] recipes) const pure
     {
         RedBlackTree!dstring[dstring] ret;
         recipes.each!((r) {

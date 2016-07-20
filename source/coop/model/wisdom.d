@@ -73,8 +73,9 @@ class Wisdom {
     }
 
     auto recipesIn(Category name)
-    {
-        enforce(name in recipeList);
+    in {
+        assert(name in recipeList);
+    } body {
         return recipeList[cast(dstring)name];
     }
 
@@ -84,8 +85,9 @@ class Wisdom {
     }
 
     auto recipesIn(Binder name)
-    {
-        enforce(name in binderList);
+    in {
+        assert(name in binderList);
+    } body {
         return binderList[cast(dstring)name];
     }
 

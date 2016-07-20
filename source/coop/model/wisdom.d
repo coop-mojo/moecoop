@@ -67,6 +67,66 @@ class Wisdom {
         itemList = readItemList(baseDir_);
     }
 
+    @property auto recipeCategories()
+    {
+        return recipeList.keys.sort().array;
+    }
+
+    auto recipesIn(Category name)
+    {
+        enforce(name in recipeList);
+        return recipeList[cast(dstring)name];
+    }
+
+    @property auto binders()
+    {
+        return binderList.keys.sort().array;
+    }
+
+    auto recipesIn(Binder name)
+    {
+        enforce(name in binderList);
+        return binderList[cast(dstring)name];
+    }
+
+    auto recipeFor(dstring recipeName)
+    {
+        auto ret = recipeCategories.find!(c => recipeName in recipesIn(Category(c)));
+        if (ret.empty)
+        {
+            import std.container.util;
+            Recipe dummy;
+            dummy.techniques = make!(typeof(dummy.techniques))(null);
+            return dummy;
+        }
+        else
+        {
+            return recipesIn(Category(ret.front))[recipeName];
+        }
+    }
+
+    auto bindersFor(dstring recipeName)
+    {
+        return binders.filter!(b => recipesIn(Binder(b)).canFind(recipeName)).array;
+    }
+
+    auto save() const
+    {
+        import std.stdio;
+        import std.conv;
+
+        foreach(dir; ["アイテム", "バインダー", "レシピ", "飲み物", "飲食バフ",
+                      "食べ物", "武器", "防具"])
+        {
+            mkdirRecurse(buildPath(baseDir_, dir));
+        }
+
+        auto f = File(buildPath(baseDir_, "アイテム", "アイテム.json"), "w");
+        f.write(JSONValue(itemList.values
+                          .map!(item => tuple(item.name.to!string, item.toJSON))
+                          .assocArray).toPrettyString);
+    }
+private:
     auto readBinderList(string basedir)
     {
         enforce(basedir.exists);
@@ -216,66 +276,6 @@ class Wisdom {
             .map!(s => s.readFoodEffects)
             .joiner
             .assocArray;
-    }
-
-    @property auto recipeCategories()
-    {
-        return recipeList.keys.sort().array;
-    }
-
-    auto recipesIn(Category name)
-    {
-        enforce(name in recipeList);
-        return recipeList[cast(dstring)name];
-    }
-
-    @property auto binders()
-    {
-        return binderList.keys.sort().array;
-    }
-
-    auto recipesIn(Binder name)
-    {
-        enforce(name in binderList);
-        return binderList[cast(dstring)name];
-    }
-
-    auto recipeFor(dstring recipeName)
-    {
-        auto ret = recipeCategories.find!(c => recipeName in recipesIn(Category(c)));
-        if (ret.empty)
-        {
-            import std.container.util;
-            Recipe dummy;
-            dummy.techniques = make!(typeof(dummy.techniques))(null);
-            return dummy;
-        }
-        else
-        {
-            return recipesIn(Category(ret.front))[recipeName];
-        }
-    }
-
-    auto bindersFor(dstring recipeName)
-    {
-        return binders.filter!(b => recipesIn(Binder(b)).canFind(recipeName)).array;
-    }
-
-    auto save()
-    {
-        import std.stdio;
-        import std.conv;
-
-        foreach(dir; ["アイテム", "バインダー", "レシピ", "飲み物", "飲食バフ",
-                      "食べ物", "武器", "防具"])
-        {
-            mkdirRecurse(buildPath(baseDir_, dir));
-        }
-
-        auto f = File(buildPath(baseDir_, "アイテム", "アイテム.json"), "w");
-        f.write(JSONValue(itemList.values
-                          .map!(item => tuple(item.name.to!string, item.toJSON))
-                          .assocArray).toPrettyString);
     }
 }
 

@@ -89,8 +89,8 @@ test_script:
   - dub test --arch=%Darch% --compiler=%DC%
 
 artifacts:
-  - path: moecoop-trunk-%Dmodel%bit.zip
-    name: 生協の知恵袋 生焼け版(%Dmodel%bit)
+  - path: moecoop-trunk-$(Dmodel)bit.zip
+    name: 生協の知恵袋 生焼け版($(Dmodel)bit)
 
 after_build:
   - archive.bat %Darch%

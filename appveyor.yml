@@ -1,12 +1,10 @@
 platform: x64
 environment:
- matrix:
-  - DC: dmd
-    DVersion: 2.071.1
-    arch: x86
-  - DC: dmd
-    DVersion: 2.071.1
-    arch: x64
+  DC: dmd
+  DVersion: 2.071.1
+  matrix:
+    - arch: x86
+    - arch: x64
 
 skip_tags: true
 branches:

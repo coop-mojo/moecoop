@@ -29,3 +29,7 @@ img[alt="オプション画面"] {
 img[alt="材料検索画面"] {
   max-width: 200px;
 }
+
+img[alt="インクリメンタル検索"] {
+  max-width: 150px;
+}

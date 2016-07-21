@@ -1,12 +1,10 @@
 platform: x64
 environment:
  matrix:
-  - APPVEYOR_JOB_NAME: 32bit
-    DC: dmd
+  - DC: dmd
     DVersion: 2.071.1
     arch: x86
-  - APPVEYOR_JOB_NAME: 64bit
-    DC: dmd
+  - DC: dmd
     DVersion: 2.071.1
     arch: x64
 

@@ -3,6 +3,9 @@ environment:
  matrix:
   - DC: dmd
     DVersion: 2.071.1
+    arch: x86
+  - DC: dmd
+    DVersion: 2.071.1
     arch: x64
 
 skip_tags: true
@@ -56,10 +59,12 @@ before_build:
   - ps: if($env:arch -eq "x86"){
             $env:compilersetupargs = "x86";
             $env:Darch = "x86";
+            $env:Dmodel = "32";
           }
         elseif($env:arch -eq "x64"){
             $env:compilersetupargs = "amd64";
             $env:Darch = "x86_64";
+            $env:Dmodel = "64";
         }
   - ps : if($env:DC -eq "dmd"){
            $env:PATH += ";C:\dmd2\windows\bin;";
@@ -84,12 +89,9 @@ test_script:
   - dub test --arch=%Darch% --compiler=%DC%
 
 artifacts:
-  - path: moecoop-trunk-64bit.zip
-    name: 生協の知恵袋 生焼け版(64bit)
-  - path: moecoop-trunk-32bit.zip
-    name: 生協の知恵袋 生焼け版(32bit)
+  - path: moecoop-trunk-%Dmodel%bit.zip
+    name: 生協の知恵袋 生焼け版(%Dmodel%bit)
 
 after_build:
-  - archive.bat
-  - mv moecoop-64bit.zip moecoop-trunk-64bit.zip
-  - mv moecoop-32bit.zip moecoop-trunk-32bit.zip
+  - archive.bat %Darch%
+  - mv moecoop-%Darch%.zip moecoop-trunk-%Dmodel%bit.zip

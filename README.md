@@ -141,7 +141,7 @@ MIT ライセンスです。 詳細は[LICENSE](LICENSE)をご覧ください。
 
 ### 内部で利用しているソフトウェアのライランスについて
 また、生協の知恵袋では以下のソフトウェアが利用されています。
-- Curl
+- [libcurl](https://curl.haxx.se/)
 ```
 COPYRIGHT AND PERMISSION NOTICE
 
@@ -156,7 +156,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 Except as contained in this notice, the name of a copyright holder shall not be used in advertising or otherwise to promote the sale, use or other dealings in this Software without prior written authorization of the copyright holder.
 ```
 
-- C/Migemo
+- [C/Migemo](https://www.kaoriya.net/software/cmigemo/)
 ```
 Copyright (c) 2003-2007 MURAOKA Taro (KoRoN)
 

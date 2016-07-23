@@ -13,7 +13,7 @@
 - Linux
 ```
 $ xhost local:root
-$ sudo docker run -it --rm -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix moecoop/docker-fukuro
+$ sudo docker run -it --rm -v /tmp/.X11-unix:/tmp/.X11-unix moecoop/docker-fukuro
 ```
 
 - Mac

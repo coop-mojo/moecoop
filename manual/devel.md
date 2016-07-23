@@ -2,8 +2,20 @@
 ゼロから始めるドキュメント整備ページにようこそ！
 
 ## 開発環境のインストール方法
+生協では、知恵袋の開発環境をひとまとめにした[生協の知恵袋 裁縫セット](https://hub.docker.com/r/moecoop/docker-fukuro/)を公開しています。
+裁縫セットの利用には[Docker](https://www.docker.com/)が必要です。
+
+### Docker のインストール
+
+### 裁縫セットの使い方
+
 - Windows
 - Linux
+```
+$ xhost local:root
+$ sudo docker run -it --rm -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix moecoop/docker-fukuro
+```
+
 - Mac
 
 ## ビルド方法

@@ -112,14 +112,14 @@ unittest
     Item item;
     with(item)
     {
-        name = "変性コイン";
+        name = "マイナーズ ワイフ";
         price = 0;
-        weight = 0.01;
-        petFoodInfo = [ PetFoodType.NoEatable.to!PetFoodType: 0.0 ];
+        weight = 0.03;
+        petFoodInfo = [ PetFoodType.UNKNOWN.to!PetFoodType: 0.0 ];
         stackable = true;
-        properties = SpecialProperty.CS;
+        properties = SpecialProperty.OP;
         type = ItemType.Others;
-        remarks = "マイページに入れたら取り出せない";
+        remarks = "クエストで使う";
     }
     auto json = item.toJSON;
     with(json)
@@ -127,9 +127,10 @@ unittest
         assert(json["英名"].str == item.ename.to!string);
         assert(json["info"].str == item.info.to!string);
         assert(json["NPC売却価格"].uinteger == item.price);
-        assert(json["重さ"].floating.approxEqual(0.01));
+        assert(json["重さ"].floating.approxEqual(item.weight));
         assert(json["転送できる"].type == JSON_TYPE.FALSE);
         assert(json["スタックできる"].type == JSON_TYPE.TRUE);
+        assert(json["ペットアイテム"].object == ["不明": JSONValue(0.0)]);
         assert(json["種類"].str == item.type.to!string);
         assert(json["備考"].str == item.remarks.to!string);
     }

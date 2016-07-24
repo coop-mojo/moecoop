@@ -68,43 +68,6 @@ struct Item
         }
         return JSONValue(hash);
     }
-
-    bool opEquals(ref const typeof(this) other) const @safe pure nothrow
-    {
-        auto prop(string p)(in typeof(this) item)
-        {
-            return mixin("item."~p);
-        }
-        foreach(field; FieldNameTuple!(typeof(this)))
-        {
-            static if (field == "weight")
-            {
-                import std.math;
-                if (!prop!field(this).isNaN && !prop!field(other).isNaN &&
-                    !prop!field(this).approxEqual(prop!field(other)))
-                {
-                    return false;
-                }
-                else if (prop!field(this).isNaN ^ prop!field(other).isNaN)
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                if (prop!field(this) != prop!field(other))
-                {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    size_t toHash() const @safe pure nothrow
-    {
-        return name.hashOf;
-    }
 }
 
 unittest

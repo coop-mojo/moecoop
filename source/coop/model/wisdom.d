@@ -305,7 +305,7 @@ auto readBinders(string file)
 unittest
 {
     auto w = assertNotThrown(new Wisdom(SystemResourceBase));
-    assert(w.recipeCategories.equal(["合成"d, "料理", "木工", "薬調合", "裁縫", "装飾細工", "複合", "醸造", "鍛冶"]));
+    assert(w.recipeCategories.equal(["合成"d, "料理", "木工", "特殊", "薬調合", "裁縫", "装飾細工", "複合", "醸造", "鍛冶"]));
     assert(w.binders.equal(["QoAクエスト"d, "アクセサリー", "アクセサリー No.2", "カオス", "家", "家具", "木工", "木工 No.2",
                             "材料/道具", "材料/道具 No.2", "楽器", "罠", "裁縫", "裁縫 No.2", "複製",
                             "鍛冶 No.1", "鍛冶 No.2", "鍛冶 No.3", "鍛冶 No.4", "鍛冶 No.5", "鍛冶 No.6", "鍛冶 No.7",

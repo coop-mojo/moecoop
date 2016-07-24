@@ -103,6 +103,33 @@ struct Item
     }
 }
 
+unittest
+{
+    Item item;
+    with(item)
+    {
+        name = "ヘビの肉";
+        price = 17;
+        weight = 0.04;
+        petFoodInfo = [ PetFoodType.Meat.to!PetFoodType: 0.8 ];
+        stackable = true;
+        type = ItemType.Others;
+    }
+    auto json = item.toJSON;
+    with(json)
+    {
+        import std.stdio;
+        assert(json["英名"].str.empty);
+        assert(json["info"].str.empty);
+        assert(json["NPC売却価格"].uinteger == 17);
+        assert(json["重さ"].floating.approxEqual(0.04));
+        assert(json["転送できる"].type == JSON_TYPE.FALSE);
+        assert(json["スタックできる"].type == JSON_TYPE.TRUE);
+        assert(json["ペットアイテム"].object == ["肉食物": JSONValue(0.8)]);
+        assert(json["種類"].str == "その他");
+    }
+}
+
 auto readItems(string fname)
 {
     auto res = fname.readText.parseJSON;

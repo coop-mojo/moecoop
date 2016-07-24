@@ -108,25 +108,27 @@ unittest
     Item item;
     with(item)
     {
-        name = "ヘビの肉";
-        price = 17;
-        weight = 0.04;
-        petFoodInfo = [ PetFoodType.Meat.to!PetFoodType: 0.8 ];
+        name = "変性コイン";
+        price = 0;
+        weight = 0.01;
+        petFoodInfo = [ PetFoodType.NoEatable.to!PetFoodType: 0.0 ];
         stackable = true;
+        properties = SpecialProperty.CS;
         type = ItemType.Others;
+        remarks = "マイページに入れたら取り出せない";
     }
     auto json = item.toJSON;
     with(json)
     {
-        import std.stdio;
-        assert(json["英名"].str.empty);
-        assert(json["info"].str.empty);
-        assert(json["NPC売却価格"].uinteger == 17);
-        assert(json["重さ"].floating.approxEqual(0.04));
+        assert(json["英名"].str == item.ename.to!string);
+        assert(json["info"].str == item.info.to!string);
+        assert(json["NPC売却価格"].uinteger == item.price);
+        assert(json["重さ"].floating.approxEqual(0.01));
         assert(json["転送できる"].type == JSON_TYPE.FALSE);
         assert(json["スタックできる"].type == JSON_TYPE.TRUE);
-        assert(json["ペットアイテム"].object == ["肉食物": JSONValue(0.8)]);
-        assert(json["種類"].str == "その他");
+        assert(json["ペットアイテム"].object == ["犬も食べない": JSONValue(0.0)]);
+        assert(json["種類"].str == item.type.to!string);
+        assert(json["備考"].str == item.remarks.to!string);
     }
 }
 

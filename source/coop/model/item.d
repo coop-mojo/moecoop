@@ -62,6 +62,10 @@ struct Item
         {
             hash["特殊条件"] = JSONValue(properties.toStrings(false));
         }
+        if (!remarks.empty)
+        {
+            hash["備考"] = JSONValue(remarks.to!string);
+        }
         return JSONValue(hash);
     }
 
@@ -126,7 +130,6 @@ unittest
         assert(json["重さ"].floating.approxEqual(0.01));
         assert(json["転送できる"].type == JSON_TYPE.FALSE);
         assert(json["スタックできる"].type == JSON_TYPE.TRUE);
-        assert(json["ペットアイテム"].object == ["犬も食べない": JSONValue(0.0)]);
         assert(json["種類"].str == item.type.to!string);
         assert(json["備考"].str == item.remarks.to!string);
     }

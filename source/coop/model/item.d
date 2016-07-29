@@ -442,7 +442,7 @@ alias ShipRestriction = ExtendedEnum!(
     //"物まね師",
     Tamer => "テイマー", Wizard => "ウィザード", Priest => "プリースト", Shaman => "シャーマン",
     Enchanter => "エンチャンター",
-    Summoner => "サモナー", Shadow => "シャドウ", //"魔術師", "野生児", "小悪魔",
+    Summoner => "サモナー", Shadow => "シャドウ", Magician => "魔術師", //"野生児", "小悪魔",
     Vendor =>"ベンダー", RockSinger => "ロックシンガー",
     Songsinger => "ソングシンガー", //"スリ",
     Showboat => "目立ちたがり", StreetDancer => "ストリートダンサー",

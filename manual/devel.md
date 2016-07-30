@@ -45,28 +45,28 @@ Windows 環境の X サーバーと、知恵袋が使用している GUI ライ�
 
 - Windows 環境
 ```
-# dub build -c fallback
+$ dub build -c fallback
 ```
 
 - Linux、Mac 環境
 ```
-# dub build
+$ dub build
 ```
 
 ### 実行方法
 - Windows 環境
 ```
-# dub run -c fallback
+$ dub run -c fallback
 ```
 
 - Linux、Mac 環境
 ```
-# dub run
+$ dub run
 ```
 
 ### テスト方法
 ```
-# dub test
+$ dub test
 ```
 
 ### ファイルを編集したい

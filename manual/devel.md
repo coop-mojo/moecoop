@@ -21,7 +21,7 @@
 
 - Windows
   - 事前に、PC の IP アドレスをご確認ください。通常は `ipconfig` で確認できます。
-  - デスクトップにできた `Docker Quickstart Terminal` を開いて、以下の `$` もしくは `#` 以降を入力してください。
+  - デスクトップにできた `Docker Quickstart Terminal` を起動して、以下を入力してください。
 ```
 $ export DISPLAY=$ip:0.0
 $ export PATH=/c/Program\ Files\ \(x86\)/Xming:$PATH

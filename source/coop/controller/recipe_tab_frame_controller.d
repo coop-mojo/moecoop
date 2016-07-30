@@ -1,6 +1,7 @@
 /**
+ * Copyright: Copyright (c) 2016 Mojo
  * Authors: Mojo
- * License: MIT License
+ * License: $(LINK2 https://github.com/coop-mojo/moecoop/blob/master/LICENSE, MIT License)
  */
 module coop.controller.recipe_tab_frame_controller;
 

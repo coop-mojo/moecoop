@@ -1,6 +1,7 @@
 /**
+ * Copyright: Copyright (c) 2016 Mojo
  * Authors: Mojo
- * License: MIT License
+ * License: $(LINK2 https://github.com/coop-mojo/moecoop/blob/master/LICENSE, MIT License)
  */
 module coop.util;
 
@@ -16,25 +17,42 @@ import std.string;
 import std.traits;
 import std.typecons;
 
+/// 各種データファイルが置いてあるディレクトリ
 immutable SystemResourceBase = "resource";
+
+/// ユーザーの設定ファイルが置いてあるのディレクトリ
 immutable UserResourceBase = "userdata";
+
+/// プログラム名
 immutable AppName = "生協の知恵袋"d;
+
+/// バージョン番号
 immutable Version = import("version").chomp;
+
+/// 公式サイト URL
 enum URL = "http://docs.fukuro.coop.moe/";
 
+/**
+ * バージョン番号 `var` がリリースかどうかを返す。
+ * リリース版の番号は、`v.a.b.c` となっている (`a`, `b`, `c` は数字)。
+ * Returns: `var` がリリース版を表していれば `true`、それ以外は `false`
+ */
 @property auto isRelease(in string ver) @safe pure nothrow
 {
     return !ver.canFind("-");
 }
 
+///
 @safe pure nothrow unittest
 {
     assert(!"v1.0.2-2-norelease".isRelease);
     assert("v1.0.2".isRelease);
 }
 
+///
 struct EventHandler(T...)
 {
+    ///
     void opCall(T args) {
         if (proc == Proc.init)
         {
@@ -46,6 +64,7 @@ struct EventHandler(T...)
         }
     }
 
+    ///
     auto opAssign(Proc p) @safe pure nothrow
     {
         proc = p;
@@ -66,6 +85,7 @@ nothrow unittest
     assertNotThrown(eh2(0));
 }
 
+///
 auto indexOf(Range, Elem)(Range r, Elem e)
     if (isInputRange!Range && is(Elem: ElementType!Range) && !isSomeChar!(ElementType!Range))
 {
@@ -73,14 +93,19 @@ auto indexOf(Range, Elem)(Range r, Elem e)
     return elm.empty ? -1 : elm.front[0];
 }
 
+///
 @safe pure nothrow unittest
 {
     assert([1, 2, 3, 4].indexOf(2) == 1);
     assert([1, 2, 3, 4].indexOf(5) == -1);
 }
 
+/**
+ * 双方向マップ
+ */
 struct BiMap(T, U)
 {
+    ///
     this(const T[U] kvs)
     in{
         auto len = kvs.keys.length;
@@ -93,18 +118,21 @@ struct BiMap(T, U)
         bmap = kvs.byKeyValue().map!(kv => tuple(kv.value, kv.key)).assocArray;
     }
 
+    ///
     auto opBinaryRight(string op)(U key)
         @safe const pure nothrow if (op == "in")
     {
         return key in fmap;
     }
 
+    ///
     auto opBinaryRight(string op)(T key)
         @safe const pure nothrow if (op == "in")
     {
         return key in bmap;
     }
 
+    ///
     auto ref opIndex(U k) const pure nothrow
     in {
         assert(k in fmap);
@@ -112,6 +140,7 @@ struct BiMap(T, U)
         return fmap[k];
     }
 
+    ///
     auto ref opIndex(T k) const pure nothrow
     in {
         assert(k in bmap);
@@ -123,6 +152,7 @@ private:
     const U[T] bmap;
 }
 
+///
 struct ExtendedEnum(KVs...)
 {
     mixin(format(q{
@@ -130,12 +160,15 @@ struct ExtendedEnum(KVs...)
                     %s
                 }
             }, [staticMap!(ParamName, KVs)].join(", ")));
+    ///
     enum svalues = [staticMap!(ReturnValue, KVs)];
+    ///
     enum values = mixin("["~[staticMap!(ParamName, KVs)].join(", ")~"]");
 
     int val;
     alias val this;
 
+    ///
     this(int m) @safe nothrow
     in {
         assert(m in bimap);
@@ -143,6 +176,7 @@ struct ExtendedEnum(KVs...)
         val = m;
     }
 
+    ///
     this(S)(S s) @safe nothrow if (isSomeString!S)
     in {
         assert(s in bimap);
@@ -150,6 +184,7 @@ struct ExtendedEnum(KVs...)
         val = bimap[s];
     }
 
+    ///
     auto toString() @safe const nothrow
     {
         return bimap[val];
@@ -180,10 +215,12 @@ private enum ParamName(alias T) = {
 
 version(unittest)
 {
+    ///
     alias util_EEnum = ExtendedEnum!(
         A => "い", B => "ろ", C => "は",
         );
 }
+///
 @safe nothrow unittest
 {
     static assert(util_EEnum.values == [util_EEnum.A, util_EEnum.B, util_EEnum.C]);
@@ -194,6 +231,11 @@ version(unittest)
     assert("い".to!util_EEnum == val);
 }
 
+/**
+ * JSONValue から他の方への変換を行う。
+ * Params: T = 変換後の型
+ *         json = 変換を行う JSONValue
+ */
 auto jto(T)(JSONValue json)
 {
     static if (isSomeString!T || is(T == enum))
@@ -243,20 +285,24 @@ auto jto(T)(JSONValue json)
     }
 }
 
+/// ditto
 auto jto(AA: V[K], V, K)(JSONValue[string] json)
 {
     import std.typecons;
     return json.keys.map!(k => tuple(k.to!K, json[k].jto!V)).assocArray;
 }
 
+/// ditto
 auto jto(Array: T[], T)(JSONValue[] json)
     if (!isSomeString!Array)
 {
     return json.map!(jto!T).array;
 }
 
+///
 @safe nothrow unittest
 {
+    // 各種プリミティブ型への変換
     {
         auto i = 3;
         auto ival = JSONValue(i);
@@ -275,12 +321,14 @@ auto jto(Array: T[], T)(JSONValue[] json)
         assert(assertNotThrown(fval.jto!real) == f);
     }
 
+    // JSONValue(int) -> real への変換
     {
         auto i = 3;
         auto fval = JSONValue(i);
         assert(assertNotThrown(fval.jto!real) == i.to!real);
     }
 
+    // ユーザー定義型への変換
     {
         enum E { A, B, C }
         auto e = E.A;

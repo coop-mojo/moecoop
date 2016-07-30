@@ -2,34 +2,83 @@
 ゼロから始めるドキュメント整備ページにようこそ！
 
 ## 開発環境のインストール方法
-生協では、知恵袋の開発環境をひとまとめにした[生協の知恵袋 裁縫セット](https://hub.docker.com/r/moecoop/docker-fukuro/)を公開しています。
-裁縫セットの利用には[Docker](https://www.docker.com/)が必要です。
+生協では、知恵袋の開発環境をひとまとめにした[生協の知恵袋 お裁縫セット](https://hub.docker.com/r/moecoop/docker-fukuro/)を公開しています。
 
-### Docker のインストール
+### 推奨環境
+- Windows
+  - [Docker toolbox](https://www.docker.com/products/docker-toolbox)
+  - [Xming-mesa](http://www.straightrunning.com/XmingNotes/)
+
+- Linux
+  - [Docker](https://www.docker.com/)
+  - [Xサーバー](https://www.x.org/wiki/)
+      - 通常はどちらも、パッケージ管理システム経由でインストールできます。
+
+- Mac
+  - まだ未検証
 
 ### 裁縫セットの使い方
 
 - Windows
+  - 事前に、PC の IP アドレスをご確認ください。通常は `ipconfig` で確認できます。
+  - デスクトップにできた `Docker Quickstart Terminal` を開いて、以下の `$` もしくは `#` 以降を入力してください。
+```
+$ export DISPLAY=$ip:0.0
+$ export PATH=/c/Program\ Files\ \(x86\)/Xming:$PATH
+$ run Xming :0 -multiwindow -ac -clipboard
+$ docker run -it --rm -e DISPLAY=$DISPLAY moecoop/docker-fukuro
+```
+
 - Linux
+  - 事前に、docker デーモンが動作していることを確認してください。
 ```
 $ xhost local:root
 $ sudo docker run -it --rm -v /tmp/.X11-unix:/tmp/.X11-unix moecoop/docker-fukuro
 ```
 
 - Mac
+  - まだ未検証
 
-## ビルド方法
+### ビルド方法
+Windows 環境の X サーバーと、知恵袋が使用している GUI ライブラリの相性問題のため、
+環境によってビルド方法が若干異なるのでご注意ください。
+
+- Windows 環境
 ```
-$ dub build
+# dub build -c fallback
 ```
 
-## テスト方法
+- Linux、Mac 環境
 ```
-$ dub test
+# dub build
 ```
 
-## データ構造
-## ソース構造
+### 実行方法
+- Windows 環境
+```
+# dub run -c fallback
+```
+
+- Linux、Mac 環境
+```
+# dub run
+```
+
+### テスト方法
+```
+# dub test
+```
+
+### ファイルを編集したい
+- お裁縫セットではエディタは提供していません。以下のように、ローカルから知恵袋のリポジトリを参照できるようにしてから、お好みのエディタで編集してください。
+
+```
+## Windows 環境
+$ sudo docker run -it --rm -v //c/Users/foo/repository:/work -e DISPLAY=$DISPLAY moecoop/docker-fukuro
+
+## Linux 環境
+$ sudo docker run -it --rm -v ~/repository:/work -v /tmp/.X11-unix:/tmp/.X11-unix moecoop/docker-fukuro
+```
 
 ## ライセンス
 ### 生協の知恵袋のライセンスについて
@@ -58,7 +107,10 @@ https://github.com/coop-mojo/moecoop/blob/master/LICENSE
   ライブラリを利用している部分を流用する場合には、これらのライブラリの著作権表示を README のどこかに記載してください。
   libcurl と C/Mimemo は、共に MIT ライセンスです。
 
-### 内部で利用しているソフトウェアのライランスについて
+### 生協の知恵袋 お裁縫セットのライセンスについて
+生協の知恵袋 お裁縫セットのリポジトリ内のファイルは、CC0 のもとで配布されています。詳細は[LICENSE](https://github.com/coop-mojo/docker-fukuro/blob/master/LICENSE)をご覧ください。
+
+### 知恵袋が内部で利用しているソフトウェアのライランスについて
 生協の知恵袋では以下のソフトウェアが利用されています。
 
 - [libcurl](https://curl.haxx.se/)

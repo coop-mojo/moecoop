@@ -45,6 +45,7 @@ abstract class RecipeTabFrameController
             frame_.metaSearchOptionChanged =
             frame_.migemoOptionChanged =
             frame_.categoryChanged =
+            frame_.revOptionChanged =
             frame_.characterChanged =
             frame_.nColumnChanged =
             frame_.sortKeyChanged = {
@@ -156,18 +157,28 @@ private:
     auto matchFunFor(dstring query)
     {
         import std.regex;
+        bool delegate(dstring) fun;
         if (frame_.useMigemo)
         {
             try{
                 auto q = migemo.query(query).regex;
-                return (dstring s) => !s.removechars(r"/[ 　]/").matchFirst(q).empty;
+                fun = (dstring s) => !s.removechars(r"/[ 　]/").matchFirst(q).empty;
             } catch(RegexException e) {
                 // use default matchFun
             }
         }
         else
         {
-            return (dstring s) => !find(s.removechars(r"/[ 　]/"), boyerMooreFinder(query)).empty;
+            fun = (dstring s) => !find(s.removechars(r"/[ 　]/"), boyerMooreFinder(query)).empty;
+        }
+
+        if (frame_.useReverseSearch)
+        {
+            return (dstring s) => wisdom.recipeFor(s).ingredients.keys.any!(ing => fun(ing));
+        }
+        else
+        {
+            return (dstring s) => fun(s);
         }
         assert(false);
     }

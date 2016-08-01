@@ -271,6 +271,11 @@ class RecipeTabFrame: HorizontalLayout
         childById!CheckBox("metaSearch").checked = use;
     }
 
+    @property auto useReverseSearch()
+    {
+        return enforce(childById!CheckBox("revSearch")).checked;
+    }
+
     @property auto useMigemo()
     {
         return childById!CheckBox("migemo").checked;
@@ -308,6 +313,7 @@ class RecipeTabFrame: HorizontalLayout
     EventHandler!() migemoOptionChanged;
     EventHandler!() categoryChanged;
     EventHandler!() characterChanged;
+    EventHandler!() revOptionChanged;
     EventHandler!() nColumnChanged;
     EventHandler!() sortKeyChanged;
     int delegate(size_t, int) tableColumnLength;
@@ -405,6 +411,7 @@ auto recipeListLayout()
                     text: "見たいレシピ"
                 }
                 HorizontalLayout {
+                    id: searchOptions
                     CheckBox {
                         id: metaSearch;
                     }

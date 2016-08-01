@@ -30,6 +30,8 @@ class SkillTabFrameController: RecipeTabFrameController
             items = [EnumMembers!SortOrder][0..$-1];
             selectedItemIndex = 0;
         }
+        auto revSearch = new CheckBox("revSearch", "逆引き検索"d);
+        frame.childById("searchOptions").addChild(revSearch);
     }
 
 protected:

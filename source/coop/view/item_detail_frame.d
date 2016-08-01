@@ -231,6 +231,17 @@ auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
         {
             layout.addElem("装備可能シップ", info.restriction.map!(a => a.to!dstring~"系").join(", "));
         }
+        if (!info.effects.keys.empty)
+        {
+            layout.addElem("追加効果",
+                           info.effects
+                               .byKeyValue
+                               .map!(kv => format("%s: %s%s"d,
+                                                  kv.key,
+                                                  kv.value > 0 ? "+" : "-",
+                                                  kv.value))
+                               .join(", "));
+        }
         break;
     }
     case Asset:{

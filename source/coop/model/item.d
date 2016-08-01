@@ -377,7 +377,7 @@ struct BulletInfo
     real range;
     int angle;
     ShipRestriction[] restriction;
-    real[dstring] skills; // ステータス上の効果
+    real[dstring] skills;
     real[dstring] effects;
     dstring additionalEffect; // 攻撃に用いた時の付加効果
 }

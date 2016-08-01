@@ -458,14 +458,9 @@ alias ShipRestriction = ExtendedEnum!(
     // 生産
     Cook => "料理師",
     //"鍛冶師",
-    Bartender => "バーテンダー",
-    WoodWorker => "木工師",
-    Tailor => "仕立て屋",
-    Drugmaker => "調合師",
-    Decorator => "細工師",
-    //"筆記師",
-    Barber => "調髪師",
-    Cultivator => "栽培師",
+    Bartender => "バーテンダー", WoodWorker => "木工師", Tailor => "仕立て屋",
+    Drugmaker => "調合師", Decorator => "細工師", Scribe => "筆記師",
+    Barber => "調髪師", Cultivator => "栽培師",
 
     // 複合
     Warrior => "ウォーリアー",  Alchemist => "アルケミスト", Forester => "フォレスター",

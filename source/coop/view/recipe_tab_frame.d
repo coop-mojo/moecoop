@@ -273,7 +273,14 @@ class RecipeTabFrame: HorizontalLayout
 
     @property auto useReverseSearch()
     {
-        return enforce(childById!CheckBox("revSearch")).checked;
+        if (auto box = childById!CheckBox("revSearch"))
+        {
+            return box.checked;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     @property auto useMigemo()

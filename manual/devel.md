@@ -6,22 +6,22 @@
 
 ### 推奨環境
 - Windows
-  - [Docker toolbox](https://www.docker.com/products/docker-toolbox)
-  - [Xming-mesa](http://www.straightrunning.com/XmingNotes/)
+    - [Docker toolbox](https://www.docker.com/products/docker-toolbox)
+    - [Xming-mesa](http://www.straightrunning.com/XmingNotes/)
 
 - Linux
-  - [Docker](https://www.docker.com/)
-  - [Xサーバー](https://www.x.org/wiki/)
-      - 通常はどちらも、パッケージ管理システム経由でインストールできます。
+    - [Docker](https://www.docker.com/)
+    - [Xサーバー](https://www.x.org/wiki/)
+        - 通常はどちらも、パッケージ管理システム経由でインストールできます。
 
 - Mac
-  - まだ未検証
+    - まだ未検証
 
 ### 裁縫セットの使い方
 
 - Windows
-  - 事前に、PC の IP アドレスをご確認ください。通常は `ipconfig` で確認できます。
-  - デスクトップにできた `Docker Quickstart Terminal` を起動して、以下を入力してください。
+    - 事前に、PC の IP アドレスをご確認ください。通常は `ipconfig` で確認できます。
+    - デスクトップにできた `Docker Quickstart Terminal` を起動して、以下を入力してください。
 ```
 $ export DISPLAY=$ip:0.0
 $ export PATH=/c/Program\ Files\ \(x86\)/Xming:$PATH
@@ -30,14 +30,14 @@ $ docker run -it --rm -e DISPLAY=$DISPLAY moecoop/docker-fukuro
 ```
 
 - Linux
-  - 事前に、docker デーモンが動作していることを確認してください。
+    - 事前に、docker デーモンが動作していることを確認してください。
 ```
 $ xhost local:root
 $ sudo docker run -it --rm -v /tmp/.X11-unix:/tmp/.X11-unix moecoop/docker-fukuro
 ```
 
 - Mac
-  - まだ未検証
+    - まだ未検証
 
 ### ビルド方法
 Windows 環境の X サーバーと、知恵袋が使用している GUI ライブラリの相性問題のため、

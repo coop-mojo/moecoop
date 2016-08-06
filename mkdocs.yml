@@ -8,7 +8,6 @@ site_favicon: coop-icon.ico
 extra_css:
   - css/custom.css
 
-docs_dir: manual
 use_directory_urls: true
 pages:
   - はじめに: index.md

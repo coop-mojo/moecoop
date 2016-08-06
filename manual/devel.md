@@ -84,6 +84,7 @@ $ sudo docker run -it --rm -v ~/repository:/work -v /tmp/.X11-unix:/tmp/.X11-uni
 ### 生協の知恵袋のライセンスについて
 生協の知恵袋はMIT ライセンスのもとで配布されています。詳細は[LICENSE](https://github.com/coop-mojo/moecoop/blob/master/LICENSE)をご覧ください。
 大雑把な説明をすると、MITライセンスは以下の特徴を持ったライセンスです。
+
 - コピー許可
 - 再配布許可
 - 改変許可
@@ -93,6 +94,7 @@ $ sudo docker run -it --rm -v ~/repository:/work -v /tmp/.X11-unix:/tmp/.X11-uni
 ただし改変や再配布、ソースソード(`resource`以下の JSON ファイルも) を利用する場合には、著作権表示をどこかに掲載してください。
 
 よくわからない場合には、
+
 - 再配布するファイル群には[LICENSE](https://github.com/coop-mojo/moecoop/blob/master/LICENSE)も含めてください。
     - ここで配布しているものをそのまま再配布する場合には、特に気にしなくても大丈夫です。
 - 別プログラム中でソースコードを利用した場合には、例えば以下の文言を README のどこかに記載してください。

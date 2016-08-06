@@ -130,7 +130,7 @@ class Wisdom {
 private:
     auto readBinderList(string basedir)
     {
-        enforce(basedir.exists);
+        enforce(basedir.exists, basedir ~ " does not exist!");
         enforce(basedir.isDir);
 
         auto dir = buildPath(basedir, "バインダー");

@@ -71,7 +71,15 @@ class MainFrame: AppFrame
 
         binderTab.controller.showRecipeNames;
 
-        statusLine.setStatusText(" "d);
+        debug
+        {
+            enum defaultMsg = "デバッグ凡例: 赤 = レシピ情報なし、青 = アイテム情報なし、下線 = アイテム個別情報なし";
+        }
+        else
+        {
+            enum defaultMsg = " "d;
+        }
+        statusLine.setStatusText(defaultMsg);
     }
 
     @property auto controller()

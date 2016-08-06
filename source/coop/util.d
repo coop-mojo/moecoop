@@ -19,10 +19,10 @@ import std.traits;
 import std.typecons;
 
 /// 各種データファイルが置いてあるディレクトリ
-immutable SystemResourceBase = buildPath(import("rootdir").chomp, "resource");
+immutable SystemResourceBase = buildPath(import("rootdir").strip, "resource");
 
 /// ユーザーの設定ファイルが置いてあるのディレクトリ
-immutable UserResourceBase = buildPath(import("rootdir").chomp, "userdata");
+immutable UserResourceBase = buildPath(import("rootdir").strip, "userdata");
 
 /// プログラム名
 immutable AppName = "生協の知恵袋"d;

@@ -13,6 +13,7 @@ import std.exception;
 import std.file;
 import std.json;
 import std.path;
+import std.range;
 import std.typecons;
 
 import coop.model.item;
@@ -183,11 +184,15 @@ private:
         enforce(sysBase.isDir);
 
         auto dir = buildPath(sysBase, "アイテム");
-        if (!dir.exists)
+        auto wDir = buildPath(dir, "武器");
+        auto dirs = [dir, wDir];
+        if (!dirs.all!exists)
         {
             return typeof(itemList).init;
         }
-        return dirEntries(dir, "*.json", SpanMode.breadth)
+        return dirs.filter!exists
+            .map!(d => dirEntries(d, "*.json", SpanMode.breadth))
+            .joiner
             .map!(s => s.readItems)
             .array
             .joiner

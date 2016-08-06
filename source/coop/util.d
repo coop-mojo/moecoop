@@ -21,7 +21,7 @@ import std.typecons;
 /// 各種データファイルが置いてあるディレクトリ
 immutable SystemResourceBase = buildPath(import("rootdir").strip, "resource");
 
-/// ユーザーの設定ファイルが置いてあるのディレクトリ
+/// ユーザーの設定ファイルが置いてあるディレクトリ
 immutable UserResourceBase = buildPath(import("rootdir").strip, "userdata");
 
 /// プログラム名

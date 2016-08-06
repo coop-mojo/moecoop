@@ -6,7 +6,7 @@ site_author: もじょんぬ
 copyright: Copyright (c) 2016, もじょんぬ
 site_favicon: coop-icon.ico
 extra_css:
-  - _static/custom.css
+  - css/custom.css
 
 docs_dir: manual
 use_directory_urls: false

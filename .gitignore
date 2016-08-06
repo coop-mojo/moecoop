@@ -13,3 +13,4 @@ source/icon.res
 *.lst
 views/version
 manual/_build
+site/

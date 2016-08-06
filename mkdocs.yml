@@ -1,0 +1,21 @@
+site_name: 生協の知恵袋
+site_description: 生協の知恵袋は、Master of Epic のバインダー管理やアイテム・レシピ情報を見るためのツールです。
+site_url: http://docs.fukuro.coop.moe
+repo_url: https://github.com/coop-mojo/moecoop
+site_author: もじょんぬ
+copyright: Copyright (c) 2016, もじょんぬ
+site_favicon: coop-icon.ico
+extra_css:
+  - _static/custom.css
+
+docs_dir: manual
+use_directory_urls: false
+pages:
+  - はじめに: index.md
+  - バインダータブ: binder.md
+  - スキルタブ: skill.md
+  - レシピ材料タブ: material.md
+  - オプション画面: option.md
+  - Migemo 検索について: migemo.md
+  - 開発者向け: devel.md
+theme: readthedocs

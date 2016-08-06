@@ -157,7 +157,7 @@ private:
         }
         return dirEntries(dir, "*.json", SpanMode.breadth)
             .map!(s => s.readRecipes)
-            .assocArray;
+            .checkedAssocArray;
     }
 
     auto genRRecipeList(Recipe[] recipes) const pure
@@ -192,7 +192,7 @@ private:
             .map!(s => s.readItems)
             .array
             .joiner
-            .assocArray;
+            .checkedAssocArray;
     }
 
     auto readFoodList(string sysBase)
@@ -208,7 +208,7 @@ private:
         return dirEntries(dir, "*.json", SpanMode.breadth)
             .map!(s => s.readFoods)
             .joiner
-            .assocArray;
+            .checkedAssocArray;
     }
 
     auto readDrinkList(string sysBase)
@@ -221,7 +221,7 @@ private:
         {
             return (FoodInfo[dstring]).init;
         }
-        return file.readFoods.assocArray;
+        return file.readFoods.checkedAssocArray;
     }
 
     auto readLiquorList(string sysBase)
@@ -234,7 +234,7 @@ private:
         {
             return (FoodInfo[dstring]).init;
         }
-        return buildPath(sysBase, "飲み物", "酒.json").readFoods.assocArray;
+        return buildPath(sysBase, "飲み物", "酒.json").readFoods.checkedAssocArray;
     }
 
     auto readWeaponList(string sysBase)
@@ -247,7 +247,7 @@ private:
         {
             return (WeaponInfo[dstring]).init;
         }
-        return buildPath(sysBase, "武器", "武器.json").readWeapons.assocArray;
+        return buildPath(sysBase, "武器", "武器.json").readWeapons.checkedAssocArray;
     }
 
     auto readBulletList(string sysBase)
@@ -260,7 +260,7 @@ private:
         {
             return (BulletInfo[dstring]).init;
         }
-        return buildPath(sysBase, "武器", "弾.json").readBullets.assocArray;
+        return buildPath(sysBase, "武器", "弾.json").readBullets.checkedAssocArray;
     }
 
     auto readFoodEffectList(string sysBase)
@@ -276,7 +276,7 @@ private:
         return dirEntries(dir, "*.json", SpanMode.breadth)
             .map!(s => s.readFoodEffects)
             .joiner
-            .assocArray;
+            .checkedAssocArray;
     }
 
     /// データが保存してあるパス

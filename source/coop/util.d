@@ -343,6 +343,44 @@ auto jto(Array: T[], T)(JSONValue[] json)
     }
 }
 
+/**
+ * デバッグビルド時に、key の重複時にエラー出力にその旨を表示する std.array.assocArray
+ * リリースビルド時には std.array.assocArray をそのまま呼び出す。
+ */
+auto checkedAssocArray(Range)(Range r) if (isInputRange!Range)
+{
+    debug
+    {
+        alias E = ElementType!Range;
+        static assert(isTuple!E, "assocArray: argument must be a range of tuples");
+        static assert(E.length == 2, "assocArray: tuple dimension must be 2");
+        alias KeyType = E.Types[0];
+        alias ValueType = E.Types[1];
+
+        ValueType[KeyType] ret;
+        return r.fold!((r, kv) {
+                auto key = kv[0];
+                auto val = kv[1];
+                if (auto it = key in r)
+                {
+                    import std.stdio;
+                    stderr.writef("キーが重複しています: %s", key);
+                    static if (hasMember!(ValueType, "file") && is(typeof(ValueType.init.file) == string))
+                    {
+                        stderr.writef(" (%s, %s)", (*it).file, val.file);
+                    }
+                    stderr.writeln;
+                }
+                r[key] = val;
+                return r;
+            })(ret);
+    }
+    else
+    {
+        return r.assocArray;
+    }
+}
+
 version(D_Coverage)
 {
     version(unittest)

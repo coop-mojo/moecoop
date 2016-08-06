@@ -41,6 +41,9 @@ struct Item
     dstring remarks;
     ItemType type;
 
+    /// デバッグ用。このアイテム情報が収録されているファイル名
+    string file;
+
     auto toJSON() const
     {
         auto hash = [
@@ -107,10 +110,14 @@ auto readItems(string fname)
     auto items = res.object;
     return items.keys.map!(key =>
                            tuple(key.to!dstring,
-                                 key.toItem(items[key].object)));
+                                 key.toItem(items[key].object,
+                                            fname)));
 }
 
-auto toItem(string s, JSONValue[string] json)
+/**
+ * アイテム s の情報を、ファイル fname に書かれている json から読み込む
+ */
+auto toItem(string s, JSONValue[string] json, string fname)
 {
     Item item;
     with(item)
@@ -137,6 +144,7 @@ auto toItem(string s, JSONValue[string] json)
             properties = (*props).array.toSpecialProperties;
         }
         type = json["種類"].jto!ItemType;
+        file = fname;
     }
     return item;
 }

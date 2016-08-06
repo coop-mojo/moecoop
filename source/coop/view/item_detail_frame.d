@@ -242,6 +242,10 @@ auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
                                                   kv.value))
                                .join(", "));
         }
+        if (!info.additionalEffect.empty)
+        {
+            layout.addElem("付与効果", info.additionalEffect);
+        }
         break;
     }
     case Asset:{

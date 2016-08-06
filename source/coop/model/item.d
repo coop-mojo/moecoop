@@ -379,7 +379,7 @@ struct BulletInfo
     ShipRestriction[] restriction;
     real[dstring] skills;
     real[dstring] effects;
-    dstring additionalEffect; // 攻撃に用いた時の付加効果
+    dstring additionalEffect;
 }
 
 auto readBullets(string fname)
@@ -405,10 +405,10 @@ auto toBulletInfo(JSONValue[string] json)
         {
             effects = (*f).jto!(real[dstring]);
         }
-        // if (auto af = "付与効果" in json)
-        // {
-        //     additionalEffect = (*af).jto!(int[dstring]);
-        // }
+        if (auto af = "付与効果" in json)
+        {
+            additionalEffect = (*af).jto!dstring;
+        }
 
         if (auto rest = "使用可能シップ" in json)
         {

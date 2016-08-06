@@ -9,7 +9,7 @@ extra_css:
   - css/custom.css
 
 docs_dir: manual
-use_directory_urls: false
+use_directory_urls: true
 pages:
   - はじめに: index.md
   - バインダータブ: binder.md

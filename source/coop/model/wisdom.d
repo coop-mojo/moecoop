@@ -184,15 +184,11 @@ private:
         enforce(sysBase.isDir);
 
         auto dir = buildPath(sysBase, "アイテム");
-        auto wDir = buildPath(dir, "武器");
-        auto dirs = [dir, wDir];
-        if (!dirs.all!exists)
+        if (!dir.exists)
         {
             return typeof(itemList).init;
         }
-        return dirs.filter!exists
-            .map!(d => dirEntries(d, "*.json", SpanMode.breadth))
-            .joiner
+        return dirEntries(dir, "*.json", SpanMode.breadth)
             .map!(s => s.readItems)
             .array
             .joiner

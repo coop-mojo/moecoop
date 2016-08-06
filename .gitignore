@@ -12,4 +12,5 @@ docs/
 source/icon.res
 *.lst
 views/version
+views/rootdir
 site/

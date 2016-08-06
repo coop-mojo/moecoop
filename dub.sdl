@@ -18,6 +18,7 @@ copyFiles "libs/windows/x86_64/libcurl.dll" platform="windows-x86_64"
 sourceFiles "source/icon.res" platform="windows"
 preBuildCommands "rc source/icon.rc" platform="windows"
 preBuildCommands "git describe > views/version"
+preBuildCommands "echo $PACKAGE_DIR > views/rootdir"
 
 configuration "application" {
     targetType "executable"

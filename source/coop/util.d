@@ -12,16 +12,17 @@ import std.exception;
 import std.format;
 import std.json;
 import std.meta;
+import std.path;
 import std.range;
 import std.string;
 import std.traits;
 import std.typecons;
 
 /// 各種データファイルが置いてあるディレクトリ
-immutable SystemResourceBase = "resource";
+immutable SystemResourceBase = buildPath(import("rootdir").chomp, "resource");
 
 /// ユーザーの設定ファイルが置いてあるのディレクトリ
-immutable UserResourceBase = "userdata";
+immutable UserResourceBase = buildPath(import("rootdir").chomp, "userdata");
 
 /// プログラム名
 immutable AppName = "生協の知恵袋"d;

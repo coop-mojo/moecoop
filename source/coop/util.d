@@ -34,7 +34,7 @@ immutable Version = import("version").chomp;
 enum URL = "http://docs.fukuro.coop.moe/";
 
 /**
- * バージョン番号 `var` がリリースかどうかを返す。
+ * バージョン番号 `var` がリリース版を表しているかを返す。
  * リリース版の番号は、`v.a.b.c` となっている (`a`, `b`, `c` は数字)。
  * Returns: `var` がリリース版を表していれば `true`、それ以外は `false`
  */

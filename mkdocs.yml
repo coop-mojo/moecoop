@@ -11,7 +11,7 @@ extra_css:
 docs_dir: manual
 use_directory_urls: false
 pages:
-  - はじめに: README.md
+  - はじめに: index.md
   - バインダータブ: binder.md
   - スキルタブ: skill.md
   - レシピ材料タブ: material.md

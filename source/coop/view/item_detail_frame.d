@@ -195,7 +195,7 @@ auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
             layout.addElem("付与効果",
                            info.additionalEffect
                                .byKeyValue
-                               .map!(kv => format("%s (%s)"d, kv.key, kv.value))
+                               .map!(kv => format("%s: %s%%"d, kv.key, kv.value))
                                .join(", "));
         }
 
@@ -209,6 +209,11 @@ auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
                                                   kv.value > 0 ? "+" : "",
                                                   kv.value))
                                .join(", "));
+        }
+
+        if (!info.specials.empty)
+        {
+            layout.addElem("効果アップ", info.specials[].join(", "));
         }
         break;
     }

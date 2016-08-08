@@ -242,12 +242,15 @@ private:
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
 
-        auto file = buildPath(sysBase, "武器", "武器.json");
-        if (!file.exists)
+        auto dir = buildPath(sysBase, "武器", "武器");
+        if (!dir.exists)
         {
             return (WeaponInfo[dstring]).init;
         }
-        return buildPath(sysBase, "武器", "武器.json").readWeapons.checkedAssocArray;
+        return dirEntries(dir, "*.json", SpanMode.breadth)
+            .map!readWeapons
+            .joiner
+            .checkedAssocArray;
     }
 
     auto readBulletList(string sysBase)

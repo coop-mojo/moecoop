@@ -180,7 +180,8 @@ struct ExtendedEnum(KVs...)
     ///
     this(S)(S s) @safe nothrow if (isSomeString!S)
     in {
-        assert(s in bimap);
+        import std.format;
+        assert(s in bimap, format("%s は EEnum %s に含まれていません", s, bimap));
     } body {
         val = bimap[s];
     }

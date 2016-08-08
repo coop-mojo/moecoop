@@ -7,6 +7,7 @@ module coop.model.item;
 
 import std.algorithm;
 import std.conv;
+import std.container;
 import std.exception;
 import std.file;
 import std.json;
@@ -316,6 +317,7 @@ struct WeaponInfo
     int exhaustion;
     real[dstring] effects;
     int[dstring] additionalEffect;
+    RedBlackTree!dstring specials;
 }
 
 auto readWeapons(string fname)
@@ -352,6 +354,12 @@ auto toWeaponInfo(JSONValue[string] json)
         if (auto af = "付与効果" in json)
         {
             additionalEffect = (*af).jto!(int[dstring]);
+        }
+
+        specials = new RedBlackTree!dstring;
+        if (auto sp = "効果アップ" in json)
+        {
+            specials.insert((*sp).jto!(dstring[]));
         }
 
         if (auto rest = "使用可能シップ" in json)

@@ -318,6 +318,8 @@ struct WeaponInfo
     real[dstring] effects;
     int[dstring] additionalEffect;
     RedBlackTree!dstring specials;
+    bool canMagicCharged;
+    bool canElementCharged;
 }
 
 auto readWeapons(string fname)
@@ -370,6 +372,8 @@ auto toWeaponInfo(JSONValue[string] json)
         {
             restriction = [ShipRestriction.Any.to!ShipRestriction];
         }
+        canMagicCharged = json["魔法チャージ"].jto!bool;
+        canElementCharged = json["属性チャージ"].jto!bool;
     }
     return info;
 }
@@ -449,7 +453,7 @@ alias ShipRestriction = ExtendedEnum!(
     UNKNOWN => "不明", Any => "なし",
     // 基本シップ
     // 熟練
-    Puncher => "パンチャー", //"剣士",
+    Puncher => "パンチャー", Swordsman => "剣士",
     Macer => "メイサー",
     Lancer => "ランサー", Gunner => "ガンナー", Archer => "アーチャー",
     Guardsman => "ガーズマン",

@@ -215,6 +215,15 @@ auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
         {
             layout.addElem("効果アップ", info.specials[].join(", "));
         }
+
+        if (info.canMagicCharged)
+        {
+            layout.addElem("魔法チャージ", "可能");
+        }
+        if (info.canElementCharged)
+        {
+            layout.addElem("属性チャージ", "可能");
+        }
         break;
     }
     case Armor:{

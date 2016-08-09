@@ -8,7 +8,7 @@ env:
   - ARCH=x86_64
 
 before_install:
-  - dub fetch --unshallow
+  - git fetch --unshallow
   - dub fetch doveralls
 
 script:

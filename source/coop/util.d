@@ -365,13 +365,12 @@ auto checkedAssocArray(Range)(Range r) if (isInputRange!Range)
                 auto val = kv[1];
                 if (auto it = key in r)
                 {
-                    import std.stdio;
-                    stderr.writef("キーが重複しています: %s", key);
+                    import dlangui.core.logger;
+                    Log.fd("キーが重複しています: %s", key);
                     static if (hasMember!(ValueType, "file") && is(typeof(ValueType.init.file) == string))
                     {
-                        stderr.writef(" (%s, %s)", (*it).file, val.file);
+                        Log.fd(" (%s, %s)", (*it).file, val.file);
                     }
-                    stderr.writeln;
                 }
                 r[key] = val;
                 return r;

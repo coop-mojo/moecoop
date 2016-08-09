@@ -139,7 +139,7 @@ private:
             return typeof(binderList).init;
         }
         return dirEntries(dir, "*.json", SpanMode.breadth)
-            .map!(s => s.readBinders)
+            .map!readBinders
             .array
             .joiner
             .assocArray;
@@ -156,7 +156,7 @@ private:
             return typeof(recipeList).init;
         }
         return dirEntries(dir, "*.json", SpanMode.breadth)
-            .map!(s => s.readRecipes)
+            .map!readRecipes
             .checkedAssocArray;
     }
 
@@ -189,7 +189,7 @@ private:
             return typeof(itemList).init;
         }
         return dirEntries(dir, "*.json", SpanMode.breadth)
-            .map!(s => s.readItems)
+            .map!readItems
             .array
             .joiner
             .checkedAssocArray;
@@ -206,7 +206,7 @@ private:
             return (FoodInfo[dstring]).init;
         }
         return dirEntries(dir, "*.json", SpanMode.breadth)
-            .map!(s => s.readFoods)
+            .map!readFoods
             .joiner
             .checkedAssocArray;
     }
@@ -277,7 +277,7 @@ private:
             return typeof(foodEffectList).init;
         }
         return dirEntries(dir, "*.json", SpanMode.breadth)
-            .map!(s => s.readFoodEffects)
+            .map!readFoodEffects
             .joiner
             .checkedAssocArray;
     }

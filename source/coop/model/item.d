@@ -320,6 +320,9 @@ struct WeaponInfo
     RedBlackTree!dstring specials;
     bool canMagicCharged;
     bool canElementCharged;
+
+    /// デバッグ用。このアイテム情報が収録されているファイル名
+    string file;
 }
 
 auto readWeapons(string fname)
@@ -329,10 +332,10 @@ auto readWeapons(string fname)
     auto weapons = res.object;
     return weapons.keys.map!(key =>
                              tuple(key.to!dstring,
-                                   weapons[key].object.toWeaponInfo));
+                                   weapons[key].object.toWeaponInfo(fname)));
 }
 
-auto toWeaponInfo(JSONValue[string] json)
+auto toWeaponInfo(JSONValue[string] json, string fname)
 {
     WeaponInfo info;
     with(info)
@@ -374,6 +377,8 @@ auto toWeaponInfo(JSONValue[string] json)
         }
         canMagicCharged = json["魔法チャージ"].jto!bool;
         canElementCharged = json["属性チャージ"].jto!bool;
+
+        file = fname;
     }
     return info;
 }

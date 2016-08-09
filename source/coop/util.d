@@ -13,7 +13,7 @@ import std.traits;
 /// 各種データファイルが置いてあるディレクトリ
 immutable SystemResourceBase = "resource";
 
-/// ユーザーの設定ファイルが置いてあるのディレクトリ
+/// ユーザーの設定ファイルが置いてあるディレクトリ
 immutable UserResourceBase = "userdata";
 
 /// プログラム名

@@ -5,17 +5,10 @@
  */
 module coop.util;
 
-import std.algorithm;
-import std.array;
-import std.conv;
-import std.exception;
-import std.format;
 import std.json;
-import std.meta;
 import std.range;
 import std.string;
 import std.traits;
-import std.typecons;
 
 /// 各種データファイルが置いてあるディレクトリ
 immutable SystemResourceBase = "resource";
@@ -39,6 +32,7 @@ enum URL = "http://docs.fukuro.coop.moe/";
  */
 @property auto isRelease(in string ver) @safe pure nothrow
 {
+    import std.algorithm;
     return !ver.canFind("-");
 }
 
@@ -77,6 +71,7 @@ private:
 
 nothrow unittest
 {
+    import std.exception;
     EventHandler!int eh1;
     assertNotThrown(eh1(0));
 
@@ -89,6 +84,7 @@ nothrow unittest
 auto indexOf(Range, Elem)(Range r, Elem e)
     if (isInputRange!Range && is(Elem: ElementType!Range) && !isSomeChar!(ElementType!Range))
 {
+    import std.algorithm;
     auto elm = r.enumerate.find!"a[1] == b"(e);
     return elm.empty ? -1 : elm.front[0];
 }
@@ -108,12 +104,15 @@ struct BiMap(T, U)
     ///
     this(const T[U] kvs)
     in{
+        import std.algorithm;
         auto len = kvs.keys.length;
         auto keys = kvs.keys.sort().uniq.array;
         assert(keys.length == len);
         auto vals = kvs.values.dup.sort().uniq.array;
         assert(vals.length == len);
     } body {
+        import std.algorithm;
+        import std.typecons;
         fmap = kvs;
         bmap = kvs.byKeyValue().map!(kv => tuple(kv.value, kv.key)).assocArray;
     }
@@ -155,6 +154,7 @@ private:
 ///
 struct ExtendedEnum(KVs...)
 {
+    import std.meta;
     mixin(format(q{
                 enum{
                     %s
@@ -224,6 +224,8 @@ version(unittest)
 ///
 @safe nothrow unittest
 {
+    import std.conv;
+    import std.exception;
     static assert(util_EEnum.values == [util_EEnum.A, util_EEnum.B, util_EEnum.C]);
     static assert(util_EEnum.svalues == ["い", "ろ", "は"]);
 
@@ -239,6 +241,8 @@ version(unittest)
  */
 auto jto(T)(JSONValue json)
 {
+    import std.conv;
+    import std.exception;
     static if (isSomeString!T || is(T == enum))
     {
         enforce(json.type == JSON_TYPE.STRING);
@@ -289,6 +293,8 @@ auto jto(T)(JSONValue json)
 /// ditto
 auto jto(AA: V[K], V, K)(JSONValue[string] json)
 {
+    import std.algorithm;
+    import std.conv;
     import std.typecons;
     return json.keys.map!(k => tuple(k.to!K, json[k].jto!V)).assocArray;
 }
@@ -297,12 +303,16 @@ auto jto(AA: V[K], V, K)(JSONValue[string] json)
 auto jto(Array: T[], T)(JSONValue[] json)
     if (!isSomeString!Array)
 {
+    import std.algorithm;
     return json.map!(jto!T).array;
 }
 
 ///
 @safe nothrow unittest
 {
+    import std.conv;
+    import std.exception;
+
     // 各種プリミティブ型への変換
     {
         auto i = 3;
@@ -352,6 +362,9 @@ auto checkedAssocArray(Range)(Range r) if (isInputRange!Range)
 {
     debug
     {
+        import std.algorithm;
+        import std.traits;
+        import std.typecons;
         alias E = ElementType!Range;
         static assert(isTuple!E, "assocArray: argument must be a range of tuples");
         static assert(E.length == 2, "assocArray: tuple dimension must be 2");

@@ -30,16 +30,27 @@ struct Item
         petFoodInfo = assumeWontThrow(petFoodInfo.dup);
     }
 
+    /// アイテム名
     dstring name;
+    /// 英語名
     dstring ename;
+    /// 重さ
     real weight;
+    /// NPC 売却価格
     uint price;
+    /// info
     dstring info;
+    /// 特殊条件
     ushort properties;
+    /// 転送可能かどうか
     bool transferable;
+    /// スタックできるかどうか
     bool stackable;
+    /// ペットアイテム
     real[PetFoodType] petFoodInfo;
+    /// 備考
     dstring remarks;
+    /// アイテム種別
     ItemType type;
 
     /// デバッグ用。このアイテム情報が収録されているファイル名
@@ -305,20 +316,35 @@ auto toFoodEffect(string s, JSONValue[string] json) pure
 
 struct WeaponInfo
 {
+    /// ダメージ
     real[Grade] damage;
+    /// 攻撃間隔
     int duration;
+    /// 有効レンジ
     real range;
+    /// 必要スキル
     real[dstring] skills;
+    /// 両手持ちかどうか
     bool isDoubleHands;
+    /// 装備スロット
     WeaponSlot slot;
+    /// 使用可能シップ
     ShipRestriction[] restriction;
+    /// 素材
     Material material;
+    /// 消耗タイプ
     ExhaustionType type;
+    /// 消耗度
     int exhaustion;
+    /// 追加効果
     real[dstring] effects;
+    /// 付与効果
     int[dstring] additionalEffect;
+    /// 効果アップ
     RedBlackTree!dstring specials;
+    /// 魔法チャージ可能かどうか
     bool canMagicCharged;
+    /// 属性チャージ可能かどうか
     bool canElementCharged;
 
     /// デバッグ用。このアイテム情報が収録されているファイル名
@@ -385,15 +411,27 @@ auto toWeaponInfo(JSONValue[string] json, string fname)
 
 struct ArmorInfo
 {
+    /// アーマークラス
     real[Grade] AC;
+    /// 必要スキル
     real[dstring] skills;
+    /// 装備スロット
     ArmorSlot slot;
+    /// 使用可能シップ
     ShipRestriction[] restriction;
+    /// 素材
     Material material;
+    /// 消耗タイプ
     ExhaustionType type;
+    /// 消耗度
     int exhaustion;
+    /// 追加効果
     real[dstring] effects;
+    /// 付加効果
     dstring additionalEffect;
+
+    /// デバッグ用。このアイテム情報が収録されているファイル名
+    string file;
 }
 
 struct BulletInfo

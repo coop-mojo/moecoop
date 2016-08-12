@@ -61,7 +61,7 @@ class Wisdom {
             extraInfoList[Drink.to!ItemType] = readDrinkList(baseDir_).to!(ExtraInfo[dstring]);
             extraInfoList[Liquor.to!ItemType] = readLiquorList(baseDir_).to!(ExtraInfo[dstring]);
             extraInfoList[Weapon.to!ItemType] = readWeaponList(baseDir_).to!(ExtraInfo[dstring]);
-            extraInfoList[Armor.to!ItemType] = (ExtraInfo[dstring]).init;
+            extraInfoList[Armor.to!ItemType] = readArmorList(baseDir_).to!(ExtraInfo[dstring]);
             extraInfoList[Bullet.to!ItemType] = readBulletList(baseDir_).to!(ExtraInfo[dstring]);
         }
         itemList = readItemList(baseDir_);
@@ -250,6 +250,22 @@ private:
         }
         return dirEntries(dir, "*.json", SpanMode.breadth)
             .map!readWeapons
+            .joiner
+            .checkedAssocArray;
+    }
+
+    auto readArmorList(string sysBase)
+    {
+        enforce(sysBase.exists);
+        enforce(sysBase.isDir);
+
+        auto dir = buildPath(sysBase, "防具");
+        if (!dir.exists)
+        {
+            return (ArmorInfo[dstring]).init;
+        }
+        return dirEntries(dir, "*.json", SpanMode.breadth)
+            .map!readArmors
             .joiner
             .checkedAssocArray;
     }

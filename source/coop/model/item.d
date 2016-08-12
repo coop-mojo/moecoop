@@ -433,9 +433,66 @@ struct ArmorInfo
     RedBlackTree!dstring specials;
     /// 魔法チャージ可能かどうか
     bool canMagicCharged;
+    /// 属性チャージ可能かどうか
+    bool canElementCharged;
 
     /// デバッグ用。このアイテム情報が収録されているファイル名
     string file;
+}
+
+auto readArmors(string fname)
+{
+    auto res = fname.readText.parseJSON;
+    enforce(res.type == JSON_TYPE.OBJECT);
+    auto armors = res.object;
+    return armors.keys.map!(key =>
+                             tuple(key.to!dstring,
+                                   armors[key].object.toArmorInfo(fname)));
+}
+
+auto toArmorInfo(JSONValue[string] json, string fname)
+{
+    ArmorInfo info;
+    with(info)
+    {
+        AC = json["アーマークラス"].jto!(real[Grade]);
+        skills = json["必要スキル"].jto!(real[dstring]);
+        slot = json["装備箇所"].jto!ArmorSlot;
+        material = json["素材"].jto!Material;
+        if (auto t = "消耗タイプ" in json)
+        {
+            type = (*t).jto!ExhaustionType;
+        }
+        exhaustion = json["耐久"].jto!int;
+        if (auto f = "追加効果" in json)
+        {
+            effects = (*f).jto!(real[dstring]);
+        }
+        if (auto af = "付加効果" in json)
+        {
+            additionalEffect = (*af).jto!dstring;
+        }
+
+        specials = new RedBlackTree!dstring;
+        if (auto sp = "効果アップ" in json)
+        {
+            specials.insert((*sp).jto!(dstring[]));
+        }
+
+        if (auto rest = "使用可能シップ" in json)
+        {
+            restriction = (*rest).jto!(ShipRestriction[]);
+        }
+        else
+        {
+            restriction = [ShipRestriction.Any.to!ShipRestriction];
+        }
+        canMagicCharged = json["魔法チャージ"].jto!bool;
+        canElementCharged = json["属性チャージ"].jto!bool;
+
+        file = fname;
+    }
+    return info;
 }
 
 struct BulletInfo

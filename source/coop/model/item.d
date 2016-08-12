@@ -5,19 +5,10 @@
  */
 module coop.model.item;
 
-import std.algorithm;
-import std.conv;
-import std.container;
-import std.exception;
-import std.file;
-import std.json;
-import std.math;
-import std.range;
-import std.traits;
-import std.typecons;
-import std.variant;
+import std.json: JSONValue;
+import std.variant: Algebraic;
 
-import coop.util;
+import coop.util: ExtendedEnum;
 
 /// アイテムの追加情報
 alias ExtraInfo = Algebraic!(FoodInfo, WeaponInfo, ArmorInfo, BulletInfo, ExpendableInfo);
@@ -27,6 +18,7 @@ struct Item
 {
     this(this) @safe pure nothrow
     {
+        import std.exception: assumeWontThrow;
         petFoodInfo = assumeWontThrow(petFoodInfo.dup);
     }
 
@@ -58,6 +50,10 @@ struct Item
 
     auto toJSON() const
     {
+        import std.conv: to;
+        import std.math: isNaN;
+        import std.range: empty;
+
         auto hash = [
             "英名": JSONValue(ename.to!string),
             "NPC売却価格": JSONValue(price),
@@ -88,6 +84,8 @@ struct Item
 
 unittest
 {
+    import std.conv: to;
+
     Item item;
     with(item)
     {
@@ -103,6 +101,9 @@ unittest
     auto json = item.toJSON;
     with(json)
     {
+        import std.json: JSON_TYPE;
+        import std.math: approxEqual;
+
         assert(json["英名"].str == item.ename.to!string);
         assert(json["info"].str == item.info.to!string);
         assert(json["NPC売却価格"].uinteger == item.price);
@@ -117,6 +118,13 @@ unittest
 
 auto readItems(string fname)
 {
+    import std.algorithm: map;
+    import std.conv: to;
+    import std.exception: enforce;
+    import std.file: readText;
+    import std.json: JSON_TYPE, parseJSON;
+    import std.typecons: tuple;
+
     auto res = fname.readText.parseJSON;
     enforce(res.type == JSON_TYPE.OBJECT);
     auto items = res.object;
@@ -134,6 +142,9 @@ auto toItem(string s, JSONValue[string] json, string fname)
     Item item;
     with(item)
     {
+        import std.conv: to;
+        import coop.util: jto;
+
         name = s.to!dstring;
         ename = json["英名"].jto!dstring;
         price = json["NPC売却価格"].jto!uint;
@@ -190,6 +201,9 @@ auto toStrings(ushort sps, bool detailed = true) pure
 {
     with(SpecialProperty)
     {
+        import std.algorithm: filter, map;
+        import std.range: array;
+
         auto propMap = [
             NT: "他のプレイヤーにトレードで渡せない",
             OP: "一人一個のみ",
@@ -208,6 +222,7 @@ auto toStrings(ushort sps, bool detailed = true) pure
             ];
         auto str(SpecialProperty p)
         {
+            import std.conv: to;
             return detailed ? propMap[p] : p.to!string;
         }
         return propMap.keys.filter!(p => sps&p).map!(p => str(p)).array;
@@ -216,6 +231,7 @@ auto toStrings(ushort sps, bool detailed = true) pure
 
 pure unittest
 {
+    import std.algorithm: equal, sort;
     assert(SpecialProperty.OP.toStrings.equal(["一人一個のみ"]));
     assert((SpecialProperty.CS | SpecialProperty.CR).toStrings.sort().equal(["修理できない", "売ることができない"]));
 
@@ -224,6 +240,9 @@ pure unittest
 
 auto toSpecialProperties(JSONValue[] vals) pure
 {
+    import std.algorithm: map, reduce;
+    import std.conv: to;
+    import std.range: array;
     auto props = vals.map!"a.str".map!(s => s.to!SpecialProperty).array;
     return props.reduce!((a, b) => a|b).to!ushort;
 }
@@ -243,6 +262,13 @@ struct FoodInfo
 
 auto readFoods(string fname)
 {
+    import std.algorithm: map;
+    import std.conv: to;
+    import std.exception: enforce;
+    import std.file: readText;
+    import std.json: JSON_TYPE, parseJSON;
+    import std.typecons: tuple;
+
     auto res = fname.readText.parseJSON;
     enforce(res.type == JSON_TYPE.OBJECT);
     auto foods = res.object;
@@ -256,6 +282,9 @@ auto toFoodInfo(string s, JSONValue[string] json) @safe pure
     FoodInfo info;
     with(info)
     {
+        import std.conv: to;
+        import coop.util: jto;
+
         name = s.to!dstring;
         effect = json["効果"].jto!real;
         if (auto addition = "付加効果" in json)
@@ -285,6 +314,13 @@ struct AdditionalEffect
 
 auto readFoodEffects(string fname)
 {
+    import std.algorithm: map;
+    import std.conv: to;
+    import std.exception: enforce;
+    import std.file: readText;
+    import std.json: JSON_TYPE, parseJSON;
+    import std.typecons: tuple;
+
     auto res = fname.readText.parseJSON;
     enforce(res.type == JSON_TYPE.OBJECT);
     auto effects = res.object;
@@ -298,6 +334,9 @@ auto toFoodEffect(string s, JSONValue[string] json) pure
     AdditionalEffect effect;
     with(effect)
     {
+        import std.conv: to;
+        import coop.util: jto;
+
         name = s.to!dstring;
         effects = json["効果"].jto!(int[dstring]);
         if (auto others = "その他効果" in json)
@@ -316,6 +355,8 @@ auto toFoodEffect(string s, JSONValue[string] json) pure
 
 struct WeaponInfo
 {
+    import std.container.rbtree: RedBlackTree;
+
     /// ダメージ
     real[Grade] damage;
     /// 攻撃間隔
@@ -353,6 +394,13 @@ struct WeaponInfo
 
 auto readWeapons(string fname)
 {
+    import std.algorithm: map;
+    import std.conv: to;
+    import std.exception: enforce;
+    import std.file: readText;
+    import std.json: JSON_TYPE, parseJSON;
+    import std.typecons: tuple;
+
     auto res = fname.readText.parseJSON;
     enforce(res.type == JSON_TYPE.OBJECT);
     auto weapons = res.object;
@@ -366,6 +414,9 @@ auto toWeaponInfo(JSONValue[string] json, string fname)
     WeaponInfo info;
     with(info)
     {
+        import std.conv: to;
+        import coop.util: jto;
+
         damage = json["攻撃力"].jto!(real[Grade]);
         duration = json["攻撃間隔"].jto!int;
         range = json["射程"].jto!real;
@@ -411,6 +462,8 @@ auto toWeaponInfo(JSONValue[string] json, string fname)
 
 struct ArmorInfo
 {
+    import std.container.rbtree: RedBlackTree;
+
     /// アーマークラス
     real[Grade] AC;
     /// 必要スキル
@@ -442,6 +495,13 @@ struct ArmorInfo
 
 auto readArmors(string fname)
 {
+    import std.algorithm: map;
+    import std.conv: to;
+    import std.exception: enforce;
+    import std.file: readText;
+    import std.json: JSON_TYPE, parseJSON;
+    import std.typecons: tuple;
+
     auto res = fname.readText.parseJSON;
     enforce(res.type == JSON_TYPE.OBJECT);
     auto armors = res.object;
@@ -455,6 +515,9 @@ auto toArmorInfo(JSONValue[string] json, string fname)
     ArmorInfo info;
     with(info)
     {
+        import std.conv: to;
+        import coop.util: jto;
+
         AC = json["アーマークラス"].jto!(real[Grade]);
         skills = json["必要スキル"].jto!(real[dstring]);
         slot = json["装備箇所"].jto!ArmorSlot;
@@ -508,6 +571,13 @@ struct BulletInfo
 
 auto readBullets(string fname)
 {
+    import std.algorithm: map;
+    import std.conv: to;
+    import std.exception: enforce;
+    import std.file: readText;
+    import std.json: JSON_TYPE, parseJSON;
+    import std.typecons: tuple;
+
     auto res = fname.readText.parseJSON;
     enforce(res.type == JSON_TYPE.OBJECT);
     auto bullets = res.object;
@@ -521,6 +591,9 @@ auto toBulletInfo(JSONValue[string] json)
     BulletInfo info;
     with(info)
     {
+        import std.conv: to;
+        import coop.util: jto;
+
         damage = json["ダメージ"].jto!real;
         range = json["有効レンジ"].jto!real;
         angle = json["角度補正角"].jto!int;
@@ -643,6 +716,13 @@ struct ExpendableInfo
 
 auto readExpendables(string fname)
 {
+    import std.algorithm: map;
+    import std.conv: to;
+    import std.exception: enforce;
+    import std.file: readText;
+    import std.json: JSON_TYPE, parseJSON;
+    import std.typecons: tuple;
+
     auto res = fname.readText.parseJSON;
     enforce(res.type == JSON_TYPE.OBJECT);
     auto expendables = res.object;
@@ -656,6 +736,8 @@ auto toExpendableInfo(JSONValue[string] json) pure
     ExpendableInfo info;
     with(info)
     {
+        import coop.util: jto;
+
         effect = json["効果"].jto!dstring;
         if (auto f = "必要スキル" in json)
         {
@@ -667,6 +749,8 @@ auto toExpendableInfo(JSONValue[string] json) pure
 
 struct Overlaid(T)
 {
+    import std.traits: hasMember;
+
     this(T orig, T* ol)
     {
         original = orig;
@@ -694,6 +778,10 @@ struct Overlaid(T)
 private:
     static auto isValidValue(T)(T val) pure nothrow
     {
+        import std.range: empty;
+        import std.math: isNaN;
+        import std.traits: isFloatingPoint, isSomeString, isIntegral;
+
         static if (isFloatingPoint!T)
             return !val.isNaN;
         else static if (isSomeString!T)
@@ -716,9 +804,13 @@ private:
 
 @safe nothrow unittest
 {
+    import std.traits: FieldNameTuple;
+
     Item orig;
     with(orig)
     {
+        import std.conv: to;
+
         name = "テスト";
         ename = "test";
         weight = 0.3;

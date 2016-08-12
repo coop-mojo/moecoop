@@ -609,9 +609,10 @@ alias WeaponSlot = ExtendedEnum!(
     );
 
 alias ArmorSlot = ExtendedEnum!(
-    UNKNOWN => "不明", HeadProtector => "頭(防)", BodyProtector => "胴(防)",
-    HandProtector => "手(防)", PantsProtector => "パンツ(防)", ShoesProtector => "靴(防)",
-    ShoulderProtector => "肩(防)", WaistProtector => "腰(防)",
+    UNKNOWN => "不明",
+    HeadProtector => "頭(防)", BodyProtector => "胴(防)", HandProtector => "手(防)",
+    PantsProtector => "パンツ(防)", ShoesProtector => "靴(防)", ShoulderProtector => "肩(防)",
+    WaistProtector => "腰(防)",
     HeadOrnament => "頭(装)", FaceOrnament => "顔(装)", EarOrnament => "耳(装)",
     FingerOrnament => "手(装)", BreastOrnament => "胸(装)", BackOrnament => "背中(装)",
     WaistOrnament => "腰(装)",

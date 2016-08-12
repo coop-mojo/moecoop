@@ -61,6 +61,7 @@ class Wisdom {
             extraInfoList[Drink.to!ItemType] = readDrinkList(baseDir_).to!(ExtraInfo[dstring]);
             extraInfoList[Liquor.to!ItemType] = readLiquorList(baseDir_).to!(ExtraInfo[dstring]);
             extraInfoList[Weapon.to!ItemType] = readWeaponList(baseDir_).to!(ExtraInfo[dstring]);
+            extraInfoList[Armor.to!ItemType] = (ExtraInfo[dstring]).init;
             extraInfoList[Bullet.to!ItemType] = readBulletList(baseDir_).to!(ExtraInfo[dstring]);
         }
         itemList = readItemList(baseDir_);
@@ -117,7 +118,7 @@ class Wisdom {
         import std.conv;
 
         foreach(dir; ["アイテム", "バインダー", "レシピ", "飲み物", "飲食バフ",
-                      "食べ物", "武器", "防具"])
+                      "食べ物", "武器", "弾", "防具", "盾"])
         {
             mkdirRecurse(buildPath(baseDir_, dir));
         }
@@ -242,7 +243,7 @@ private:
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
 
-        auto dir = buildPath(sysBase, "武器", "武器");
+        auto dir = buildPath(sysBase, "武器");
         if (!dir.exists)
         {
             return (WeaponInfo[dstring]).init;
@@ -258,12 +259,15 @@ private:
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
 
-        auto file = buildPath(sysBase, "武器", "弾.json");
-        if (!file.exists)
+        auto dir = buildPath(sysBase, "弾");
+        if (!dir.exists)
         {
             return (BulletInfo[dstring]).init;
         }
-        return buildPath(sysBase, "武器", "弾.json").readBullets.checkedAssocArray;
+        return dirEntries(dir, "*.json", SpanMode.breadth)
+            .map!readBullets
+            .joiner
+            .checkedAssocArray;
     }
 
     auto readFoodEffectList(string sysBase)

@@ -20,7 +20,7 @@ import std.variant;
 import coop.util;
 
 /// アイテムの追加情報
-alias ExtraInfo = Algebraic!(FoodInfo, WeaponInfo, BulletInfo, ExpendableInfo);
+alias ExtraInfo = Algebraic!(FoodInfo, WeaponInfo, ArmorInfo, BulletInfo, ExpendableInfo);
 
 /// アイテム一般の情報
 struct Item
@@ -429,6 +429,10 @@ struct ArmorInfo
     real[dstring] effects;
     /// 付加効果
     dstring additionalEffect;
+    /// 効果アップ
+    RedBlackTree!dstring specials;
+    /// 魔法チャージ可能かどうか
+    bool canMagicCharged;
 
     /// デバッグ用。このアイテム情報が収録されているファイル名
     string file;

@@ -11,7 +11,7 @@ import std.variant: Algebraic;
 import coop.util: ExtendedEnum;
 
 /// アイテムの追加情報
-alias ExtraInfo = Algebraic!(FoodInfo, WeaponInfo, ArmorInfo, BulletInfo, ExpendableInfo);
+alias ExtraInfo = Algebraic!(FoodInfo, WeaponInfo, ArmorInfo, BulletInfo, ShieldInfo, ExpendableInfo);
 
 /// アイテム一般の情報
 struct Item
@@ -250,7 +250,7 @@ auto toSpecialProperties(JSONValue[] vals) pure
 alias ItemType = ExtendedEnum!(
     UNKNOWN => "不明", Others => "その他", Food => "食べ物", Drink => "飲み物",
     Liquor => "酒", Expendable => "消耗品", Weapon => "武器", Armor => "防具",
-    Bullet => "弾", Asset => "アセット",);
+    Bullet => "弾", Shield => "盾", Asset => "アセット",);
 
 /// 料理固有の情報
 struct FoodInfo
@@ -615,6 +615,104 @@ auto toBulletInfo(JSONValue[string] json)
         {
             restriction = [ShipRestriction.Any.to!ShipRestriction];
         }
+    }
+    return info;
+}
+
+struct ShieldInfo
+{
+    import std.container.rbtree: RedBlackTree;
+
+    /// アーマークラス
+    real[Grade] AC;
+    /// 必要スキル
+    real[dstring] skills;
+    /// 回避率
+    int avoidRatio;
+    /// 使用可能シップ
+    ShipRestriction[] restriction;
+    /// 素材
+    Material material;
+    /// 消耗タイプ
+    ExhaustionType type;
+    /// 消耗度
+    int exhaustion;
+    /// 追加効果
+    real[dstring] effects;
+    /// 付加効果
+    dstring additionalEffect;
+    /// 効果アップ
+    RedBlackTree!dstring specials;
+    /// 魔法チャージ可能かどうか
+    bool canMagicCharged;
+    /// 属性チャージ可能かどうか
+    bool canElementCharged;
+
+    /// デバッグ用。このアイテム情報が収録されているファイル名
+    string file;
+}
+
+auto readShields(string fname)
+{
+    import std.algorithm: map;
+    import std.conv: to;
+    import std.exception: enforce;
+    import std.file: readText;
+    import std.json: JSON_TYPE, parseJSON;
+    import std.typecons: tuple;
+
+    auto res = fname.readText.parseJSON;
+    enforce(res.type == JSON_TYPE.OBJECT);
+    auto shields = res.object;
+    return shields.keys.map!(key =>
+                             tuple(key.to!dstring,
+                                   shields[key].object.toShieldInfo(fname)));
+}
+
+auto toShieldInfo(JSONValue[string] json, string fname)
+{
+    ShieldInfo info;
+    with(info)
+    {
+        import std.conv: to;
+        import coop.util: jto;
+
+        AC = json["アーマークラス"].jto!(real[Grade]);
+        skills = json["必要スキル"].jto!(real[dstring]);
+        avoidRatio = json["回避率"].jto!int;
+        material = json["素材"].jto!Material;
+        if (auto t = "消耗タイプ" in json)
+        {
+            type = (*t).jto!ExhaustionType;
+        }
+        exhaustion = json["耐久"].jto!int;
+        if (auto f = "追加効果" in json)
+        {
+            effects = (*f).jto!(real[dstring]);
+        }
+        if (auto af = "付加効果" in json)
+        {
+            additionalEffect = (*af).jto!dstring;
+        }
+
+        specials = new RedBlackTree!dstring;
+        if (auto sp = "効果アップ" in json)
+        {
+            specials.insert((*sp).jto!(dstring[]));
+        }
+
+        if (auto rest = "使用可能シップ" in json)
+        {
+            restriction = (*rest).jto!(ShipRestriction[]);
+        }
+        else
+        {
+            restriction = [ShipRestriction.Any.to!ShipRestriction];
+        }
+        canMagicCharged = json["魔法チャージ"].jto!bool;
+        canElementCharged = json["属性チャージ"].jto!bool;
+
+        file = fname;
     }
     return info;
 }

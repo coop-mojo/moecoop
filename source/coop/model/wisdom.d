@@ -63,6 +63,7 @@ class Wisdom {
             extraInfoList[Weapon.to!ItemType] = readWeaponList(baseDir_).to!(ExtraInfo[dstring]);
             extraInfoList[Armor.to!ItemType] = readArmorList(baseDir_).to!(ExtraInfo[dstring]);
             extraInfoList[Bullet.to!ItemType] = readBulletList(baseDir_).to!(ExtraInfo[dstring]);
+            extraInfoList[Shield.to!ItemType] = (ExtraInfo[dstring]).init;
         }
         itemList = readItemList(baseDir_);
     }
@@ -282,6 +283,22 @@ private:
         }
         return dirEntries(dir, "*.json", SpanMode.breadth)
             .map!readBullets
+            .joiner
+            .checkedAssocArray;
+    }
+
+    auto readShieldList(string sysBase)
+    {
+        enforce(sysBase.exists);
+        enforce(sysBase.isDir);
+
+        auto dir = buildPath(sysBase, "盾");
+        if (!dir.exists)
+        {
+            return (ShieldInfo[dstring]).init;
+        }
+        return dirEntries(dir, "*.json", SpanMode.breadth)
+            .map!readShields
             .joiner
             .checkedAssocArray;
     }

@@ -313,6 +313,10 @@ auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
         }
         break;
     }
+    case Shield:{
+        auto info = ei.peek!ShieldInfo;
+        break;
+    }
     case Asset:{
         break;
     }

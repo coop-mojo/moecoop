@@ -315,6 +315,56 @@ auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
     }
     case Shield:{
         auto info = ei.peek!ShieldInfo;
+
+        auto ACStr = Grade.values
+                          .filter!(g => info.AC.keys.canFind(g))
+                          .map!(g => format("%s: %.1f"d, g.to!Grade, info.AC[g.to!Grade]))
+                              .join(", ");
+        layout.addElem("アーマークラス", ACStr);
+        layout.addElem(info.type == ExhaustionType.Points ? "使用可能回数" : "消耗度",
+                       info.exhaustion.to!dstring);
+        layout.addElem("必要スキル",
+                       info.skills
+                           .byKeyValue
+                           .map!(kv => format("%s (%.1f)"d, kv.key, kv.value))
+                           .join(", "));
+        layout.addElem("回避率", info.avoidRatio.to!dstring);
+        layout.addElem("素材", info.material.to!dstring);
+        if (info.restriction.front != ShipRestriction.Any)
+        {
+            layout.addElem("装備可能シップ", info.restriction.map!(a => a.to!dstring~"系").join(", "));
+        }
+
+        if (!info.additionalEffect.empty)
+        {
+            layout.addElem("付加効果", info.additionalEffect);
+        }
+
+        if (!info.effects.keys.empty)
+        {
+            layout.addElem("追加効果",
+                           info.effects
+                               .byKeyValue
+                               .map!(kv => format("%s: %s%.1f"d,
+                                                  kv.key,
+                                                  kv.value > 0 ? "+" : "",
+                                                  kv.value))
+                               .join(", "));
+        }
+
+        if (!info.specials.empty)
+        {
+            layout.addElem("効果アップ", info.specials[].join(", "));
+        }
+
+        if (info.canMagicCharged)
+        {
+            layout.addElem("魔法チャージ", "可能");
+        }
+        if (info.canElementCharged)
+        {
+            layout.addElem("属性チャージ", "可能");
+        }
         break;
     }
     case Asset:{

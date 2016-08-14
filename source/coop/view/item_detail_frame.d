@@ -328,7 +328,7 @@ auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
                            .byKeyValue
                            .map!(kv => format("%s (%.1f)"d, kv.key, kv.value))
                            .join(", "));
-        layout.addElem("回避率", info.avoidRatio.to!dstring);
+        layout.addElem("回避", format("%s%%"d, info.avoidRatio));
         layout.addElem("素材", info.material.to!dstring);
         if (info.restriction.front != ShipRestriction.Any)
         {

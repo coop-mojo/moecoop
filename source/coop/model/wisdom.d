@@ -63,7 +63,7 @@ class Wisdom {
             extraInfoList[Weapon.to!ItemType] = readWeaponList(baseDir_).to!(ExtraInfo[dstring]);
             extraInfoList[Armor.to!ItemType] = readArmorList(baseDir_).to!(ExtraInfo[dstring]);
             extraInfoList[Bullet.to!ItemType] = readBulletList(baseDir_).to!(ExtraInfo[dstring]);
-            extraInfoList[Shield.to!ItemType] = (ExtraInfo[dstring]).init;
+            extraInfoList[Shield.to!ItemType] = readShieldList(baseDir_).to!(ExtraInfo[dstring]);
         }
         itemList = readItemList(baseDir_);
     }

@@ -679,7 +679,7 @@ auto toShieldInfo(JSONValue[string] json, string fname)
 
         AC = json["アーマークラス"].jto!(real[Grade]);
         skills = json["必要スキル"].jto!(real[dstring]);
-        avoidRatio = json["回避率"].jto!int;
+        avoidRatio = json["回避"].jto!int;
         material = json["素材"].jto!Material;
         if (auto t = "消耗タイプ" in json)
         {

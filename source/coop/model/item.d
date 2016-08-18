@@ -785,7 +785,7 @@ alias ArmorSlot = ExtendedEnum!(
     PantsProtector => "パンツ(防)", ShoesProtector => "靴(防)", ShoulderProtector => "肩(防)",
     WaistProtector => "腰(防)",
     HeadOrnament => "頭(装)", FaceOrnament => "顔(装)", EarOrnament => "耳(装)",
-    FingerOrnament => "手(装)", BreastOrnament => "胸(装)", BackOrnament => "背中(装)",
+    FingerOrnament => "指(装)", BreastOrnament => "胸(装)", BackOrnament => "背中(装)",
     WaistOrnament => "腰(装)",
     );
 

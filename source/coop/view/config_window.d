@@ -38,39 +38,45 @@ class ConfigDialog: Dialog
         }
 
         auto wLayout = parseML(q{
-                TableLayout {
-                    colCount: 3
+                VerticalLayout {
                     padding: 10
-
-                    TextWidget {
-                        text: "キャラクター管理"
+                    HorizontalLayout {
+                        TextWidget {
+                            text: "キャラクター管理"
+                        }
+                        VerticalLayout {
+                            HorizontalLayout {
+                                Button {
+                                    id: addCharacter
+                                    text: "追加..."
+                                }
+                                Button {
+                                    id: deleteCharacter
+                                    text: "削除"
+                                }
+                                Button {
+                                    id: editCharacter
+                                    text: "キャラクター情報編集..."
+                                }
+                            }
+                            ListWidget {
+                                id: characters
+                                backgroundColor: "white"
+                            }
+                        }
                     }
-                    EditLine { id: toBeAdded }
-                    Button {
-                        id: addCharacter
-                        text: "追加"
-                    }
-                    TextWidget {
-                        text: ""
-                    }
-                    ListWidget {
-                        id: characters
-                        backgroundColor: "white"
-                    }
-                    Button {
-                        id: deleteCharacter
-                        text: "選択したキャラクターを削除"
-                    }
-
-                    TextWidget {
-                        text: "Migemo ライブラリ"
-                    }
-                    TextWidget {
-                        id: migemoStatus
-                    }
-                    Button {
-                        id: migemoInstaller
-                        text: "インストール"
+                    HorizontalLayout {
+                        TextWidget {
+                            text: "Migemo ライブラリ"
+                        }
+                        FrameLayout {
+                            minWidth: 130
+                            layoutWidth: FILL_PARENT
+                        }
+                        Button {
+                            id: migemoInstaller
+                            text: "インストール"
+                        }
                     }
                 }
             });
@@ -80,14 +86,11 @@ class ConfigDialog: Dialog
         wLayout.childById!ListWidget("characters").ownAdapter = charList;
         dstring baseDir = chars_.values.front.baseDirectory;
 
-        with(wLayout.childById("toBeAdded"))
-        {
-            keyEvent = (Widget src, KeyEvent e) {
-                wLayout.childById("addCharacter").enabled = chars_.keys.all!(c => c != text);
-                return false;
-            };
-        }
         wLayout.childById("addCharacter").click = (Widget src) {
+            /// ダイアログ開く
+            // キャラクター名
+            // スキルシミュレーターURL
+            // スキるぽんで編集/(spacer)/OK/キャンセル/
             auto newChar = wLayout.childById("toBeAdded").text;
             chars_[newChar] = new Character(newChar, baseDir);
             charList.add(newChar);
@@ -121,19 +124,25 @@ class ConfigDialog: Dialog
 
         if (config_.migemoLib.exists)
         {
-            wLayout.childById("migemoStatus").text = "インストールされています";
-            wLayout.childById("migemoInstaller").enabled = false;
+            with(wLayout.childById("migemoInstaller"))
+            {
+                text = "インストール済み";
+                enabled = false;
+            }
         }
         else
         {
-            wLayout.childById("migemoStatus").text = "インストールされていません";
-            version(Posix)
+            with(wLayout.childById("migemoInstaller"))
             {
-                wLayout.childById("migemoInstaller").enabled = false;
-            }
-            else version(Win32)
-            {
-                wLayout.childById("migemoInstaller").enabled = false;
+                text = "インストール";
+                version(Posix)
+                {
+                    enabled = false;
+                }
+                else version(Win32)
+                {
+                    enabled = false;
+                }
             }
         }
 
@@ -147,9 +156,9 @@ class ConfigDialog: Dialog
                 childById("button-action2").enabled = false;
                 scope(exit) childById("button-action2").enabled = true;
 
-                wLayout.childById("migemoStatus").text = "インストール中...";
-                scope(success) wLayout.childById("migemoStatus").text = "インストールできました！";
-                scope(failure) wLayout.childById("migemoStatus").text = "インストールに失敗しました";
+                wLayout.childById("migemoInstaller").text = "インストール中...";
+                scope(success) wLayout.childById("migemoInstaller").text = "インストール済み";
+                scope(failure) wLayout.childById("migemoInstallers").text = "インストールに失敗しました";
                 installMigemo(config_.migemoLib.dirName);
                 return true;
             };
@@ -160,19 +169,20 @@ class ConfigDialog: Dialog
 
         auto exits = new HorizontalLayout;
         auto spacer = new FrameLayout;
+        spacer.minWidth(300);
         spacer.layoutWidth(FILL_PARENT);
-        spacer.minWidth(400);
         exits.addChild(spacer);
-        exits.addChild(new Button(ACTION_OK));
-        exits.addChild(new Button(ACTION_CANCEL));
-        _buttonActions = [ACTION_OK, ACTION_CANCEL];
+        auto close = new Button(ACTION_CLOSE).minWidth(80).text = "閉じる";
+        exits.addChild(close);
+        _buttonActions = [ACTION_CLOSE];
         addChild(exits);
     }
 
     override void close(const Action action)
     {
         if (action) {
-            if (action.id == StandardAction.Ok)
+            if (action.id == StandardAction.Close &&
+                config_.migemoLib.exists)
             {
                 (cast(MainFrame)_parentWindow.mainWidget).controller.loadMigemo;
             }
@@ -248,3 +258,4 @@ auto unzip(string srcFile, string destDir)
         target.write(am.expandedData);
     }
 }
+

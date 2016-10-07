@@ -117,6 +117,18 @@ unittest
                "取引": 15.0]);
 }
 
+unittest
+{
+    import std.exception;
+    assertThrown!SkillSimulatorException(parseSimulatorURL("UnsupportedURL"d));
+}
+
+unittest
+{
+    import std.exception;
+    assertThrown!SkillSimulatorException(parseSimulatorURL("http://www.ponz-web.com/skill/?デデーン！&"d));
+}
+
 /**
  * スキるぽんでスキル値の使われている文字列を整数値に変換する。
  * 有効な数字は a-zA-F で、それぞれ32進数の 0-9a-v に対応している。

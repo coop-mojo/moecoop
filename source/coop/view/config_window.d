@@ -361,8 +361,21 @@ class CharacterSettingDialog: Dialog
         };
 
         childById("ponButton").click = (Widget src) {
-            import coop.model.skills;
-            auto url = urlBox.text.empty ? SkillPon : urlBox.text;
+            dstring url;
+            auto txt = urlBox.text;
+            if (txt.empty)
+            {
+                import std.conv;
+                import std.format;
+                import std.uri;
+                import coop.model.skills;
+
+                url = charNameBox.text.empty ? SkillPon.to!dstring : format("%s?0&&%s"d, SkillPon, charNameBox.text.encode);
+            }
+            else
+            {
+                url = txt;
+            }
             Platform.instance.openURL(url.to!string);
             return true;
         };

@@ -52,7 +52,7 @@ class ConfigDialog: Dialog
                                     text: "キャラクター情報編集..."
                                 }
                             }
-                            ListWidget {
+                            StringListWidget {
                                 id: characters
                                 backgroundColor: "white"
                             }
@@ -74,10 +74,7 @@ class ConfigDialog: Dialog
                 }
             });
 
-        StringListAdapter charList = new StringListAdapter;
-        chars_.keys.each!(c => charList.add(c));
-        wLayout.childById!ListWidget("characters").ownAdapter = charList;
-        wLayout.childById!ListWidget("characters").selectedItemIndex = 0;
+        wLayout.childById!StringListWidget("characters").items = chars_.keys;
         dstring baseDir = chars_.values.front.baseDirectory;
 
         if (chars_.keys.length == 1)
@@ -95,8 +92,8 @@ class ConfigDialog: Dialog
                     auto name = enforce(cdlg.charNameBox.text);
                     auto url = cdlg.urlBox.text;
                     chars_[name] = new Character(name, baseDir);
-                    // url
-                    charList.add(name);
+                    chars_[name].url = url;
+                    wLayout.childById!StringListWidget("characters").items = chars_.keys;
                     auto mainWidget = _parentWindow.mainWidget;
                     with(mainWidget)
                     {
@@ -112,19 +109,15 @@ class ConfigDialog: Dialog
         };
 
         wLayout.childById("editCharacter").click = (Widget src) {
-            auto list = wLayout.childById!ListWidget("characters");
-            auto charIdx = list.selectedItemIndex;
-            /// Out of Index の場合は？
-            auto charName = charList.items[charIdx].to!dstring;
+            auto charName = wLayout.childById!StringListWidget("characters").selectedItem;
             auto ch = chars_[charName];
-            // auto url = ch.url;
+            auto url = ch.url;
 
-            auto dlg = new CharacterSettingDialog(window, chars_, charName/*, url*/);
+            auto dlg = new CharacterSettingDialog(window, chars_, charName, url);
             dlg.dialogResult = (Dialog dlg, const Action action) {
                 if (action && action.id == StandardAction.Ok)
                 {
-                    auto url = (cast(CharacterSettingDialog)dlg).urlBox.text;
-                    // ch.url = url;
+                    ch.url = (cast(CharacterSettingDialog)dlg).urlBox.text;
                 }
             };
             dlg.show;
@@ -132,14 +125,13 @@ class ConfigDialog: Dialog
         };
 
         wLayout.childById("deleteCharacter").click = (Widget src) {
-            auto list = wLayout.childById!ListWidget("characters");
+            auto list = wLayout.childById!StringListWidget("characters");
             auto deletedIdx = list.selectedItemIndex;
-            /// Out of Index の場合は？
-            auto deleted = charList.items[deletedIdx];
+            auto deleted = list.selectedItem;
             auto c = chars_[deleted];
             chars_.remove(deleted);
             c.deleteConfig;
-            charList.remove(deletedIdx);
+            list.items = chars_.keys;
             auto mainWidget = _parentWindow.mainWidget;
             with(mainWidget)
             {
@@ -151,7 +143,6 @@ class ConfigDialog: Dialog
             {
                 src.enabled = false;
             }
-            // どこかのタイミングで selectedItemIndex を設定する必要あり
             return true;
         };
 
@@ -267,7 +258,6 @@ auto installMigemo()(string dest)
 auto unzip(string srcFile, string destDir)
 {
     import std.exception;
-    import std.regex;
     import std.zip;
 
     enforce(srcFile.exists);
@@ -275,6 +265,7 @@ auto unzip(string srcFile, string destDir)
     auto zip = new ZipArchive(read(srcFile));
     foreach(name, am; zip.directory)
     {
+        import std.regex;
         if (name.endsWith("/"))
         {
             continue;
@@ -337,11 +328,6 @@ class CharacterSettingDialog: Dialog
 
         addChild(wLayout);
 
-        if (!name.empty)
-        {
-            charNameBox.text = name;
-            charNameBox.enabled = false;
-        }
         charNameBox.contentChange = (EditableContent con) {
             auto txt = con.text;
             if (txt.empty)
@@ -349,7 +335,7 @@ class CharacterSettingDialog: Dialog
                 childById("ok-button").enabled = false;
                 childById("alert").text = "";
             }
-            else if (chars.keys.canFind(txt))
+            else if (charNameBox.enabled && chars.keys.canFind(txt))
             {
                 childById("ok-button").enabled = false;
                 childById("alert").text = "既に存在しています";
@@ -363,19 +349,21 @@ class CharacterSettingDialog: Dialog
 
         urlBox.text = url;
         urlBox.contentChange = (EditableContent con) {
-            import std.regex;
             auto txt = con.text;
-            if (charNameBox.enabled && txt.match(ctRegex!r"&%"d))
+            if (charNameBox.enabled)
             {
-                import std.uri;
-                auto str = txt.matchFirst(ctRegex!r"&(%.+?)$"d)[1];
-                charNameBox.text = str.decode.to!dstring;
+                import coop.model.skills;
+                import std.exception;
+                import std.typecons;
+                auto tpl = parseSimulatorURL(txt).ifThrown(tuple(""d, "", (double[string]).init, ""d));
+                charNameBox.text = tpl[0];
             }
         };
 
         childById("ponButton").click = (Widget src) {
-            enum PonURL = "http://www.ponz-web.com/skill/";
-            Platform.instance.openURL(PonURL);
+            import coop.model.skills;
+            auto url = urlBox.text.empty ? SkillPon : urlBox.text;
+            Platform.instance.openURL(url.to!string);
             return true;
         };
 
@@ -391,6 +379,16 @@ class CharacterSettingDialog: Dialog
         exits.addChildren([ok, cancel]);
         _buttonActions = [ACTION_OK, ACTION_CANCEL];
         addChild(exits);
+
+        if (!name.empty)
+        {
+            charNameBox.enabled = false;
+            charNameBox.text = name;
+        }
+        else
+        {
+            childById("ok-button").enabled = false;
+        }
     }
 
     @property auto charNameBox() {

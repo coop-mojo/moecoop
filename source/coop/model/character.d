@@ -5,35 +5,43 @@
  */
 module coop.model.character;
 
-import std.algorithm;
-import std.array;
-import std.container.rbtree;
-import std.conv;
-import std.exception;
-import std.file;
-import std.json;
-import std.path;
-import std.regex;
-
 class Character
 {
+    import std.container.rbtree;
+
     this(dstring n, dstring baseDir)
     {
+        import std.file;
+        import std.path;
+
         dir_ = baseDir;
         name_ = n;
         if (buildPath(dir_, name_).exists)
         {
+            import std.algorithm;
+            import std.array;
+            import std.conv;
+
             auto binderDir = buildPath(dir_, name_, "バインダー"d).to!string;
             mkdirRecurse(binderDir);
             filedMap_ = dirEntries(binderDir, "*.json", SpanMode.breadth)
                         .map!(s => s.readBindersInfo)
                         .joiner
                         .assocArray;
+
+            auto configFile = buildPath(dir_, name_, "config.json"d);
+            if (configFile.exists)
+            {
+                import std.json;
+                url = configFile.readText.parseJSON["URL"].str.to!dstring;
+            }
         }
     }
 
     auto hasRecipe(dstring recipe, dstring binder = "")
     {
+        import std.array;
+        import std.algorithm;
         if (binder.empty)
         {
             return filedMap_.values.canFind!(binder => recipe in binder);
@@ -69,13 +77,37 @@ class Character
         name_ = newName;
     }
 
+    @property auto url() @safe pure nothrow @nogc
+    {
+        return url_;
+    }
+
+    @property auto url(dstring u)
+    {
+        url_ = u;
+    }
+
     auto save()
     {
+        import std.conv;
+        import std.file;
+        import std.path;
+
+        auto dir = buildPath(dir_, name);
+        if (!dir.exists)
+        {
+            mkdirRecurse(dir.to!string);
+        }
+        writeURLInfo;
         writeBindersInfo;
     }
 
     auto deleteConfig()
     {
+        import std.conv;
+        import std.file;
+        import std.path;
+
         auto configDir = buildPath(dir_, name_);
         if (configDir.exists)
         {
@@ -90,8 +122,28 @@ class Character
 
 private:
 
+    auto writeURLInfo()
+    {
+        import std.conv;
+        import std.json;
+        import std.path;
+        import std.stdio;
+
+        auto file = buildPath(dir_, name, "config.json"d);
+        JSONValue vals = [
+            "URL": url.to!string,
+            ];
+        auto f = File(file, "w");
+        f.write(vals.toPrettyString);
+    }
+
     auto writeBindersInfo()
     {
+        import std.conv;
+        import std.file;
+        import std.json;
+        import std.path;
+
         auto binderDir = buildPath(dir_, name_, "バインダー"d).to!string;
         if (binderDir.exists)
         {
@@ -102,6 +154,11 @@ private:
         JSONValue[string] binderFiles;
         foreach(kv; filedMap_.byKeyValue)
         {
+            import std.algorithm;
+            import std.array;
+            import std.exception;
+            import std.regex;
+
             auto binder = kv.key.to!string;
             auto elems = kv.value.array;
             if (elems.empty) continue;
@@ -134,14 +191,23 @@ private:
     RedBlackTree!dstring[dstring] filedMap_;
     dstring name_;
     dstring dir_;
+    dstring url_;
 }
 
 auto readBindersInfo(string file)
 {
-    import std.typecons;
+    import std.algorithm;
+    import std.exception;
+    import std.file;
+    import std.json;
+
     auto json = file.readText.parseJSON;
     enforce(json.type == JSON_TYPE.OBJECT);
     return json.object.byKeyValue.map!((kv) {
+            import std.container.rbtree;
+            import std.conv;
+            import std.typecons;
+
             auto binder = kv.key.to!dstring;
             auto recipes = make!(RedBlackTree!dstring)(kv.value.object.keys.to!(dstring[]));
             return tuple(binder, recipes);

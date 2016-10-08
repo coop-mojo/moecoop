@@ -188,7 +188,7 @@ class ConfigDialog: Dialog
         addChild(wLayout);
 
         auto exits = new HorizontalLayout;
-        auto spacer = new FrameLayout;
+        auto spacer = new HSpacer;
         spacer.minWidth(300);
         spacer.layoutWidth(FILL_PARENT);
         exits.addChild(spacer);

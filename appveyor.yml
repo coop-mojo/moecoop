@@ -1,7 +1,7 @@
 platform: x64
 environment:
   DC: dmd
-  DVersion: 2.071.1
+  DVersion: 2.071.2
   matrix:
     - arch: x86
     - arch: x64

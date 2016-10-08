@@ -48,17 +48,10 @@ class RecipeMaterialTabFrameController
         {
             frame_.disableMigemoBox;
         }
-        frame_.migemoOptionChanged = {
-            auto txtBox = frame_.childById("itemQuery");
-            showProductCandidate(txtBox.text);
+        frame_.migemoOptionChanged = frame_.queryChanged = {
+            auto txt = frame_.childById("itemQuery").text;
+            showProductCandidate(txt);
         };
-
-        with(frame_.childById!EditLine("itemQuery"))
-        {
-            contentChange = (EditableContent content) {
-                showProductCandidate(content.text);
-            };
-        }
     }
 
     auto showProductCandidate(dstring queryText)

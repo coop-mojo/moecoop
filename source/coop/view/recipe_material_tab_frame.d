@@ -55,10 +55,24 @@ class RecipeMaterialTabFrame: HorizontalLayout
             return true;
         };
 
+        childById!EditLine("itemQuery").contentChange = (EditableContent content) {
+            if (timerID > 0)
+            {
+                cancelTimer(timerID);
+            }
+            timerID = setTimer(300);
+        };
+
         childById!EditLine("itemQuery").popupMenu = editorPopupMenu;
 
         preference = RecipeGraph.preference;
 
+    }
+
+    override bool onTimer(ulong id)
+    {
+        queryChanged();
+        return false;
     }
 
     @property auto characters(dstring[] chars)
@@ -649,10 +663,12 @@ class RecipeMaterialTabFrame: HorizontalLayout
     int[dstring] toBeMade;
     bool isLocked;
     EventHandler!() migemoOptionChanged;
+    EventHandler!() queryChanged;
     RecipeGraph fullGraph;
     RecipeGraph subGraph;
     dstring[dstring] preference;
     RedBlackTree!dstring leafMaterials;
+    ulong timerID;
 }
 
 auto recipeMaterialLayout()

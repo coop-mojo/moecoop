@@ -68,7 +68,11 @@ class RecipeTabFrame: HorizontalLayout
                 return true;
             };
             keyEvent = (Widget src, KeyEvent e) {
-                queryChanged();
+                if (timerID > 0)
+                {
+                    this.cancelTimer(timerID);
+                }
+                timerID = this.setTimer(300);
                 return false;
             };
             popupMenu = editorPopupMenu;
@@ -104,6 +108,12 @@ class RecipeTabFrame: HorizontalLayout
             showItemEditDialog(root.window, this, childById!ItemDetailFrame("detail2").item, 1, controller.cWisdom);
             return true;
         };
+    }
+
+    override bool onTimer(ulong id)
+    {
+        queryChanged();
+        return false;
     }
 
     @property auto categories(dstring[] cats)
@@ -424,6 +434,7 @@ private:
         };
         return ret;
     }
+    ulong timerID;
 }
 
 auto recipeListLayout()

@@ -46,9 +46,11 @@ class VersionDialog: Dialog
         wLayout.childById("info").addChild(urlButton);
         addChild(wLayout);
         auto exits = new HorizontalLayout;
-        exits.addChild(new HSpacer);
-        exits.addChild(new Button(ACTION_OK));
-        _buttonActions = [ACTION_OK];
+        auto spacer = new HSpacer;
+        spacer.minWidth = 300;
+        exits.addChild(spacer);
+        exits.addChild(new Button(ACTION_CLOSE).minWidth(80).text("閉じる"));
+        _buttonActions = [ACTION_CLOSE];
         addChild(exits);
     }
 

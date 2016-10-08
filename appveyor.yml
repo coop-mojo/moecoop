@@ -98,4 +98,4 @@ after_build:
   - mv moecoop-%Darch%.zip moecoop-trunk-%Dmodel%bit.zip
   - archive.bat %Darch% debug
   - mv moecoop-%Darch%.zip moecoop-trunk-%Dmodel%bit-debug.zip
-  - type views/version
+  - type views\version

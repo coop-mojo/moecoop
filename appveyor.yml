@@ -92,6 +92,8 @@ artifacts:
     name: 生協の知恵袋 生焼け版($(Dmodel)bit)
   - path: moecoop-trunk-$(Dmodel)bit-debug.zip
     name: 生協の知恵袋 生焼けデバッグ版($(Dmodel)bit)
+  - path: moecoop-$(CoopVer)-$(Dmodel)bit.zip
+    name: 生協の知恵袋 v$(CoopVer) ($(Dmodel)bit)
 
 after_build:
   - archive.bat %Darch% release
@@ -99,3 +101,6 @@ after_build:
   - archive.bat %Darch% debug
   - mv moecoop-%Darch%.zip moecoop-trunk-%Dmodel%bit-debug.zip
   - type views\version
+  - set /p CoopVer=<views\version
+  - set CoopVer=%CoopVer:~1%
+  - cp moecoop-trunk-%Dmodel%bit.zip moecoop-%CoopVer%-%Dmodel%bit.zip

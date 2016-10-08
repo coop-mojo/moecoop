@@ -61,6 +61,8 @@ class RecipeTabFrame: HorizontalLayout
 
         with(childById!EditLine("searchQuery"))
         {
+            import coop.view.editors;
+
             focusChange = (Widget src, bool checked) {
                 queryFocused();
                 return true;
@@ -69,6 +71,7 @@ class RecipeTabFrame: HorizontalLayout
                 queryChanged();
                 return false;
             };
+            popupMenu = editorPopupMenu;
         }
         childById!CheckBox("metaSearch").checkChange = (Widget src, bool checked) {
             metaSearchOptionChanged();

@@ -101,5 +101,14 @@ class EditRealLine: EditNumberLine!real
     }
 }
 
+auto editorPopupMenu()
+{
+    auto editPopupItem = new MenuItem(null);
+    editPopupItem.add(new Action(EditorActions.Cut, "切り取り"d, "edit-cut", KeyCode.KEY_X, KeyFlag.Control));
+    editPopupItem.add(new Action(EditorActions.Copy, "コピー"d, "edit-copy", KeyCode.KEY_C, KeyFlag.Control));
+    editPopupItem.add(new Action(EditorActions.Paste, "貼り付け"d, "edit-paste", KeyCode.KEY_V, KeyFlag.Control));
+    return editPopupItem;
+}
+
 import dlangui.widgets.metadata;
 mixin(registerWidgets!(EditIntLine, EditRealLine)());

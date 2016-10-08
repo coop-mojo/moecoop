@@ -292,6 +292,8 @@ class CharacterSettingDialog: Dialog
 
     override void initialize()
     {
+        import coop.view.editors;
+
         auto wLayout = parseML(q{
                 VerticalLayout {
                     padding: 10
@@ -328,6 +330,7 @@ class CharacterSettingDialog: Dialog
 
         addChild(wLayout);
 
+        charNameBox.popupMenu = editorPopupMenu;
         charNameBox.contentChange = (EditableContent con) {
             auto txt = con.text;
             if (txt.empty)
@@ -348,6 +351,7 @@ class CharacterSettingDialog: Dialog
         };
 
         urlBox.text = url;
+        urlBox.popupMenu = editorPopupMenu;
         urlBox.contentChange = (EditableContent con) {
             auto txt = con.text;
             if (charNameBox.enabled)

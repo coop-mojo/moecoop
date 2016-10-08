@@ -54,7 +54,11 @@ class RecipeMaterialTabFrame: HorizontalLayout
             migemoOptionChanged();
             return true;
         };
+
+        childById!EditLine("itemQuery").popupMenu = editorPopupMenu;
+
         preference = RecipeGraph.preference;
+
     }
 
     @property auto characters(dstring[] chars)
@@ -139,6 +143,7 @@ class RecipeMaterialTabFrame: HorizontalLayout
                 auto t = new TextWidget(null, "個"d);
                 o.enabled = false;
                 o.minWidth = 55;
+                o.popupMenu = editorPopupMenu;
                 if (auto num = c in toBeMade)
                 {
                     w.checked = true;
@@ -356,6 +361,7 @@ class RecipeMaterialTabFrame: HorizontalLayout
                 auto o = new EditIntLine("own");
                 auto t = new TextWidget("times", format("/%s 個"d, 0));
                 o.minWidth = 55;
+                o.popupMenu = editorPopupMenu;
 
                 w.checkStateChanged = (bool checked) {
                     if (isLocked)

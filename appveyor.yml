@@ -103,4 +103,4 @@ after_build:
   - type views\version
   - set /p CoopVer=<views\version
   - set CoopVer=%CoopVer:~1%
-  - cp moecoop-trunk-%Dmodel%bit.zip moecoop-%CoopVer%-%Dmodel%bit.zip
+  - copy moecoop-trunk-%Dmodel%bit.zip moecoop-%CoopVer%-%Dmodel%bit.zip

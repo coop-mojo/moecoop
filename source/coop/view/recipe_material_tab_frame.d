@@ -86,20 +86,6 @@ class RecipeMaterialTabFrame: TabFrameBase
         return childById!ComboBox("characters");
     }
 
-    @property void characters(dstring[] chars)
-    {
-        auto charBox = childById!ComboBox("characters");
-        auto selected = charBox.items.empty ? "存在しないユーザー" : charBox.selectedItem;
-        charBox.items = chars;
-        auto newIdx = chars.countUntil(selected).to!int;
-        charBox.selectedItemIndex = newIdx == -1 ? 0 : newIdx;
-    }
-
-    @property auto selectedCharacter()
-    {
-        return childById!ComboBox("characters").selectedItem;
-    }
-
     auto hideItemDetail(int idx)
     {
         childById("item"~(idx+1).to!string).visibility = Visibility.Gone;
@@ -460,7 +446,7 @@ class RecipeMaterialTabFrame: TabFrameBase
                     rs.each!(w => w.visibility = Visibility.Visible);
                     rs[1].text = format("%s 回"d, *n);
                     auto detail = controller.wisdom.recipeFor(r);
-                    if (detail.requiresRecipe && !controller.characters[selectedCharacter].hasRecipe(r))
+                    if (detail.requiresRecipe && !controller.characters[charactersBox.selectedItem].hasRecipe(r))
                     {
                         rs[0].textColor = "gray";
                     }

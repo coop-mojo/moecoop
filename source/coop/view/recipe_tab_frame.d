@@ -136,20 +136,6 @@ class RecipeTabFrame: TabFrameBase
         return childById!ComboBox("categories").selectedItem;
     }
 
-    @property void characters(dstring[] chars)
-    {
-        auto charBox = childById!ComboBox("characters");
-        auto selected = charBox.items.empty ? "存在しないユーザー" : charBox.selectedItem;
-        charBox.items = chars;
-        auto newIdx = chars.countUntil(selected).to!int;
-        charBox.selectedItemIndex = newIdx == -1 ? 0 : newIdx;
-    }
-
-    @property auto selectedCharacter()
-    {
-        return childById!ComboBox("characters").selectedItem;
-    }
-
     override @property ComboBox charactersBox()
     {
         return childById!ComboBox("characters");
@@ -377,7 +363,7 @@ private:
         }
 
         ret.checkStateChanged = (bool marked) {
-            auto c = selectedCharacter;
+            auto c = charactersBox.selectedItem;
             if (marked)
             {
                 binders.each!(b => characters[c].markFiledRecipe(recipe, b));
@@ -389,7 +375,7 @@ private:
                 ret.backgroundColor = "white";
             }
         };
-        ret.checked = binders.canFind!(b => characters[selectedCharacter].hasRecipe(recipe, b));
+        ret.checked = binders.canFind!(b => characters[charactersBox.selectedItem].hasRecipe(recipe, b));
         ret.enabled = binders.length == 1;
 
         ret.detailClicked = {

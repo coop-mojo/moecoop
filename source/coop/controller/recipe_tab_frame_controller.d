@@ -60,7 +60,8 @@ abstract class RecipeTabFrameController
         dummy.techniques = make!(typeof(dummy.techniques))(null);
         frame_.recipeDetail = RecipeDetailFrame.create(dummy, wisdom, characters);
 
-        frame_.characters = characters.keys.sort().array;
+        frame_.charactersBox.items = characters.keys.sort().array;
+        frame_.charactersBox.selectedItemIndex = 0;
 
         frame_.hideItemDetail(0);
         frame_.hideItemDetail(1);

@@ -31,7 +31,8 @@ class RecipeMaterialTabFrameController
     this(RecipeMaterialTabFrame frame)
     {
         frame_ = frame;
-        frame_.characters = characters.keys.sort().array;
+        frame_.charactersBox.items = characters.keys.sort().array;
+        frame_.charactersBox.selectedItemIndex = 0;
 
         Recipe dummy;
         dummy.techniques = make!(typeof(dummy.techniques))(null);

@@ -94,13 +94,6 @@ class ConfigDialog: Dialog
                     chars_[name] = new Character(name, baseDir);
                     chars_[name].url = url;
                     wLayout.childById!StringListWidget("characters").items = chars_.keys;
-                    auto mainWidget = _parentWindow.mainWidget;
-                    with(mainWidget)
-                    {
-                        childById!RecipeTabFrame("binderFrame").characters = chars_.keys;
-                        childById!RecipeTabFrame("skillFrame").characters = chars_.keys;
-                        childById!RecipeMaterialTabFrame("materialFrame").characters = chars_.keys;
-                    }
                     wLayout.childById("deleteCharacter").enabled = true;
                 }
             };
@@ -132,13 +125,6 @@ class ConfigDialog: Dialog
             chars_.remove(deleted);
             c.deleteConfig;
             list.items = chars_.keys;
-            auto mainWidget = _parentWindow.mainWidget;
-            with(mainWidget)
-            {
-                childById!RecipeTabFrame("binderFrame").characters = chars_.keys;
-                childById!RecipeTabFrame("skillFrame").characters = chars_.keys;
-                childById!RecipeMaterialTabFrame("materialFrame").characters = chars_.keys;
-            }
             if (chars_.keys.length == 1)
             {
                 src.enabled = false;
@@ -205,7 +191,16 @@ class ConfigDialog: Dialog
             if (action.id == StandardAction.Close &&
                 config_.migemoLib.exists)
             {
-                (cast(MainFrame)_parentWindow.mainWidget).controller.loadMigemo;
+                auto main = cast(MainFrame)window.mainWidget;
+                main.controller.loadMigemo;
+                ["binderFrame", "skillFrame", "materialFrame"].each!((tabName) {
+                        import coop.view.tab_frame_base;
+                        auto tab = main.childById!TabFrameBase(tabName);
+                        auto selected = tab.charactersBox.selectedItem;
+                        tab.charactersBox.items = chars_.keys;
+                        auto newIdx = chars_.keys.countUntil(selected).to!int;
+                        tab.charactersBox.selectedItemIndex = newIdx == -1 ? 0 : newIdx;
+                    });
             }
         }
         _parentWindow.removePopup(_popup);

@@ -5,19 +5,7 @@
  */
 module coop.controller.recipe_tab_frame_controller;
 
-import dlangui;
-
-import std.algorithm;
-import std.container.util;
-import std.range;
-import std.string;
 import std.typecons;
-
-import coop.model.recipe;
-import coop.model.wisdom;
-import coop.view.recipe_tab_frame;
-import coop.view.recipe_detail_frame;
-import coop.controller.main_frame_controller;
 
 enum SortOrder {
     BySkill       = "スキル値順"d,
@@ -29,10 +17,20 @@ alias RecipePair = Tuple!(dstring, "category", dstring[], "recipes");
 
 abstract class RecipeTabFrameController
 {
+    import coop.view.recipe_tab_frame;
+    import coop.controller.main_frame_controller;
+
     mixin TabController;
 
     this(RecipeTabFrame frame, dstring[] cats)
     {
+        import std.algorithm;
+        import std.container.util;
+        import std.range;
+
+        import coop.model.recipe;
+        import coop.view.recipe_detail_frame;
+
         frame_ = frame;
         frame_.queryFocused = {
             if (frame_.queryBox.text == defaultTxtMsg)
@@ -79,6 +77,9 @@ abstract class RecipeTabFrameController
 
     auto showRecipeNames()
     {
+        import std.algorithm;
+        import std.string;
+
         if (frame_.queryBox.text == defaultTxtMsg)
         {
             frame_.queryBox.text = ""d;
@@ -104,6 +105,8 @@ abstract class RecipeTabFrameController
 
         if (!query.empty)
         {
+            import std.range;
+
             auto queryFun = matchFunFor(query);
             recipes = recipes
                       .byKeyValue
@@ -115,6 +118,7 @@ abstract class RecipeTabFrameController
         }
 
         auto elems = recipes.byKeyValue.map!((kv) {
+                import std.range;
                 auto category = kv.key;
                 auto rs = kv.value;
 
@@ -151,6 +155,8 @@ abstract class RecipeTabFrameController
 protected:
     enum defaultTxtMsg = "見たいレシピ";
 
+    import coop.model.wisdom;
+
     abstract dstring[][dstring] recipeChunks(Wisdom);
     abstract dstring[][dstring] recipeChunksFor(Wisdom, dstring);
 
@@ -158,6 +164,7 @@ private:
     auto matchFunFor(dstring query)
     {
         import std.regex;
+        import std.string;
         bool delegate(dstring) fun;
         if (frame_.useMigemo)
         {
@@ -170,11 +177,13 @@ private:
         }
         else
         {
+            import std.algorithm;
             fun = (dstring s) => !find(s.removechars(r"/[ 　]/"), boyerMooreFinder(query)).empty;
         }
 
         if (frame_.useReverseSearch)
         {
+            import std.algorithm;
             return (dstring s) => wisdom.recipeFor(s).ingredients.keys.any!(ing => fun(ing));
         }
         else

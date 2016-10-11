@@ -18,10 +18,11 @@ import coop.util;
 import coop.view.controls;
 import coop.view.main_frame;
 import coop.view.item_detail_frame;
+import coop.view.tab_frame_base;
 import coop.view.recipe_detail_frame;
 import coop.controller.recipe_tab_frame_controller;
 
-class RecipeTabFrame: HorizontalLayout
+class RecipeTabFrame: TabFrameBase
 {
     mixin TabFrame;
 
@@ -59,24 +60,24 @@ class RecipeTabFrame: HorizontalLayout
             };
         }
 
-        with(childById!EditLine("searchQuery"))
-        {
-            import coop.view.editors;
+        import coop.view.editors;
+        childById!EditLine("searchQuery").contentChange = (EditableContent content) {
+            if (timerID > 0)
+            {
+                cancelTimer(timerID);
+            }
+            if (window)
+            {
+                timerID = setTimer(300);
+            }
+        };
+        childById!EditLine("searchQuery").popupMenu = editorPopupMenu;
 
-            focusChange = (Widget src, bool checked) {
-                queryFocused();
-                return true;
-            };
-            keyEvent = (Widget src, KeyEvent e) {
-                if (timerID > 0)
-                {
-                    this.cancelTimer(timerID);
-                }
-                timerID = this.setTimer(300);
-                return false;
-            };
-            popupMenu = editorPopupMenu;
-        }
+        // childById!EditLine("searchQuery").focusChange = (Widget src, bool checked) {
+        //     queryFocused();
+        //     return true;
+        // };
+
         childById!CheckBox("metaSearch").checkChange = (Widget src, bool checked) {
             metaSearchOptionChanged();
             return true;
@@ -110,6 +111,11 @@ class RecipeTabFrame: HorizontalLayout
         };
     }
 
+    override @property EditLine queryBox()
+    {
+        return childById!EditLine("searchQuery");
+    }
+
     override bool onTimer(ulong id)
     {
         queryChanged();
@@ -130,7 +136,7 @@ class RecipeTabFrame: HorizontalLayout
         return childById!ComboBox("categories").selectedItem;
     }
 
-    @property auto characters(dstring[] chars)
+    @property void characters(dstring[] chars)
     {
         auto charBox = childById!ComboBox("characters");
         auto selected = charBox.items.empty ? "存在しないユーザー" : charBox.selectedItem;
@@ -142,6 +148,11 @@ class RecipeTabFrame: HorizontalLayout
     @property auto selectedCharacter()
     {
         return childById!ComboBox("characters").selectedItem;
+    }
+
+    override @property ComboBox charactersBox()
+    {
+        return childById!ComboBox("characters");
     }
 
     auto showRecipeList(Pairs)(Pairs pairs)
@@ -249,16 +260,6 @@ class RecipeTabFrame: HorizontalLayout
         return childById!ComboBox("sortBy").selectedItem;
     }
 
-    @property auto queryText()
-    {
-        return childById!EditLine("searchQuery").text;
-    }
-
-    @property auto queryText(dstring str)
-    {
-        childById!EditLine("searchQuery").text = str;
-    }
-
     auto hideItemDetail(int idx)
     {
         childById("item"~(idx+1).to!string).visibility = Visibility.Gone;
@@ -274,12 +275,12 @@ class RecipeTabFrame: HorizontalLayout
         return childById!ComboBox("nColumns").selectedItem[0..1].to!int;
     }
 
-    @property auto useMetaSearch()
+    override @property bool useMetaSearch()
     {
         return childById!CheckBox("metaSearch").checked;
     }
 
-    @property auto useMetaSearch(bool use)
+    override @property void useMetaSearch(bool use)
     {
         childById!CheckBox("metaSearch").checked = use;
     }
@@ -296,17 +297,17 @@ class RecipeTabFrame: HorizontalLayout
         }
     }
 
-    @property auto useMigemo()
+    override @property bool useMigemo()
     {
         return childById!CheckBox("migemo").checked;
     }
 
-    @property auto useMigemo(bool use)
+    override @property void useMigemo(bool use)
     {
         childById!CheckBox("migemo").checked = use;
     }
 
-    @property auto disableMigemoBox()
+    override @property void disableMigemoBox()
     {
         with(childById!CheckBox("migemo"))
         {
@@ -315,7 +316,7 @@ class RecipeTabFrame: HorizontalLayout
         }
     }
 
-    @property auto enableMigemoBox()
+    override @property void enableMigemoBox()
     {
         childById!CheckBox("migemo").enabled = true;
     }

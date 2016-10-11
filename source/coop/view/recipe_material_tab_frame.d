@@ -27,9 +27,10 @@ import coop.view.main_frame;
 import coop.view.recipe_tab_frame;
 import coop.view.item_detail_frame;
 import coop.view.recipe_detail_frame;
+import coop.view.tab_frame_base;
 import coop.controller.recipe_material_tab_frame_controller;
 
-class RecipeMaterialTabFrame: HorizontalLayout
+class RecipeMaterialTabFrame: TabFrameBase
 {
     mixin TabFrame;
 
@@ -69,13 +70,23 @@ class RecipeMaterialTabFrame: HorizontalLayout
 
     }
 
+    override @property EditLine queryBox()
+    {
+        return childById!EditLine("itemQuery");
+    }
+
     override bool onTimer(ulong id)
     {
         queryChanged();
         return false;
     }
 
-    @property auto characters(dstring[] chars)
+    override @property ComboBox charactersBox()
+    {
+        return childById!ComboBox("characters");
+    }
+
+    @property void characters(dstring[] chars)
     {
         auto charBox = childById!ComboBox("characters");
         auto selected = charBox.items.empty ? "存在しないユーザー" : charBox.selectedItem;
@@ -111,17 +122,17 @@ class RecipeMaterialTabFrame: HorizontalLayout
         frame.addChild(recipe);
     }
 
-    @property auto useMigemo()
+    override @property bool useMigemo()
     {
         return childById!CheckBox("migemo").checked;
     }
 
-    @property auto useMigemo(bool use)
+    override @property void useMigemo(bool use)
     {
         childById!CheckBox("migemo").checked = use;
     }
 
-    @property auto disableMigemoBox()
+    override @property void disableMigemoBox()
     {
         with(childById!CheckBox("migemo"))
         {
@@ -130,7 +141,7 @@ class RecipeMaterialTabFrame: HorizontalLayout
         }
     }
 
-    @property auto enableMigemoBox()
+    override @property void enableMigemoBox()
     {
         childById!CheckBox("migemo").enabled = true;
     }

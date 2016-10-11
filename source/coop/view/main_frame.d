@@ -14,6 +14,7 @@ import coop.model.wisdom;
 import coop.model.config;
 import coop.view.recipe_tab_frame;
 import coop.view.recipe_material_tab_frame;
+import coop.view.tab_frame_base;
 import coop.controller.main_frame_controller;
 import coop.controller.binder_tab_frame_controller;
 import coop.controller.skill_tab_frame_controller;
@@ -137,23 +138,18 @@ protected:
         tabs.addTab(materialTab, "レシピ材料"d);
 
         tabs.tabChanged = (string next, string prev) {
-            if (auto recipeTab = cast(RecipeTabFrame)childById(prev))
-            {
-                auto useMetaSearch = recipeTab.useMetaSearch;
-                auto useMigemo = recipeTab.useMigemo;
-                auto queryText = recipeTab.queryText;
+            auto prev_tab = childById!TabFrameBase(prev);
+            auto useMetaSearch = prev_tab.useMetaSearch;
+            auto useMigemo = prev_tab.useMigemo;
+            auto query = prev_tab.queryBox.text;
+            auto idx = prev_tab.charactersBox.selectedItemIndex;
 
-                [binderTab, skillTab].each!((tab) {
-                        tab.useMetaSearch = useMetaSearch;
-                        tab.useMigemo = useMigemo;
-                        tab.queryText = queryText;
-                    });
-            }
-
-            if (auto nextTab = cast(RecipeTabFrame)childById(next))
-            {
-                nextTab.controller.showRecipeNames;
-            }
+            [binderTab, skillTab, materialTab].each!((tab) {
+                    tab.useMetaSearch = useMetaSearch;
+                    tab.useMigemo = useMigemo;
+                    tab.queryBox.text = query;
+                    tab.charactersBox.selectedItemIndex = idx;
+                });
         };
         return tabs;
     }

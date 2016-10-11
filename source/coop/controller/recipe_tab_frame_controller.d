@@ -35,9 +35,9 @@ abstract class RecipeTabFrameController
     {
         frame_ = frame;
         frame_.queryFocused = {
-            if (frame_.queryText == defaultTxtMsg)
+            if (frame_.queryBox.text == defaultTxtMsg)
             {
-                frame_.queryText = ""d;
+                frame_.queryBox.text = ""d;
             }
         };
 
@@ -78,12 +78,12 @@ abstract class RecipeTabFrameController
 
     auto showRecipeNames()
     {
-        if (frame_.queryText == defaultTxtMsg)
+        if (frame_.queryBox.text == defaultTxtMsg)
         {
-            frame_.queryText = ""d;
+            frame_.queryBox.text = ""d;
         }
 
-        auto query = frame_.queryText.removechars(r"/[ 　]/");
+        auto query = frame_.queryBox.text.removechars(r"/[ 　]/");
 
         // メタ検索 + 検索欄が空 -> 全部の候補がでてくる
         // 意味がないのでこの場合には何もせず処理を終了する

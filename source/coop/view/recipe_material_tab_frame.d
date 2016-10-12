@@ -39,6 +39,7 @@ class RecipeMaterialTabFrame: TabFrameBase
     this(string id)
     {
         super(id);
+        defaultMessage = "アイテム名";
         auto layout = new HorizontalLayout;
         addChild(layout);
         layout.margins = 20;
@@ -61,13 +62,36 @@ class RecipeMaterialTabFrame: TabFrameBase
             {
                 cancelTimer(timerID);
             }
-            timerID = setTimer(300);
+            if (window)
+            {
+                timerID = setTimer(300);
+            }
         };
 
         childById!EditLine("itemQuery").popupMenu = editorPopupMenu;
+        childById!EditLine("itemQuery").focusChange = (Widget src, bool focused) {
+            if (focused)
+            {
+                if (src.text == defaultMessage)
+                {
+                    src.text = "";
+                    src.textColor = "black";
+                }
+            }
+            else
+            {
+                if (src.text == "")
+                {
+                    src.text = defaultMessage;
+                    src.textColor = "gray";
+                }
+            }
+            return true;
+        };
+        childById("itemQuery").text = defaultMessage;
+        childById("itemQuery").textColor = "gray";
 
         preference = RecipeGraph.preference;
-
     }
 
     override @property EditLine queryBox()
@@ -77,7 +101,10 @@ class RecipeMaterialTabFrame: TabFrameBase
 
     override bool onTimer(ulong id)
     {
-        queryChanged();
+        if (queryBox.text != defaultMessage)
+        {
+            queryChanged();
+        }
         return false;
     }
 

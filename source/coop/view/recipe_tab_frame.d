@@ -31,6 +31,7 @@ class RecipeTabFrame: TabFrameBase
     this(string id)
     {
         super(id);
+        defaultMessage = "レシピ名";
         auto layout = new HorizontalLayout;
         addChild(layout);
         layout.margins = 20;
@@ -73,10 +74,27 @@ class RecipeTabFrame: TabFrameBase
         };
         childById!EditLine("searchQuery").popupMenu = editorPopupMenu;
 
-        // childById!EditLine("searchQuery").focusChange = (Widget src, bool checked) {
-        //     queryFocused();
-        //     return true;
-        // };
+        childById!EditLine("searchQuery").focusChange = (Widget src, bool focused) {
+            if (focused)
+            {
+                if (src.text == defaultMessage)
+                {
+                    src.text = "";
+                    src.textColor = "black";
+                }
+            }
+            else
+            {
+                if (src.text == "")
+                {
+                    src.text = defaultMessage;
+                    src.textColor = "gray";
+                }
+            }
+            return true;
+        };
+        childById("searchQuery").text = defaultMessage;
+        childById("searchQuery").textColor = "gray";
 
         childById!CheckBox("metaSearch").checkChange = (Widget src, bool checked) {
             metaSearchOptionChanged();
@@ -118,7 +136,10 @@ class RecipeTabFrame: TabFrameBase
 
     override bool onTimer(ulong id)
     {
-        queryChanged();
+        if (queryBox.text != defaultMessage)
+        {
+            queryChanged();
+        }
         return false;
     }
 
@@ -314,7 +335,6 @@ class RecipeTabFrame: TabFrameBase
         childById("metaSearch").text = format("全ての%sから検索"d, cat);
     }
 
-    EventHandler!() queryFocused;
     EventHandler!() queryChanged;
     EventHandler!() metaSearchOptionChanged;
     EventHandler!() migemoOptionChanged;

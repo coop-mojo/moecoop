@@ -32,12 +32,6 @@ abstract class RecipeTabFrameController
         import coop.view.recipe_detail_frame;
 
         frame_ = frame;
-        frame_.queryFocused = {
-            if (frame_.queryBox.text == defaultTxtMsg)
-            {
-                frame_.queryBox.text = ""d;
-            }
-        };
 
         frame_.queryChanged =
             frame_.metaSearchOptionChanged =

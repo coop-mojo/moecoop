@@ -293,10 +293,7 @@ class CharacterSettingDialog: Dialog
                 VerticalLayout {
                     padding: 10
                     TableLayout {
-                        colCount: 3
-                        TextWidget {
-                            text: "キャラクター名"
-                        }
+                        colCount: 2
                         EditLine {
                             id: charNameBox
                             minWidth: 200
@@ -304,9 +301,6 @@ class CharacterSettingDialog: Dialog
                         TextWidget {
                             id: "alert"
                             textColor: "red"
-                        }
-                        TextWidget {
-                            text: "URL"
                         }
                         EditLine {
                             id: urlBox
@@ -325,10 +319,11 @@ class CharacterSettingDialog: Dialog
 
         addChild(wLayout);
 
+        enum defaultCharName = "キャラクター名";
         charNameBox.popupMenu = editorPopupMenu;
         charNameBox.contentChange = (EditableContent con) {
             auto txt = con.text;
-            if (txt.empty)
+            if (txt.empty || txt == defaultCharName)
             {
                 childById("ok-button").enabled = false;
                 childById("alert").text = "";
@@ -344,8 +339,28 @@ class CharacterSettingDialog: Dialog
                 childById("alert").text = "";
             }
         };
+        charNameBox.focusChange = (Widget src, bool focused) {
+            if (focused)
+            {
+                if (src.text == defaultCharName)
+                {
+                    src.text = "";
+                    src.textColor = "black";
+                }
+            }
+            else
+            {
+                if (src.text == "")
+                {
+                    src.text = defaultCharName;
+                    src.textColor = "gray";
+                }
+            }
+            return true;
+        };
 
-        urlBox.text = url;
+        enum defaultURL = "スキルシミュレーターURL";
+        urlBox.text = url == "" ? defaultURL : url;
         urlBox.popupMenu = editorPopupMenu;
         urlBox.contentChange = (EditableContent con) {
             auto txt = con.text;
@@ -355,21 +370,54 @@ class CharacterSettingDialog: Dialog
                 import std.exception;
                 import std.typecons;
                 auto tpl = parseSimulatorURL(txt).ifThrown(tuple(""d, "", (double[string]).init, ""d));
-                charNameBox.text = tpl[0];
+                if (tpl[0] != "")
+                {
+                    charNameBox.text = tpl[0];
+                    charNameBox.textColor = "black";
+                }
             }
         };
+        urlBox.focusChange = (Widget src, bool focused) {
+            if (focused)
+            {
+                if (src.text == defaultURL)
+                {
+                    src.text = "";
+                    src.textColor = "black";
+                }
+            }
+            else
+            {
+                if (src.text == "")
+                {
+                    src.text = defaultURL;
+                    src.textColor = "gray";
+                }
+            }
+            return true;
+        };
+        if (urlBox.text == defaultURL)
+        {
+            urlBox.textColor = "gray";
+        }
 
         childById("ponButton").click = (Widget src) {
             dstring url;
             auto txt = urlBox.text;
-            if (txt.empty)
+            if (txt.empty || txt == defaultURL)
             {
-                import std.conv;
-                import std.format;
-                import std.uri;
                 import coop.model.skills;
-
-                url = charNameBox.text.empty ? SkillPon.to!dstring : format("%s?0&&%s"d, SkillPon, charNameBox.text.encode);
+                if (charNameBox.text.empty || charNameBox.text == defaultCharName)
+                {
+                    import std.conv;
+                    url = SkillPon.to!dstring;
+                }
+                else
+                {
+                    import std.format;
+                    import std.uri;
+                    url = format("%s?0&&%s"d, SkillPon, charNameBox.text.encode);
+                }
             }
             else
             {
@@ -381,7 +429,7 @@ class CharacterSettingDialog: Dialog
 
         auto exits = new HorizontalLayout;
         auto spacer = new FrameLayout;
-        spacer.minWidth(300);
+        spacer.minWidth(200);
         spacer.layoutWidth(FILL_PARENT);
         exits.addChild(spacer);
         auto ok = new Button(ACTION_OK).minWidth(80).text = "決定";
@@ -400,6 +448,8 @@ class CharacterSettingDialog: Dialog
         else
         {
             childById("ok-button").enabled = false;
+            charNameBox.text = defaultCharName;
+            charNameBox.textColor = "gray";
         }
     }
 

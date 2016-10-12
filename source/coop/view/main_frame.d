@@ -141,13 +141,22 @@ protected:
             auto prev_tab = childById!TabFrameBase(prev);
             auto useMetaSearch = prev_tab.useMetaSearch;
             auto useMigemo = prev_tab.useMigemo;
-            auto query = prev_tab.queryBox.text;
+            auto query = prev_tab.queryBox.text == prev_tab.defaultMessage ? "" : prev_tab.queryBox.text;
             auto idx = prev_tab.charactersBox.selectedItemIndex;
 
             [binderTab, skillTab, materialTab].each!((tab) {
                     tab.useMetaSearch = useMetaSearch;
                     tab.useMigemo = useMigemo;
-                    tab.queryBox.text = query;
+                    if (query == "")
+                    {
+                        tab.queryBox.text = tab.defaultMessage;
+                        tab.queryBox.textColor = "gray";
+                    }
+                    else
+                    {
+                        tab.queryBox.text = query;
+                        tab.queryBox.textColor = "black";
+                    }
                     tab.charactersBox.selectedItemIndex = idx;
                 });
         };

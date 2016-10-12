@@ -24,6 +24,8 @@ abstract class TabFrameBase: HorizontalLayout
     @property void disableMigemoBox() {}
 
     abstract @property EditLine queryBox();
+
+    dstring defaultMessage = "";
 private:
     bool useMeta_, useMigemo_;
 }

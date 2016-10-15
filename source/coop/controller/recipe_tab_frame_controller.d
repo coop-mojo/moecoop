@@ -74,12 +74,9 @@ abstract class RecipeTabFrameController
         import std.algorithm;
         import std.string;
 
-        if (frame_.queryBox.text == defaultTxtMsg)
-        {
-            frame_.queryBox.text = ""d;
-        }
+        auto input = frame_.queryBox.text == frame_.defaultMessage ? ""d : frame_.queryBox.text;
 
-        auto query = frame_.queryBox.text.removechars(r"/[ 　]/");
+        auto query = input.removechars(r"/[ 　]/");
 
         // メタ検索 + 検索欄が空 -> 全部の候補がでてくる
         // 意味がないのでこの場合には何もせず処理を終了する
@@ -147,8 +144,6 @@ abstract class RecipeTabFrameController
     }
 
 protected:
-    enum defaultTxtMsg = "見たいレシピ";
-
     import coop.model.wisdom;
 
     abstract dstring[][dstring] recipeChunks(Wisdom);

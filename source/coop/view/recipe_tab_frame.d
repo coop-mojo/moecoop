@@ -136,10 +136,7 @@ class RecipeTabFrame: TabFrameBase
 
     override bool onTimer(ulong id)
     {
-        if (queryBox.text != defaultMessage)
-        {
-            queryChanged();
-        }
+        queryChanged();
         return false;
     }
 

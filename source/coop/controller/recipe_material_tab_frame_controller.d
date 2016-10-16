@@ -49,7 +49,8 @@ class RecipeMaterialTabFrameController
         {
             frame_.disableMigemoBox;
         }
-        frame_.migemoOptionChanged = frame_.queryChanged = {
+        frame_.migemoOptionChanged =
+            frame_.queryChanged = {
             auto txt = frame_.childById("itemQuery").text;
             showProductCandidate(txt);
         };

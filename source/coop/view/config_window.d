@@ -368,8 +368,9 @@ class CharacterSettingDialog: Dialog
             {
                 import coop.model.skills;
                 import std.exception;
+                import std.traits;
                 import std.typecons;
-                auto tpl = parseSimulatorURL(txt).ifThrown(tuple(""d, "", (double[string]).init, ""d));
+                auto tpl = parseSimulatorURL(txt).ifThrown(ReturnType!parseSimulatorURL.init);
                 if (tpl[0] != "")
                 {
                     charNameBox.text = tpl[0];

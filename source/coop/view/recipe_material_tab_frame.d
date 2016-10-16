@@ -57,6 +57,11 @@ class RecipeMaterialTabFrame: TabFrameBase
             return true;
         };
 
+        childById!ComboBox("characters").itemClick = (Widget src, int idx) {
+            characterChanged();
+            return true;
+        };
+
         childById!EditLine("itemQuery").contentChange = (EditableContent content) {
             if (timerID > 0)
             {
@@ -473,7 +478,8 @@ class RecipeMaterialTabFrame: TabFrameBase
                     rs.each!(w => w.visibility = Visibility.Visible);
                     rs[1].text = format("%s 回"d, *n);
                     auto detail = controller.wisdom.recipeFor(r);
-                    if (detail.requiresRecipe && !controller.characters[charactersBox.selectedItem].hasRecipe(r))
+                    auto c = controller.characters[charactersBox.selectedItem];
+                    if (!c.hasSkillFor(detail) || (detail.requiresRecipe && !c.hasRecipe(r)))
                     {
                         rs[0].textColor = "gray";
                     }
@@ -688,6 +694,7 @@ class RecipeMaterialTabFrame: TabFrameBase
     bool isLocked;
     EventHandler!() migemoOptionChanged;
     EventHandler!() queryChanged;
+    EventHandler!() characterChanged;
     RecipeGraph fullGraph;
     RecipeGraph subGraph;
     dstring[dstring] preference;

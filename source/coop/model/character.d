@@ -38,6 +38,13 @@ class Character
         }
     }
 
+    import coop.model.recipe;
+    auto hasSkillFor(Recipe recipe)
+    {
+        import std.algorithm;
+        return recipe.requiredSkills.byKeyValue.all!(kv => (kv.key in skills) && skills[kv.key] >= kv.value);
+    }
+
     auto hasRecipe(dstring recipe, dstring binder = "")
     {
         import std.array;
@@ -84,7 +91,13 @@ class Character
 
     @property auto url(dstring u)
     {
+        import coop.model.skills;
+        import std.exception;
+        import std.traits;
+        import std.typecons;
+
         url_ = u;
+        skills = parseSimulatorURL(url_).ifThrown!SkillSimulatorException(ReturnType!parseSimulatorURL.init)[2];
     }
 
     auto save()
@@ -192,6 +205,7 @@ private:
     dstring name_;
     dstring dir_;
     dstring url_;
+    double[dstring] skills;
 }
 
 auto readBindersInfo(string file)

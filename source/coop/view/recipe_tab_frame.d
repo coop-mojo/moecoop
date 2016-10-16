@@ -352,9 +352,9 @@ private:
         auto characters = controller.characters;
         auto binders = relatedBindersFor(recipe, category);
 
+        auto r = wisdom.recipeFor(recipe);
         debug
         {
-            auto r = wisdom.recipeFor(recipe);
             if (r.name.empty)
             {
                 ret.textColor = "red";
@@ -380,20 +380,36 @@ private:
         }
 
         ret.checkStateChanged = (bool marked) {
-            auto c = charactersBox.selectedItem;
+            auto c = characters[charactersBox.selectedItem];
             if (marked)
             {
-                binders.each!(b => characters[c].markFiledRecipe(recipe, b));
+                binders.each!(b => c.markFiledRecipe(recipe, b));
                 ret.backgroundColor = 0xdcdcdc;
+                if (c.hasSkillFor(r))
+                {
+                    ret.textColor = "black";
+                }
             }
             else
             {
-                binders.each!(b => characters[c].unmarkFiledRecipe(recipe, b));
+                binders.each!(b => c.unmarkFiledRecipe(recipe, b));
                 ret.backgroundColor = "white";
+                if (!c.hasSkillFor(r) || r.requiresRecipe)
+                {
+                    ret.textColor = "gray";
+                }
             }
         };
         ret.checked = binders.canFind!(b => characters[charactersBox.selectedItem].hasRecipe(recipe, b));
         ret.enabled = binders.length == 1;
+        if (r.requiresRecipe)
+        {
+            ret.textColor = (ret.checked && characters[charactersBox.selectedItem].hasSkillFor(r)) ? "black" : "gray";
+        }
+        else
+        {
+            ret.textColor = characters[charactersBox.selectedItem].hasSkillFor(r) ? "black" : "gray";
+        }
 
         ret.detailClicked = {
             unhighlightDetailRecipe;

@@ -384,7 +384,6 @@ private:
             if (marked)
             {
                 binders.each!(b => c.markFiledRecipe(recipe, b));
-                ret.backgroundColor = 0xdcdcdc;
                 if (c.hasSkillFor(r))
                 {
                     ret.textColor = "black";
@@ -393,7 +392,6 @@ private:
             else
             {
                 binders.each!(b => c.unmarkFiledRecipe(recipe, b));
-                ret.backgroundColor = "white";
                 if (!c.hasSkillFor(r) || r.requiresRecipe)
                 {
                     ret.textColor = "gray";

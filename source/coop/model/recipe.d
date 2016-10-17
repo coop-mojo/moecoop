@@ -156,4 +156,5 @@ unittest
     assert(!recipe.isGambledRoulette);
     assert(!recipe.isPenaltyRoulette);
     assert(recipe.remarks.empty);
+    assert(recipe.toShortString == "ﾛｰｽﾄｽﾈｰｸﾐｰﾄx1 (料理0.0) = ﾍﾋﾞの肉x1");
 }

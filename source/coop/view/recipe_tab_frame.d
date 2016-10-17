@@ -450,6 +450,11 @@ private:
                     setItemDetail(ItemDetailFrame.create(item, idx+1, wisdom, cWisdom), idx);
                 });
         };
+
+        import std.typecons;
+        ret.popupMenu = [tuple("このレシピをコピー"d, () {
+                    Platform.instance.setClipboardText(r.toShortString.to!dstring);
+                })];
         return ret;
     }
     ulong timerID;

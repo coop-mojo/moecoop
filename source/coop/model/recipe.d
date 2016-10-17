@@ -56,6 +56,23 @@ struct Recipe
     {
         return name.hashOf;
     }
+
+    /**
+     * MoE 内に貼り付けるための短めの文字列を返す
+     */
+    auto toShortString() const
+    {
+        import std.format;
+        import std.string;
+
+        import coop.util;
+
+        return format("%s (%s%s) = %s",
+                      products.byKeyValue.map!(kv => format("%sx%s", kv.key.toHankaku.removechars(" "), kv.value)).join(","),
+                      requiredSkills.byKeyValue.map!(kv => format("%s%s", kv.key.toHankaku.removechars(" "), kv.value)).join(","),
+                      requiresRecipe ? ": ﾚｼﾋﾟ必須" : "",
+                      ingredients.byKeyValue.map!(kv => format("%sx%s", kv.key.toHankaku.removechars(" "), kv.value)).join(" "));
+    }
 }
 
 auto readRecipes(string file)

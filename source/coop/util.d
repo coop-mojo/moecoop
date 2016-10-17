@@ -415,7 +415,7 @@ auto checkedAssocArray(Range)(Range r) if (isInputRange!Range)
         case 'ラ': return "ﾗ"; case 'リ': return "ﾘ"; case 'ル': return "ﾙ"; case 'レ': return "ﾚ"; case 'ロ': return "ﾛ";
         case 'ワ': return "ﾜ"; case 'ヲ': return "ｦ"; case 'ン': return "ﾝ";
 
-        case 'ー': return "−";
+        case 'ー': return "ｰ";
 
         case 'ァ': return "ｧ"; case 'ィ': return "ｨ"; case 'ゥ': return "ｩ"; case 'ェ': return "ｪ"; case 'ォ': return "ｫ";
         case 'ャ': return "ｬ"; case 'ュ': return "ｭ"; case 'ョ': return "ｮ";
@@ -437,7 +437,7 @@ auto checkedAssocArray(Range)(Range r) if (isInputRange!Range)
 {
     assert("アカサタナハマヤラワ".toHankaku == "ｱｶｻﾀﾅﾊﾏﾔﾗﾜ");
     assert("ァャガザダバパ".toHankaku == "ｧｬｶﾞｻﾞﾀﾞﾊﾞﾊﾟ");
-    assert("ソート後の表".toHankaku == "ｿ−ﾄ後の表");
+    assert("ソート後の表".toHankaku == "ｿｰﾄ後の表");
 
     // - (ハイフン) と ｰ (半角カタカナ) は似ているが違うので注意！
     assert("ソート後の表".toHankaku != "ｿ-ﾄ後の表");

@@ -434,7 +434,7 @@ auto checkedAssocArray(Range)(Range r) if (isInputRange!Range)
 
 ///
 @safe unittest
-{import std.conv;
+{
     assert("アカサタナハマヤラワ".toHankaku == "ｱｶｻﾀﾅﾊﾏﾔﾗﾜ");
     assert("ァャガザダバパ".toHankaku == "ｧｬｶﾞｻﾞﾀﾞﾊﾞﾊﾟ");
     assert("ソート後の表".toHankaku == "ｿ−ﾄ後の表");

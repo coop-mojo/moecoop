@@ -20,7 +20,7 @@ import coop.model.recipe;
 import coop.model.wisdom;
 import coop.model.character;
 
-class RecipeDetailFrame: ScrollWidget
+class RecipeDetailFrame: ScrollWidget, MenuItemActionHandler
 {
     this() { super(); }
 
@@ -131,6 +131,10 @@ class RecipeDetailFrame: ScrollWidget
                                           make!(RedBlackTree!dstring)(ret.binders.filter!(b => chars[k].hasRecipe(r.name, b)).array)))
                          .assocArray;
         }
+
+        auto popupItem = new MenuItem(null);
+        popupItem.add(new Action(EditorActions.Copy, "このレシピをコピー"d, "edit-cut"));
+        ret.popupMenu = popupItem;
         return ret;
     }
 
@@ -220,7 +224,64 @@ class RecipeDetailFrame: ScrollWidget
                     }
                 }).join(", ");
     }
+
+    @property auto popupMenu(MenuItem popupMenu)
+    {
+        _popupMenu = popupMenu;
+    }
+
+    override bool canShowPopupMenu(int x, int y)
+    {
+        if (_popupMenu is null)
+        {
+            return false;
+        }
+        else if (_popupMenu.openingSubmenu.assigned &&
+            !_popupMenu.openingSubmenu(_popupMenu))
+        {
+                return false;
+        }
+        else if (recipe_.products.keys.empty)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    override void showPopupMenu(int x, int y)
+    {
+        if (_popupMenu.openingSubmenu.assigned &&
+            !_popupMenu.openingSubmenu(_popupMenu))
+        {
+            return;
+        }
+        _popupMenu.updateActionState(this);
+        PopupMenu popupMenu = new PopupMenu(_popupMenu);
+        popupMenu.menuItemAction = this;
+        PopupWidget popup = window.showPopup(popupMenu, this, PopupAlign.Point | PopupAlign.Right, x, y);
+        popup.flags = PopupFlags.CloseOnClickOutside;
+    }
+
+    override bool onMenuItemAction(const Action action)
+    {
+        return dispatchAction(action);
+    }
+
+    override bool handleAction(const Action a)
+    {
+        if (a)
+        {
+            if (a.id == EditorActions.Copy)
+            {
+                platform.setClipboardText(recipe_.toShortString.to!dstring);
+                return true;
+            }
+        }
+        return false;
+    }
+
 private:
+    MenuItem _popupMenu;
     Recipe recipe_;
     dstring[] filedBinders_;
     RedBlackTree!dstring[dstring] owners_;

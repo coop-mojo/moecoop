@@ -453,7 +453,7 @@ private:
 
         import std.typecons;
         ret.popupMenu = [tuple("このレシピをコピー"d, () {
-                    Platform.instance.setClipboardText(r.toShortString.to!dstring);
+                    platform.setClipboardText(r.toShortString.to!dstring);
                 })];
         return ret;
     }

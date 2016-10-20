@@ -5,28 +5,29 @@
  */
 module coop.model.recipe_graph;
 
-import coop.model.wisdom;
-
-import std.algorithm;
-import std.container;
-import std.conv;
-import std.format;
-import std.math;
-import std.range;
 import std.typecons;
 
 alias MatTuple = Tuple!(int, "num", bool, "isIntermediate");
 
 class RecipeGraph
 {
+    import std.container;
+
+    import coop.model.wisdom;
+
     this(dstring[] names, Wisdom w, dstring[dstring] pref = defaultPreference) pure
     {
+        import std.algorithm;
+        import std.array;
+
         preferences_ = pref;
         roots = names.sort().map!(n => init(n, cast(RecipeContainer)null, w)).array;
     }
 
     auto elements() pure
     {
+        import std.range;
+
         if (orderedRecipes_.empty)
         {
             visit;
@@ -40,9 +41,15 @@ class RecipeGraph
      +/
     auto elements(int[dstring] targets, int[dstring] owned, Wisdom w, RedBlackTree!dstring mats = new RedBlackTree!dstring) pure
     in {
+        import std.algorithm;
+        import std.array;
         import std.format;
+
         assert(targets.keys.all!(t => roots.map!"a.name".canFind(t)), format("Invalid input: %s but roots are %s", targets, roots.map!"a.name".array));
     } body {
+        import std.algorithm;
+        import std.array;
+
         int[dstring] rs, leftover;
         MatTuple[dstring] ms = targets.byKeyValue.map!(kv => tuple(kv.key, MatTuple(kv.value, false))).assocArray;
         foreach(r; elements.recipes)
@@ -61,6 +68,9 @@ class RecipeGraph
                 int nApply;
                 if (req > ow)
                 {
+                    import std.conv;
+                    import std.math;
+
                     nApply = ((req-ow)/nPerComb.to!real).ceil.to!int;
                     leftover[tar] = nApply*nPerComb - (req-ow);
                     rs[r] = nApply;
@@ -106,8 +116,13 @@ class RecipeGraph
 
     @property auto targets() const @safe pure nothrow
     out(result) {
+        import std.algorithm;
+
         assert(result.isSorted);
     } body {
+        import std.algorithm;
+        import std.array;
+
         return roots.map!"a.name".array;
     }
 
@@ -194,6 +209,9 @@ private:
 
         if (auto rs = name in w.rrecipeList)
         {
+            import std.algorithm;
+            import std.array;
+
             dstring[] arr;
             if (auto elem = name in preferences_)
             {
@@ -201,6 +219,7 @@ private:
             }
             else
             {
+
                 arr = (*rs)[].array;
             }
             mat.children = arr.map!(r => this.init(r, mat, w)).array;
@@ -217,6 +236,9 @@ private:
      +/
     auto init(dstring name, MaterialContainer parent, Wisdom w) pure
     {
+        import std.algorithm;
+        import std.array;
+
         auto recipe = recipes_.get(name, new RecipeContainer(name));
         if (parent.name !in recipe.parents)
         {
@@ -238,8 +260,12 @@ private:
 
     auto visit() pure
     out {
+        import std.algorithm;
+
         assert(targets.all!(t => orderedMaterials_.canFind(t)));
     } body {
+        import std.algorithm;
+
         orderedRecipes_ = [];
         orderedMaterials_ = [];
         auto visitedRecipes = new RedBlackTree!dstring;
@@ -251,6 +277,8 @@ private:
 
     void visit(MaterialContainer material, ref RedBlackTree!dstring rs, ref RedBlackTree!dstring ms) pure
     {
+        import std.algorithm;
+
         if (material.name in ms)
         {
             return;
@@ -262,6 +290,8 @@ private:
 
     void visit(RecipeContainer recipe, ref RedBlackTree!dstring rs, ref RedBlackTree!dstring ms) pure
     {
+        import std.algorithm;
+
         if (recipe.name in rs)
         {
             return;
@@ -283,6 +313,8 @@ private:
 
 class RecipeContainer
 {
+    import std.container;
+
     this(dstring name_) @safe pure nothrow
     {
         name = name_;
@@ -291,11 +323,18 @@ class RecipeContainer
 
     override string toString() const @safe pure
     {
+        import std.conv;
+
         return name.to!string;
     }
 
     string toGraphString(ref RedBlackTree!string ms, ref RedBlackTree!string rs, int lv = 0) const pure
     {
+        import std.algorithm;
+        import std.conv;
+        import std.format;
+        import std.range;
+
         if (name.to!string in rs)
         {
             return format("%sR: %s (already occured)", ' '.repeat.take(lv*2), name);
@@ -312,6 +351,8 @@ class RecipeContainer
 
 class MaterialContainer
 {
+    import std.container;
+
     this(dstring name_) @safe pure nothrow
     {
         name = name_;
@@ -325,11 +366,18 @@ class MaterialContainer
 
     override string toString() const @safe pure
     {
+        import std.conv;
+
         return name.to!string;
     }
 
     string toGraphString(ref RedBlackTree!string ms, ref RedBlackTree!string rs, int lv = 0) const pure
     {
+        import std.algorithm;
+        import std.conv;
+        import std.format;
+        import std.range;
+
         if (!isProduct)
         {
             return format("%sM: %s (Leaf)", ' '.repeat.take(lv*2), name);

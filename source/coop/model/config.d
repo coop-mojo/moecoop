@@ -5,22 +5,20 @@
  */
 module coop.model.config;
 
-import std.conv;
-import std.exception;
-import std.file;
-import std.format;
-import std.json;
-import std.path;
-import std.process;
-
-import coop.util;
-
 class Config {
     this(string file)
     {
+        import std.file;
+        import std.path;
+
         configFile = file;
         if (file.exists)
         {
+            import std.exception;
+            import std.json;
+
+            import coop.util;
+
             auto json = file.readText.parseJSON;
             enforce(json.type == JSON_TYPE.OBJECT);
             windowWidth = json["initWindowWidth"].jto!uint;
@@ -53,7 +51,10 @@ class Config {
 
     auto save()
     {
+        import std.file;
+        import std.path;
         import std.stdio;
+
         mkdirRecurse(configFile.dirName);
         auto f = File(configFile, "w");
         f.write(toJSON);
@@ -61,6 +62,7 @@ class Config {
 
     auto toJSON()
     {
+        import std.json;
         auto json = JSONValue([ "initWindowWidth": JSONValue(windowWidth),
                                 "initWindowHeight": JSONValue(windowHeight),
                                   ]);
@@ -69,7 +71,10 @@ class Config {
 
     auto initMigemoDir()
     {
+        import std.file;
+        import std.path;
         import std.typecons;
+
         alias LibInfo = Tuple!(string, "lib", string, "dict");
         version(Windows)
         {
@@ -90,6 +95,8 @@ class Config {
         }
         else version(linux)
         {
+            import std.format;
+
             version(X86)
             {
                 enum arch = "i386-linux-gnu";
@@ -173,6 +180,8 @@ auto ln(string target, string linkname)
     }
     else version(Posix)
     {
+        import std.file;
+
         symlink(target, linkname);
     }
 }

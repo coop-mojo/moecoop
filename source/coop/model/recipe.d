@@ -5,20 +5,12 @@
  */
 module coop.model.recipe;
 
-import std.algorithm;
-import std.array;
-import std.container.rbtree;
-import std.container.util;
-import std.conv;
-import std.exception;
-import std.file;
 import std.json;
-import std.typecons;
-
-import coop.util;
 
 struct Recipe
 {
+    import std.container;
+
     /// レシピ名
     dstring name;
 
@@ -62,6 +54,7 @@ struct Recipe
      */
     auto toShortString() const
     {
+        import std.algorithm;
         import std.format;
         import std.string;
 
@@ -77,9 +70,18 @@ struct Recipe
 
 auto readRecipes(string file)
 in{
+    import std.file;
+
     assert(file.exists);
 } body {
+    import std.algorithm;
+    import std.conv;
+    import std.exception;
+    import std.file;
     import std.path;
+    import std.range;
+    import std.typecons;
+
     auto category = file.baseName(".json");
     auto res = file.readText.parseJSON;
     enforce(res.type == JSON_TYPE.OBJECT);
@@ -97,6 +99,11 @@ auto toRecipe(string s, JSONValue[string] json)
 {
     Recipe ret;
     with(ret) {
+        import std.conv;
+        import std.container;
+
+        import coop.util;
+
         name = s.to!dstring;
         ingredients = json["材料"].jto!(int[dstring]);
         products = json["生成物"].jto!(int[dstring]);
@@ -139,6 +146,9 @@ auto toRecipe(string s, JSONValue[string] json)
 
 unittest
 {
+    import std.algorithm;
+    import std.range;
+
     auto name = "ロースト スネーク ミート";
     auto json = ["材料": JSONValue([ "ヘビの肉": 1 ]),
                  "生成物": JSONValue([ "ロースト スネーク ミート": 1 ]),

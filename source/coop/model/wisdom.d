@@ -5,25 +5,17 @@
  */
 module coop.model.wisdom;
 
-import std.algorithm;
-import std.array;
-import std.conv;
-import std.container;
-import std.exception;
-import std.file;
-import std.json;
-import std.path;
-import std.range;
 import std.typecons;
-
-import coop.model.item;
-import coop.model.recipe;
-import coop.util;
 
 alias Binder = Typedef!(dstring, "binder");
 alias Category = Typedef!(dstring, "category");
 
 class Wisdom {
+    import std.container;
+
+    import coop.model.item;
+    import coop.model.recipe;
+
     /// バインダーごとのレシピ名一覧
     dstring[][dstring] binderList;
 
@@ -50,6 +42,9 @@ class Wisdom {
 
     auto reload()
     {
+        import std.algorithm;
+        import std.array;
+
         binderList = readBinderList(baseDir_);
         recipeList = readRecipeList(baseDir_);
         rrecipeList = genRRecipeList(recipeList.values.map!(a => a.values).join);
@@ -57,6 +52,8 @@ class Wisdom {
 
         with(ItemType)
         {
+            import std.conv;
+
             extraInfoList[Food.to!ItemType] = readFoodList(baseDir_).to!(ExtraInfo[dstring]);
             extraInfoList[Drink.to!ItemType] = readDrinkList(baseDir_).to!(ExtraInfo[dstring]);
             extraInfoList[Liquor.to!ItemType] = readLiquorList(baseDir_).to!(ExtraInfo[dstring]);
@@ -70,6 +67,9 @@ class Wisdom {
 
     @property auto recipeCategories() const pure nothrow
     {
+        import std.algorithm;
+        import std.array;
+
         return recipeList.keys.sort().array;
     }
 
@@ -82,6 +82,9 @@ class Wisdom {
 
     @property auto binders() const pure nothrow
     {
+        import std.algorithm;
+        import std.array;
+
         return binderList.keys.sort().array;
     }
 
@@ -94,6 +97,9 @@ class Wisdom {
 
     auto recipeFor(dstring recipeName) pure
     {
+        import std.algorithm;
+        import std.range;
+
         auto ret = recipeCategories.find!(c => recipeName in recipesIn(Category(c)));
         if (ret.empty)
         {
@@ -110,13 +116,21 @@ class Wisdom {
 
     auto bindersFor(dstring recipeName) pure nothrow
     {
+        import std.algorithm;
+        import std.range;
+
         return binders.filter!(b => recipesIn(Binder(b)).canFind(recipeName)).array;
     }
 
     auto save() const
     {
-        import std.stdio;
+        import std.algorithm;
+        import std.array;
         import std.conv;
+        import std.file;
+        import std.json;
+        import std.path;
+        import std.stdio;
 
         foreach(dir; ["アイテム", "バインダー", "レシピ", "飲み物", "飲食バフ",
                       "食べ物", "武器", "弾", "防具", "盾"])
@@ -132,6 +146,12 @@ class Wisdom {
 private:
     auto readBinderList(string basedir)
     {
+        import std.algorithm;
+        import std.exception;
+        import std.file;
+        import std.path;
+        import std.range;
+
         enforce(basedir.exists);
         enforce(basedir.isDir);
 
@@ -149,6 +169,13 @@ private:
 
     auto readRecipeList(string basedir)
     {
+        import std.algorithm;
+        import std.exception;
+        import std.file;
+        import std.path;
+
+        import coop.util;
+
         enforce(basedir.exists);
         enforce(basedir.isDir);
 
@@ -164,6 +191,8 @@ private:
 
     auto genRRecipeList(Recipe[] recipes) const pure
     {
+        import std.algorithm;
+
         RedBlackTree!dstring[dstring] ret;
         recipes.each!((r) {
                 r.products.keys.each!((p) {
@@ -182,6 +211,14 @@ private:
 
     auto readItemList(string sysBase)
     {
+        import std.algorithm;
+        import std.array;
+        import std.exception;
+        import std.file;
+        import std.path;
+
+        import coop.util;
+
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
 
@@ -199,6 +236,13 @@ private:
 
     auto readFoodList(string sysBase)
     {
+        import std.algorithm;
+        import std.exception;
+        import std.file;
+        import std.path;
+
+        import coop.util;
+
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
 
@@ -215,6 +259,12 @@ private:
 
     auto readDrinkList(string sysBase)
     {
+        import std.exception;
+        import std.file;
+        import std.path;
+
+        import coop.util;
+
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
 
@@ -228,6 +278,12 @@ private:
 
     auto readLiquorList(string sysBase)
     {
+        import std.exception;
+        import std.file;
+        import std.path;
+
+        import coop.util;
+
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
 
@@ -241,6 +297,13 @@ private:
 
     auto readWeaponList(string sysBase)
     {
+        import std.algorithm;
+        import std.exception;
+        import std.file;
+        import std.path;
+
+        import coop.util;
+
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
 
@@ -257,6 +320,13 @@ private:
 
     auto readArmorList(string sysBase)
     {
+        import std.algorithm;
+        import std.exception;
+        import std.file;
+        import std.path;
+
+        import coop.util;
+
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
 
@@ -273,6 +343,13 @@ private:
 
     auto readBulletList(string sysBase)
     {
+        import std.algorithm;
+        import std.exception;
+        import std.file;
+        import std.path;
+
+        import coop.util;
+
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
 
@@ -289,6 +366,13 @@ private:
 
     auto readShieldList(string sysBase)
     {
+        import std.algorithm;
+        import std.exception;
+        import std.file;
+        import std.path;
+
+        import coop.util;
+
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
 
@@ -305,6 +389,13 @@ private:
 
     auto readFoodEffectList(string sysBase)
     {
+        import std.algorithm;
+        import std.exception;
+        import std.file;
+        import std.path;
+
+        import coop.util;
+
         enforce(sysBase.exists);
         enforce(sysBase.isDir);
 
@@ -325,8 +416,11 @@ private:
 
 auto readBinders(string file)
 {
-    import std.json;
+    import std.algorithm;
     import std.conv;
+    import std.exception;
+    import std.file;
+    import std.json;
 
     enforce(file.exists);
     auto res = file
@@ -337,6 +431,8 @@ auto readBinders(string file)
         .object
         .byKeyValue
         .map!((kv) {
+                import coop.util;
+
                 auto binder = kv.key.to!dstring;
                 enforce(kv.value.type == JSON_TYPE.ARRAY);
                 auto recipes = kv.value.jto!(dstring[]);
@@ -346,6 +442,12 @@ auto readBinders(string file)
 
 unittest
 {
+    import std.algorithm;
+    import std.exception;
+    import std.range;
+
+    import coop.util;
+
     auto w = assertNotThrown(new Wisdom(SystemResourceBase));
     assert(w.recipeCategories.equal(["合成"d, "料理", "木工", "特殊", "薬調合", "裁縫", "装飾細工", "複合", "醸造", "鍛冶"]));
     assert(w.binders.equal(["QoAクエスト"d, "アクセサリー", "アクセサリー No.2", "カオス", "家", "家具", "木工", "木工 No.2",
@@ -364,6 +466,9 @@ unittest
 
 unittest
 {
+    import std.exception;
+    import std.range;
+
     auto w = assertNotThrown(new Wisdom("."));
     assert(w.binders.empty);
     assert(w.recipeCategories.empty);
@@ -371,6 +476,10 @@ unittest
 
 unittest
 {
+    import std.exception;
+    import std.file;
+    import std.path;
+
     enum invalidDir = "__invalid__";
     mkdir(invalidDir);
     scope(exit) rmdirRecurse(invalidDir);

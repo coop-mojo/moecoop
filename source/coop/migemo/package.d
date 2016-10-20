@@ -5,16 +5,7 @@
  */
 module coop.migemo;
 
-import derelict.util.exception;
-
-import std.conv;
 import std.exception;
-import std.file;
-import std.path;
-import std.string;
-import std.traits;
-
-import coop.migemo.derelict.migemo;
 
 class MigemoException: Exception
 {
@@ -24,12 +15,22 @@ class MigemoException: Exception
 alias migemoEnforce = enforceEx!MigemoException;
 
 class Migemo{
+    import std.traits;
+
     this(String)(String path, String dictDir) if (isSomeString!String)
     in{
+        import std.file;
+
         assert(path.exists);
         assert(path.isFile);
     } body {
+        import derelict.util.exception;
         try{
+            import std.conv;
+            import std.file;
+            import std.path;
+            import std.string;
+
             DerelictMigemo.load(path.to!string);
             m = migemo_open(null);
             migemo_setproc_int2char(m, &int2char);
@@ -54,7 +55,10 @@ class Migemo{
 
     void load(String)(String path) if (isSomeString!String)
     {
+        import std.conv;
+        import std.file;
         import std.format;
+        import std.string;
 
         migemoEnforce(path.exists, format("%s does not exist.", path));
         migemoEnforce(path.isFile, format("%s is not a file.", path));
@@ -69,6 +73,9 @@ class Migemo{
 
     auto query(String)(String query) if (isSomeString!String)
     {
+        import std.conv;
+        import std.string;
+
         auto cstr = migemo_query(m, query.to!string.toStringz);
         scope(exit) migemo_release(m, cstr);
         return fromStringz(cstr).idup.to!String;
@@ -79,6 +86,8 @@ class Migemo{
         migemo_close(m);
     }
 private:
+    import coop.migemo.derelict.migemo;
+
     migemo *m;
 }
 

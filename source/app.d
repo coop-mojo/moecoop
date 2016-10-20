@@ -5,19 +5,6 @@
  */
 import dlangui;
 
-import std.algorithm;
-import std.array;
-import std.conv;
-import std.file;
-import std.path;
-import std.typecons;
-
-import coop.model.character;
-import coop.model.config;
-import coop.model.wisdom;
-import coop.view.main_frame;
-import coop.util;
-
 version(linux)
 {
     static this()
@@ -31,6 +18,19 @@ mixin APP_ENTRY_POINT;
 
 extern(C) int UIAppMain(string[] args)
 {
+    import std.algorithm;
+    import std.array;
+    import std.conv;
+    import std.file;
+    import std.path;
+    import std.typecons;
+
+    import coop.model.character;
+    import coop.model.config;
+    import coop.model.wisdom;
+    import coop.view.main_frame;
+    import coop.util;
+
     embeddedResourceList.addResources(embedResourcesFromList!"resources.list"());
 
     auto wisdom = new Wisdom(SystemResourceBase);

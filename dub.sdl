@@ -4,7 +4,7 @@ description "生協の知恵袋"
 homepage "https://github.com/coop-mojo/moecoop/"
 copyright "Copyright © 2016, もじょんぬ"
 license "MIT"
-authors "もじょんぬ@E鯖 <moe.e.coop@gmail.com>"
+authors "もじょんぬ <moe.e.coop@gmail.com>"
 
 dependency "dlangui" version="0.9.38"
 dependency "derelict-util" version="2.0.6"

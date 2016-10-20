@@ -5,31 +5,26 @@
  */
 module coop.controller.recipe_material_tab_frame_controller;
 
-import dlangui;
-
-import std.algorithm;
-import std.container;
-import std.math;
-import std.range;
-import std.regex;
-import std.string;
 import std.typecons;
-
-import coop.util;
-import coop.model.item;
-import coop.model.recipe;
-import coop.view.recipe_material_tab_frame;
-import coop.view.recipe_detail_frame;
-import coop.controller.main_frame_controller;
 
 alias MaterialTuple = Tuple!(int, "num", bool, "intermediate");
 
 class RecipeMaterialTabFrameController
 {
+    import coop.controller.main_frame_controller;
+    import coop.view.recipe_material_tab_frame;
+
     mixin TabController;
 
     this(RecipeMaterialTabFrame frame)
     {
+        import std.algorithm;
+        import std.container;
+        import std.range;
+
+        import coop.model.recipe;
+        import coop.view.recipe_detail_frame;
+
         frame_ = frame;
         frame_.charactersBox.items = characters.keys.sort().array;
         frame_.charactersBox.selectedItemIndex = 0;
@@ -58,6 +53,10 @@ class RecipeMaterialTabFrameController
 
     auto showProductCandidate(dstring queryText)
     {
+        import std.algorithm;
+        import std.range;
+        import std.string;
+
         auto query = queryText.removechars(r"/[ 　]/");
         if (query.empty)
         {
@@ -72,9 +71,11 @@ class RecipeMaterialTabFrameController
 private:
     auto matchFunFor(dstring query)
     {
-        import std.regex;
+        import std.string;
+
         if (frame_.useMigemo)
         {
+            import std.regex;
             try{
                 auto q = migemo.query(query).regex;
                 return (dstring s) => !s.removechars(r"/[ 　]/").matchFirst(q).empty;
@@ -84,6 +85,8 @@ private:
         }
         else
         {
+            import std.algorithm;
+
             return (dstring s) => !find(s.removechars(r"/[ 　]/"), boyerMooreFinder(query)).empty;
         }
         assert(false);

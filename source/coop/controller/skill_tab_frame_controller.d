@@ -5,22 +5,18 @@
  */
 module coop.controller.skill_tab_frame_controller;
 
-import dlangui;
-
-import std.algorithm;
-import std.range;
-import std.traits;
-import std.typecons;
-
-import coop.model.wisdom;
-import coop.view.recipe_tab_frame;
 import coop.controller.recipe_tab_frame_controller;
 
 class SkillTabFrameController: RecipeTabFrameController
 {
+    import coop.view.recipe_tab_frame;
+
     this(RecipeTabFrame frame, dstring[] categories)
     {
+        import dlangui;
+        import std.conv;
         import std.math: ceil;
+        import std.traits;
 
         super(frame, categories);
         frame.relatedBindersFor = (recipe, _) => wisdom.bindersFor(recipe);
@@ -35,13 +31,22 @@ class SkillTabFrameController: RecipeTabFrameController
     }
 
 protected:
+    import coop.model.wisdom;
+
     override dstring[][dstring] recipeChunks(Wisdom wisdom)
     {
+        import std.algorithm;
+        import std.range;
+        import std.typecons;
+
         return wisdom.recipeCategories.map!(c => tuple(c, wisdom.recipesIn(Category(c)).keys)).assocArray;
     }
 
     override dstring[][dstring] recipeChunksFor(Wisdom wisdom, dstring cat)
     {
+        import std.range;
+        import std.typecons;
+
         return [tuple(cat, wisdom.recipesIn(Category(cat)).keys)].assocArray;
     }
 }

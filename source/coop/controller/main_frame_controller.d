@@ -5,18 +5,14 @@
  */
 module coop.controller.main_frame_controller;
 
-import coop.view.main_frame;
-import coop.model.config;
-import coop.model.character;
-import coop.model.wisdom;
-import coop.migemo;
-
-import std.file;
-import std.path;
-import std.exception;
-
 class MainFrameController
 {
+    import coop.migemo;
+    import coop.model.character;
+    import coop.model.config;
+    import coop.model.wisdom;
+    import coop.view.main_frame;
+
     this(MainFrame frame, Wisdom wisdom, Character[dstring] chars, Config config, Wisdom customWisdom)
     {
         frame_ = frame;
@@ -37,9 +33,14 @@ class MainFrameController
 
     auto loadMigemo()
     {
+        import std.file;
+
         if (config.migemoLib.exists)
         {
             try{
+                import std.exception;
+                import std.path;
+
                 migemo_ = new Migemo(config_.migemoLib, config_.migemoDict);
                 migemo_.load(buildPath("resource", "dict", "moe-dict"));
                 enforce(migemo_.isEnable);

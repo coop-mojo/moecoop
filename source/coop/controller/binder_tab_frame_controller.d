@@ -5,21 +5,17 @@
  */
 module coop.controller.binder_tab_frame_controller;
 
-import dlangui;
-
-import std.algorithm;
-import std.range;
-import std.traits;
-import std.typecons;
-
-import coop.model.wisdom;
-import coop.view.recipe_tab_frame;
 import coop.controller.recipe_tab_frame_controller;
 
 class BinderTabFrameController: RecipeTabFrameController
 {
+    import coop.view.recipe_tab_frame;
+
     this(RecipeTabFrame frame, dstring[] categories)
     {
+        import dlangui;
+        import std.traits;
+
         super(frame, categories);
         frame.relatedBindersFor = (recipe, binder) => [binder];
         frame.tableColumnLength = (_, nColumns) => MaxNumberOfBinderPages/nColumns;
@@ -29,13 +25,22 @@ class BinderTabFrameController: RecipeTabFrameController
     }
 
 protected:
+    import coop.model.wisdom;
+
     override dstring[][dstring] recipeChunks(Wisdom wisdom)
     {
+        import std.algorithm;
+        import std.range;
+        import std.typecons;
+
         return wisdom.binders.map!(b => tuple(b, wisdom.recipesIn(Binder(b)))).assocArray;
     }
 
     override dstring[][dstring] recipeChunksFor(Wisdom wisdom, dstring cat)
     {
+        import std.range;
+        import std.typecons;
+
         return [tuple(cat, wisdom.recipesIn(Binder(cat)))].assocArray;
     }
 

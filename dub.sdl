@@ -6,7 +6,7 @@ copyright "Copyright © 2016, もじょんぬ"
 license "MIT"
 authors "もじょんぬ <moe.e.coop@gmail.com>"
 
-dependency "dlangui" version="0.9.21"
+dependency "dlangui" version="0.9.22"
 dependency "derelict-util" version="2.0.6"
 
 stringImportPaths "views" "views/res"

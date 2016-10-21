@@ -78,6 +78,8 @@ class Config {
         alias LibInfo = Tuple!(string, "lib", string, "dict");
         version(Windows)
         {
+            import std.format;
+
             version(X86)
             {
                 enum bits = "32";
@@ -175,6 +177,10 @@ auto ln(string target, string linkname)
 {
     version(Windows)
     {
+        import std.exception;
+        import std.format;
+        import std.process;
+
         // ジャンクションを作る API が無い
         enforce(executeShell(format("mklink /j '%s' '%s'", linkname, target)).status != 0);
     }

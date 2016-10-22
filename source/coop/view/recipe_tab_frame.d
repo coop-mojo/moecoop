@@ -7,23 +7,16 @@ module coop.view.recipe_tab_frame;
 
 import dlangui;
 
-import std.algorithm;
-import std.exception;
-import std.range;
-import std.traits;
-
-import coop.model.item;
-import coop.util;
-
-import coop.view.controls;
-import coop.view.main_frame;
-import coop.view.item_detail_frame;
 import coop.view.tab_frame_base;
-import coop.view.recipe_detail_frame;
-import coop.controller.recipe_tab_frame_controller;
 
 class RecipeTabFrame: TabFrameBase
 {
+    import std.range;
+
+    import coop.controller.recipe_tab_frame_controller;
+    import coop.util;
+    import coop.view.main_frame;
+
     mixin TabFrame;
 
     this() { super(); }
@@ -53,6 +46,8 @@ class RecipeTabFrame: TabFrameBase
 
         with(childById!ComboBox("sortBy"))
         {
+            import std.traits;
+
             items = [EnumMembers!SortOrder];
             selectedItemIndex = 0;
             itemClick = (Widget src, int idx) {
@@ -118,12 +113,16 @@ class RecipeTabFrame: TabFrameBase
 
         childById!Button("editItem1").click = (Widget _) {
             import coop.view.item_edit_dialog;
+            import coop.view.item_detail_frame;
+
             showItemEditDialog(root.window, this, childById!ItemDetailFrame("detail1").item, 0, controller.cWisdom);
             return true;
         };
 
         childById!Button("editItem2").click = (Widget _) {
             import coop.view.item_edit_dialog;
+            import coop.view.item_detail_frame;
+
             showItemEditDialog(root.window, this, childById!ItemDetailFrame("detail2").item, 1, controller.cWisdom);
             return true;
         };
@@ -162,6 +161,8 @@ class RecipeTabFrame: TabFrameBase
     auto showRecipeList(Pairs)(Pairs pairs)
         if (isInputRange!Pairs && is(ElementType!Pairs == RecipePair))
     {
+        import std.algorithm;
+
         auto entries = toRecipeEntries(pairs);
 
         unhighlightDetailRecipe;
@@ -177,6 +178,8 @@ class RecipeTabFrame: TabFrameBase
                                  : entries.chunks(tableColumnLength(entries.length,
                                                                     numberOfColumns)).array;
         auto cols = chs.map!((rs) {
+                import coop.view.controls;
+
                 Widget col = new VerticalLayout;
                 auto box = new CheckableEntryWidget("markall", "全部所持"d);
                 box.backgroundColor = "gray";
@@ -201,6 +204,8 @@ class RecipeTabFrame: TabFrameBase
     auto toRecipeEntries(Pairs)(Pairs pairs)
         if (isInputRange!Pairs && is(ElementType!Pairs == RecipePair))
     {
+        import std.algorithm;
+
         return pairs.map!((pair) {
                 auto category = pair.category;
                 auto recipes = pair.recipes;
@@ -218,6 +223,8 @@ class RecipeTabFrame: TabFrameBase
 
     @property auto recipeDetail()
     {
+        import coop.view.recipe_detail_frame;
+
         return cast(RecipeDetailFrame)childById!FrameLayout("recipeDetail").child(0);
     }
 
@@ -232,6 +239,8 @@ class RecipeTabFrame: TabFrameBase
     {
         if (auto detailFrame = recipeDetail)
         {
+            import coop.view.controls;
+
             auto shownRecipe = detailFrame.name;
             if (auto item = childById("recipeList").childById!CheckableEntryWidget(shownRecipe.to!string))
             {
@@ -244,6 +253,8 @@ class RecipeTabFrame: TabFrameBase
     {
         if (auto detailFrame = recipeDetail)
         {
+            import coop.view.controls;
+
             auto shownRecipe = detailFrame.name;
             if (auto item = childById("recipeList").childById!CheckableEntryWidget(shownRecipe.to!string))
             {
@@ -346,6 +357,10 @@ class RecipeTabFrame: TabFrameBase
 private:
     Widget toRecipeWidget(dstring recipe, dstring category)
     {
+        import std.algorithm;
+
+        import coop.view.controls;
+
         auto ret = new CheckableEntryWidget(recipe.to!string, recipe);
         auto wisdom = controller.wisdom;
         auto cWisdom = controller.cWisdom;
@@ -355,12 +370,16 @@ private:
         auto r = wisdom.recipeFor(recipe);
         debug
         {
+            import std.range;
+
             if (r.name.empty)
             {
                 ret.textColor = "red";
             }
             else
             {
+                import std.algorithm;
+
                 auto prods = r.products.keys;
                 if (!prods.all!(p => p in wisdom.itemList))
                 {
@@ -410,6 +429,10 @@ private:
         }
 
         ret.detailClicked = {
+            import std.exception;
+
+            import coop.view.recipe_detail_frame;
+
             unhighlightDetailRecipe;
             scope(exit) highlightDetailRecipe;
 
@@ -433,6 +456,9 @@ private:
             hideItemDetail(1);
 
             itemNames.enumerate(0).each!((idx_name) {
+                    import coop.model.item;
+                    import coop.view.item_detail_frame;
+
                     auto idx = idx_name[0];
                     dstring name = idx_name[1];
                     Item item;

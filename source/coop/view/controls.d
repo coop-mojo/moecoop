@@ -7,18 +7,13 @@ module coop.view.controls;
 
 import dlangui;
 
-import std.algorithm;
-import std.array;
-import std.conv;
-import std.functional;
-import std.range;
-import std.traits;
-import std.typecons;
-
-import coop.util;
-
 class CheckableEntryWidget: HorizontalLayout, MenuItemActionHandler
 {
+    import std.traits;
+    import std.typecons;
+
+    import coop.util;
+
     this()
     {
         super();
@@ -117,6 +112,9 @@ private:
 
 class LinkWidget: TextWidget, MenuItemActionHandler
 {
+    import std.traits;
+    import std.typecons;
+
     this()
     {
         super();
@@ -149,9 +147,14 @@ class LinkWidget: TextWidget, MenuItemActionHandler
 
     @property typeof(this) popupMenu(Fn)(Tuple!(dstring, Fn)[] items) if (isCallable!Fn)
     {
+        import std.algorithm;
+        import std.array;
+        import std.range;
+
         _menuItems = items.map!"a[1].toDelegate".array;
         auto menu = new MenuItem(null);
         items.map!"a[0]".enumerate.each!((vals) {
+                import std.conv;
                 menu.add(new Action(vals[0].to!int, vals[1]));
             });
         _popupMenu = menu;

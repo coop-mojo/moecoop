@@ -8,10 +8,6 @@ module coop.view.version_window;
 import dlangui;
 import dlangui.dialogs.dialog;
 
-import coop.util;
-
-import std.conv;
-
 class VersionDialog: Dialog
 {
     this(Window parent)
@@ -21,6 +17,10 @@ class VersionDialog: Dialog
 
     override void initialize()
     {
+        import std.format;
+
+        import coop.util;
+
         auto wLayout = parseML(q{
                 HorizontalLayout {
                     FrameLayout {
@@ -37,7 +37,6 @@ class VersionDialog: Dialog
         wLayout.childById("icon").addChild(new ImageWidget(null, "coop-icon-large"));
 
         wLayout.childById("name").text = verString;
-        import std.format;
         auto urlButton = new UrlImageTextButton(null, URL, format("%sja/%s/", URL, Version.isRelease ? Version : "latest"));
         urlButton.click = (Widget w) {
             Platform.instance.openURL(w.action.stringParam);
@@ -62,6 +61,9 @@ class VersionDialog: Dialog
     auto verString()
     {
         import std.format;
+
+        import coop.util;
+
         auto fmt = Version.isRelease ? "%s %s"d : "%s 生焼け版 (%s)"d;
         return format(fmt, AppName, Version);
     }

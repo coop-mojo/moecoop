@@ -10,14 +10,6 @@ import dlangui.dialogs.dialog;
 
 import coop.model.config;
 import coop.model.character;
-import coop.view.main_frame;
-import coop.view.recipe_tab_frame;
-import coop.view.recipe_material_tab_frame;
-
-import std.algorithm;
-import std.array;
-import std.file;
-import std.path;
 
 class ConfigDialog: Dialog
 {
@@ -30,6 +22,9 @@ class ConfigDialog: Dialog
 
     override void initialize()
     {
+        import std.file;
+        import std.range;
+
         auto wLayout = parseML(q{
                 VerticalLayout {
                     padding: 10
@@ -188,9 +183,13 @@ class ConfigDialog: Dialog
     override void close(const Action action)
     {
         if (action) {
+            import std.file;
             if (action.id == StandardAction.Close &&
                 config_.migemoLib.exists)
             {
+                import std.algorithm;
+                import coop.view.main_frame;
+
                 auto main = cast(MainFrame)window.mainWidget;
                 main.controller.loadMigemo;
                 ["binderFrame", "skillFrame", "materialFrame"].each!((tabName) {
@@ -253,6 +252,7 @@ auto installMigemo()(string dest)
 auto unzip(string srcFile, string destDir)
 {
     import std.exception;
+    import std.file;
     import std.zip;
 
     enforce(srcFile.exists);
@@ -260,6 +260,8 @@ auto unzip(string srcFile, string destDir)
     auto zip = new ZipArchive(read(srcFile));
     foreach(name, am; zip.directory)
     {
+        import std.algorithm;
+        import std.path;
         import std.regex;
         if (name.endsWith("/"))
         {
@@ -287,6 +289,8 @@ class CharacterSettingDialog: Dialog
 
     override void initialize()
     {
+        import std.range;
+
         import coop.view.editors;
 
         auto wLayout = parseML(q{
@@ -322,6 +326,9 @@ class CharacterSettingDialog: Dialog
         enum defaultCharName = "キャラクター名";
         charNameBox.popupMenu = editorPopupMenu;
         charNameBox.contentChange = (EditableContent con) {
+            import std.algorithm;
+            import std.range;
+
             auto txt = con.text;
             if (txt.empty || txt == defaultCharName)
             {
@@ -403,6 +410,8 @@ class CharacterSettingDialog: Dialog
         }
 
         childById("ponButton").click = (Widget src) {
+            import std.range;
+
             dstring url;
             auto txt = urlBox.text;
             if (txt.empty || txt == defaultURL)

@@ -7,15 +7,15 @@ module coop.view.editors;
 
 import dlangui;
 
-import std.algorithm;
-import std.range;
-import std.regex;
 import std.traits;
 
 class EditNumberLine(T): EditLine if (isNumeric!T)
 {
     this(string id, dstring content)
     in{
+        import std.range;
+        import std.regex;
+
         assert(content.empty || content.matchFirst(ctRegex!regex));
     } body {
         super(id, content);
@@ -52,10 +52,14 @@ class EditNumberLine(T): EditLine if (isNumeric!T)
 private:
     auto hasValidContent(dstring added)
     {
+        import std.regex;
+
         if (added.matchFirst(ctRegex!regex))
         {
             static if (isFloatingPoint!T)
             {
+                import std.algorithm;
+
                 return !(text~added).startsWith(".") &&
                     !(text.canFind(".") && added.canFind("."));
             }

@@ -5,39 +5,27 @@
  */
 module coop.view.recipe_material_tab_frame;
 
-import dlangui;
-
-import std.algorithm;
-import std.container;
-import std.exception;
-import std.format;
-import std.range;
-import std.regex;
-import std.string;
-import std.typecons;
-
-import coop.util;
-import coop.model.item;
-import coop.model.recipe;
-import coop.model.recipe_graph;
-import coop.view.controls;
-import coop.view.editors;
-import coop.view.layouts;
-import coop.view.main_frame;
-import coop.view.recipe_tab_frame;
-import coop.view.item_detail_frame;
-import coop.view.recipe_detail_frame;
 import coop.view.tab_frame_base;
-import coop.controller.recipe_material_tab_frame_controller;
 
 class RecipeMaterialTabFrame: TabFrameBase
 {
+    import dlangui;
+    import std.container;
+
+    import coop.controller.recipe_material_tab_frame_controller;
+    import coop.model.recipe_graph;
+    import coop.util;
+    import coop.view.main_frame;
+
     mixin TabFrame;
 
     this() { super(); }
 
     this(string id)
     {
+        import coop.view.editors;
+        import coop.view.recipe_tab_frame;
+
         super(id);
         defaultMessage = "アイテム名";
         auto layout = new HorizontalLayout;
@@ -130,6 +118,8 @@ class RecipeMaterialTabFrame: TabFrameBase
 
     @property auto recipeDetail()
     {
+        import coop.view.recipe_detail_frame;
+
         return cast(RecipeDetailFrame)childById!FrameLayout("recipeDetail").child(0);
     }
 
@@ -173,6 +163,9 @@ class RecipeMaterialTabFrame: TabFrameBase
 
     auto showCandidates(dstring[] candidates)
     {
+        import std.algorithm;
+        import std.range;
+
         auto scr = new ScrollWidget;
         auto tbl = new TableLayout("candidates");
         tbl.colCount = 3;
@@ -181,6 +174,9 @@ class RecipeMaterialTabFrame: TabFrameBase
         scr.maxHeight = 300;
 
         auto mats = chain(toBeMade.keys, candidates.filter!(c => !toBeMade.keys.canFind(c))).map!((c) {
+                import coop.view.controls;
+                import coop.view.editors;
+
                 auto w = new CheckableEntryWidget(c.to!string, c);
                 auto o = new EditIntLine("own");
                 auto t = new TextWidget(null, "個"d);
@@ -199,6 +195,9 @@ class RecipeMaterialTabFrame: TabFrameBase
                 }
 
                 w.detailClicked = {
+                    import coop.model.item;
+                    import coop.view.item_detail_frame;
+
                     unhighlightDetailItems;
                     scope(exit) highlightDetailItems;
 
@@ -241,6 +240,8 @@ class RecipeMaterialTabFrame: TabFrameBase
                     }
                     else
                     {
+                        import std.typecons;
+
                         auto targets = toBeMade.byKeyValue.filter!(kv => kv.value > 0).map!(kv => tuple(kv.key, kv.value)).assocArray;
                         initializeTables(toBeMade.keys);
                         if (!targets.keys.empty)
@@ -251,6 +252,8 @@ class RecipeMaterialTabFrame: TabFrameBase
                 };
 
                 o.contentChange = (EditableContent content) {
+                    import std.typecons;
+
                     if (!w.checked || !o.enabled)
                     {
                         return;
@@ -298,19 +301,30 @@ class RecipeMaterialTabFrame: TabFrameBase
 
     auto ownedMaterials()
     {
+        import std.algorithm;
+        import std.array;
+
+        import coop.view.layouts;
+
         if (!hasShownResult)
         {
             return null;
         }
         auto tbl = childById!TableLayout("materials");
         return tbl.rows.map!((r) {
+                import std.string;
+
                 auto mat = r[0].text.chomp(": ");
                 if (r[1].text.empty)
                 {
+                    import std.typecons;
+
                     return tuple(mat, 0);
                 }
                 else
                 {
+                    import std.typecons;
+
                     return tuple(mat, r[1].text.to!int);
                 }
             }).filter!(a => a[1] > 0).assocArray;
@@ -318,6 +332,8 @@ class RecipeMaterialTabFrame: TabFrameBase
 
     auto initRecipeTable(dstring[] recipes)
     {
+        import std.algorithm;
+
         auto fr = childById("recipeBase");
         fr.removeAllChildren;
 
@@ -327,10 +343,16 @@ class RecipeMaterialTabFrame: TabFrameBase
         tbl.colCount = 2;
 
         recipes.map!((r) {
+                import std.format;
+
+                import coop.view.controls;
+
                 auto w = new LinkWidget(r.to!string, r~": ");
                 auto t = new TextWidget("times", format("%s 回"d, 0));
                 auto detail = controller.wisdom.recipeFor(r);
                 w.click = (Widget _) {
+                    import coop.view.recipe_detail_frame;
+
                     unhighlightDetailRecipe;
                     scope(exit) highlightDetailRecipe;
                     recipeDetail = RecipeDetailFrame.create(detail, controller.wisdom, controller.characters);
@@ -346,6 +368,8 @@ class RecipeMaterialTabFrame: TabFrameBase
 
     auto initLeftoverTable(dstring[] leftovers)
     {
+        import std.algorithm;
+
         auto fr = childById("leftoverBase");
         fr.removeAllChildren;
 
@@ -355,9 +379,16 @@ class RecipeMaterialTabFrame: TabFrameBase
         tbl.colCount = 2;
 
         leftovers.map!((lo) {
+                import std.format;
+
+                import coop.view.controls;
+
                 auto w = new LinkWidget(lo.to!string, lo~": ");
                 auto n = new TextWidget("num", format("%s 個"d, 0));
                 w.click = (Widget _) {
+                    import coop.model.item;
+                    import coop.view.item_detail_frame;
+
                     unhighlightDetailItems;
                     scope(exit) highlightDetailItems;
 
@@ -386,6 +417,8 @@ class RecipeMaterialTabFrame: TabFrameBase
 
     auto initMaterialTable(dstring[] materials)
     {
+        import std.algorithm;
+
         auto fr = childById("materialBase");
         fr.removeAllChildren;
 
@@ -400,6 +433,11 @@ class RecipeMaterialTabFrame: TabFrameBase
         tbl.colCount = 3;
 
         materials.map!((lo) {
+                import std.format;
+
+                import coop.view.controls;
+                import coop.view.editors;
+
                 auto w = new CheckableEntryWidget(lo.to!string, lo~": ");
                 auto o = new EditIntLine("own");
                 auto t = new TextWidget("times", format("/%s 個"d, 0));
@@ -416,6 +454,8 @@ class RecipeMaterialTabFrame: TabFrameBase
                     scope(exit) isLocked = false;
                     if (checked)
                     {
+                        import std.regex;
+
                         o.text = t.text.matchFirst(r"/(\d+) 個"d)[1];
                     }
                     else
@@ -424,6 +464,9 @@ class RecipeMaterialTabFrame: TabFrameBase
                     }
                 };
                 w.detailClicked = {
+                    import coop.model.item;
+                    import coop.view.item_detail_frame;
+
                     unhighlightDetailItems;
                     scope(exit) highlightDetailItems;
 
@@ -441,6 +484,8 @@ class RecipeMaterialTabFrame: TabFrameBase
                     setItemDetail(ItemDetailFrame.create(item, 1, controller.wisdom, controller.cWisdom), 0);
                 };
                 o.contentChange = (EditableContent content) {
+                    import std.regex;
+
                     updateTables(toBeMade, ownedMaterials);
                     if (isLocked)
                     {
@@ -460,6 +505,8 @@ class RecipeMaterialTabFrame: TabFrameBase
         scr.backgroundColor = "white";
         fr.addChild(scr);
         clearButton.click = (Widget _) {
+            import coop.view.layouts;
+
             tbl.rows.map!"a[1]".each!(w => w.text = "0");
             return true;
         };
@@ -467,11 +514,18 @@ class RecipeMaterialTabFrame: TabFrameBase
 
     auto updateRecipeTable(int[dstring] recipes)
     {
+        import std.algorithm;
+        import std.exception;
+
+        import coop.view.layouts;
+
         unhighlightDetailRecipe;
         scope(exit) highlightDetailRecipe;
         auto tbl = enforce(childById!TableLayout("recipes"));
 
         tbl.rows.each!((rs) {
+                import std.string;
+
                 auto r = rs[0].text.chomp(": ");
                 if (auto n  = r in recipes)
                 {
@@ -495,6 +549,8 @@ class RecipeMaterialTabFrame: TabFrameBase
                     auto rNode = fullGraph.recipeNodes[r];
                     if (!rNode.parents.empty)
                     {
+                        import std.array;
+
                         auto bros = rNode.parents[]
                                          .map!(p => fullGraph.materialNodes[p].children)
                                          .join
@@ -505,6 +561,10 @@ class RecipeMaterialTabFrame: TabFrameBase
                                          .array;
                         if (bros.length > 1)
                         {
+                            import std.typecons;
+
+                            import coop.view.controls;
+
                             auto menu = bros.filter!(b => b != r)
                                             .map!(b => tuple(format("%s を使う"d, b), () {
                                                         preference[rNode.parents[].front] = b;
@@ -526,10 +586,18 @@ class RecipeMaterialTabFrame: TabFrameBase
 
     auto updateLeftoverTable(int[dstring] leftovers)
     {
+        import std.algorithm;
+        import std.exception;
+        import std.range;
+
+        import coop.view.layouts;
+
         unhighlightDetailItems;
         scope(exit) highlightDetailItems;
         auto tbl = enforce(childById!TableLayout("leftovers"));
         tbl.rows.each!((rs) {
+                import std.string;
+
                 if (auto n = rs[0].text.chomp(": ") in leftovers)
                 {
                     rs.each!(w => w.visibility = Visibility.Visible);
@@ -548,10 +616,17 @@ class RecipeMaterialTabFrame: TabFrameBase
 
     auto updateMaterialTable(MatTuple[dstring] materials)
     {
+        import std.algorithm;
+        import std.exception;
+
+        import coop.view.layouts;
+
         unhighlightDetailItems;
         scope(exit) highlightDetailItems;
         auto tbl = enforce(childById!TableLayout("materials"));
         tbl.rows.each!((rs) {
+                import std.string;
+
                 isLocked = true;
                 scope(exit) isLocked = false;
 
@@ -573,6 +648,10 @@ class RecipeMaterialTabFrame: TabFrameBase
                     auto mNode = fullGraph.materialNodes[m];
                     if (!mNode.isLeaf)
                     {
+                        import std.typecons;
+
+                        import coop.view.controls;
+
                         Tuple!(dstring, void delegate()) menuItem;
                         if (mNode.name in leafMaterials)
                         {
@@ -612,6 +691,9 @@ class RecipeMaterialTabFrame: TabFrameBase
 
     auto updateTables(int[dstring] targets, int[dstring] owned = null)
     {
+        import std.algorithm;
+        import std.array;
+
         if (subGraph is null || !fullGraph.targets.equal(subGraph.targets))
         {
             subGraph = new RecipeGraph(targets.keys, controller.wisdom, preference);
@@ -629,6 +711,10 @@ class RecipeMaterialTabFrame: TabFrameBase
     in{
         assert(hasShownResult);
     } body {
+        import std.algorithm;
+        import std.array;
+        import std.typecons;
+
         subGraph = null;
         updateTables(toBeMade.byKeyValue.filter!(kv => kv.value > 0).map!(kv => tuple(kv.key, kv.value)).assocArray, ownedMaterials);
      }
@@ -704,6 +790,8 @@ class RecipeMaterialTabFrame: TabFrameBase
 
 auto recipeMaterialLayout()
 {
+    import dlangui;
+
     auto layout = parseML(q{
             VerticalLayout {
                 HorizontalLayout {

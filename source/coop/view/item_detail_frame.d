@@ -7,12 +7,6 @@ module coop.view.item_detail_frame;
 
 import dlangui;
 
-import std.algorithm;
-import std.array;
-import std.conv;
-import std.format;
-import std.math;
-
 import coop.model.item;
 import coop.model.wisdom;
 
@@ -45,6 +39,10 @@ class ItemDetailFrame: ScrollWidget
         auto table = ret.childById("table");
         with(table)
         {
+            import std.format;
+            import std.math;
+            import std.range;
+
             table.addElem("名前", item.name);
 
             table.addElem("英名", item.ename.empty ? "わからん（´・ω・｀）" : item.ename, item.isOverlaid!"ename");
@@ -63,6 +61,8 @@ class ItemDetailFrame: ScrollWidget
 
             if (item.petFoodInfo.keys[0] != PetFoodType.NoEatable)
             {
+                import std.algorithm;
+
                 table.addElem("ペットアイテム",
                               item.petFoodInfo
                                   .byKeyValue
@@ -80,6 +80,8 @@ class ItemDetailFrame: ScrollWidget
             auto rem = item.name in wisdom.itemList ? item.remarks : "細かいことはわかりません（´・ω・｀）";
             if (!rem.empty || !extraRemarks.empty)
             {
+                import std.algorithm;
+
                 table.addElem("備考", [rem, extraRemarks].filter!"!a.empty".join(", "));
             }
         }
@@ -119,6 +121,8 @@ auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
     final switch(item.type) with(ItemType)
     {
     case Food, Drink, Liquor:{
+        import std.format;
+
         auto info = ei.peek!FoodInfo;
         layout.addElem("効果", format("%.1f"d, info.effect));
 
@@ -127,6 +131,9 @@ auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
             layout.addElem("付加効果", effectName);
             if (auto einfo = effectName in wisdom.foodEffectList)
             {
+                import std.algorithm;
+                import std.array;
+
                 auto effectStr = einfo
                                  .effects
                                  .byKeyValue
@@ -153,9 +160,14 @@ auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
         break;
     }
     case Expendable:{
+        import std.range;
+
         auto info = ei.peek!ExpendableInfo;
         if (!info.skill.keys.empty)
         {
+            import std.algorithm;
+            import std.format;
+
             layout.addElem("必要スキル",
                            info.skill
                                .byKeyValue
@@ -167,6 +179,10 @@ auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
         break;
     }
     case Weapon:{
+        import std.algorithm;
+        import std.array;
+        import std.format;
+
         auto info = ei.peek!WeaponInfo;
 
         auto damageStr = Grade.values
@@ -227,12 +243,16 @@ auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
         break;
     }
     case Armor:{
+        import std.algorithm;
+        import std.array;
+        import std.format;
+
         auto info = ei.peek!ArmorInfo;
 
         auto ACStr = Grade.values
                           .filter!(g => info.AC.keys.canFind(g))
                           .map!(g => format("%s: %.1f"d, g.to!Grade, info.AC[g.to!Grade]))
-                              .join(", ");
+                          .join(", ");
         layout.addElem("アーマークラス", ACStr);
         layout.addElem(info.type == ExhaustionType.Points ? "使用可能回数" : "消耗度",
                        info.exhaustion.to!dstring);
@@ -281,6 +301,10 @@ auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
         break;
     }
     case Bullet:{
+        import std.algorithm;
+        import std.array;
+        import std.format;
+
         auto info = ei.peek!BulletInfo;
 
         layout.addElem("ダメージ", format("%.1f"d, info.damage));
@@ -314,12 +338,16 @@ auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
         break;
     }
     case Shield:{
+        import std.algorithm;
+        import std.array;
+        import std.format;
+
         auto info = ei.peek!ShieldInfo;
 
         auto ACStr = Grade.values
                           .filter!(g => info.AC.keys.canFind(g))
                           .map!(g => format("%s: %.1f"d, g.to!Grade, info.AC[g.to!Grade]))
-                              .join(", ");
+                          .join(", ");
         layout.addElem("アーマークラス", ACStr);
         layout.addElem(info.type == ExhaustionType.Points ? "使用可能回数" : "消耗度",
                        info.exhaustion.to!dstring);

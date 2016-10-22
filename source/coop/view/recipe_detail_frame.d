@@ -8,20 +8,15 @@ module coop.view.recipe_detail_frame;
 import dlangui;
 import dlangui.widgets.metadata;
 
-import std.algorithm;
-import std.array;
-import std.container.rbtree;
-import std.format;
-import std.range;
-import std.traits;
-import std.typecons;
-
-import coop.model.recipe;
-import coop.model.wisdom;
-import coop.model.character;
-
 class RecipeDetailFrame: ScrollWidget, MenuItemActionHandler
 {
+    import std.container;
+    import std.range;
+
+    import coop.model.character;
+    import coop.model.recipe;
+    import coop.model.wisdom;
+
     this() { super(); }
 
     this(string id)
@@ -79,6 +74,10 @@ class RecipeDetailFrame: ScrollWidget, MenuItemActionHandler
         ret.recipe_ = r;
         with(ret)
         {
+            import std.algorithm;
+            import std.array;
+            import std.format;
+
             childById("recipe").text = r.name;
             childById("tech").text = r.techniques[].join(" or ");
             childById("skills").text = r.requiredSkills
@@ -122,6 +121,9 @@ class RecipeDetailFrame: ScrollWidget, MenuItemActionHandler
         ret.binders = wisdom.bindersFor(r.name);
         if (!chars.keys.empty)
         {
+            import std.algorithm;
+            import std.typecons;
+
             ret.owners = chars
                          .keys
                          .filter!(k =>
@@ -207,6 +209,8 @@ class RecipeDetailFrame: ScrollWidget, MenuItemActionHandler
 
     @property auto owners(RedBlackTree!dstring[dstring] os)
     {
+        import std.algorithm;
+
         owners_ = os;
         auto bLen = binders.length;
         childById("owners").text =
@@ -219,6 +223,8 @@ class RecipeDetailFrame: ScrollWidget, MenuItemActionHandler
                     }
                     else
                     {
+                        import std.format;
+
                         return format("%s (%s)"d,
                                       k,os[k][].join(", "));
                     }

@@ -7,11 +7,11 @@ module coop.view.layouts;
 
 import dlangui;
 
-import std.algorithm;
-import std.range;
-
 auto rows(TableLayout l)
 {
+    import std.algorithm;
+    import std.range;
+
     return iota(0, l.childCount)
         .map!(i => l.child(i))
         .array
@@ -37,6 +37,9 @@ Widget[] row(TableLayout l, string name)
 
 auto columns(TableLayout l)
 {
+    import std.algorithm;
+    import std.range;
+
     return iota(0, l.colCount)
         .map!(i => iota(i, l.childCount, l.colCount).map!(j => l.child(j)).array)
         .array;

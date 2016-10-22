@@ -8,24 +8,15 @@ module coop.view.item_edit_dialog;
 import dlangui;
 import dlangui.dialogs.dialog;
 
-import std.algorithm;
-import std.exception;
-import std.format;
-import std.math;
-import std.range;
-import std.regex;
 import std.traits;
 
 import coop.model.item;
 import coop.model.wisdom;
-import coop.view.editors;
-import coop.view.item_detail_frame;
 import coop.view.recipe_tab_frame;
-
-import coop.util;
 
 class ItemEditDialog: Dialog
 {
+
     this(Window parent, RecipeTabFrame fr, Item orig, int index, Wisdom cw)
     {
         super(UIString("アイテム情報編集"d), parent, DialogFlag.Popup);
@@ -45,6 +36,9 @@ class ItemEditDialog: Dialog
 
     override void initialize()
     {
+        import std.algorithm;
+        import std.range;
+
         auto root = parseML(q{
                 VerticalLayout {
                     TableLayout {
@@ -87,6 +81,9 @@ class ItemEditDialog: Dialog
         auto pet = new HorizontalLayout;
         with(pet)
         {
+            import coop.view.editors;
+            import coop.util;
+
             auto petTypes = PetFoodType.svalues.to!(dstring[]);
 
             auto petComboBox = new ComboBox("", petTypes);
@@ -148,6 +145,8 @@ class ItemEditDialog: Dialog
         auto props = item.properties;
         foreach(pr; [EnumMembers!SpecialProperty])
         {
+            import std.array;
+
             alias updateFun = (ushort p) => (bool c) {
                 if (c) {
                     updated.properties |= p;
@@ -215,6 +214,8 @@ private:
 
     auto updateFrame()
     {
+        import coop.view.item_detail_frame;
+
         tabFrame.setItemDetail(ItemDetailFrame.create(original, idx+1, tabFrame.controller.wisdom, cWisdom), idx);
     }
 
@@ -235,11 +236,16 @@ auto showItemEditDialog(Window parent, RecipeTabFrame frame, Item item, int inde
 auto addTextElem(dstring prop)(Widget layout, dstring caption, Overlaid!Item item)
     if (hasMember!(Item, prop))
 {
+    import coop.view.editors;
+
     mixin("alias PropType = typeof(Item.init."~prop~");");
     auto toPropString(PropType val)
     {
         static if (isFloatingPoint!PropType)
         {
+            import std.format;
+            import std.math;
+
             return val.isNaN ? "" : format("%.2f"d, val);
         }
         else
@@ -271,6 +277,8 @@ auto addTextElem(dstring prop)(Widget layout, dstring caption, Overlaid!Item ite
             auto txt = content.text;
             if (enabled)
             {
+                import std.range;
+
                 static if (isFloatingPoint!PropType)
                 {
                     enum initVal = 0;
@@ -287,6 +295,8 @@ auto addTextElem(dstring prop)(Widget layout, dstring caption, Overlaid!Item ite
 
 auto addCheckElem(Widget layout, dstring caption, bool checked, bool enabled, void delegate(bool) fun, dstring tooltip = "")
 {
+    import std.range;
+
     auto cap = new TextWidget("", caption);
     layout.addChild(cap);
     auto checkBox = new CheckBox("");

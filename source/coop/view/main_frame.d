@@ -7,19 +7,6 @@ module coop.view.main_frame;
 
 import dlangui;
 
-import std.algorithm;
-
-import coop.model.character;
-import coop.model.wisdom;
-import coop.model.config;
-import coop.view.recipe_tab_frame;
-import coop.view.recipe_material_tab_frame;
-import coop.view.tab_frame_base;
-import coop.controller.main_frame_controller;
-import coop.controller.binder_tab_frame_controller;
-import coop.controller.skill_tab_frame_controller;
-import coop.controller.recipe_material_tab_frame_controller;
-
 immutable fontName = defaultFontName;
 
 version(Windows) {
@@ -49,6 +36,7 @@ public:
     {
         assert(ret !is null);
     } body {
+        import dlangui;
         Widget parent_ = this;
         while(parent_.parent !is null)
         {
@@ -62,8 +50,16 @@ public:
 
 class MainFrame: AppFrame
 {
+    import coop.model.character;
+    import coop.model.wisdom;
+    import coop.model.config;
+
     this(Wisdom wisdom, Character[dstring] chars, Config config, Wisdom customWisdom)
     {
+        import coop.controller.binder_tab_frame_controller;
+        import coop.controller.recipe_material_tab_frame_controller;
+        import coop.controller.skill_tab_frame_controller;
+
         super();
         controller_ = new MainFrameController(this, wisdom, chars, config, customWisdom);
         binderTab.controller = new BinderTabFrameController(binderTab, controller.wisdom.binders);
@@ -138,6 +134,10 @@ protected:
         tabs.addTab(materialTab, "レシピ材料"d);
 
         tabs.tabChanged = (string next, string prev) {
+            import std.algorithm;
+
+            import coop.view.tab_frame_base;
+
             auto prev_tab = childById!TabFrameBase(prev);
             auto useMetaSearch = prev_tab.useMetaSearch;
             auto useMigemo = prev_tab.useMigemo;
@@ -186,6 +186,10 @@ protected:
         return false;
     }
 private:
+    import coop.controller.main_frame_controller;
+    import coop.view.recipe_tab_frame;
+    import coop.view.recipe_material_tab_frame;
+
     MainFrameController controller_;
     RecipeTabFrame binderTab, skillTab;
     RecipeMaterialTabFrame materialTab;

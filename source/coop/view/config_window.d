@@ -221,7 +221,7 @@ auto installMigemo()(string dest)
 {
     version(Windows)
     {
-        import std.file: remove;
+        import std.file;
         import std.format;
         import std.net.curl;
         import std.path;

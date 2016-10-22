@@ -523,65 +523,66 @@ class RecipeMaterialTabFrame: TabFrameBase
         scope(exit) highlightDetailRecipe;
         auto tbl = enforce(childById!TableLayout("recipes"));
 
-        tbl.rows.each!((rs) {
-                import std.string;
+        foreach(rs; tbl.rows)
+        {
+            import std.string;
 
-                auto r = rs[0].text.chomp(": ");
-                if (auto n  = r in recipes)
+            auto r = rs[0].text.chomp(": ");
+            if (auto n  = r in recipes)
+            {
+                rs.each!(w => w.visibility = Visibility.Visible);
+                rs[1].text = format("%s 回"d, *n);
+                auto detail = controller.wisdom.recipeFor(r);
+                auto c = controller.characters[charactersBox.selectedItem];
+                if (!c.hasSkillFor(detail) || (detail.requiresRecipe && !c.hasRecipe(r)))
                 {
-                    rs.each!(w => w.visibility = Visibility.Visible);
-                    rs[1].text = format("%s 回"d, *n);
-                    auto detail = controller.wisdom.recipeFor(r);
-                    auto c = controller.characters[charactersBox.selectedItem];
-                    if (!c.hasSkillFor(detail) || (detail.requiresRecipe && !c.hasRecipe(r)))
-                    {
-                        rs[0].textColor = "gray";
-                    }
-                    else if (detail.ingredients.keys.all!(ing => childById!TableLayout("materials").row(ing.to!string)[0].checked))
-                    {
-                        rs[0].textColor = "red";
-                    }
-                    else
-                    {
-                        rs[0].textColor = "black";
-                    }
-
-                    auto rNode = fullGraph.recipeNodes[r];
-                    if (!rNode.parents.empty)
-                    {
-                        import std.array;
-
-                        auto bros = rNode.parents[]
-                                         .map!(p => fullGraph.materialNodes[p].children)
-                                         .join
-                                         .map!"a.name"
-                                         .array
-                                         .sort()
-                                         .uniq
-                                         .array;
-                        if (bros.length > 1)
-                        {
-                            import std.typecons;
-
-                            import coop.view.controls;
-
-                            auto menu = bros.filter!(b => b != r)
-                                            .map!(b => tuple(format("%s を使う"d, b), () {
-                                                        preference[rNode.parents[].front] = b;
-                                                        reload;
-                                                    }))
-                                            .array;
-                            auto lw = (cast(LinkWidget)rs[0]);
-                            lw.popupMenu = menu;
-                            lw.textFlags = TextFlag.Underline;
-                        }
-                    }
+                    rs[0].textColor = "gray";
+                }
+                else if (detail.ingredients.keys.all!(ing => childById!TableLayout("materials").row(ing.to!string)[0].checked))
+                {
+                    rs[0].textColor = "red";
                 }
                 else
                 {
-                    rs.each!(w => w.visibility = Visibility.Gone);
+                    rs[0].textColor = "black";
                 }
-            });
+
+                auto rNode = fullGraph.recipeNodes[r];
+                if (!rNode.parents.empty)
+                {
+                    import std.array;
+
+                    auto bros = rNode.parents[]
+                                     .map!(p => fullGraph.materialNodes[p].children)
+                                     .join
+                                     .map!"a.name"
+                                     .array
+                                     .sort()
+                                     .uniq
+                                     .array;
+                    if (bros.length > 1)
+                    {
+                        import std.typecons;
+
+                        import coop.view.controls;
+
+                        auto menu = bros.filter!(b => b != r)
+                                        .map!(b => tuple(format("%s を使う"d, b), () {
+                                                    preference[rNode.parents[].front] = b;
+                                                    reload;
+                                                }))
+                                        .array;
+                        auto lw = (cast(LinkWidget)rs[0]);
+                        lw.popupMenu = menu;
+                        lw.textFlags = TextFlag.Underline;
+                    }
+                }
+            }
+            else
+            {
+                rs.each!(w => w.visibility = Visibility.Gone);
+            }
+        }
     }
 
     auto updateLeftoverTable(int[dstring] leftovers)
@@ -595,19 +596,20 @@ class RecipeMaterialTabFrame: TabFrameBase
         unhighlightDetailItems;
         scope(exit) highlightDetailItems;
         auto tbl = enforce(childById!TableLayout("leftovers"));
-        tbl.rows.each!((rs) {
-                import std.string;
+        foreach(rs; tbl.rows)
+        {
+            import std.string;
 
-                if (auto n = rs[0].text.chomp(": ") in leftovers)
-                {
-                    rs.each!(w => w.visibility = Visibility.Visible);
-                    rs[1].text = format("%s 個"d, *n);
-                }
-                else
-                {
-                    rs.each!(w => w.visibility = Visibility.Gone);
-                }
-            });
+            if (auto n = rs[0].text.chomp(": ") in leftovers)
+            {
+                rs.each!(w => w.visibility = Visibility.Visible);
+                rs[1].text = format("%s 個"d, *n);
+            }
+            else
+            {
+                rs.each!(w => w.visibility = Visibility.Gone);
+            }
+        }
         if (leftovers.keys.empty)
         {
             tbl.childById("なし").visibility = Visibility.Visible;
@@ -624,59 +626,60 @@ class RecipeMaterialTabFrame: TabFrameBase
         unhighlightDetailItems;
         scope(exit) highlightDetailItems;
         auto tbl = enforce(childById!TableLayout("materials"));
-        tbl.rows.each!((rs) {
-                import std.string;
+        foreach(rs; tbl.rows)
+        {
+            import std.string;
 
-                isLocked = true;
-                scope(exit) isLocked = false;
+            isLocked = true;
+            scope(exit) isLocked = false;
 
-                auto m = rs[0].text.chomp(": ");
-                if (auto n = m in materials)
+            auto m = rs[0].text.chomp(": ");
+            if (auto n = m in materials)
+            {
+                rs.each!(w => w.visibility = Visibility.Visible);
+                rs[2].text = format("/%s 個"d, (*n).num);
+                rs[0].textColor = (*n).isIntermediate ? "blue" : "black";
+                if (!rs[1].text.empty && rs[1].text.to!int >= (*n).num)
                 {
-                    rs.each!(w => w.visibility = Visibility.Visible);
-                    rs[2].text = format("/%s 個"d, (*n).num);
-                    rs[0].textColor = (*n).isIntermediate ? "blue" : "black";
-                    if (!rs[1].text.empty && rs[1].text.to!int >= (*n).num)
-                    {
-                        rs[0].checked = true;
-                    }
-                    else
-                    {
-                        rs[0].checked = false;
-                    }
-
-                    auto mNode = fullGraph.materialNodes[m];
-                    if (!mNode.isLeaf)
-                    {
-                        import std.typecons;
-
-                        import coop.view.controls;
-
-                        Tuple!(dstring, void delegate()) menuItem;
-                        if (mNode.name in leafMaterials)
-                        {
-                            menuItem = tuple("材料から用意する"d, () {
-                                    leafMaterials.removeKey(mNode.name);
-                                    reload;
-                                });
-                        }
-                        else
-                        {
-                            menuItem = tuple("直接用意する"d, () {
-                                    leafMaterials.insert(mNode.name);
-                                    reload;
-                                });
-                        }
-                        auto cew = (cast(CheckableEntryWidget)rs[0]);
-                        cew.popupMenu = [menuItem];
-                        cew.textFlags = TextFlag.Underline;
-                    }
+                    rs[0].checked = true;
                 }
                 else
                 {
-                    rs.each!(w => w.visibility = Visibility.Gone);
+                    rs[0].checked = false;
                 }
-            });
+
+                auto mNode = fullGraph.materialNodes[m];
+                if (!mNode.isLeaf)
+                {
+                    import std.typecons;
+
+                    import coop.view.controls;
+
+                    Tuple!(dstring, void delegate()) menuItem;
+                    if (mNode.name in leafMaterials)
+                    {
+                        menuItem = tuple("材料から用意する"d, () {
+                                leafMaterials.removeKey(mNode.name);
+                                reload;
+                            });
+                    }
+                    else
+                    {
+                        menuItem = tuple("直接用意する"d, () {
+                                leafMaterials.insert(mNode.name);
+                                reload;
+                            });
+                    }
+                    auto cew = (cast(CheckableEntryWidget)rs[0]);
+                    cew.popupMenu = [menuItem];
+                    cew.textFlags = TextFlag.Underline;
+                }
+            }
+            else
+            {
+                rs.each!(w => w.visibility = Visibility.Gone);
+            }
+        }
     }
 
     auto initializeTables(dstring[] items)

@@ -194,14 +194,16 @@ class ConfigDialog: Dialog
 
                 auto main = cast(MainFrame)window.mainWidget;
                 main.controller.loadMigemo;
-                ["binderFrame", "skillFrame", "materialFrame"].each!((tabName) {
-                        import coop.view.tab_frame_base;
-                        auto tab = main.childById!TabFrameBase(tabName);
-                        auto selected = tab.charactersBox.selectedItem;
-                        tab.charactersBox.items = chars_.keys;
-                        auto newIdx = chars_.keys.countUntil(selected).to!int;
-                        tab.charactersBox.selectedItemIndex = newIdx == -1 ? 0 : newIdx;
-                    });
+                foreach(tabName; ["binderFrame", "skillFrame", "materialFrame"])
+                {
+                    import coop.view.tab_frame_base;
+
+                    auto tab = main.childById!TabFrameBase(tabName);
+                    auto selected = tab.charactersBox.selectedItem;
+                    tab.charactersBox.items = chars_.keys;
+                    auto newIdx = chars_.keys.countUntil(selected).to!int;
+                    tab.charactersBox.selectedItemIndex = newIdx == -1 ? 0 : newIdx;
+                }
             }
         }
         _parentWindow.removePopup(_popup);

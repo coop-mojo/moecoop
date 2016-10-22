@@ -144,21 +144,22 @@ protected:
             auto query = prev_tab.queryBox.text == prev_tab.defaultMessage ? "" : prev_tab.queryBox.text;
             auto idx = prev_tab.charactersBox.selectedItemIndex;
 
-            [binderTab, skillTab, materialTab].each!((tab) {
-                    tab.useMetaSearch = useMetaSearch;
-                    tab.useMigemo = useMigemo;
-                    if (query == "")
-                    {
-                        tab.queryBox.text = tab.defaultMessage;
-                        tab.queryBox.textColor = "gray";
-                    }
-                    else
-                    {
-                        tab.queryBox.text = query;
-                        tab.queryBox.textColor = "black";
-                    }
-                    tab.charactersBox.selectedItemIndex = idx;
-                });
+            foreach(tab; [binderTab, skillTab, materialTab])
+            {
+                tab.useMetaSearch = useMetaSearch;
+                tab.useMigemo = useMigemo;
+                if (query == "")
+                {
+                    tab.queryBox.text = tab.defaultMessage;
+                    tab.queryBox.textColor = "gray";
+                }
+                else
+                {
+                    tab.queryBox.text = query;
+                    tab.queryBox.textColor = "black";
+                }
+                tab.charactersBox.selectedItemIndex = idx;
+            }
         };
         return tabs;
     }

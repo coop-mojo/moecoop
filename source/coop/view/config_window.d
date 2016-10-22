@@ -154,6 +154,8 @@ class ConfigDialog: Dialog
         version(Windows)
         {
             wLayout.childById("migemoInstaller").click = (Widget src) {
+                import std.path;
+
                 wLayout.childById("migemoInstaller").enabled = false;
                 childById("close-button").enabled = false;
                 scope(exit) childById("close-button").enabled = true;

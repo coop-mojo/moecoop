@@ -810,10 +810,9 @@ auto recipeMaterialLayout()
                 }
                 CheckBox { id: migemo; text: "Migemo 検索" }
 
-                TableLayout {
+                FrameLayout {
                     id: helper
                     padding: 1
-                    colCount: 2
                 }
 
                 VerticalLayout {

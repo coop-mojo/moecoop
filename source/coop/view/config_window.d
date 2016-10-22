@@ -221,10 +221,11 @@ auto installMigemo()(string dest)
 {
     version(Windows)
     {
-        import std.net.curl;
-        import std.format;
-        import std.zip;
         import std.file: remove;
+        import std.format;
+        import std.net.curl;
+        import std.path;
+        import std.zip;
 
         enum baseURL = "http://files.kaoriya.net/cmigemo/";
         enum ver = "20110227";

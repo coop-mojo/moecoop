@@ -368,35 +368,6 @@ private:
         auto binders = relatedBindersFor(recipe, category);
 
         auto r = wisdom.recipeFor(recipe);
-        debug
-        {
-            import std.range;
-
-            if (r.name.empty)
-            {
-                ret.textColor = "red";
-            }
-            else
-            {
-                import std.algorithm;
-
-                auto prods = r.products.keys;
-                if (!prods.all!(p => p in wisdom.itemList))
-                {
-                    ret.textColor = "blue";
-                }
-                else
-                {
-                    if (!prods.map!(p => wisdom.itemList[p]).all!((it) {
-                                return it.type !in wisdom.extraInfoList ||
-                                       it.name in wisdom.extraInfoList[it.type];
-                            }))
-                    {
-                        ret.textFlags = TextFlag.Underline;
-                    }
-                }
-            }
-        }
 
         ret.checkStateChanged = (bool marked) {
             auto c = characters[charactersBox.selectedItem];
@@ -426,6 +397,35 @@ private:
         else
         {
             ret.textColor = characters[charactersBox.selectedItem].hasSkillFor(r) ? "black" : "gray";
+        }
+        debug
+        {
+            import std.range;
+
+            if (r.name.empty)
+            {
+                ret.textColor = "red";
+            }
+            else
+            {
+                import std.algorithm;
+
+                auto prods = r.products.keys;
+                if (!prods.all!(p => p in wisdom.itemList))
+                {
+                    ret.textColor = "blue";
+                }
+                else
+                {
+                    if (!prods.map!(p => wisdom.itemList[p]).all!((it) {
+                                return it.type !in wisdom.extraInfoList ||
+                                       it.name in wisdom.extraInfoList[it.type];
+                            }))
+                    {
+                        ret.textFlags = TextFlag.Underline;
+                    }
+                }
+            }
         }
 
         ret.detailClicked = {

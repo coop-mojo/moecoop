@@ -277,7 +277,10 @@ class RecipeMaterialTabFrame: TabFrameBase
 
         auto candidateFrame = new VerticalLayout;
         candidateFrame.addChild(new TextWidget(null, "作成候補"d));
-        candidateFrame.addChild(scr);
+        auto hl = new HorizontalLayout;
+        hl.addChild(scr);
+        hl.addChild(new HSpacer);
+        candidateFrame.addChild(hl);
 
         auto helperFrame = childById("helper");
         helperFrame.removeAllChildren;

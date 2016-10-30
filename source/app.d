@@ -7,10 +7,13 @@ import dlangui;
 
 version(linux)
 {
-    static this()
+    version(DMD)
     {
-        import etc.linux.memoryerror;
-        assert(registerMemoryErrorHandler());
+        static this()
+        {
+            import etc.linux.memoryerror;
+            assert(registerMemoryErrorHandler());
+        }
     }
 }
 

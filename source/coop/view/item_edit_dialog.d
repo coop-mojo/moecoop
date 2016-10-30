@@ -91,7 +91,7 @@ class ItemEditDialog: Dialog
 
             petComboBox.selectedItemIndex = PetFoodType.values.indexOf(item.petFoodInfo.keys[0]).to!int;
             petComboBox.itemClick = (Widget src, int idx) {
-                updated.petFoodInfo.clear;
+                updated.petFoodInfo = typeof(updated.petFoodInfo).init;
                 if (idx == 0 || idx == petTypes.length-1)
                 {
                     textBox.text = "";
@@ -119,7 +119,7 @@ class ItemEditDialog: Dialog
                     return;
                 if (!txt.empty)
                 {
-                    updated.petFoodInfo.clear;
+                    updated.petFoodInfo = typeof(updated.petFoodInfo).init;
                     updated.petFoodInfo[idx.to!PetFoodType] = txt.to!real;
                 }
             };

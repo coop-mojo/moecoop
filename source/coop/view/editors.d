@@ -16,7 +16,7 @@ class EditNumberLine(T): EditLine if (isNumeric!T)
         import std.range;
         import std.regex;
 
-        assert(content.empty || content.matchFirst(ctRegex!regex));
+        assert(content.empty || content.matchFirst(ctRegex!numRegex));
     } body {
         super(id, content);
     }
@@ -54,7 +54,7 @@ private:
     {
         import std.regex;
 
-        if (added.matchFirst(ctRegex!regex))
+        if (added.matchFirst(ctRegex!numRegex))
         {
             static if (isFloatingPoint!T)
             {
@@ -76,11 +76,11 @@ private:
 
     static if (isIntegral!T)
     {
-        enum regex = r"^\d*$"d;
+        enum numRegex = r"^\d*$"d;
     }
     else
     {
-        enum regex = r"^\d*(\.\d*)?$"d;
+        enum numRegex = r"^\d*(\.\d*)?$"d;
     }
 }
 

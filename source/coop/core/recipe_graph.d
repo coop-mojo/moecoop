@@ -258,23 +258,6 @@ private:
         return recipe;
     }
 
-    auto visit() pure
-    out {
-        import std.algorithm;
-
-        assert(targets.all!(t => orderedMaterials_.canFind(t)));
-    } body {
-        import std.algorithm;
-
-        orderedRecipes_ = [];
-        orderedMaterials_ = [];
-        auto visitedRecipes = new RedBlackTree!dstring;
-        auto visitedMaterials = new RedBlackTree!dstring;
-        roots.each!(r => visit(r, visitedRecipes, visitedMaterials));
-        orderedRecipes_.reverse();
-        orderedMaterials_.reverse();
-    }
-
     void visit(MaterialContainer material, ref RedBlackTree!dstring rs, ref RedBlackTree!dstring ms) pure
     {
         import std.algorithm;
@@ -299,6 +282,26 @@ private:
         rs.insert(recipe.name);
         recipe.children.filter!(c => !orderedMaterials_.canFind(c.name)).each!(c => this.visit(c, rs, ms));
         orderedRecipes_ ~= recipe.name;
+    }
+
+    auto visit() pure
+    out {
+        import std.algorithm;
+
+        assert(targets.all!(t => orderedMaterials_.canFind(t)));
+    } body {
+        import std.algorithm;
+
+        orderedRecipes_ = [];
+        orderedMaterials_ = [];
+        auto visitedRecipes = new RedBlackTree!dstring;
+        auto visitedMaterials = new RedBlackTree!dstring;
+        foreach(r; roots)
+        {
+            visit(r, visitedRecipes, visitedMaterials);
+        }
+        orderedRecipes_.reverse();
+        orderedMaterials_.reverse();
     }
 
     MaterialContainer[] roots;

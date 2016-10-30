@@ -457,7 +457,7 @@ private:
 
             foreach(idx, name; itemNames.enumerate(0))
             {
-                import coop.model.item;
+                import coop.core.item;
                 import coop.view.item_detail_frame;
 
                 Item item;

@@ -28,7 +28,7 @@ abstract class RecipeTabFrameController
         import std.container.util;
         import std.range;
 
-        import coop.model.recipe;
+        import coop.core.recipe;
         import coop.view.recipe_detail_frame;
 
         frame_ = frame;
@@ -144,7 +144,7 @@ abstract class RecipeTabFrameController
     }
 
 protected:
-    import coop.model.wisdom;
+    import coop.core.wisdom;
 
     abstract dstring[][dstring] recipeChunks(Wisdom);
     abstract dstring[][dstring] recipeChunksFor(Wisdom, dstring);

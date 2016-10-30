@@ -3,7 +3,7 @@
  * Authors: Mojo
  * License: $(LINK2 https://github.com/coop-mojo/moecoop/blob/master/LICENSE, MIT License)
  */
-module coop.model.recipe_graph;
+module coop.core.recipe_graph;
 
 import std.typecons;
 
@@ -13,7 +13,7 @@ class RecipeGraph
 {
     import std.container;
 
-    import coop.model.wisdom;
+    import coop.core.wisdom;
 
     this(dstring[] names, Wisdom w, dstring[dstring] pref = defaultPreference) pure
     {

@@ -3,7 +3,7 @@
  * Authors: Mojo
  * License: $(LINK2 https://github.com/coop-mojo/moecoop/blob/master/LICENSE, MIT License)
  */
-module coop.model.wisdom;
+module coop.core.wisdom;
 
 import std.typecons;
 
@@ -13,8 +13,8 @@ alias Category = Typedef!(dstring, "category");
 class Wisdom {
     import std.container;
 
-    import coop.model.item;
-    import coop.model.recipe;
+    import coop.core.item;
+    import coop.core.recipe;
 
     /// バインダーごとのレシピ名一覧
     dstring[][dstring] binderList;

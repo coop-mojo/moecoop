@@ -10,8 +10,8 @@ import dlangui.dialogs.dialog;
 
 import std.traits;
 
-import coop.model.item;
-import coop.model.wisdom;
+import coop.core.item;
+import coop.core.wisdom;
 import coop.view.recipe_tab_frame;
 
 class ItemEditDialog: Dialog

@@ -50,8 +50,8 @@ public:
 
 class MainFrame: AppFrame
 {
-    import coop.model.character;
-    import coop.model.wisdom;
+    import coop.core.character;
+    import coop.core.wisdom;
     import coop.model.config;
 
     this(Wisdom wisdom, Character[dstring] chars, Config config, Wisdom customWisdom)

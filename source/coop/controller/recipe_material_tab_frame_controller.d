@@ -22,7 +22,7 @@ class RecipeMaterialTabFrameController
         import std.container;
         import std.range;
 
-        import coop.model.recipe;
+        import coop.core.recipe;
         import coop.view.recipe_detail_frame;
 
         frame_ = frame;

@@ -31,7 +31,7 @@ class SkillTabFrameController: RecipeTabFrameController
     }
 
 protected:
-    import coop.model.wisdom;
+    import coop.core.wisdom;
 
     override dstring[][dstring] recipeChunks(Wisdom wisdom)
     {

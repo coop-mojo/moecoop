@@ -8,9 +8,9 @@ module coop.controller.main_frame_controller;
 class MainFrameController
 {
     import coop.migemo;
-    import coop.model.character;
+    import coop.core.character;
     import coop.model.config;
-    import coop.model.wisdom;
+    import coop.core.wisdom;
     import coop.view.main_frame;
 
     this(MainFrame frame, Wisdom wisdom, Character[dstring] chars, Config config, Wisdom customWisdom)

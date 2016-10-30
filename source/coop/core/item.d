@@ -3,7 +3,7 @@
  * Authors: Mojo
  * License: $(LINK2 https://github.com/coop-mojo/moecoop/blob/master/LICENSE, MIT License)
  */
-module coop.model.item;
+module coop.core.item;
 
 import std.json: JSONValue;
 import std.variant: Algebraic;

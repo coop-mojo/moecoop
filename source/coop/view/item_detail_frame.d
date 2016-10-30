@@ -7,8 +7,8 @@ module coop.view.item_detail_frame;
 
 import dlangui;
 
-import coop.model.item;
-import coop.model.wisdom;
+import coop.core.item;
+import coop.core.wisdom;
 
 class ItemDetailFrame: ScrollWidget
 {

@@ -3,7 +3,7 @@
  * Authors: Mojo
  * License: $(LINK2 https://github.com/coop-mojo/moecoop/blob/master/LICENSE, MIT License)
  */
-module coop.model.character;
+module coop.core.character;
 
 class Character
 {
@@ -38,7 +38,7 @@ class Character
         }
     }
 
-    import coop.model.recipe;
+    import coop.core.recipe;
     auto hasSkillFor(Recipe recipe)
     {
         import std.algorithm;
@@ -91,7 +91,7 @@ class Character
 
     @property auto url(dstring u)
     {
-        import coop.model.skills;
+        import coop.core.skills;
         import std.exception;
         import std.traits;
         import std.typecons;

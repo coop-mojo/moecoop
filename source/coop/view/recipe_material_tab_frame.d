@@ -639,6 +639,8 @@ class RecipeMaterialTabFrame: TabFrameBase
             auto m = rs[0].text.chomp(": ");
             if (auto n = m in materials)
             {
+                import std.range;
+
                 rs.each!(w => w.visibility = Visibility.Visible);
                 rs[2].text = format("/%s 個"d, (*n).num);
                 rs[0].textColor = (*n).isIntermediate ? "blue" : "black";

@@ -86,6 +86,7 @@ private:
         else
         {
             import std.algorithm;
+            import std.range;
 
             return (dstring s) => !find(s.removechars(r"/[ 　]/"), boyerMooreFinder(query)).empty;
         }

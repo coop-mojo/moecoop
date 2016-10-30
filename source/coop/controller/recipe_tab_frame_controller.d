@@ -72,6 +72,7 @@ abstract class RecipeTabFrameController
     auto showRecipeNames()
     {
         import std.algorithm;
+        import std.range;
         import std.string;
 
         auto input = frame_.queryBox.text == frame_.defaultMessage ? ""d : frame_.queryBox.text;
@@ -167,6 +168,8 @@ private:
         else
         {
             import std.algorithm;
+            import std.range;
+
             fun = (dstring s) => !find(s.removechars(r"/[ 　]/"), boyerMooreFinder(query)).empty;
         }
 

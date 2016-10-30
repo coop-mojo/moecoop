@@ -66,10 +66,12 @@ before_build:
   - ps: if($env:platform -eq "x86"){
             $env:compilersetupargs = "x86";
             $env:Darch = "x86";
+            $env:Dmodel = "32";
         }
         elseif($env:platform -eq "x64"){
             $env:compilersetupargs = "amd64";
             $env:Darch = "x86_64";
+            $env:Dmodel = "64";
         }
   - ps : if($env:DC -eq "dmd"){
            $env:PATH += ";C:\dmd2\windows\bin;";
@@ -88,7 +90,6 @@ build_script:
 test_script:
   - echo %APPVEYOR_JOB_NAME%
   - echo %PLATFORM%
-  - echo %Darch%
   - echo %DC%
   - echo %PATH%
   - '%DC% --version'

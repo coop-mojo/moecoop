@@ -1,10 +1,17 @@
-platform: x64
+platform:
+  - x86
+  - x64
+
 environment:
-  DC: dmd
-  DVersion: 2.071.2
   matrix:
-    - arch: x86
-    - arch: x64
+    - DC: dmd
+      DVersion: 2.071.2
+    - DC: ldc
+      DVersion: 1.0.0
+
+matrix:
+  allow_failures:
+    - DC: ldc
 
 skip_tags: true
 branches:
@@ -15,10 +22,10 @@ install:
   - ps: function SetUpDCompiler
         {
             if($env:DC -eq "dmd"){
-              if($env:arch -eq "x86"){
+              if($env:platform -eq "x86"){
                 $env:DConf = "m32";
               }
-              elseif($env:arch -eq "x64"){
+              elseif($env:platform -eq "x64"){
                 $env:DConf = "m64";
               }
               echo "downloading ...";
@@ -32,15 +39,17 @@ install:
             }
             elseif($env:DC -eq "ldc"){
               echo "downloading ...";
-              if($env:arch -eq "x86"){
+              if($env:platform -eq "x86"){
                 $env:DConf = "m32";
+                $env:Dmodel = "32";
               }
-              elseif($env:arch -eq "x64"){
+              elseif($env:platform -eq "x64"){
                 $env:DConf = "m64";
+                $env:Dmodel = "64";
               }
               $env:toolchain = "msvc";
               $version = $env:DVersion;
-              Invoke-WebRequest "https://github.com/ldc-developers/ldc/releases/download/v$($version)/ldc2-$($version)-win64-msvc.zip" -OutFile "c:\ldc.zip";
+              Invoke-WebRequest "https://github.com/ldc-developers/ldc/releases/download/v$($version)/ldc2-$($version)-win$($env:Dmodel)-msvc.zip" -OutFile "c:\ldc.zip";
               echo "finished.";
               pushd c:\\;
               7z x ldc.zip > $null;
@@ -54,22 +63,20 @@ install:
   - dub --version
 
 before_build:
-  - ps: if($env:arch -eq "x86"){
+  - ps: if($env:platform -eq "x86"){
             $env:compilersetupargs = "x86";
             $env:Darch = "x86";
-            $env:Dmodel = "32";
-          }
-        elseif($env:arch -eq "x64"){
+        }
+        elseif($env:platform -eq "x64"){
             $env:compilersetupargs = "amd64";
             $env:Darch = "x86_64";
-            $env:Dmodel = "64";
         }
   - ps : if($env:DC -eq "dmd"){
            $env:PATH += ";C:\dmd2\windows\bin;";
          }
          elseif($env:DC -eq "ldc"){
            $version = $env:DVersion;
-           $env:PATH += ";C:\ldc2-$($version)-win64-msvc\bin";
+           $env:PATH += ";C:\ldc2-$($version)-win$($env:Dmodel)-msvc\bin";
            $env:DC = "ldc2";
          }
   - ps: $env:compilersetup = "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall";

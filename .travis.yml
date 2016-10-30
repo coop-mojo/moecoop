@@ -4,10 +4,6 @@ d:
   - dmd-2.071.2
   - ldc-1.0.0
 
-matrix:
-  allow_failures:
-    - d: ldc-1.0.0
-
 os:
   - linux
   - osx

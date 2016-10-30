@@ -1,5 +1,9 @@
 language: d
 
+d:
+  - dmd-2.071.2
+  - ldc-1.0.0
+
 os:
   - linux
   - osx

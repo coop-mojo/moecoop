@@ -23,7 +23,7 @@ immutable AppName = "生協の知恵袋"d;
 immutable Version = import("version").chomp;
 
 /// 公式サイト URL
-enum URL = "http://docs.fukuro.coop.moe/";
+enum MoeCoopURL = "http://docs.fukuro.coop.moe/";
 
 /**
  * バージョン番号 `var` がリリース版を表しているかを返す。

@@ -37,7 +37,7 @@ class VersionDialog: Dialog
         wLayout.childById("icon").addChild(new ImageWidget(null, "coop-icon-large"));
 
         wLayout.childById("name").text = verString;
-        auto urlButton = new UrlImageTextButton(null, URL, format("%sja/%s/", URL, Version.isRelease ? Version : "latest"));
+        auto urlButton = new UrlImageTextButton(null, MoeCoopURL, format("%sja/%s/", MoeCoopURL, Version.isRelease ? Version : "latest"));
         urlButton.click = (Widget w) {
             Platform.instance.openURL(w.action.stringParam);
             return true;

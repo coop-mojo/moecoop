@@ -10,7 +10,7 @@ enum SkillPon = "http://www.ponz-web.com/skill/";
 class SkillSimulatorException: Exception
 {
     import std.exception;
-    import coop.fallback
+    import coop.fallback;
     mixin basicExceptionCtors;
 }
 

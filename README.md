@@ -12,7 +12,7 @@
 
 リリース版は[リンク先](https://github.com/coop-mojo/moecoop/releases/latest)から`moecoop-*.zip`をダウンロードしてご利用ください．
 
-また，開発中の生焼け版の公開を始めました([64bit版](https://ci.appveyor.com/api/projects/coop-mojo/moecoop/artifacts/moecoop-trunk-64bit.zip?branch=master&job=Environment%3a%20arch%3dx64)、[32bit版](https://ci.appveyor.com/api/projects/coop-mojo/moecoop/artifacts/moecoop-trunk-32bit.zip?branch=master&job=Environment%3A%20arch%3Dx86))．登録されているアイテム情報や新機能が増えているかもしれないですが，生焼けなので試すとお腹を壊したり爆発したり，鼻から LoC が出てくるかもしれません．
+また，開発中の生焼け版の公開を始めました([64bit版](https://ci.appveyor.com/api/projects/coop-mojo/moecoop/artifacts/moecoop-trunk-64bit.zip?branch=master&job=Environment%3A%20DC%3Ddmd%2C%20DVersion%3D2.071.2%3B%20Platform%3A%20x64)、[32bit版](https://ci.appveyor.com/api/projects/coop-mojo/moecoop/artifacts/moecoop-trunk-32bit.zip?branch=master&job=Environment%3A%20DC%3Ddmd%2C%20DVersion%3D2.071.2%3B%20Platform%3A%20x86))．登録されているアイテム情報や新機能が増えているかもしれないですが，生焼けなので試すとお腹を壊したり爆発したり，鼻から LoC が出てくるかもしれません．
 
 ## 使い方
 [マニュアル](http://docs.fukuro.coop.moe)をご覧ください。

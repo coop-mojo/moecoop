@@ -42,6 +42,8 @@ version(LDC)
     {
         auto fold(R, S...)(R r, S seed)
         {
+            import std.algorithm: reduce;
+
             static if (S.length < 2)
             {
                 return reduce!fun(seed, r);

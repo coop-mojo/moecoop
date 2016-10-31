@@ -16,6 +16,8 @@ copyFiles "libs/windows/x86/libcurl.dll" platform="windows-x86"
 copyFiles "libs/windows/x86_64/libcurl.dll" platform="windows-x86_64"
 postBuildCommands "powershell -Command \"wget http://files.kaoriya.net/cmigemo/cmigemo-default-win64-20110227.zip -OutFile migemo.zip;\"" \
                   "powershell -Command \"unzip migemo.zip;\"" \
+                  "dir" \
+                  "dir migemo" \
                   "copy cmigemo-default-win64\\migemo.dll ." \
                   "xcopy cmigemo-default-win64\\dict\\utf-8 resource\\dict\\dict" \
                   "rm -rf migemo.zip cmigemo-default-win64" platform="windows-x86_64"

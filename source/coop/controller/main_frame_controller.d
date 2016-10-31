@@ -33,19 +33,25 @@ class MainFrameController
 
     auto loadMigemo()
     {
+        import dlangui.core.logger;
         import std.file;
 
+        Log.d("Called loadMigemo");
         if (config.migemoLib.exists)
         {
+            Log.d("MigemoLib exists");
             try{
                 import std.exception;
                 import std.path;
 
+                Log.d("Init migemo...");
                 migemo_ = new Migemo(config_.migemoLib, config_.migemoDict);
+                Log.d("Loading moe-dict...");
                 migemo_.load(buildPath("resource", "dict", "moe-dict"));
                 enforce(migemo_.isEnable);
                 frame_.enableMigemo;
             } catch(MigemoException e) {
+                Log.d("Exception occurs");
                 migemo_ = null;
                 frame_.disableMigemo;
             }

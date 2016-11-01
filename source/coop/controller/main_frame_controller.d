@@ -77,7 +77,7 @@ private:
             }
             else version(X86_64)
             {
-                enum candidates = [LibInfo(`migemo.dll`, `resources\dict\dict`)];
+                enum candidates = [LibInfo(`migemo.dll`, `resource\dict\dict`)];
             }
         }
         else version(linux)

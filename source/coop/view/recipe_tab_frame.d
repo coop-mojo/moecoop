@@ -456,7 +456,7 @@ private:
             hideItemDetail(1);
 
             itemNames.enumerate(0).each!((idx_name) {
-                    import coop.model.item;
+                    import coop.core.item;
                     import coop.view.item_detail_frame;
 
                     auto idx = idx_name[0];

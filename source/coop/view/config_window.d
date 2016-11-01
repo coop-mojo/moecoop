@@ -8,16 +8,14 @@ module coop.view.config_window;
 import dlangui;
 import dlangui.dialogs.dialog;
 
-import coop.model.config;
 import coop.core.character;
 
 class ConfigDialog: Dialog
 {
-    this(Window parent, Character[dstring] chars, Config con)
+    this(Window parent, Character[dstring] chars)
     {
         super(UIString("設定"d), parent, DialogFlag.Popup);
         chars_ = chars;
-        config_ = con;
     }
 
     override void initialize()
@@ -127,83 +125,14 @@ class ConfigDialog: Dialog
         _buttonActions = [ACTION_CLOSE];
         addChild(exits);
     }
-
-    // override void close(const Action action)
-    // {
-    //     _parentWindow.removePopup(_popup);
-    // }
 private:
-    Config config_;
     Character[dstring] chars_;
 }
 
-auto showConfigWindow(Window parent, Character[dstring] chars, Config config)
+auto showConfigWindow(Window parent, Character[dstring] chars)
 {
-    auto dlg = new ConfigDialog(parent, chars, config);
+    auto dlg = new ConfigDialog(parent, chars);
     dlg.show;
-}
-
-auto installMigemo()(string dest)
-{
-    version(Windows)
-    {
-        import std.file;
-        import std.format;
-        import std.net.curl;
-        import std.path;
-        import std.zip;
-
-        enum baseURL = "http://files.kaoriya.net/cmigemo/";
-        enum ver = "20110227";
-        version(X86)
-        {
-            enum arch = "32";
-        }
-        else
-        {
-            enum arch = "64";
-        }
-
-        auto src = format("%s/cmigemo-default-win%s-%s.zip", baseURL, arch, ver);
-        auto archive = src.baseName;
-        download(src, archive);
-        assert(archive.exists);
-        scope(exit) archive.remove;
-
-        unzip(archive, dest);
-    }
-    else
-    {
-        static assert(false, "It should not be called from non-Windows systems.");
-    }
-}
-
-auto unzip(string srcFile, string destDir)
-{
-    import std.exception;
-    import std.file;
-    import std.zip;
-
-    enforce(srcFile.exists);
-
-    auto zip = new ZipArchive(read(srcFile));
-    foreach(name, am; zip.directory)
-    {
-        import std.algorithm;
-        import std.path;
-        import std.regex;
-        if (name.endsWith("/"))
-        {
-            continue;
-        }
-        auto target = buildPath(destDir, name.replaceFirst(ctRegex!r"^.+?/", ""));
-        auto dir = target.dirName;
-        mkdirRecurse(dir);
-        assert(am.expandedData.length == 0);
-        zip.expand(am);
-        assert(am.expandedData.length == am.expandedSize);
-        target.write(am.expandedData);
-    }
 }
 
 class CharacterSettingDialog: Dialog

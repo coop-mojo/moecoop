@@ -175,7 +175,7 @@ protected:
                 return true;
             case OPTION:
                 import coop.view.config_window;
-                showConfigWindow(window, controller.characters, controller.config);
+                showConfigWindow(window, controller.characters);
                 return true;
             case VERSION:
                 import coop.view.version_window;

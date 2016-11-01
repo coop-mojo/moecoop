@@ -35,13 +35,15 @@ class MainFrameController
     {
         import std.file;
 
-        if (config.migemoLib.exists)
+        auto info = migemoInfo;
+
+        if (info.lib.exists)
         {
             try{
                 import std.exception;
                 import std.path;
 
-                migemo_ = new Migemo(config_.migemoLib, config_.migemoDict);
+                migemo_ = new Migemo(info.lib, info.dict);
                 migemo_.load(buildPath("resource", "dict", "moe-dict"));
                 enforce(migemo_.isEnable);
                 frame_.enableMigemo;
@@ -57,6 +59,56 @@ class MainFrameController
     Wisdom wisdom_, cWisdom_;
     Migemo migemo_;
     MainFrame frame_;
+private:
+
+    auto migemoInfo()
+    {
+        import std.typecons;
+
+        alias LibInfo = Tuple!(string, "lib", string, "dict");
+        version(Windows)
+        {
+            version(X86)
+            {
+                enum candidates = [LibInfo.init];
+            }
+            else version(X86_64)
+            {
+                enum candidates = [LibInfo(`migemo.dll`, `resources\dict\dict`)];
+            }
+        }
+        else version(linux)
+        {
+            import std.algorithm;
+            import std.file;
+            import std.format;
+            import std.range;
+
+            version(X86)
+            {
+                enum arch = "i386-linux-gnu";
+            }
+            else
+            {
+                enum arch = "x86_64-linux-gnu";
+            }
+            enum candidates = [
+                // Arch
+                LibInfo("/usr/lib/libmigemo.so", "/usr/share/migemo/utf-8"),
+                // Debian/Ubuntu
+                LibInfo(format("/usr/lib/%s/libmigemo.so.1", arch), "/usr/share/cmigemo/utf-8"),
+                // Fedora
+                LibInfo("/usr/lib/libmigemo.so.1", "/usr/share/cmigemo/utf-8"),
+                ];
+        }
+        else version(OSX)
+        {
+            enum candidates = [LibInfo("/usr/local/opt/cmigemo/lib/libmigemo.dylib",
+                                       "/usr/local/opt/cmigemo/share/migemo/utf-8")];
+        }
+        auto ret = candidates.find!(a => a.lib.exists);
+        return ret.empty ? LibInfo.init : ret.front;
+    }
 }
 
 mixin template TabController()

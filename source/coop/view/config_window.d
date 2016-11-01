@@ -53,19 +53,6 @@ class ConfigDialog: Dialog
                             }
                         }
                     }
-                    HorizontalLayout {
-                        TextWidget {
-                            text: "Migemo ライブラリ"
-                        }
-                        FrameLayout {
-                            minWidth: 130
-                            layoutWidth: FILL_PARENT
-                        }
-                        Button {
-                            id: migemoInstaller
-                            text: "インストール"
-                        }
-                    }
                 }
             });
 
@@ -127,47 +114,6 @@ class ConfigDialog: Dialog
             return true;
         };
 
-        if (config_.migemoLib.exists)
-        {
-            with(wLayout.childById("migemoInstaller"))
-            {
-                text = "インストール済み";
-                enabled = false;
-            }
-        }
-        else
-        {
-            with(wLayout.childById("migemoInstaller"))
-            {
-                text = "インストール";
-                version(Posix)
-                {
-                    enabled = false;
-                }
-                else version(Win32)
-                {
-                    enabled = false;
-                }
-            }
-        }
-
-        version(Windows)
-        {
-            wLayout.childById("migemoInstaller").click = (Widget src) {
-                import std.path;
-
-                wLayout.childById("migemoInstaller").enabled = false;
-                childById("close-button").enabled = false;
-                scope(exit) childById("close-button").enabled = true;
-
-                wLayout.childById("migemoInstaller").text = "インストール中...";
-                scope(success) wLayout.childById("migemoInstaller").text = "インストール済み";
-                scope(failure) wLayout.childById("migemoInstallers").text = "インストールに失敗しました";
-                installMigemo(config_.migemoLib.dirName);
-                return true;
-            };
-        }
-
         addChild(wLayout);
 
         auto exits = new HorizontalLayout;
@@ -182,32 +128,10 @@ class ConfigDialog: Dialog
         addChild(exits);
     }
 
-    override void close(const Action action)
-    {
-        if (action) {
-            import std.file;
-            if (action.id == StandardAction.Close &&
-                config_.migemoLib.exists)
-            {
-                import std.algorithm;
-                import coop.view.main_frame;
-
-                auto main = cast(MainFrame)window.mainWidget;
-                main.controller.loadMigemo;
-                foreach(tabName; ["binderFrame", "skillFrame", "materialFrame"])
-                {
-                    import coop.view.tab_frame_base;
-
-                    auto tab = main.childById!TabFrameBase(tabName);
-                    auto selected = tab.charactersBox.selectedItem;
-                    tab.charactersBox.items = chars_.keys;
-                    auto newIdx = chars_.keys.countUntil(selected).to!int;
-                    tab.charactersBox.selectedItemIndex = newIdx == -1 ? 0 : newIdx;
-                }
-            }
-        }
-        _parentWindow.removePopup(_popup);
-    }
+    // override void close(const Action action)
+    // {
+    //     _parentWindow.removePopup(_popup);
+    // }
 private:
     Config config_;
     Character[dstring] chars_;

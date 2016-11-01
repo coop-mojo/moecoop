@@ -63,6 +63,9 @@ private:
 
     auto migemoInfo()
     {
+        import std.algorithm;
+        import std.file;
+        import std.range;
         import std.typecons;
 
         alias LibInfo = Tuple!(string, "lib", string, "dict");
@@ -79,10 +82,7 @@ private:
         }
         else version(linux)
         {
-            import std.algorithm;
-            import std.file;
             import std.format;
-            import std.range;
 
             version(X86)
             {

@@ -105,30 +105,15 @@ Released under the MIT license
 https://github.com/coop-mojo/moecoop/blob/master/LICENSE
 ```
 
-- また、生協の知恵袋は libcurl ライブラリと C/Migemo ライブラリを利用しています。
-  ライブラリを利用している部分を流用する場合には、これらのライブラリの著作権表示を README のどこかに記載してください。
-  libcurl と C/Mimemo は、共に MIT ライセンスです。
+- また、生協の知恵袋は C/Migemo ライブラリを利用しています。
+  ライブラリを利用している部分を流用する場合には、ライブラリの著作権表示を README のどこかに記載してください。
+  C/Mimemo は、MIT ライセンスです。
 
 ### 生協の知恵袋 お裁縫セットのライセンスについて
 生協の知恵袋 お裁縫セットのリポジトリ内のファイルは、CC0 のもとで配布されています。詳細は[LICENSE](https://github.com/coop-mojo/docker-fukuro/blob/master/LICENSE)をご覧ください。
 
 ### 知恵袋が内部で利用しているソフトウェアのライランスについて
 生協の知恵袋では以下のソフトウェアが利用されています。
-
-- [libcurl](https://curl.haxx.se/)
-```
-COPYRIGHT AND PERMISSION NOTICE
-
-Copyright (c) 1996 - 2016, Daniel Stenberg, daniel@haxx.se, and many contributors, see the THANKS file.
-
-All rights reserved.
-
-Permission to use, copy, modify, and distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF THIRD PARTY RIGHTS. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-Except as contained in this notice, the name of a copyright holder shall not be used in advertising or otherwise to promote the sale, use or other dealings in this Software without prior written authorization of the copyright holder.
-```
 
 - [C/Migemo](https://www.kaoriya.net/software/cmigemo/)
 ```

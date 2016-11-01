@@ -455,25 +455,26 @@ private:
 
             hideItemDetail(1);
 
-            foreach(idx, name; itemNames.enumerate(0))
-            {
-                import coop.core.item;
-                import coop.view.item_detail_frame;
+            itemNames.enumerate(0).each!((idx_name) {
+                    import coop.model.item;
+                    import coop.view.item_detail_frame;
 
-                Item item;
-                if (auto i = name in wisdom.itemList)
-                {
-                    item = *i;
-                }
-                else
-                {
-                    item.name = name;
-                    item.petFoodInfo = [PetFoodType.UNKNOWN.to!PetFoodType: 0];
-                }
+                    auto idx = idx_name[0];
+                    dstring name = idx_name[1];
+                    Item item;
+                    if (auto i = name in wisdom.itemList)
+                    {
+                        item = *i;
+                    }
+                    else
+                    {
+                        item.name = name;
+                        item.petFoodInfo = [PetFoodType.UNKNOWN.to!PetFoodType: 0];
+                    }
 
-                showItemDetail(idx);
-                setItemDetail(ItemDetailFrame.create(item, idx+1, wisdom, cWisdom), idx);
-            }
+                    showItemDetail(idx);
+                    setItemDetail(ItemDetailFrame.create(item, idx+1, wisdom, cWisdom), idx);
+                });
         };
 
         import std.typecons;

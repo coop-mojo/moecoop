@@ -194,20 +194,18 @@ private:
         import std.algorithm;
 
         RedBlackTree!dstring[dstring] ret;
-        foreach(r; recipes)
-        {
-            foreach(p; r.products.keys)
-            {
-                if (p !in ret)
-                {
-                    ret[p] = make!(RedBlackTree!dstring)(r.name);
-                }
-                else
-                {
-                    ret[p].insert(r.name);
-                }
-            }
-        }
+        recipes.each!((r) {
+                r.products.keys.each!((p) {
+                        if (p !in ret)
+                        {
+                            ret[p] = make!(RedBlackTree!dstring)(r.name);
+                        }
+                        else
+                        {
+                            ret[p].insert(r.name);
+                        }
+                    });
+            });
         return ret;
     }
 

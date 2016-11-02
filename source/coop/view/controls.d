@@ -60,10 +60,9 @@ class CheckableEntryWidget: HorizontalLayout, MenuItemActionHandler
         link.unhighlight;
     }
 
-    @property typeof(this) popupMenu(Fn)(Tuple!(dstring, Fn)[] items) if (isCallable!Fn)
+    @property void popupMenu(MenuItem menu)
     {
-        link.popupMenu(items);
-        return this;
+        link.popupMenu(menu);
     }
 
     @property override dstring text()
@@ -145,20 +144,9 @@ class LinkWidget: TextWidget, MenuItemActionHandler
         backgroundColor = defaultBackgroundColor;
     }
 
-    @property typeof(this) popupMenu(Fn)(Tuple!(dstring, Fn)[] items) if (isCallable!Fn)
+    @property void popupMenu(MenuItem menu)
     {
-        import std.algorithm;
-        import std.array;
-        import std.range;
-
-        _menuItems = items.map!"a[1].toDelegate".array;
-        auto menu = new MenuItem(null);
-        items.map!"a[0]".enumerate.each!((vals) {
-                import std.conv;
-                menu.add(new Action(vals[0].to!int, vals[1]));
-            });
         _popupMenu = menu;
-        return this;
     }
 
     override bool canShowPopupMenu(int x, int y)
@@ -194,23 +182,9 @@ class LinkWidget: TextWidget, MenuItemActionHandler
         return dispatchAction(action);
     }
 
-    override bool handleAction(const Action a)
-    {
-        if (a)
-        {
-            if (a.id < _menuItems.length)
-            {
-                _menuItems[a.id]();
-                return true;
-            }
-        }
-        return false;
-    }
-
     immutable uint defaultBackgroundColor;
 private:
     MenuItem _popupMenu;
-    void delegate()[] _menuItems;
 }
 
 import dlangui.widgets.metadata;

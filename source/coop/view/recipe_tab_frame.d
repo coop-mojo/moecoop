@@ -477,9 +477,15 @@ private:
         };
 
         import std.typecons;
-        ret.popupMenu = [tuple("このレシピをコピー"d, () {
-                    platform.setClipboardText(r.toShortString.to!dstring);
-                })];
+        auto menu = new MenuItem;
+        auto a = new Action(25000, "このレシピをコピー"d); // 25000 自体に意味はない
+        auto it = new MenuItem(a);
+        it.menuItemClick = (MenuItem _) {
+            platform.setClipboardText(r.toShortString.to!dstring);
+            return false;
+        };
+        menu.add(it);
+        ret.popupMenu = menu;
         return ret;
     }
     ulong timerID;

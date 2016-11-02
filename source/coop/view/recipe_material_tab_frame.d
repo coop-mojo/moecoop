@@ -568,12 +568,19 @@ class RecipeMaterialTabFrame: TabFrameBase
 
                             import coop.view.controls;
 
-                            auto menu = bros.filter!(b => b != r)
-                                            .map!(b => tuple(format("%s を使う"d, b), () {
-                                                        preference[rNode.parents[].front] = b;
-                                                        reload;
-                                                    }))
-                                            .array;
+                            auto menu = new MenuItem;
+                            auto idx = 25000; // 番号自体に意味はない
+                            bros.filter!(b => b != r)
+                                .map!((b) {
+                                        auto a = new Action(idx++, format("%s を使う"d, b));
+                                        auto it = new MenuItem(a);
+                                        it.menuItemClick = (MenuItem _) {
+                                            preference[rNode.parents[].front] = b;
+                                            reload;
+                                            return false;
+                                        };
+                                        return it;
+                                    }).each!(it => menu.add(it));
                             auto lw = (cast(LinkWidget)rs[0]);
                             lw.popupMenu = menu;
                             lw.textFlags = TextFlag.Underline;
@@ -584,7 +591,7 @@ class RecipeMaterialTabFrame: TabFrameBase
                 {
                     rs.each!(w => w.visibility = Visibility.Gone);
                 }
-            });
+        });
     }
 
     auto updateLeftoverTable(int[dstring] leftovers)
@@ -655,23 +662,31 @@ class RecipeMaterialTabFrame: TabFrameBase
 
                         import coop.view.controls;
 
-                        Tuple!(dstring, void delegate()) menuItem;
+                        auto menu = new MenuItem;
                         if (mNode.name in leafMaterials)
                         {
-                            menuItem = tuple("材料から用意する"d, () {
-                                    leafMaterials.removeKey(mNode.name);
-                                    reload;
-                                });
+                            auto a = new Action(25000, "材料から用意する"d);
+                            auto it = new MenuItem(a);
+                            it.menuItemClick = (MenuItem _) {
+                                leafMaterials.removeKey(mNode.name);
+                                reload;
+                                return false;
+                            };
+                            menu.add(it);
                         }
                         else
                         {
-                            menuItem = tuple("直接用意する"d, () {
-                                    leafMaterials.insert(mNode.name);
-                                    reload;
-                                });
+                            auto a = new Action(25001, "直接用意する"d);
+                            auto it = new MenuItem(a);
+                            it.menuItemClick = (MenuItem _) {
+                                leafMaterials.insert(mNode.name);
+                                reload;
+                                return false;
+                            };
+                            menu.add(it);
                         }
                         auto cew = (cast(CheckableEntryWidget)rs[0]);
-                        cew.popupMenu = [menuItem];
+                        cew.popupMenu = menu;
                         cew.textFlags = TextFlag.Underline;
                     }
                 }

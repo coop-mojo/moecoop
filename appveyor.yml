@@ -9,6 +9,10 @@ environment:
     - DC: ldc
       DVersion: 1.0.0
 
+matrix:
+  allow_failures:
+    - DC: ldc
+
 skip_tags: true
 branches:
   except:

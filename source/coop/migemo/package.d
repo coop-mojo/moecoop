@@ -18,7 +18,7 @@ alias migemoEnforce = enforceEx!MigemoException;
 class Migemo{
     import std.traits;
 
-    this(String)(String path, String dictDir) if (isSomeString!String)
+    this(String)(String path, String dictDir) @trusted if (isSomeString!String)
     in{
         import std.file;
 
@@ -54,7 +54,7 @@ class Migemo{
         }
     }
 
-    void load(String)(String path) if (isSomeString!String)
+    void load(String)(String path) @trusted if (isSomeString!String)
     {
         import std.conv;
         import std.file;
@@ -67,12 +67,12 @@ class Migemo{
                       format("Failed to load %s.", path));
     }
 
-    bool isEnable()
+    bool isEnable() @trusted nothrow @nogc
     {
         return cast(bool)migemo_is_enable(m);
     }
 
-    auto query(String)(String query) if (isSomeString!String)
+    auto query(String)(String query) @trusted if (isSomeString!String)
     {
         import std.conv;
         import std.string;
@@ -82,7 +82,7 @@ class Migemo{
         return fromStringz(cstr).idup.to!String;
     }
 
-    ~this()
+    ~this() @trusted nothrow @nogc
     {
         migemo_close(m);
     }

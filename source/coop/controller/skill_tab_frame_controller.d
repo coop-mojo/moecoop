@@ -19,7 +19,7 @@ class SkillTabFrameController: RecipeTabFrameController
         import std.traits;
 
         super(frame, categories);
-        frame.relatedBindersFor = (recipe, _) => wisdom.bindersFor(recipe);
+        frame.relatedBindersFor = (recipe, _) => model.getBindersFor(recipe);
         frame.tableColumnLength = (nRecipes, nColumns) => (nRecipes.to!real/nColumns).ceil.to!int;
         with(frame.childById!ComboBox("sortBy"))
         {

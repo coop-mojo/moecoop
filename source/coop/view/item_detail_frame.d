@@ -33,10 +33,10 @@ class ItemDetailFrame: ScrollWidget
 
     static auto create(dstring name, int idx, WisdomModel model, Wisdom cWisdom)
     {
-        auto i = model.getItem(name);
+        auto orig = model.getItem(name);
         auto ret = new typeof(this)("detail"~idx.to!string);
-        auto item = Overlaid!Item(i, i.name in cWisdom.itemList);
-        ret.item_ = i;
+        auto item = Overlaid!Item(orig, name in cWisdom.itemList);
+        ret.item_ = orig;
 
         auto table = ret.childById("table");
         with(table)
@@ -79,7 +79,7 @@ class ItemDetailFrame: ScrollWidget
                 table.addElem("info", item.info, item.isOverlaid!"info");
             }
 
-            auto rem = item.name in model.wisdom.itemList ? item.remarks : "細かいことはわかりません（´・ω・｀）";
+            auto rem = orig ? item.remarks : "細かいことはわかりません（´・ω・｀）";
             if (!rem.empty || !extraRemarks.empty)
             {
                 import std.algorithm;

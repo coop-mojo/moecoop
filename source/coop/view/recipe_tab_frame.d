@@ -411,15 +411,16 @@ private:
                 import std.algorithm;
 
                 auto prods = r.products.keys;
-                if (!prods.all!(p => p in wisdom.itemList))
+                if (!prods.all!(p => controller.model.getItem(p)))
                 {
                     ret.textColor = "blue";
                 }
                 else
                 {
-                    if (!prods.map!(p => wisdom.itemList[p]).all!((it) {
-                                return it.type !in wisdom.extraInfoList ||
-                                       it.name in wisdom.extraInfoList[it.type];
+                    if (prods.any!((p) {
+                                import coop.core.item;
+                                auto ex = controller.model.getExtraInfo(p);
+                                return ex.type != ItemType.Others && !ex.extra.hasValue;
                             }))
                     {
                         ret.textFlags = TextFlag.Underline;

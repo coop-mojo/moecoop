@@ -80,6 +80,12 @@ struct Item
         }
         return JSONValue(hash);
     }
+
+    auto opCast(T: bool)()
+    {
+        import std.range;
+        return !name.empty;
+    }
 }
 
 unittest
@@ -87,6 +93,7 @@ unittest
     import std.conv: to;
 
     Item item;
+    assert(cast(bool)item == false);
     with(item)
     {
         name = "マイナーズ ワイフ";
@@ -98,6 +105,8 @@ unittest
         type = ItemType.Others;
         remarks = "クエストで使う";
     }
+    assert(cast(bool)item == true);
+
     auto json = item.toJSON;
     with(json)
     {

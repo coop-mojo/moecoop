@@ -120,7 +120,7 @@ class RecipeDetailFrame: ScrollWidget, MenuItemActionHandler
                 r.remarks.empty ? Visibility.Gone : Visibility.Visible;
             childById("remarks").text = r.remarks;
         }
-        ret.binders = model.wisdom.bindersFor(r.name);
+        ret.binders = model.getBindersFor(r.name);
         if (!chars.keys.empty)
         {
             import std.algorithm;

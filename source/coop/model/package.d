@@ -50,11 +50,16 @@ class WisdomModel
         else
         {
             Item item;
-            item.name = name.to!dstring;
             item.petFoodInfo = [PetFoodType.UNKNOWN.to!PetFoodType: 0];
             return item;
         }
         assert(false);
+    }
+
+    auto getBindersFor(Str)(Str name) if (isSomeString!Str)
+    {
+        import std.conv;
+        return wisdom.bindersFor(name.to!dstring);
     }
 
     auto getExtraInfo(Str)(Str name) if (isSomeString!Str)
@@ -67,8 +72,14 @@ class WisdomModel
 
         if (auto i = name.to!dstring in wisdom.itemList)
         {
-            if ((*i).type !in wisdom.extraInfoList ||
-                (*i).name !in wisdom.extraInfoList[(*i).type])
+            if ((*i).type == ItemType.Others)
+            {
+                RetType ret;
+                ret.type = ItemType.Others;
+                return ret;
+            }
+            else if ((*i).type !in wisdom.extraInfoList ||
+                     (*i).name !in wisdom.extraInfoList[(*i).type])
             {
                 return RetType.init;
             }
@@ -341,5 +352,5 @@ private:
     }
 
     public Wisdom wisdom;
-    public Migemo migemo;
+    Migemo migemo;
 }

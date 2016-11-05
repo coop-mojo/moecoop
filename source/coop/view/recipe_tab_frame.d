@@ -438,10 +438,9 @@ private:
             scope(exit) highlightDetailRecipe;
 
 
-            auto rDetail = controller.model.getRecipe(recipe);
             recipeDetail = RecipeDetailFrame.create(recipe, controller.model, characters);
 
-            auto itemNames = rDetail.products.keys;
+            auto itemNames = controller.model.getRecipe(recipe).products.keys;
             enforce(itemNames.length <= 2);
             if (itemNames.empty)
             {
@@ -453,7 +452,6 @@ private:
 
             foreach(idx, name; itemNames.enumerate(0))
             {
-                import coop.core.item;
                 import coop.view.item_detail_frame;
 
                 showItemDetail(idx);
@@ -461,7 +459,6 @@ private:
             }
         };
 
-        import std.typecons;
         auto menu = new MenuItem;
         auto a = new Action(25000, "このレシピをコピー"d); // 25000 自体に意味はない
         auto it = new MenuItem(a);

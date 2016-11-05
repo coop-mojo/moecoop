@@ -49,6 +49,12 @@ struct Recipe
         return name.hashOf;
     }
 
+    auto opCast(T: bool)()
+    {
+        import std.range;
+        return !name.empty;
+    }
+
     /**
      * MoE 内に貼り付けるための短めの文字列を返す
      */

@@ -439,11 +439,6 @@ private:
 
 
             auto rDetail = controller.model.getRecipe(recipe);
-            if (rDetail.name.empty)
-            {
-                rDetail.name = recipe;
-                rDetail.remarks = "作り方がわかりません（´・ω・｀）";
-            }
             recipeDetail = RecipeDetailFrame.create(recipe, controller.model, characters);
 
             auto itemNames = rDetail.products.keys;

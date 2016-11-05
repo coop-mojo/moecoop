@@ -69,10 +69,10 @@ class RecipeDetailFrame: ScrollWidget, MenuItemActionHandler
         backgroundColor = "white";
     }
 
-    static auto create(dstring name, WisdomModel model, Character[dstring] chars)
+    static auto create(dstring n, WisdomModel model, Character[dstring] chars)
     {
-        auto r = model.getRecipe(name);
-        auto ret = new typeof(this)(r.name.to!string);
+        auto r = model.getRecipe(n);
+        auto ret = new typeof(this)(n.to!string);
         ret.recipe_ = r;
         with(ret)
         {
@@ -80,7 +80,7 @@ class RecipeDetailFrame: ScrollWidget, MenuItemActionHandler
             import std.array;
             import std.format;
 
-            childById("recipe").text = r.name;
+            childById("recipe").text = n;
             childById("tech").text = r.techniques[].join(" or ");
             childById("skills").text = r.requiredSkills
                                        .byKeyValue
@@ -116,11 +116,12 @@ class RecipeDetailFrame: ScrollWidget, MenuItemActionHandler
                 rouletteText = attrs.join(", ");
             }
             childById("roulette").text = rouletteText;
+            auto rem = r ? r.remarks : "作り方がわかりません（´・ω・｀）";
             childById("remarksInfo").visibility =
-                r.remarks.empty ? Visibility.Gone : Visibility.Visible;
-            childById("remarks").text = r.remarks;
+                rem.empty ? Visibility.Gone : Visibility.Visible;
+            childById("remarks").text = rem;
         }
-        ret.binders = model.getBindersFor(r.name);
+        ret.binders = model.getBindersFor(n);
         if (!chars.keys.empty)
         {
             import std.algorithm;
@@ -130,9 +131,9 @@ class RecipeDetailFrame: ScrollWidget, MenuItemActionHandler
                          .keys
                          .filter!(k =>
                                   ret.binders
-                                  .any!(b => chars[k].hasRecipe(r.name, b)))
+                                  .any!(b => chars[k].hasRecipe(n, b)))
                          .map!(k => tuple(k,
-                                          make!(RedBlackTree!dstring)(ret.binders.filter!(b => chars[k].hasRecipe(r.name, b)).array)))
+                                          make!(RedBlackTree!dstring)(ret.binders.filter!(b => chars[k].hasRecipe(n, b)).array)))
                          .assocArray;
         }
 

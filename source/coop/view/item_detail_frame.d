@@ -45,7 +45,7 @@ class ItemDetailFrame: ScrollWidget
             import std.math;
             import std.range;
 
-            table.addElem("名前", item.name);
+            table.addElem("名前", name);
 
             table.addElem("英名", item.ename.empty ? "わからん（´・ω・｀）" : item.ename, item.isOverlaid!"ename");
             table.addElem("重さ", item.weight.isNaN ? "そこそこの重さ" : format("%.2f"d, item.weight), item.isOverlaid!"weight");

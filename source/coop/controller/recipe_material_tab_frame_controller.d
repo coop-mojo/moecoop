@@ -29,14 +29,12 @@ class RecipeMaterialTabFrameController
         frame_.charactersBox.items = characters.keys.sort().array;
         frame_.charactersBox.selectedItemIndex = 0;
 
-        Recipe dummy;
-        dummy.techniques = make!(typeof(dummy.techniques))(null);
-        frame_.recipeDetail = RecipeDetailFrame.create(dummy, wisdom, characters);
+        frame_.recipeDetail = RecipeDetailFrame.create(""d, model, characters);
 
         frame_.hideItemDetail(0);
         frame_.hideItemDetail(1);
 
-        if (migemo)
+        if (model.migemoAvailable)
         {
             frame_.enableMigemoBox;
         }
@@ -51,45 +49,16 @@ class RecipeMaterialTabFrameController
         };
     }
 
-    auto showProductCandidate(dstring queryText)
+    auto showProductCandidate(dstring query)
     {
-        import std.algorithm;
-        import std.range;
-        import std.string;
+        import std.regex;
 
-        auto query = queryText.removechars(r"/[ 　]/");
-        if (query.empty)
+        if (query.matchFirst(r"/^\s*$/"d))
         {
             return;
         }
-        auto queryFun = matchFunFor(query);
-        auto candidates = wisdom.rrecipeList.keys.filter!queryFun.array;
+        auto candidates = model.getItemList(query, cast(Flag!"useMigemo")frame_.useMigemo, Yes.canBeProduced);
 
         frame_.showCandidates(candidates);
-    }
-
-private:
-    auto matchFunFor(dstring query)
-    {
-        import std.string;
-
-        if (frame_.useMigemo)
-        {
-            import std.regex;
-            try{
-                auto q = migemo.query(query).regex;
-                return (dstring s) => !s.removechars(r"/[ 　]/").matchFirst(q).empty;
-            } catch(RegexException e) {
-                // use default matchFun
-            }
-        }
-        else
-        {
-            import std.algorithm;
-            import std.range;
-
-            return (dstring s) => !find(s.removechars(r"/[ 　]/"), boyerMooreFinder(query)).empty;
-        }
-        assert(false);
     }
 }

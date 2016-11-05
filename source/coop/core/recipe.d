@@ -44,7 +44,7 @@ struct Recipe
         return name == other.name;
     }
 
-    size_t toHash() const @safe pure nothrow
+    size_t toHash() const @trusted pure nothrow
     {
         return name.hashOf;
     }

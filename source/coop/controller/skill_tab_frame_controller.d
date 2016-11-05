@@ -30,23 +30,22 @@ class SkillTabFrameController: RecipeTabFrameController
         frame.childById("searchOptions").addChild(revSearch);
     }
 
-protected:
-    import coop.core.wisdom;
-
-    override dstring[][dstring] recipeChunks(Wisdom wisdom)
+    override void showRecipeNames()
     {
-        import std.algorithm;
-        import std.range;
+        import std.regex;
         import std.typecons;
+        import coop.core.wisdom: Category;
 
-        return wisdom.recipeCategories.map!(c => tuple(c, wisdom.recipesIn(Category(c)).keys)).assocArray;
-    }
+        auto query = frame_.queryBox.text == frame_.defaultMessage ? ""d : frame_.queryBox.text;
+        if (frame_.useMetaSearch && query.matchFirst(r"/^\s*$/"d))
+        {
+            return;
+        }
 
-    override dstring[][dstring] recipeChunksFor(Wisdom wisdom, dstring cat)
-    {
-        import std.range;
-        import std.typecons;
-
-        return [tuple(cat, wisdom.recipesIn(Category(cat)).keys)].assocArray;
+        auto recipes = model.getRecipeList(query, Category(frame_.selectedCategory),
+                                           cast(Flag!"useMetaSearch")frame_.useMetaSearch, cast(Flag!"useMigemo")frame_.useMigemo,
+                                           cast(Flag!"useReverseSearch")frame_.useReverseSearch,
+                                           cast(SortOrder)frame_.sortKey);
+        frame_.showRecipeList(recipes);
     }
 }

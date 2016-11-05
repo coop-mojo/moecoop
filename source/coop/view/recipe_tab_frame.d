@@ -367,7 +367,7 @@ private:
         auto characters = controller.characters;
         auto binders = relatedBindersFor(recipe, category);
 
-        auto r = wisdom.recipeFor(recipe);
+        auto r = controller.model.getRecipe(recipe);
 
         ret.checkStateChanged = (bool marked) {
             auto c = characters[charactersBox.selectedItem];
@@ -437,13 +437,13 @@ private:
             scope(exit) highlightDetailRecipe;
 
 
-            auto rDetail = wisdom.recipeFor(recipe);
+            auto rDetail = controller.model.getRecipe(recipe);
             if (rDetail.name.empty)
             {
                 rDetail.name = recipe;
                 rDetail.remarks = "作り方がわかりません（´・ω・｀）";
             }
-            recipeDetail = RecipeDetailFrame.create(rDetail, wisdom, characters);
+            recipeDetail = RecipeDetailFrame.create(recipe, controller.model, characters);
 
             auto itemNames = rDetail.products.keys;
             enforce(itemNames.length <= 2);
@@ -460,19 +460,8 @@ private:
                 import coop.core.item;
                 import coop.view.item_detail_frame;
 
-                Item item;
-                if (auto i = name in wisdom.itemList)
-                {
-                    item = *i;
-                }
-                else
-                {
-                    item.name = name;
-                    item.petFoodInfo = [PetFoodType.UNKNOWN.to!PetFoodType: 0];
-                }
-
                 showItemDetail(idx);
-                setItemDetail(ItemDetailFrame.create(item, idx+1, wisdom, cWisdom), idx);
+                setItemDetail(ItemDetailFrame.create(name, idx+1, controller.model, cWisdom), idx);
             }
         };
 

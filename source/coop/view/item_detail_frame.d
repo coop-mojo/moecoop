@@ -9,6 +9,7 @@ import dlangui;
 
 import coop.core.item;
 import coop.core.wisdom;
+import coop.model;
 
 class ItemDetailFrame: ScrollWidget
 {
@@ -30,8 +31,9 @@ class ItemDetailFrame: ScrollWidget
         backgroundColor = "white";
     }
 
-    static auto create(Item i, int idx, Wisdom wisdom, Wisdom cWisdom)
+    static auto create(dstring name, int idx, WisdomModel model, Wisdom cWisdom)
     {
+        auto i = model.getItem(name);
         auto ret = new typeof(this)("detail"~idx.to!string);
         auto item = Overlaid!Item(i, i.name in cWisdom.itemList);
         ret.item_ = i;
@@ -48,7 +50,7 @@ class ItemDetailFrame: ScrollWidget
             table.addElem("英名", item.ename.empty ? "わからん（´・ω・｀）" : item.ename, item.isOverlaid!"ename");
             table.addElem("重さ", item.weight.isNaN ? "そこそこの重さ" : format("%.2f"d, item.weight), item.isOverlaid!"weight");
 
-            dstring extraRemarks = table.addExtraElem(i, wisdom);
+            dstring extraRemarks = table.addExtraElem(name, model);
 
             table.addElem("NPC売却価格", format("%s g"d, item.price), item.isOverlaid!"price");
             table.addElem("転送可", item.transferable ? "はい" : "いいえ", item.isOverlaid!"transferable");
@@ -77,7 +79,7 @@ class ItemDetailFrame: ScrollWidget
                 table.addElem("info", item.info, item.isOverlaid!"info");
             }
 
-            auto rem = item.name in wisdom.itemList ? item.remarks : "細かいことはわかりません（´・ω・｀）";
+            auto rem = item.name in model.wisdom.itemList ? item.remarks : "細かいことはわかりません（´・ω・｀）";
             if (!rem.empty || !extraRemarks.empty)
             {
                 import std.algorithm;
@@ -109,27 +111,26 @@ auto addElem(dstring delim = ": ")(Widget layout, dstring caption, dstring elem,
     }
 }
 
-auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
+auto addExtraElem(Widget layout, dstring name, WisdomModel model)
 {
-    if (item.type !in wisdom.extraInfoList ||
-        item.name !in wisdom.extraInfoList[item.type])
+    auto ex = model.getExtraInfo(name);
+    if (ex.type == ItemType.UNKNOWN || ex.extra == ExtraInfo.init)
     {
         return ""d;
     }
-    auto ei = wisdom.extraInfoList[item.type][item.name];
 
-    final switch(item.type) with(ItemType)
+    final switch(ex.type) with(ItemType)
     {
     case Food, Drink, Liquor:{
         import std.format;
 
-        auto info = ei.peek!FoodInfo;
+        auto info = ex.extra.peek!FoodInfo;
         layout.addElem("効果", format("%.1f"d, info.effect));
 
         if (auto effectName = info.additionalEffect)
         {
             layout.addElem("付加効果", effectName);
-            if (auto einfo = effectName in wisdom.foodEffectList)
+            if (auto einfo = effectName in model.wisdom.foodEffectList)
             {
                 import std.algorithm;
                 import std.array;
@@ -162,7 +163,7 @@ auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
     case Expendable:{
         import std.range;
 
-        auto info = ei.peek!ExpendableInfo;
+        auto info = ex.extra.peek!ExpendableInfo;
         if (!info.skill.keys.empty)
         {
             import std.algorithm;
@@ -183,7 +184,7 @@ auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
         import std.array;
         import std.format;
 
-        auto info = ei.peek!WeaponInfo;
+        auto info = ex.extra.peek!WeaponInfo;
 
         auto damageStr = Grade.values
                               .filter!(g => info.damage.keys.canFind(g))
@@ -247,7 +248,7 @@ auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
         import std.array;
         import std.format;
 
-        auto info = ei.peek!ArmorInfo;
+        auto info = ex.extra.peek!ArmorInfo;
 
         auto ACStr = Grade.values
                           .filter!(g => info.AC.keys.canFind(g))
@@ -305,7 +306,7 @@ auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
         import std.array;
         import std.format;
 
-        auto info = ei.peek!BulletInfo;
+        auto info = ex.extra.peek!BulletInfo;
 
         layout.addElem("ダメージ", format("%.1f"d, info.damage));
         layout.addElem("有効レンジ", format("%.1f"d, info.range));
@@ -342,7 +343,7 @@ auto addExtraElem(Widget layout, Item item, Wisdom wisdom)
         import std.array;
         import std.format;
 
-        auto info = ei.peek!ShieldInfo;
+        auto info = ex.extra.peek!ShieldInfo;
 
         auto ACStr = Grade.values
                           .filter!(g => info.AC.keys.canFind(g))

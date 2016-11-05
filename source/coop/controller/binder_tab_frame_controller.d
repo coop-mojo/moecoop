@@ -24,26 +24,22 @@ class BinderTabFrameController: RecipeTabFrameController
         frame.childById("sortBox").visibility = Visibility.Gone;
     }
 
-protected:
-    import coop.core.wisdom;
-
-    override dstring[][dstring] recipeChunks(Wisdom wisdom)
+    override void showRecipeNames()
     {
-        import std.algorithm;
-        import std.range;
+        import std.regex;
         import std.typecons;
+        import coop.core.wisdom: Binder;
 
-        return wisdom.binders.map!(b => tuple(b, wisdom.recipesIn(Binder(b)))).assocArray;
+        auto query = frame_.queryBox.text == frame_.defaultMessage ? ""d : frame_.queryBox.text;
+        if (frame_.useMetaSearch && query.matchFirst(r"/^\s*$/"d))
+        {
+            return;
+        }
+
+        auto recipes = model.getRecipeList(query, Binder(frame_.selectedCategory),
+                                           cast(Flag!"useMetaSearch")frame_.useMetaSearch, cast(Flag!"useMigemo")frame_.useMigemo);
+        frame_.showRecipeList(recipes);
     }
-
-    override dstring[][dstring] recipeChunksFor(Wisdom wisdom, dstring cat)
-    {
-        import std.range;
-        import std.typecons;
-
-        return [tuple(cat, wisdom.recipesIn(Binder(cat)))].assocArray;
-    }
-
 private:
     enum MaxNumberOfBinderPages = 128;
 }

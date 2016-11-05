@@ -29,6 +29,7 @@ extern(C) int UIAppMain(string[] args)
     import std.typecons;
 
     import coop.core.character;
+    import coop.model;
     import coop.model.config;
     import coop.core.wisdom;
     import coop.view.main_frame;
@@ -65,7 +66,9 @@ extern(C) int UIAppMain(string[] args)
     auto window = Platform.instance.createWindow(AppName, null, WindowFlag.Resizable,
                                                  config.windowWidth,
                                                  config.windowHeight);
-    window.mainWidget = new MainFrame(wisdom, chars, config, customWisdom);
+
+    auto model = new WisdomModel(wisdom);
+    window.mainWidget = new MainFrame(model, chars, config, customWisdom);
     window.windowIcon = drawableCache.getImage("coop-icon");
     window.show;
     window.onClose = {

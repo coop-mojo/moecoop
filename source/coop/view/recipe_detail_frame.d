@@ -16,6 +16,7 @@ class RecipeDetailFrame: ScrollWidget, MenuItemActionHandler
     import coop.core.character;
     import coop.core.recipe;
     import coop.core.wisdom;
+    import coop.model;
 
     this() { super(); }
 
@@ -68,8 +69,9 @@ class RecipeDetailFrame: ScrollWidget, MenuItemActionHandler
         backgroundColor = "white";
     }
 
-    static auto create(Recipe r, Wisdom wisdom, Character[dstring] chars)
+    static auto create(dstring name, WisdomModel model, Character[dstring] chars)
     {
+        auto r = model.getRecipe(name);
         auto ret = new typeof(this)(r.name.to!string);
         ret.recipe_ = r;
         with(ret)
@@ -118,7 +120,7 @@ class RecipeDetailFrame: ScrollWidget, MenuItemActionHandler
                 r.remarks.empty ? Visibility.Gone : Visibility.Visible;
             childById("remarks").text = r.remarks;
         }
-        ret.binders = wisdom.bindersFor(r.name);
+        ret.binders = model.wisdom.bindersFor(r.name);
         if (!chars.keys.empty)
         {
             import std.algorithm;
@@ -140,55 +142,55 @@ class RecipeDetailFrame: ScrollWidget, MenuItemActionHandler
         return ret;
     }
 
-    @property auto recipe()
-    {
-        return recipe_;
-    }
+    // @property auto recipe()
+    // {
+    //     return recipe_;
+    // }
 
-    @property auto remarks()
-    {
-        return recipe_.remarks;
-    }
+    // @property auto remarks()
+    // {
+    //     return recipe_.remarks;
+    // }
 
     @property auto name()
     {
         return recipe_.name;
     }
 
-    @property auto techniques()
-    {
-        return recipe_.techniques;
-    }
+    // @property auto techniques()
+    // {
+    //     return recipe_.techniques;
+    // }
 
-    @property auto skills()
-    {
-        return recipe_.requiredSkills;
-    }
+    // @property auto skills()
+    // {
+    //     return recipe_.requiredSkills;
+    // }
 
-    @property auto products()
-    {
-        return recipe_.products;
-    }
+    // @property auto products()
+    // {
+    //     return recipe_.products;
+    // }
 
-    @property auto ingredients()
-    {
-        return recipe_.ingredients;
-    }
+    // @property auto ingredients()
+    // {
+    //     return recipe_.ingredients;
+    // }
 
-    @property auto isGambled()
-    {
-        return recipe_.isGambledRoulette;
-    }
+    // @property auto isGambled()
+    // {
+    //     return recipe_.isGambledRoulette;
+    // }
 
-    @property auto isPenalty()
-    {
-        return recipe_.isPenaltyRoulette;
-    }
+    // @property auto isPenalty()
+    // {
+    //     return recipe_.isPenaltyRoulette;
+    // }
 
-    @property auto requiresRecipe()
-    {
-        return recipe_.requiresRecipe;
-    }
+    // @property auto requiresRecipe()
+    // {
+    //     return recipe_.requiresRecipe;
+    // }
 
     @property auto binders()
     {

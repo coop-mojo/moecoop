@@ -7,8 +7,8 @@ module coop.core.wisdom;
 
 import std.typecons;
 
-alias Binder = Typedef!(dstring, "binder");
-alias Category = Typedef!(dstring, "category");
+alias Binder = Typedef!(dstring, dstring.init, "binder");
+alias Category = Typedef!(dstring, dstring.init, "category");
 
 class Wisdom {
     import std.container;

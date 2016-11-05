@@ -196,23 +196,14 @@ class RecipeMaterialTabFrame: TabFrameBase
 
                 w.detailClicked = {
                     import coop.core.item;
+                    import coop.model;
                     import coop.view.item_detail_frame;
 
                     unhighlightDetailItems;
                     scope(exit) highlightDetailItems;
 
-                    Item item;
-                    if (auto i = c in controller.wisdom.itemList)
-                    {
-                        item = *i;
-                    }
-                    else
-                    {
-                        item.name = c;
-                        item.petFoodInfo = [PetFoodType.UNKNOWN.to!PetFoodType: 0];
-                    }
                     showItemDetail(0);
-                    setItemDetail(ItemDetailFrame.create(item, 1, controller.wisdom, controller.cWisdom), 0);
+                    setItemDetail(ItemDetailFrame.create(c, 1, controller.model, controller.cWisdom), 0);
                 };
                 w.checkStateChanged = (bool checked) {
                     if (checked)
@@ -352,13 +343,12 @@ class RecipeMaterialTabFrame: TabFrameBase
 
                 auto w = new LinkWidget(r.to!string, r~": ");
                 auto t = new TextWidget("times", format("%s 回"d, 0));
-                auto detail = controller.wisdom.recipeFor(r);
                 w.click = (Widget _) {
                     import coop.view.recipe_detail_frame;
 
                     unhighlightDetailRecipe;
                     scope(exit) highlightDetailRecipe;
-                    recipeDetail = RecipeDetailFrame.create(detail, controller.wisdom, controller.characters);
+                    recipeDetail = RecipeDetailFrame.create(r, controller.model, controller.characters);
                     return true;
                 };
                 return cast(Widget[])[w, t];
@@ -390,23 +380,14 @@ class RecipeMaterialTabFrame: TabFrameBase
                 auto n = new TextWidget("num", format("%s 個"d, 0));
                 w.click = (Widget _) {
                     import coop.core.item;
+                    import coop.model;
                     import coop.view.item_detail_frame;
 
                     unhighlightDetailItems;
                     scope(exit) highlightDetailItems;
 
-                    Item item;
-                    if (auto i = lo in controller.wisdom.itemList)
-                    {
-                        item = *i;
-                    }
-                    else
-                    {
-                        item.name = lo;
-                        item.petFoodInfo = [PetFoodType.UNKNOWN.to!PetFoodType: 0];
-                    }
                     showItemDetail(0);
-                    setItemDetail(ItemDetailFrame.create(item, 1, controller.wisdom, controller.cWisdom), 0);
+                    setItemDetail(ItemDetailFrame.create(lo, 1, controller.model, controller.cWisdom), 0);
                     return true;
                 };
                 return cast(Widget[])[w, n];
@@ -468,23 +449,14 @@ class RecipeMaterialTabFrame: TabFrameBase
                 };
                 w.detailClicked = {
                     import coop.core.item;
+                    import coop.model;
                     import coop.view.item_detail_frame;
 
                     unhighlightDetailItems;
                     scope(exit) highlightDetailItems;
 
-                    Item item;
-                    if (auto i = lo in controller.wisdom.itemList)
-                    {
-                        item = *i;
-                    }
-                    else
-                    {
-                        item.name = lo;
-                        item.petFoodInfo = [PetFoodType.UNKNOWN.to!PetFoodType: 0];
-                    }
                     showItemDetail(0);
-                    setItemDetail(ItemDetailFrame.create(item, 1, controller.wisdom, controller.cWisdom), 0);
+                    setItemDetail(ItemDetailFrame.create(lo, 1, controller.model, controller.cWisdom), 0);
                 };
                 o.contentChange = (EditableContent content) {
                     import std.regex;
@@ -534,7 +506,7 @@ class RecipeMaterialTabFrame: TabFrameBase
                 {
                     rs.each!(w => w.visibility = Visibility.Visible);
                     rs[1].text = format("%s 回"d, *n);
-                    auto detail = controller.wisdom.recipeFor(r);
+                    auto detail = controller.model.getRecipe(r);
                     auto c = controller.characters[charactersBox.selectedItem];
                     if (!c.hasSkillFor(detail) || (detail.requiresRecipe && !c.hasRecipe(r)))
                     {

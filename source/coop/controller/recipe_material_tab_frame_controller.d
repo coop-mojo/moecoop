@@ -53,7 +53,7 @@ class RecipeMaterialTabFrameController
     {
         import std.regex;
 
-        if (query.matchFirst(r"/^\s*$/"d))
+        if (query.matchFirst(ctRegex!r"^\s*$"d))
         {
             return;
         }

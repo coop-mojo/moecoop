@@ -31,7 +31,7 @@ class BinderTabFrameController: RecipeTabFrameController
         import coop.core.wisdom: Binder;
 
         auto query = frame_.queryBox.text == frame_.defaultMessage ? ""d : frame_.queryBox.text;
-        if (frame_.useMetaSearch && query.matchFirst(r"/^\s*$/"d))
+        if (frame_.useMetaSearch && query.matchFirst(ctRegex!r"^\s*$"d))
         {
             return;
         }

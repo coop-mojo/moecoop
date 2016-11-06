@@ -7,6 +7,11 @@ module coop.core.recipe_graph;
 
 import std.typecons;
 
+/// for elements/0
+alias RecipeInfo = Tuple!(dstring, "name", dstring, "parentGroup");
+alias MaterialInfo = Tuple!(dstring, "name", bool, "isLeaf");
+
+/// for elements/4
 alias MatTuple = Tuple!(int, "num", bool, "isIntermediate");
 
 class RecipeGraph
@@ -26,14 +31,22 @@ class RecipeGraph
 
     auto elements() pure
     {
+        import std.algorithm;
         import std.range;
 
         if (orderedRecipes_.empty)
         {
             visit;
         }
-        alias Ret = Tuple!(dstring[], "recipes", dstring[], "materials");
-        return Ret(orderedRecipes_, orderedMaterials_);
+        RecipeInfo[] rinfo = orderedRecipes_.map!((r) {
+                auto bros = recipes_[r].parents[].map!(p => materials_[p].children).join.map!"a.name".array.sort().uniq.array;
+                assert(bros.length <= 1 || recipes_[r].parents[].walkLength == 1);
+                return RecipeInfo(r, bros.length > 1 ? recipes_[r].parents[].front : "");
+            }).array;
+
+        MaterialInfo[] minfo = orderedMaterials_.map!(m => MaterialInfo(m, materials_[m].isLeaf)).array;
+
+        return tuple!("recipes", "materials")(rinfo, minfo);
     }
 
     /++
@@ -52,7 +65,7 @@ class RecipeGraph
 
         int[dstring] rs, leftover;
         MatTuple[dstring] ms = targets.byKeyValue.map!(kv => tuple(kv.key, MatTuple(kv.value, false))).assocArray;
-        foreach(r; elements.recipes)
+        foreach(r; elements.recipes.map!"a.name")
         {
             auto re = w.recipeFor(r);
             auto tar = setIntersection(recipes_[r].parents[].array.sort(), re.products.keys.sort()).front;

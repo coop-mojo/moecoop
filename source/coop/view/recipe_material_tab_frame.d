@@ -324,7 +324,7 @@ class RecipeMaterialTabFrame: TabFrameBase
             }).filter!(a => a[1] > 0).assocArray;
     }
 
-    auto initRecipeTable(dstring[] recipes)
+    auto initRecipeTable(RecipeInfo[] recipes)
     {
         import std.algorithm;
 
@@ -338,19 +338,40 @@ class RecipeMaterialTabFrame: TabFrameBase
 
         recipes.map!((r) {
                 import std.format;
+                import std.range;
 
                 import coop.view.controls;
 
-                auto w = new LinkWidget(r.to!string, r~": ");
+                auto w = new LinkWidget(r.to!string, r.name~": ");
                 auto t = new TextWidget("times", format("%s 回"d, 0));
                 w.click = (Widget _) {
                     import coop.view.recipe_detail_frame;
 
                     unhighlightDetailRecipe;
                     scope(exit) highlightDetailRecipe;
-                    recipeDetail = RecipeDetailFrame.create(r, controller.model, controller.characters);
+                    recipeDetail = RecipeDetailFrame.create(r.name, controller.model, controller.characters);
                     return true;
                 };
+                if (!r.parentGroup.empty)
+                {
+                    auto bros = recipes.filter!(rs => rs.name != r.name && rs.parentGroup == r.parentGroup);
+                    assert(!bros.empty);
+
+                    auto menu = new MenuItem;
+                    auto idx = 25000; // 番号自体に意味はない
+                    bros.map!((b) {
+                            auto a = new Action(idx++, format("%s を使う"d, b.name));
+                            auto it = new MenuItem(a);
+                            it.menuItemClick = (MenuItem _) {
+                                preference[b.parentGroup] = b.name;
+                                reload;
+                                return false;
+                            };
+                            return it;
+                        }).each!(it => menu.add(it));
+                    w.popupMenu = menu;
+                    w.textFlags = TextFlag.Underline;
+                }
                 return cast(Widget[])[w, t];
             }).each!(c => tbl.addChildren(c));
 
@@ -359,7 +380,7 @@ class RecipeMaterialTabFrame: TabFrameBase
         fr.addChild(scr);
     }
 
-    auto initLeftoverTable(dstring[] leftovers)
+    auto initLeftoverTable(MaterialInfo[] leftovers)
     {
         import std.algorithm;
 
@@ -371,7 +392,7 @@ class RecipeMaterialTabFrame: TabFrameBase
         auto tbl = new TableLayout("leftovers");
         tbl.colCount = 2;
 
-        leftovers.map!((lo) {
+        leftovers.map!"a.name".map!((lo) {
                 import std.format;
 
                 import coop.view.controls;
@@ -399,7 +420,7 @@ class RecipeMaterialTabFrame: TabFrameBase
         fr.addChild(scr);
     }
 
-    auto initMaterialTable(dstring[] materials)
+    auto initMaterialTable(MaterialInfo[] materials)
     {
         import std.algorithm;
 
@@ -416,13 +437,13 @@ class RecipeMaterialTabFrame: TabFrameBase
         auto tbl = new TableLayout("materials");
         tbl.colCount = 3;
 
-        materials.map!((lo) {
+        materials.map!((mat) {
                 import std.format;
 
                 import coop.view.controls;
                 import coop.view.editors;
 
-                auto w = new CheckableEntryWidget(lo.to!string, lo~": ");
+                auto w = new CheckableEntryWidget(mat.name.to!string, mat.name~": ");
                 auto o = new EditIntLine("own");
                 auto t = new TextWidget("times", format("/%s 個"d, 0));
                 o.minWidth = 55;
@@ -456,8 +477,12 @@ class RecipeMaterialTabFrame: TabFrameBase
                     scope(exit) highlightDetailItems;
 
                     showItemDetail(0);
-                    setItemDetail(ItemDetailFrame.create(lo, 1, controller.model, controller.cWisdom), 0);
+                    setItemDetail(ItemDetailFrame.create(mat.name, 1, controller.model, controller.cWisdom), 0);
                 };
+                if (!mat.isLeaf)
+                {
+                    w.textFlags = TextFlag.Underline;
+                }
                 o.contentChange = (EditableContent content) {
                     import std.regex;
 
@@ -498,68 +523,37 @@ class RecipeMaterialTabFrame: TabFrameBase
         scope(exit) highlightDetailRecipe;
         auto tbl = enforce(childById!TableLayout("recipes"));
 
-        tbl.rows.each!((rs) {
-                import std.string;
+        foreach(rs; tbl.rows)
+        {
+            import std.string;
 
-                auto r = rs[0].text.chomp(": ");
-                if (auto n  = r in recipes)
+            auto r = rs[0].text.chomp(": ");
+            if (auto n  = r in recipes)
+            {
+                import std.array;
+
+                rs.each!(w => w.visibility = Visibility.Visible);
+                rs[1].text = format("%s 回"d, *n);
+                auto detail = controller.model.getRecipe(r);
+                auto c = controller.characters[charactersBox.selectedItem];
+                if (!c.hasSkillFor(detail) || (detail.requiresRecipe && !c.hasRecipe(r)))
                 {
-                    import std.array;
-
-                    rs.each!(w => w.visibility = Visibility.Visible);
-                    rs[1].text = format("%s 回"d, *n);
-                    auto detail = controller.model.getRecipe(r);
-                    auto c = controller.characters[charactersBox.selectedItem];
-                    if (!c.hasSkillFor(detail) || (detail.requiresRecipe && !c.hasRecipe(r)))
-                    {
-                        rs[0].textColor = "gray";
-                    }
-                    else if (detail.ingredients.keys.all!(ing => childById!TableLayout("materials").row(ing.to!string)[0].checked))
-                    {
-                        rs[0].textColor = "red";
-                    }
-                    else
-                    {
-                        rs[0].textColor = "black";
-                    }
-
-                    auto rNode = fullGraph.recipeNodes[r];
-
-                    auto bros = rNode.parents[]
-                                     .map!(p => fullGraph.materialNodes[p].children)
-                                     .join
-                                     .map!"a.name"
-                                     .array
-                                     .sort();
-                    if (bros.length > 1)
-                    {
-                        import std.typecons;
-
-                        import coop.view.controls;
-
-                        auto menu = new MenuItem;
-                        auto idx = 25000; // 番号自体に意味はない
-                        bros.filter!(b => b != r)
-                            .map!((b) {
-                                    auto a = new Action(idx++, format("%s を使う"d, b));
-                                    auto it = new MenuItem(a);
-                                    it.menuItemClick = (MenuItem _) {
-                                        preference[rNode.parents[].front] = b;
-                                        reload;
-                                        return false;
-                                    };
-                                    return it;
-                                }).each!(it => menu.add(it));
-                        auto lw = (cast(LinkWidget)rs[0]);
-                        lw.popupMenu = menu;
-                        lw.textFlags = TextFlag.Underline;
-                    }
+                    rs[0].textColor = "gray";
+                }
+                else if (detail.ingredients.keys.all!(ing => childById!TableLayout("materials").row(ing.to!string)[0].checked))
+                {
+                    rs[0].textColor = "red";
                 }
                 else
                 {
-                    rs.each!(w => w.visibility = Visibility.Gone);
+                    rs[0].textColor = "black";
                 }
-            });
+            }
+            else
+            {
+                rs.each!(w => w.visibility = Visibility.Gone);
+            }
+        }
     }
 
     auto updateLeftoverTable(int[dstring] leftovers)
@@ -573,19 +567,20 @@ class RecipeMaterialTabFrame: TabFrameBase
         unhighlightDetailItems;
         scope(exit) highlightDetailItems;
         auto tbl = enforce(childById!TableLayout("leftovers"));
-        tbl.rows.each!((rs) {
-                import std.string;
+        foreach(rs; tbl.rows)
+        {
+            import std.string;
 
-                if (auto n = rs[0].text.chomp(": ") in leftovers)
-                {
-                    rs.each!(w => w.visibility = Visibility.Visible);
-                    rs[1].text = format("%s 個"d, *n);
-                }
-                else
-                {
-                    rs.each!(w => w.visibility = Visibility.Gone);
-                }
-            });
+            if (auto n = rs[0].text.chomp(": ") in leftovers)
+            {
+                rs.each!(w => w.visibility = Visibility.Visible);
+                rs[1].text = format("%s 個"d, *n);
+            }
+            else
+            {
+                rs.each!(w => w.visibility = Visibility.Gone);
+            }
+        }
         if (leftovers.keys.empty)
         {
             tbl.childById("なし").visibility = Visibility.Visible;
@@ -611,6 +606,8 @@ class RecipeMaterialTabFrame: TabFrameBase
                 auto m = rs[0].text.chomp(": ");
                 if (auto n = m in materials)
                 {
+                    import std.range;
+
                     rs.each!(w => w.visibility = Visibility.Visible);
                     rs[2].text = format("/%s 個"d, (*n).num);
                     rs[0].textColor = (*n).isIntermediate ? "blue" : "black";
@@ -623,20 +620,20 @@ class RecipeMaterialTabFrame: TabFrameBase
                         rs[0].checked = false;
                     }
 
-                    auto mNode = fullGraph.materialNodes[m];
-                    if (!mNode.isLeaf)
+                    auto mat = fullMaterialInfo.find!(mi => mi.name == m).front;
+                    if (!mat.isLeaf)
                     {
                         import std.typecons;
 
                         import coop.view.controls;
 
                         auto menu = new MenuItem;
-                        if (mNode.name in leafMaterials)
+                        if (mat.name in leafMaterials)
                         {
                             auto a = new Action(25000, "材料から用意する"d);
                             auto it = new MenuItem(a);
                             it.menuItemClick = (MenuItem _) {
-                                leafMaterials.removeKey(mNode.name);
+                                leafMaterials.removeKey(mat.name);
                                 reload;
                                 return false;
                             };
@@ -647,7 +644,7 @@ class RecipeMaterialTabFrame: TabFrameBase
                             auto a = new Action(25001, "直接用意する"d);
                             auto it = new MenuItem(a);
                             it.menuItemClick = (MenuItem _) {
-                                leafMaterials.insert(mNode.name);
+                                leafMaterials.insert(mat.name);
                                 reload;
                                 return false;
                             };
@@ -655,7 +652,6 @@ class RecipeMaterialTabFrame: TabFrameBase
                         }
                         auto cew = (cast(CheckableEntryWidget)rs[0]);
                         cew.popupMenu = menu;
-                        cew.textFlags = TextFlag.Underline;
                     }
                 }
                 else
@@ -667,9 +663,11 @@ class RecipeMaterialTabFrame: TabFrameBase
 
     auto initializeTables(dstring[] items)
     {
-        fullGraph = new RecipeGraph(items, controller.wisdom, null);
+        auto fullGraph = new RecipeGraph(items, controller.wisdom, null);
 
         auto elems = fullGraph.elements;
+        fullMaterialInfo = elems.materials;
+
         initRecipeTable(elems.recipes);
         initLeftoverTable(elems.materials);
         initMaterialTable(elems.materials);
@@ -680,10 +678,7 @@ class RecipeMaterialTabFrame: TabFrameBase
         import std.algorithm;
         import std.array;
 
-        if (subGraph is null || !fullGraph.targets.equal(subGraph.targets))
-        {
-            subGraph = new RecipeGraph(targets.keys, controller.wisdom, preference);
-        }
+        auto subGraph = new RecipeGraph(targets.keys, controller.wisdom, preference);
         auto elems = subGraph.elements(targets, owned, controller.wisdom, leafMaterials);
         auto mats = setDifference!"a.key < b.key"(elems.materials.byKeyValue.array.schwartzSort!"a.key",
                                                   targets.byKeyValue.array.schwartzSort!"a.key").map!"tuple(a.key, a.value)".assocArray;
@@ -701,7 +696,6 @@ class RecipeMaterialTabFrame: TabFrameBase
         import std.array;
         import std.typecons;
 
-        subGraph = null;
         updateTables(toBeMade.byKeyValue.filter!(kv => kv.value > 0).map!(kv => tuple(kv.key, kv.value)).assocArray, ownedMaterials);
      }
 
@@ -767,8 +761,7 @@ class RecipeMaterialTabFrame: TabFrameBase
     EventHandler!() migemoOptionChanged;
     EventHandler!() queryChanged;
     EventHandler!() characterChanged;
-    RecipeGraph fullGraph;
-    RecipeGraph subGraph;
+    MaterialInfo[] fullMaterialInfo;
     dstring[dstring] preference;
     RedBlackTree!dstring leafMaterials;
     ulong timerID;

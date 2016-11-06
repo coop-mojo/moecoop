@@ -32,12 +32,14 @@ class WisdomModel
         return wisdom.recipeCategories;
     }
 
+    /// レシピ情報を返す
     auto getRecipe(Str)(Str name) if (isSomeString!Str)
     {
         import std.conv;
         return wisdom.recipeFor(name.to!dstring);
     }
 
+    /// アイテム情報を返す
     auto getItem(Str)(Str name) if (isSomeString!Str)
     {
         import std.conv;
@@ -56,12 +58,14 @@ class WisdomModel
         assert(false);
     }
 
+    /// レシピが収録されているバインダーを返す
     auto getBindersFor(Str)(Str name) if (isSomeString!Str)
     {
         import std.conv;
         return wisdom.bindersFor(name.to!dstring);
     }
 
+    /// アイテムの固有情報を返す
     auto getExtraInfo(Str)(Str name) if (isSomeString!Str)
     {
         import std.conv;
@@ -92,6 +96,7 @@ class WisdomModel
         assert(false);
     }
 
+    /// 飲食物のバフ効果を返す
     auto getFoodEffect(Str)(Str name) if (isSomeString!Str)
     {
         if (auto einfo = name.to!dstring in wisdom.foodEffectList)
@@ -105,6 +110,7 @@ class WisdomModel
         assert(false);
     }
 
+    /// binder に収録されているレシピ一覧を返す
     auto getRecipeList(Str)(Str query, Binder binder,
                             Flag!"useMetaSearch" useMetaSearch, Flag!"useMigemo" useMigemo)
         if (isSomeString!Str)
@@ -124,6 +130,7 @@ class WisdomModel
             }).joiner;
     }
 
+    /// スキルカテゴリ category に分類されているレシピ一覧を返す
     auto getRecipeList(Str)(Str query, Category category,
                             Flag!"useMetaSearch" useMetaSearch, Flag!"useMigemo" useMigemo, Flag!"useReverseSearch" useReverseSearch,
                             SortOrder order)
@@ -175,6 +182,7 @@ class WisdomModel
             }).joiner;
     }
 
+    /// query にヒットするアイテム一覧を返す
     auto getItemList(Str)(Str query, Flag!"useMigemo" useMigemo, Flag!"canBeProduced" canBeProduced)
         if (isSomeString!Str)
     {
@@ -188,12 +196,14 @@ class WisdomModel
         return items.filter!queryFun.array;
     }
 
+    /// 
     @property auto getDefaultPreference() const @safe pure nothrow
     {
         import coop.core.recipe_graph;
         return RecipeGraph.preference;
     }
 
+    /// 
     auto getMenuRecipeResult(Str)(Str[] targets)
         if (isSomeString!Str)
     {
@@ -202,6 +212,7 @@ class WisdomModel
         return graph.elements;
     }
 
+    /// 
     auto getMenuRecipeResult(Str)(int[Str] targets, int[Str] owned, Str[Str] preference, Str[] terminals)
         if (isSomeString!Str)
     {

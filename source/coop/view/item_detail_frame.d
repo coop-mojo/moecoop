@@ -130,7 +130,7 @@ auto addExtraElem(Widget layout, dstring name, WisdomModel model)
         if (auto effectName = info.additionalEffect)
         {
             layout.addElem("付加効果", effectName);
-            if (auto einfo = effectName in model.wisdom.foodEffectList)
+            if (auto einfo = model.getFoodEffect(effectName))
             {
                 import std.algorithm;
                 import std.array;

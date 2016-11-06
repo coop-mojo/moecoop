@@ -99,12 +99,14 @@ class WisdomModel
     /// 飲食物のバフ効果を返す
     auto getFoodEffect(Str)(Str name) if (isSomeString!Str)
     {
+        import std.conv;
         if (auto einfo = name.to!dstring in wisdom.foodEffectList)
         {
             return *einfo;
         }
         else
         {
+            import coop.core.item;
             return AdditionalEffect.init;
         }
         assert(false);

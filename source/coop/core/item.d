@@ -319,6 +319,12 @@ struct AdditionalEffect
     dstring otherEffects;
     uint duration;
     dstring remarks;
+
+    auto opCast(T: bool)()
+    {
+        import std.range;
+        return !name.empty;
+    }
 }
 
 auto readFoodEffects(string fname)

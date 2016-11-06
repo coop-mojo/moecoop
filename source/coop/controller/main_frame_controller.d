@@ -53,14 +53,6 @@ public:
         return frame_.root.controller.characters;
     }
 
-    @property auto wisdom()
-    out(ret)
-    {
-        assert(ret);
-    } body {
-        return frame_.root.controller.model.wisdom;
-    }
-
     @property auto model()
     out(ret)
     {

@@ -362,7 +362,6 @@ private:
         import coop.view.controls;
 
         auto ret = new CheckableEntryWidget(recipe.to!string, recipe);
-        auto wisdom = controller.wisdom;
         auto cWisdom = controller.cWisdom;
         auto characters = controller.characters;
         auto binders = relatedBindersFor(recipe, category);

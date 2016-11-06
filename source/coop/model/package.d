@@ -213,7 +213,7 @@ class WisdomModel
     }
 
     /// 
-    auto getMenuRecipeResult(Str)(int[Str] targets, int[Str] owned, Str[Str] preference, Str[] terminals)
+    auto getMenuRecipeResult(Str)(int[Str] targets, int[Str] owned, Str[Str] preference, RedBlackTree!Str terminals)
         if (isSomeString!Str)
     {
         import coop.core.recipe_graph;
@@ -222,6 +222,7 @@ class WisdomModel
     }
 
 private:
+    import std.container;
     import std.traits;
     import std.typecons;
     import coop.core.wisdom;

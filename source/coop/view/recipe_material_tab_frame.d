@@ -83,8 +83,6 @@ class RecipeMaterialTabFrame: TabFrameBase
         };
         childById("itemQuery").text = defaultMessage;
         childById("itemQuery").textColor = "gray";
-
-        preference = RecipeGraph.preference;
     }
 
     override @property EditLine queryBox()
@@ -663,9 +661,7 @@ class RecipeMaterialTabFrame: TabFrameBase
 
     auto initializeTables(dstring[] items)
     {
-        auto fullGraph = new RecipeGraph(items, controller.wisdom, null);
-
-        auto elems = fullGraph.elements;
+        auto elems = controller.model.getMenuRecipeResult(items);
         fullMaterialInfo = elems.materials;
 
         initRecipeTable(elems.recipes);
@@ -678,8 +674,11 @@ class RecipeMaterialTabFrame: TabFrameBase
         import std.algorithm;
         import std.array;
 
-        auto subGraph = new RecipeGraph(targets.keys, controller.wisdom, preference);
-        auto elems = subGraph.elements(targets, owned, controller.wisdom, leafMaterials);
+        if (preference.keys.empty)
+        {
+            preference = controller.model.getDefaultPreference;
+        }
+        auto elems = controller.model.getMenuRecipeResult(targets, owned, preference, leafMaterials);
         auto mats = setDifference!"a.key < b.key"(elems.materials.byKeyValue.array.schwartzSort!"a.key",
                                                   targets.byKeyValue.array.schwartzSort!"a.key").map!"tuple(a.key, a.value)".assocArray;
         updateMaterialTable(mats); // 最初にすること！

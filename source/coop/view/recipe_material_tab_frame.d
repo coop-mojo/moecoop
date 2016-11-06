@@ -504,6 +504,8 @@ class RecipeMaterialTabFrame: TabFrameBase
                 auto r = rs[0].text.chomp(": ");
                 if (auto n  = r in recipes)
                 {
+                    import std.array;
+
                     rs.each!(w => w.visibility = Visibility.Visible);
                     rs[1].text = format("%s 回"d, *n);
                     auto detail = controller.model.getRecipe(r);
@@ -522,48 +524,42 @@ class RecipeMaterialTabFrame: TabFrameBase
                     }
 
                     auto rNode = fullGraph.recipeNodes[r];
-                    if (!rNode.parents.empty)
+
+                    auto bros = rNode.parents[]
+                                     .map!(p => fullGraph.materialNodes[p].children)
+                                     .join
+                                     .map!"a.name"
+                                     .array
+                                     .sort();
+                    if (bros.length > 1)
                     {
-                        import std.array;
+                        import std.typecons;
 
-                        auto bros = rNode.parents[]
-                                         .map!(p => fullGraph.materialNodes[p].children)
-                                         .join
-                                         .map!"a.name"
-                                         .array
-                                         .sort()
-                                         .uniq
-                                         .array;
-                        if (bros.length > 1)
-                        {
-                            import std.typecons;
+                        import coop.view.controls;
 
-                            import coop.view.controls;
-
-                            auto menu = new MenuItem;
-                            auto idx = 25000; // 番号自体に意味はない
-                            bros.filter!(b => b != r)
-                                .map!((b) {
-                                        auto a = new Action(idx++, format("%s を使う"d, b));
-                                        auto it = new MenuItem(a);
-                                        it.menuItemClick = (MenuItem _) {
-                                            preference[rNode.parents[].front] = b;
-                                            reload;
-                                            return false;
-                                        };
-                                        return it;
-                                    }).each!(it => menu.add(it));
-                            auto lw = (cast(LinkWidget)rs[0]);
-                            lw.popupMenu = menu;
-                            lw.textFlags = TextFlag.Underline;
-                        }
+                        auto menu = new MenuItem;
+                        auto idx = 25000; // 番号自体に意味はない
+                        bros.filter!(b => b != r)
+                            .map!((b) {
+                                    auto a = new Action(idx++, format("%s を使う"d, b));
+                                    auto it = new MenuItem(a);
+                                    it.menuItemClick = (MenuItem _) {
+                                        preference[rNode.parents[].front] = b;
+                                        reload;
+                                        return false;
+                                    };
+                                    return it;
+                                }).each!(it => menu.add(it));
+                        auto lw = (cast(LinkWidget)rs[0]);
+                        lw.popupMenu = menu;
+                        lw.textFlags = TextFlag.Underline;
                     }
                 }
                 else
                 {
                     rs.each!(w => w.visibility = Visibility.Gone);
                 }
-        });
+            });
     }
 
     auto updateLeftoverTable(int[dstring] leftovers)

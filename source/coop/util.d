@@ -196,7 +196,7 @@ struct ExtendedEnum(KVs...)
 private:
     // _aaRange cannot be interpreted at compile time
     static const BiMap!(string, int) bimap;
-    static this()
+    shared static this()
     {
         bimap = zip(values, svalues).assocArray;
     }

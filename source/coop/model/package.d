@@ -11,6 +11,8 @@ enum SortOrder {
     ByBinderOrder = "バインダー順",
 }
 
+public import coop.core.wisdom: Binder, Category;
+
 class WisdomModel
 {
     /// コンストラクタ
@@ -125,6 +127,7 @@ class WisdomModel
     {
         import std.algorithm;
         import std.array;
+        import std.conv;
         import std.typecons;
 
         alias RecipePair = Tuple!(dstring, "category", dstring[], "recipes");
@@ -132,7 +135,7 @@ class WisdomModel
         auto allRecipes = useMetaSearch ?
                           wisdom.binders.map!(b => tuple(b, wisdom.recipesIn(Binder(b)))).assocArray :
                           [tuple(cast(dstring)binder, wisdom.recipesIn(binder))].assocArray;
-        auto queryResult = getQueryResultBase(query, allRecipes, useMetaSearch, useMigemo);
+        auto queryResult = getQueryResultBase(query.to!dstring, allRecipes, useMetaSearch, useMigemo);
         return queryResult.byKeyValue.map!((kv) {
                 return [RecipePair(kv.key, kv.value.array)];
             }).joiner;
@@ -146,6 +149,7 @@ class WisdomModel
     {
         import std.algorithm;
         import std.array;
+        import std.conv;
         import std.typecons;
 
         alias RecipePair = Tuple!(dstring, "category", dstring[], "recipes");
@@ -153,7 +157,7 @@ class WisdomModel
         auto allRecipes = useMetaSearch ?
                           wisdom.recipeCategories.map!(c => tuple(c, wisdom.recipesIn(Category(c)).keys)).assocArray :
                           [tuple(cast(dstring)category, wisdom.recipesIn(category).keys)].assocArray;
-        auto queryResult = getQueryResultBase(query, allRecipes, useMetaSearch, useMigemo, useReverseSearch);
+        auto queryResult = getQueryResultBase(query.to!dstring, allRecipes, useMetaSearch, useMigemo, useReverseSearch);
         return queryResult.byKeyValue.map!((kv) {
                 import std.range;
                 auto category = kv.key;

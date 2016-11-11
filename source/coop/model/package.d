@@ -5,6 +5,12 @@
  */
 module coop.model;
 
+enum SortOrder {
+    BySkill       = "スキル値順"d,
+    ByName        = "名前順",
+    ByBinderOrder = "バインダー順",
+}
+
 class WisdomModel
 {
     /// コンストラクタ
@@ -229,8 +235,6 @@ private:
     import std.typecons;
     import coop.core.wisdom;
     import coop.migemo;
-    import coop.controller.recipe_tab_frame_controller: SortOrder;
-
 
     auto getQueryResultBase(dstring query, dstring[][dstring] allRecipes,
                             Flag!"useMetaSearch" useMetaSearch, Flag!"useMigemo" useMigemo,

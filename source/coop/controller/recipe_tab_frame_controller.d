@@ -7,12 +7,6 @@ module coop.controller.recipe_tab_frame_controller;
 
 import std.typecons;
 
-enum SortOrder {
-    BySkill       = "スキル値順"d,
-    ByName        = "名前順",
-    ByBinderOrder = "バインダー順",
-}
-
 alias RecipePair = Tuple!(dstring, "category", dstring[], "recipes");
 
 abstract class RecipeTabFrameController

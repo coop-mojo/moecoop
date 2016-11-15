@@ -48,6 +48,8 @@ class RecipeTabFrame: TabFrameBase
         {
             import std.traits;
 
+            import coop.model;
+
             items = [EnumMembers!SortOrder];
             selectedItemIndex = 0;
             itemClick = (Widget src, int idx) {
@@ -207,6 +209,8 @@ class RecipeTabFrame: TabFrameBase
         import std.algorithm;
 
         return pairs.map!((pair) {
+                import coop.model;
+
                 auto category = pair.category;
                 auto recipes = pair.recipes;
 

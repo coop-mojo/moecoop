@@ -23,6 +23,8 @@ class SkillTabFrameController: RecipeTabFrameController
         frame.tableColumnLength = (nRecipes, nColumns) => (nRecipes.to!real/nColumns).ceil.to!int;
         with(frame.childById!ComboBox("sortBy"))
         {
+            import coop.model;
+
             items = [EnumMembers!SortOrder][0..$-1];
             selectedItemIndex = 0;
         }
@@ -34,7 +36,8 @@ class SkillTabFrameController: RecipeTabFrameController
     {
         import std.regex;
         import std.typecons;
-        import coop.core.wisdom: Category;
+
+        import coop.model;
 
         auto query = frame_.queryBox.text == frame_.defaultMessage ? ""d : frame_.queryBox.text;
         if (frame_.useMetaSearch && query.matchFirst(ctRegex!r"^\s*$"d))

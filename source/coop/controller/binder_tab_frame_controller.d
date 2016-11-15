@@ -16,6 +16,8 @@ class BinderTabFrameController: RecipeTabFrameController
         import dlangui;
         import std.traits;
 
+        import coop.model;
+
         super(frame, categories);
         frame.relatedBindersFor = (recipe, binder) => [binder];
         frame.tableColumnLength = (_, nColumns) => MaxNumberOfBinderPages/nColumns;

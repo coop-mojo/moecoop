@@ -129,10 +129,8 @@ class ItemEditDialog: Dialog
                               key != PetFoodType.NoEatable &&
                               item.isOverlaid!"petFoodInfo";
             petComboBox.enabled = item.isOverlaid!"petFoodInfo";
-            if (key != PetFoodType.UNKNOWN || key != PetFoodType.NoEatable)
-            {
-                textBox.text = item.petFoodInfo[key].to!dstring;
-            }
+            textBox.text = (key == PetFoodType.UNKNOWN || key == PetFoodType.NoEatable) ?
+                           ""d : item.petFoodInfo[key].to!dstring;
             addChild(petComboBox);
             addChild(textBox);
         }

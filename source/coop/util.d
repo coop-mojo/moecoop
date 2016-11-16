@@ -237,7 +237,7 @@ version(unittest)
 }
 
 /**
- * JSONValue から他の方への変換を行う。
+ * JSONValue から他の型への変換を行う。
  * Params: T = 変換後の型
  *         json = 変換を行う JSONValue
  */

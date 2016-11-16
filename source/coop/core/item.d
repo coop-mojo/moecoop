@@ -889,7 +889,7 @@ struct Overlaid(T)
         return overlaid !is null && !isValidValue(mixin("original."~field));
     }
 private:
-    static auto isValidValue(T)(T val) pure nothrow
+    static auto isValidValue(T)(const T val) pure nothrow
     {
         import std.range: empty;
         import std.math: isNaN;
@@ -903,10 +903,8 @@ private:
             return val > 0;
         else static if (is(T == bool))
             return val;
-        else static if (is(T == real[PetFoodType]))
-        {
+        else static if (is(T == const(real)[PetFoodType]))
             return val.keys[0] != PetFoodType.UNKNOWN;
-        }
         else
             return val != T.init;
     }
@@ -915,7 +913,7 @@ private:
     T* overlaid;
 }
 
-@safe nothrow unittest
+nothrow unittest
 {
     import std.traits: FieldNameTuple;
 
@@ -940,10 +938,13 @@ private:
     assert(overlaid.name == "テスト");
 }
 
-pure nothrow unittest
+nothrow unittest
 {
+    import std.conv;
+
     Item orig;
     orig.name = "テスト";
+    orig.petFoodInfo[PetFoodType.UNKNOWN.to!PetFoodType] = 0;
 
     Item item;
     item.name = "テスト";
@@ -962,4 +963,7 @@ pure nothrow unittest
 
     assert(overlaid.isOverlaid!"price");
     assert(overlaid.price == 0);
+
+    assert(overlaid.isOverlaid!"petFoodInfo");
+    assert(overlaid.petFoodInfo == typeof(overlaid.petFoodInfo).init);
 }

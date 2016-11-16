@@ -125,8 +125,9 @@ class ItemEditDialog: Dialog
             };
 
             auto key = item.petFoodInfo.keys[0];
-            textBox.enabled = item.isOverlaid!"petFoodInfo" || key != PetFoodType.UNKNOWN ||
-                              key != PetFoodType.NoEatable;
+            textBox.enabled = key != PetFoodType.UNKNOWN &&
+                              key != PetFoodType.NoEatable &&
+                              item.isOverlaid!"petFoodInfo";
             petComboBox.enabled = item.isOverlaid!"petFoodInfo";
             if (key != PetFoodType.UNKNOWN || key != PetFoodType.NoEatable)
             {

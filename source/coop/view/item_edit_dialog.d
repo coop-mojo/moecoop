@@ -81,6 +81,8 @@ class ItemEditDialog: Dialog
         auto pet = new HorizontalLayout;
         with(pet)
         {
+            import std.format;
+
             import coop.view.editors;
             import coop.util;
 
@@ -130,7 +132,7 @@ class ItemEditDialog: Dialog
                               item.isOverlaid!"petFoodInfo";
             petComboBox.enabled = item.isOverlaid!"petFoodInfo";
             textBox.text = (key == PetFoodType.UNKNOWN || key == PetFoodType.NoEatable) ?
-                           ""d : item.petFoodInfo[key].to!dstring;
+                           ""d : format("%.1f"d, item.petFoodInfo[key]);
             addChild(petComboBox);
             addChild(textBox);
         }

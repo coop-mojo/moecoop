@@ -19,8 +19,11 @@ class Wisdom {
     /// バインダーごとのレシピ名一覧
     dstring[][dstring] binderList;
 
-    /// カテゴリごとのレシピ一覧
-    Recipe[dstring][dstring] recipeList;
+    /// スキルカテゴリごとのレシピ名一覧
+    RedBlackTree!dstring[dstring] skillList;
+
+    /// レシピ一覧
+    Recipe[dstring] recipeList;
 
     /// 素材を作成するレシピ名一覧
     RedBlackTree!dstring[dstring] rrecipeList;
@@ -46,8 +49,11 @@ class Wisdom {
         import std.array;
 
         binderList = readBinderList(baseDir_);
-        recipeList = readRecipeList(baseDir_);
-        rrecipeList = genRRecipeList(recipeList.values.map!(a => a.values).join);
+        auto tmp = readRecipeList(baseDir_);
+        recipeList = tmp.recipes;
+        skillList = tmp.skillList;
+
+        rrecipeList = genRRecipeList(recipeList.values);
         foodEffectList = readFoodEffectList(baseDir_);
 
         with(ItemType)
@@ -70,14 +76,14 @@ class Wisdom {
         import std.algorithm;
         import std.array;
 
-        return recipeList.keys.sort().array;
+        return skillList.keys.sort().array;
     }
 
     auto recipesIn(Category name) @safe pure nothrow
     in {
-        assert(name in recipeList);
+        assert(name in skillList);
     } body {
-        return recipeList[cast(dstring)name];
+        return skillList[cast(dstring)name];
     }
 
     @property auto binders() const pure nothrow
@@ -100,17 +106,16 @@ class Wisdom {
         import std.algorithm;
         import std.range;
 
-        auto ret = recipeCategories.find!(c => recipeName in recipesIn(Category(c)));
-        if (ret.empty)
+        if (auto ret = recipeName in recipeList)
+        {
+            return *ret;
+        }
+        else
         {
             import std.container.util;
             Recipe dummy;
             dummy.techniques = make!(typeof(dummy.techniques))(null);
             return dummy;
-        }
-        else
-        {
-            return recipesIn(Category(ret.front))[recipeName];
         }
     }
 
@@ -173,20 +178,33 @@ private:
         import std.exception;
         import std.file;
         import std.path;
+        import std.range;
 
         import coop.util;
 
         enforce(basedir.exists);
         enforce(basedir.isDir);
 
+        alias RetType = Tuple!(typeof(skillList), "skillList",
+                               typeof(recipeList), "recipes");
         auto dir = buildPath(basedir, "レシピ");
         if (!dir.exists)
         {
-            return typeof(recipeList).init;
+            return RetType.init;
         }
-        return dirEntries(dir, "*.json", SpanMode.breadth)
-            .map!readRecipes
-            .checkedAssocArray;
+
+        auto lst = dirEntries(dir, "*.json", SpanMode.breadth)
+                   .map!readRecipes
+                   .checkedAssocArray;
+        auto slist = lst.byKeyValue
+                        .map!(kv => tuple(kv.key,
+                                          make!(RedBlackTree!dstring)(kv.value.keys)))
+                        .assocArray;
+        auto rlist = lst.values
+                        .map!"a.byPair"
+                        .joiner
+                        .assocArray;
+        return RetType(slist, rlist);
     }
 
     auto genRRecipeList(Recipe[] recipes) const pure

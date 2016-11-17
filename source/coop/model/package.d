@@ -133,7 +133,7 @@ class WisdomModel
         alias RecipePair = Tuple!(dstring, "category", dstring[], "recipes");
 
         auto allRecipes = useMetaSearch ?
-                          wisdom.binders.map!(b => tuple(b, wisdom.recipesIn(Binder(b)))).assocArray :
+                          wisdom.binderList :
                           [tuple(cast(dstring)binder, wisdom.recipesIn(binder))].assocArray;
         auto queryResult = getQueryResultBase(query.to!dstring, allRecipes, useMetaSearch, useMigemo);
         return queryResult.byKeyValue.map!((kv) {
@@ -155,8 +155,8 @@ class WisdomModel
         alias RecipePair = Tuple!(dstring, "category", dstring[], "recipes");
 
         auto allRecipes = useMetaSearch ?
-                          wisdom.recipeCategories.map!(c => tuple(c, wisdom.recipesIn(Category(c)).keys)).assocArray :
-                          [tuple(cast(dstring)category, wisdom.recipesIn(category).keys)].assocArray;
+                          wisdom.skillList.byKeyValue.map!(kv => tuple(kv.key, kv.value.array)).assocArray :
+                          [tuple(cast(dstring)category, wisdom.recipesIn(category).array)].assocArray;
         auto queryResult = getQueryResultBase(query.to!dstring, allRecipes, useMetaSearch, useMigemo, useReverseSearch);
         return queryResult.byKeyValue.map!((kv) {
                 import std.range;

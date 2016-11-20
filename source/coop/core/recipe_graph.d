@@ -153,18 +153,6 @@ class RecipeGraph
         return roots.map!"a.name".array;
     }
 
-    // override string toString()
-    // {
-    //     auto rs = new RedBlackTree!string;
-    //     auto ms = new RedBlackTree!string;
-    //     return root.toGraphString(ms, rs);
-    // }
-
-    @property static auto preference() @safe pure nothrow
-    {
-        return defaultPreference;
-    }
-
     // material -> recipe
     enum defaultPreference = [
         "魚の餌"d: "魚の餌(ヘビの肉)"d,
@@ -359,22 +347,6 @@ class RecipeContainer
         return name.to!string;
     }
 
-    string toGraphString(ref RedBlackTree!string ms, ref RedBlackTree!string rs, int lv = 0) const pure
-    {
-        import std.algorithm;
-        import std.conv;
-        import std.format;
-        import std.range;
-
-        if (name.to!string in rs)
-        {
-            return format("%sR: %s (already occured)", ' '.repeat.take(lv*2), name);
-        }
-        rs.insert(name.to!string);
-        auto nextLv = lv+1;
-        return format("%sR: %s\n%s", ' '.repeat.take(lv*2), name, children.map!(c => c.toGraphString(ms, rs, nextLv)).join("\n"));
-    }
-
     dstring name;
     RedBlackTree!dstring parents;
     MaterialContainer[] children;
@@ -400,26 +372,6 @@ class MaterialContainer
         import std.conv;
 
         return name.to!string;
-    }
-
-    string toGraphString(ref RedBlackTree!string ms, ref RedBlackTree!string rs, int lv = 0) const pure
-    {
-        import std.algorithm;
-        import std.conv;
-        import std.format;
-        import std.range;
-
-        if (!isProduct)
-        {
-            return format("%sM: %s (Leaf)", ' '.repeat.take(lv*2), name);
-        }
-        else if (name.to!string in ms)
-        {
-            return format("%sM: %s (already occured)", ' '.repeat.take(lv*2), name);
-        }
-        ms.insert(name.to!string);
-        auto nextLv = lv+1;
-        return format("%sM: %s\n%s", ' '.repeat.take(lv*2), name, children.map!(c => c.toGraphString(ms, rs, nextLv)).join("\n"));
     }
 
     dstring name;

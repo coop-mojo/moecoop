@@ -212,7 +212,7 @@ class WisdomModel
     @property auto getDefaultPreference() const @safe pure nothrow
     {
         import coop.core.recipe_graph;
-        return RecipeGraph.preference;
+        return RecipeGraph.defaultPreference;
     }
 
     /// 

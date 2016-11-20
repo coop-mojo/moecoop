@@ -230,7 +230,7 @@ class WisdomModel
     {
         import coop.core.recipe_graph;
         auto graph = new RecipeGraph(targets.keys, wisdom, preference);
-        return graph.elements(targets, owned, wisdom, terminals);
+        return graph.elements(targets, owned, terminals);
     }
 
 private:

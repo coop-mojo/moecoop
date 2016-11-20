@@ -194,15 +194,6 @@ class RecipeGraph
         "オリハルコンインゴット": "オリハルコンインゴット(鉱石)",
         ];
 
-    @property auto recipeNodes() @safe pure nothrow
-    {
-        return recipes_;
-    }
-
-    @property auto materialNodes() @safe pure nothrow
-    {
-        return materials_;
-    }
 private:
 
     /++
@@ -340,13 +331,6 @@ class RecipeContainer
         parents = new RedBlackTree!dstring;
     }
 
-    override string toString() const @safe pure
-    {
-        import std.conv;
-
-        return name.to!string;
-    }
-
     dstring name;
     RedBlackTree!dstring parents;
     MaterialContainer[] children;
@@ -365,13 +349,6 @@ class MaterialContainer
     auto isLeaf() const @safe pure nothrow
     {
         return !isProduct;
-    }
-
-    override string toString() const @safe pure
-    {
-        import std.conv;
-
-        return name.to!string;
     }
 
     dstring name;

@@ -369,6 +369,11 @@ unittest
                              MaterialInfo("ヘビの肉", true)]);
 }
 
+version(unittest)
+{
+    import coop.util: indexOf;
+}
+
 // 作成対象が1種類の場合
 unittest
 {
@@ -406,20 +411,33 @@ unittest
                                          "塩": make!(RedBlackTree!dstring)("塩(岩塩)"d, "塩(木炭＋海水)"d),
                                      ],
                                      pref);
+
         auto tpl = graph.elements;
-        assert(tpl.recipes == [
-                   RecipeInfo("ロースト タイガー ミート", ""),
-                   RecipeInfo("塩(木炭＋海水)", "塩"),
-                   RecipeInfo("塩(岩塩)", "塩"),
-                   ]);
-        assert(tpl.materials == [
-                   MaterialInfo("ロースト タイガー ミート", false),
-                   MaterialInfo("トラの肉", true),
-                   MaterialInfo("塩", false),
-                   MaterialInfo("木炭", true),
-                   MaterialInfo("海水", true),
-                   MaterialInfo("岩塩", true),
-                   ]);
+
+        import std.algorithm;
+        import std.array;
+        assert(tpl.recipes.dup.sort().equal(
+                   [
+                       RecipeInfo("ロースト タイガー ミート", ""),
+                       RecipeInfo("塩(岩塩)", "塩"),
+                       RecipeInfo("塩(木炭＋海水)", "塩"),
+                   ]));
+        assert(tpl.recipes.front == RecipeInfo("ロースト タイガー ミート", ""));
+
+        assert(tpl.materials.dup.sort().equal(
+                   [
+                       MaterialInfo("トラの肉", true),
+                       MaterialInfo("ロースト タイガー ミート", false),
+                       MaterialInfo("塩", false),
+                       MaterialInfo("岩塩", true),
+                       MaterialInfo("木炭", true),
+                       MaterialInfo("海水", true),
+                   ]));
+        auto mats = tpl.materials.map!"a.name".array;
+        assert(mats.front == "ロースト タイガー ミート");
+        assert(mats.indexOf("塩"d) < mats.indexOf("木炭"d));
+        assert(mats.indexOf("塩"d) < mats.indexOf("海水"d));
+        assert(mats.indexOf("塩"d) < mats.indexOf("岩塩"d));
     }
 
     {
@@ -437,16 +455,23 @@ unittest
                                      ],
                                      pref);
         auto tpl = graph.elements;
+
+        import std.algorithm;
+        import std.array;
         assert(tpl.recipes == [
                    RecipeInfo("ロースト タイガー ミート", ""),
                    RecipeInfo("塩(岩塩)", ""),
                    ]);
-        assert(tpl.materials == [
-                   MaterialInfo("ロースト タイガー ミート", false),
-                   MaterialInfo("トラの肉", true),
-                   MaterialInfo("塩", false),
-                   MaterialInfo("岩塩", true),
-                   ]);
+        assert(tpl.materials.dup.sort().equal(
+                   [
+                       MaterialInfo("トラの肉", true),
+                       MaterialInfo("ロースト タイガー ミート", false),
+                       MaterialInfo("塩", false),
+                       MaterialInfo("岩塩", true),
+                   ]));
+        auto mats = tpl.materials.map!"a.name".array;
+        assert(mats.front == "ロースト タイガー ミート");
+        assert(mats.indexOf("塩"d) < mats.indexOf("岩塩"d));
     }
 }
 
@@ -498,22 +523,41 @@ unittest
                                      ],
                                      pref);
         auto tpl = graph.elements;
-        assert(tpl.recipes == [
-                   RecipeInfo("ロースト ライオン ミート", ""),
-                   RecipeInfo("ロースト タイガー ミート", ""),
-                   RecipeInfo("塩(木炭＋海水)", "塩"),
-                   RecipeInfo("塩(岩塩)", "塩"),
-                   ]);
-        assert(tpl.materials == [
-                   MaterialInfo("ロースト ライオン ミート", false),
-                   MaterialInfo("ライオンの肉", true),
-                   MaterialInfo("ロースト タイガー ミート", false),
-                   MaterialInfo("トラの肉", true),
-                   MaterialInfo("塩", false),
-                   MaterialInfo("木炭", true),
-                   MaterialInfo("海水", true),
-                   MaterialInfo("岩塩", true),
-                   ]);
+
+        import std.algorithm;
+        import std.array;
+        assert(tpl.recipes.dup.sort().equal(
+                   [
+                       RecipeInfo("ロースト タイガー ミート", ""),
+                       RecipeInfo("ロースト ライオン ミート", ""),
+                       RecipeInfo("塩(岩塩)", "塩"),
+                       RecipeInfo("塩(木炭＋海水)", "塩"),
+                   ]));
+        auto rs = tpl.recipes.map!"a.name".array;
+        assert(rs.indexOf("ロースト タイガー ミート"d) < rs.indexOf("塩(岩塩)"d));
+        assert(rs.indexOf("ロースト タイガー ミート"d) < rs.indexOf("塩(木炭＋海水)"d));
+        assert(rs.indexOf("ロースト ライオン ミート"d) < rs.indexOf("塩(岩塩)"d));
+        assert(rs.indexOf("ロースト ライオン ミート"d) < rs.indexOf("塩(木炭＋海水)"d));
+
+        assert(tpl.materials.dup.sort().equal(
+                   [
+                       MaterialInfo("トラの肉", true),
+                       MaterialInfo("ライオンの肉", true),
+                       MaterialInfo("ロースト タイガー ミート", false),
+                       MaterialInfo("ロースト ライオン ミート", false),
+                       MaterialInfo("塩", false),
+                       MaterialInfo("岩塩", true),
+                       MaterialInfo("木炭", true),
+                       MaterialInfo("海水", true),
+                   ]));
+        auto mats = tpl.materials.map!"a.name".array;
+        assert(mats.indexOf("ロースト ライオン ミート"d) < mats.indexOf("ライオンの肉"d));
+        assert(mats.indexOf("ロースト ライオン ミート"d) < mats.indexOf("塩"d));
+        assert(mats.indexOf("ロースト タイガー ミート"d) < mats.indexOf("トラの肉"d));
+        assert(mats.indexOf("ロースト タイガー ミート"d) < mats.indexOf("塩"d));
+        assert(mats.indexOf("塩"d) < mats.indexOf("岩塩"d));
+        assert(mats.indexOf("塩"d) < mats.indexOf("木炭"d));
+        assert(mats.indexOf("塩"d) < mats.indexOf("海水"d));
     }
 
     {
@@ -533,19 +577,33 @@ unittest
                                      ],
                                      pref);
         auto tpl = graph.elements;
-        assert(tpl.recipes == [
-                   RecipeInfo("ロースト ライオン ミート", ""),
-                   RecipeInfo("ロースト タイガー ミート", ""),
-                   RecipeInfo("塩(岩塩)", ""),
-                   ]);
-        assert(tpl.materials == [
-                   MaterialInfo("ロースト ライオン ミート", false),
-                   MaterialInfo("ライオンの肉", true),
-                   MaterialInfo("ロースト タイガー ミート", false),
-                   MaterialInfo("トラの肉", true),
-                   MaterialInfo("塩", false),
-                   MaterialInfo("岩塩", true),
-                   ]);
+
+        import std.algorithm;
+        import std.array;
+        assert(tpl.recipes.dup.sort().equal(
+                   [
+                       RecipeInfo("ロースト タイガー ミート", ""),
+                       RecipeInfo("ロースト ライオン ミート", ""),
+                       RecipeInfo("塩(岩塩)", ""),
+                   ]));
+        auto rs = tpl.recipes.map!"a.name".array;
+        assert(rs.back == "塩(岩塩)");
+
+        assert(tpl.materials.dup.sort().equal(
+                   [
+                       MaterialInfo("トラの肉", true),
+                       MaterialInfo("ライオンの肉", true),
+                       MaterialInfo("ロースト タイガー ミート", false),
+                       MaterialInfo("ロースト ライオン ミート", false),
+                       MaterialInfo("塩", false),
+                       MaterialInfo("岩塩", true),
+                   ]));
+        auto mats = tpl.materials.map!"a.name".array;
+        assert(mats.indexOf("ロースト ライオン ミート"d) < mats.indexOf("ライオンの肉"d));
+        assert(mats.indexOf("ロースト ライオン ミート"d) < mats.indexOf("塩"d));
+        assert(mats.indexOf("ロースト タイガー ミート"d) < mats.indexOf("トラの肉"d));
+        assert(mats.indexOf("ロースト タイガー ミート"d) < mats.indexOf("塩"d));
+        assert(mats.indexOf("塩"d) < mats.indexOf("岩塩"d));
     }
 }
 

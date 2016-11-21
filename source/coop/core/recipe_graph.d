@@ -238,7 +238,7 @@ private:
     }
 
     /++
-     + Init tree from agiven recipe name
+     + Init tree from a given recipe name
      +/
     auto init(dstring name, MaterialContainer parent) pure
     {
@@ -250,10 +250,7 @@ private:
         {
             recipe.parents.insert(parent.name);
         }
-        if (name in recipes_)
-        {
-            return recipe;
-        }
+        assert(name !in recipes_);
         recipes_[name] = recipe;
 
         recipe.children = recipeFor(name)
@@ -267,10 +264,7 @@ private:
     {
         import std.algorithm;
 
-        if (material.name in ms)
-        {
-            return;
-        }
+        assert(material.name !in ms);
         ms.insert(material.name);
         material.children.filter!(c => !orderedRecipes_.canFind(c.name)).each!(c => this.visit(c, rs, ms));
         orderedMaterials_ ~= material.name;
@@ -280,10 +274,7 @@ private:
     {
         import std.algorithm;
 
-        if (recipe.name in rs)
-        {
-            return;
-        }
+        assert(recipe.name !in rs);
         rs.insert(recipe.name);
         recipe.children.filter!(c => !orderedMaterials_.canFind(c.name)).each!(c => this.visit(c, rs, ms));
         orderedRecipes_ ~= recipe.name;
@@ -357,6 +348,7 @@ class MaterialContainer
     RecipeContainer[] children;
 }
 
+///
 unittest
 {
     import std.container;
@@ -364,14 +356,278 @@ unittest
     import coop.core.recipe;
 
     Recipe roastSnake = {
-        name: "ロースト スネーク ミート"d,
-        ingredients: ["ヘビの肉"d: 1],
+        name: "ロースト スネーク ミート",
+        ingredients: ["ヘビの肉": 1],
+        products: ["ロースト スネーク ミート": 1],
     };
-    auto graph = new RecipeGraph(["ロースト スネーク ミート"d],
-                                 ["ロースト スネーク ミート"d: roastSnake],
-                                 ["ロースト スネーク ミート"d: make!(RedBlackTree!dstring)("ロースト スネーク ミート"d)]);
+    auto graph = new RecipeGraph(["ロースト スネーク ミート"],
+                                 ["ロースト スネーク ミート": roastSnake],
+                                 ["ロースト スネーク ミート": make!(RedBlackTree!dstring)("ロースト スネーク ミート"d)]);
     auto tpl = graph.elements;
-    assert(tpl.recipes == [RecipeInfo("ロースト スネーク ミート"d, "")]);import std.conv;
-    assert(tpl.materials == [MaterialInfo("ロースト スネーク ミート"d, false),
-                             MaterialInfo("ヘビの肉"d, true)]);
+    assert(tpl.recipes == [RecipeInfo("ロースト スネーク ミート", "")]);import std.conv;
+    assert(tpl.materials == [MaterialInfo("ロースト スネーク ミート", false),
+                             MaterialInfo("ヘビの肉", true)]);
+}
+
+// 作成対象が1種類の場合
+unittest
+{
+    import std.container;
+
+    import coop.core.recipe;
+
+    Recipe roastTiger = {
+        name: "ロースト タイガー ミート",
+        ingredients: ["トラの肉": 1, "塩": 1],
+        products: ["ロースト タイガー ミート": 1],
+    };
+    Recipe salt1 = {
+        name: "塩(岩塩)",
+        ingredients: ["岩塩": 1],
+        products: ["塩": 7],
+    };
+    Recipe salt2 = {
+        name: "塩(木炭＋海水)"d,
+        ingredients: ["木炭": 1, "海水": 1],
+        products: ["塩": 18],
+    };
+
+    {
+        // 必要なレシピ・素材を全て列挙
+        typeof(RecipeGraph.defaultPreference) pref = null;
+        auto graph = new RecipeGraph(["ロースト タイガー ミート"],
+                                     [
+                                         "ロースト タイガー ミート": roastTiger,
+                                         "塩(岩塩)": salt1,
+                                         "塩(木炭＋海水)": salt2,
+                                     ],
+                                     [
+                                         "ロースト タイガー ミート"d: make!(RedBlackTree!dstring)("ロースト タイガー ミート"d),
+                                         "塩": make!(RedBlackTree!dstring)("塩(岩塩)"d, "塩(木炭＋海水)"d),
+                                     ],
+                                     pref);
+        auto tpl = graph.elements;
+        assert(tpl.recipes == [
+                   RecipeInfo("ロースト タイガー ミート", ""),
+                   RecipeInfo("塩(木炭＋海水)", "塩"),
+                   RecipeInfo("塩(岩塩)", "塩"),
+                   ]);
+        assert(tpl.materials == [
+                   MaterialInfo("ロースト タイガー ミート", false),
+                   MaterialInfo("トラの肉", true),
+                   MaterialInfo("塩", false),
+                   MaterialInfo("木炭", true),
+                   MaterialInfo("海水", true),
+                   MaterialInfo("岩塩", true),
+                   ]);
+    }
+
+    {
+        // 塩(岩塩)のレシピを使う場合のレシピ・素材を列挙
+        auto pref = ["塩"d: "塩(岩塩)"d];
+        auto graph = new RecipeGraph(["ロースト タイガー ミート"],
+                                     [
+                                         "ロースト タイガー ミート": roastTiger,
+                                         "塩(岩塩)": salt1,
+                                         "塩(木炭＋海水)": salt2,
+                                     ],
+                                     [
+                                         "ロースト タイガー ミート"d: make!(RedBlackTree!dstring)("ロースト タイガー ミート"d),
+                                         "塩": make!(RedBlackTree!dstring)("塩(岩塩)"d, "塩(木炭＋海水)"d),
+                                     ],
+                                     pref);
+        auto tpl = graph.elements;
+        assert(tpl.recipes == [
+                   RecipeInfo("ロースト タイガー ミート", ""),
+                   RecipeInfo("塩(岩塩)", ""),
+                   ]);
+        assert(tpl.materials == [
+                   MaterialInfo("ロースト タイガー ミート", false),
+                   MaterialInfo("トラの肉", true),
+                   MaterialInfo("塩", false),
+                   MaterialInfo("岩塩", true),
+                   ]);
+    }
+}
+
+// 作成対象が複数種類の場合
+unittest
+{
+    import std.container;
+
+    import coop.core.recipe;
+
+    Recipe roastTiger = {
+        name: "ロースト タイガー ミート",
+        ingredients: [
+            "トラの肉": 1,
+            "塩": 1,
+            ],
+        products: ["ロースト タイガー ミート": 1],
+    };
+    Recipe roastLion = {
+        name: "ロースト ライオン ミート",
+        ingredients: ["ライオンの肉": 1, "塩": 1],
+        products: ["ロースト ライオン ミート": 1],
+    };
+    Recipe salt1 = {
+        name: "塩(岩塩)",
+        ingredients: ["岩塩": 1],
+        products: ["塩": 7],
+    };
+    Recipe salt2 = {
+        name: "塩(木炭＋海水)"d,
+        ingredients: ["木炭": 1, "海水": 1],
+        products: ["塩": 18],
+    };
+
+    {
+        // 必要なレシピ・素材を全て列挙
+        typeof(RecipeGraph.defaultPreference) pref = null;
+        auto graph = new RecipeGraph(["ロースト タイガー ミート", "ロースト ライオン ミート"],
+                                     [
+                                         "ロースト タイガー ミート": roastTiger,
+                                         "ロースト ライオン ミート": roastLion,
+                                         "塩(岩塩)": salt1,
+                                         "塩(木炭＋海水)": salt2,
+                                     ],
+                                     [
+                                         "ロースト タイガー ミート"d: make!(RedBlackTree!dstring)("ロースト タイガー ミート"d),
+                                         "ロースト ライオン ミート"d: make!(RedBlackTree!dstring)("ロースト ライオン ミート"d),
+                                         "塩": make!(RedBlackTree!dstring)("塩(岩塩)"d, "塩(木炭＋海水)"d),
+                                     ],
+                                     pref);
+        auto tpl = graph.elements;
+        assert(tpl.recipes == [
+                   RecipeInfo("ロースト ライオン ミート", ""),
+                   RecipeInfo("ロースト タイガー ミート", ""),
+                   RecipeInfo("塩(木炭＋海水)", "塩"),
+                   RecipeInfo("塩(岩塩)", "塩"),
+                   ]);
+        assert(tpl.materials == [
+                   MaterialInfo("ロースト ライオン ミート", false),
+                   MaterialInfo("ライオンの肉", true),
+                   MaterialInfo("ロースト タイガー ミート", false),
+                   MaterialInfo("トラの肉", true),
+                   MaterialInfo("塩", false),
+                   MaterialInfo("木炭", true),
+                   MaterialInfo("海水", true),
+                   MaterialInfo("岩塩", true),
+                   ]);
+    }
+
+    {
+        // 塩(岩塩)のレシピを使う場合のレシピ・素材を列挙
+        auto pref = ["塩"d: "塩(岩塩)"d];
+        auto graph = new RecipeGraph(["ロースト タイガー ミート", "ロースト ライオン ミート"],
+                                     [
+                                         "ロースト タイガー ミート": roastTiger,
+                                         "ロースト ライオン ミート": roastLion,
+                                         "塩(岩塩)": salt1,
+                                         "塩(木炭＋海水)": salt2,
+                                     ],
+                                     [
+                                         "ロースト タイガー ミート"d: make!(RedBlackTree!dstring)("ロースト タイガー ミート"d),
+                                         "ロースト ライオン ミート"d: make!(RedBlackTree!dstring)("ロースト ライオン ミート"d),
+                                         "塩": make!(RedBlackTree!dstring)("塩(岩塩)"d, "塩(木炭＋海水)"d),
+                                     ],
+                                     pref);
+        auto tpl = graph.elements;
+        assert(tpl.recipes == [
+                   RecipeInfo("ロースト ライオン ミート", ""),
+                   RecipeInfo("ロースト タイガー ミート", ""),
+                   RecipeInfo("塩(岩塩)", ""),
+                   ]);
+        assert(tpl.materials == [
+                   MaterialInfo("ロースト ライオン ミート", false),
+                   MaterialInfo("ライオンの肉", true),
+                   MaterialInfo("ロースト タイガー ミート", false),
+                   MaterialInfo("トラの肉", true),
+                   MaterialInfo("塩", false),
+                   MaterialInfo("岩塩", true),
+                   ]);
+    }
+}
+
+unittest
+{
+    import std.container;
+
+    import coop.core.recipe;
+
+    Recipe cheesePie = {
+        name: "チーズ パイ",
+        ingredients: [
+            "チーズ": 1,
+            "パイ生地": 1,
+            ],
+        products: ["チーズ パイ": 2],
+    };
+    Recipe piePaste = {
+        name: "パイ生地(ミニ ウォーター ボトル)",
+        ingredients: ["小麦粉": 1, "バター": 1, "ミニ ウォーター ボトル": 1],
+        products: ["パイ生地": 1],
+    };
+    Recipe butter = {
+        name: "バター",
+        ingredients: ["塩": 1, "ミルク": 1],
+        products: ["バター": 1],
+    };
+    Recipe flour = {
+        name: "小麦粉",
+        ingredients: ["小麦": 1, "臼": 1],
+        products: ["小麦粉": 5],
+    };
+    Recipe cheese = {
+        name: "チーズ",
+        ingredients: ["酢": 1, "塩": 1, "ミルク": 1],
+        products: ["チーズ": 1],
+    };
+    Recipe salt = {
+        name: "塩(岩塩)",
+        ingredients: ["岩塩": 1],
+        products: ["塩": 7],
+    };
+
+    auto graph = new RecipeGraph(["チーズ パイ"],
+                                 [
+                                     "チーズ パイ": cheesePie,
+                                     "パイ生地(ミニ ウォーター ボトル)": piePaste,
+                                     "バター": butter,
+                                     "小麦粉": flour,
+                                     "チーズ": cheese,
+                                     "塩(岩塩)": salt,
+                                 ],
+                                 [
+                                     "チーズ パイ"d: make!(RedBlackTree!dstring)("チーズ パイ"d),
+                                     "パイ生地"d: make!(RedBlackTree!dstring)("パイ生地(ミニ ウォーター ボトル)"d),
+                                     "バター"d: make!(RedBlackTree!dstring)("バター"d),
+                                     "小麦粉"d: make!(RedBlackTree!dstring)("小麦粉"d),
+                                     "チーズ"d: make!(RedBlackTree!dstring)("チーズ"d),
+                                     "塩": make!(RedBlackTree!dstring)("塩(岩塩)"d),
+                                 ]);
+    auto tpl = graph.elements(["チーズ パイ": 1], ["塩": 1]);
+    assert(tpl.recipes == [
+               "チーズ パイ"d: 1,
+               "パイ生地(ミニ ウォーター ボトル)": 1,
+               "バター": 1,
+               "小麦粉": 1,
+               "チーズ": 1,
+               "塩(岩塩)": 1,
+               ]);
+    assert(tpl.materials == [
+               "小麦粉": MatTuple(1, true),
+               "ミルク": MatTuple(2, false),
+               "チーズ": MatTuple(1, true),
+               "パイ生地": MatTuple(1, true),
+               "小麦": MatTuple(1, false),
+               "岩塩": MatTuple(1, false),
+               "バター": MatTuple(1, true),
+               "ミニ ウォーター ボトル": MatTuple(1, false),
+               "臼": MatTuple(1, false),
+               "酢": MatTuple(1, false),
+               "チーズ パイ"d: MatTuple(1, true),
+               "塩": MatTuple(2, true),
+               ]);
+    assert(tpl.leftovers == ["小麦粉": 4, "チーズ パイ"d: 1, "塩": 6]);
 }

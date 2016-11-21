@@ -32,7 +32,7 @@ class RecipeGraph
         roots = names.sort().map!(n => init(n, cast(RecipeContainer)null)).array;
     }
 
-    this(dstring[] names, Recipe[dstring] recipeMap, RedBlackTree!dstring[dstring] rrecipeMap, dstring[dstring] pref = defaultPreference)
+    this(dstring[] names, Recipe[dstring] recipeMap, RedBlackTree!dstring[dstring] rrecipeMap, dstring[dstring] pref = defaultPreference) pure
     {
         import std.algorithm;
         import std.array;

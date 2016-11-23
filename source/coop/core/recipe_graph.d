@@ -264,7 +264,10 @@ private:
     {
         import std.algorithm;
 
-        assert(material.name !in ms);
+        if (material.name in ms)
+        {
+            return;
+        }
         ms.insert(material.name);
         material.children.filter!(c => !orderedRecipes_.canFind(c.name)).each!(c => this.visit(c, rs, ms));
         orderedMaterials_ ~= material.name;

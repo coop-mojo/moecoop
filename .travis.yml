@@ -1,7 +1,7 @@
 language: d
 
 d:
-  - dmd-2.071.2
+  - dmd-2.072.1
   - ldc-1.0.0
 
 matrix:

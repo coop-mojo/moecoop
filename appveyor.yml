@@ -65,7 +65,7 @@ install:
 before_build:
   - ps: if($env:platform -eq "x86"){
             $env:compilersetupargs = "x86";
-            $env:Darch = "x86";
+            $env:Darch = "x86_mscoff";
             $env:Dmodel = "32";
         }
         elseif($env:platform -eq "x64"){

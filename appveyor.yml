@@ -49,8 +49,10 @@ install:
               echo "downloading ...";
               $env:toolchain = "msvc";
               $version = $env:DVersion;
+              pushd c:\\;
               Invoke-WebRequest "https://code.dlang.org/files/dub-1.0.0-windows-x86.zip" -OutFile "c:\dub.zip";
-              7z x dub.zip > $null;
+              7z x dub.zip -odub > $null;
+              popd;
               Invoke-WebRequest "https://github.com/ldc-developers/ldc/releases/download/v$($version)/ldc2-$($version)-win$($env:Dmodel)-msvc.zip" -OutFile "c:\ldc.zip";
               echo "finished.";
               pushd c:\\;
@@ -59,9 +61,6 @@ install:
             }
         }
   - ps: SetUpDCompiler
-  - set PATH=%CD%\%binpath%;%PATH%
-  - echo %CD%\%binpath%
-  - dub --version
 
 before_build:
   - ps: if($env:platform -eq "x86"){

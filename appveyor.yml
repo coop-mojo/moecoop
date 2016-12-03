@@ -52,9 +52,9 @@ install:
               $env:toolchain = "msvc";
               $version = $env:DVersion;
 
-              Invoke-WebRequest https://code.dlang.org/files/dub-1.0.0-windows-x86.zip -OutFile dub.zip
+              Invoke-WebRequest "https://code.dlang.org/files/dub-1.0.0-windows-x86.zip" -OutFile "c:\dub.zip";
               7z x dub.zip -odub > $null;
-              $env:PATH += ";%CD%\dub";
+              $env:PATH += ";C:\dub";
 
               Invoke-WebRequest "https://github.com/ldc-developers/ldc/releases/download/v$($version)/ldc2-$($version)-win$($env:Dmodel)-msvc.zip" -OutFile "c:\ldc.zip";
               echo "finished.";

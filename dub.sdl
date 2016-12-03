@@ -12,7 +12,6 @@ dependency "derelict-util" version="2.0.6"
 stringImportPaths "views" "views/res"
 
 dflags "-m32mscoff" platform="windows-x86-dmd"
-dflags "-L=/LTGC" platform="windows-x86_64-dmd"
 postBuildCommands "powershell -Command \"wget http://files.kaoriya.net/cmigemo/cmigemo-default-win64-20110227.zip -OutFile migemo.zip;\"" \
                   "powershell -Command \"unzip migemo.zip;\"" \
                   "copy /y cmigemo-default-win64\\migemo.dll ." \

@@ -56,8 +56,8 @@ install:
               Invoke-WebRequest "https://github.com/ldc-developers/ldc/releases/download/v$($version)/ldc2-$($version)-win$($env:Dmodel)-msvc.zip" -OutFile "c:\ldc.zip";
               echo "finished.";
               pushd c:\\;
-              7z x ldc.zip -oldc2 > $null;
-              ls c:\ldc2;
+              7z x ldc.zip > $null;
+              mv ldc2-$($version)-win$($env:Dmodel)-msvc ldc2;
               popd;
             }
         }

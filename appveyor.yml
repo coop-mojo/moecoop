@@ -107,8 +107,6 @@ artifacts:
     name: 生協の知恵袋 v$(CoopVer) ($(Dmodel)bit)
 
 after_build:
-  - echo %DC%
-  - where %DC%
   - archive.bat %Darch% debug %DC%
   - mv moecoop-%Darch%.zip moecoop-trunk-%Dmodel%bit-debug.zip
   - archive.bat %Darch% release %DC%

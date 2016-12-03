@@ -38,7 +38,6 @@ install:
               popd;
             }
             elseif($env:DC -eq "ldc"){
-              echo "downloading ...";
               if($env:platform -eq "x86"){
                 $env:DConf = "m32";
                 $env:Dmodel = "32";
@@ -47,19 +46,21 @@ install:
                 $env:DConf = "m64";
                 $env:Dmodel = "64";
               }
+              echo "downloading ...";
               $env:toolchain = "msvc";
               $version = $env:DVersion;
               Invoke-WebRequest "https://github.com/ldc-developers/ldc/releases/download/v$($version)/ldc2-$($version)-win$($env:Dmodel)-msvc.zip" -OutFile "c:\ldc.zip";
               echo "finished.";
               pushd c:\\;
               7z x ldc.zip > $null;
+              Invoke-WebRequest https://code.dlang.org/files/dub-1.0.0-windows-x86.zip -OutFile dub.zip
+              7z x dub.zip -odub > nul
+              $env:PATH=%CD%\dub;%PATH%
               popd;
             }
         }
   - ps: SetUpDCompiler
-  - powershell -Command Invoke-WebRequest https://code.dlang.org/files/dub-1.0.0-windows-x86.zip -OutFile dub.zip
-  - 7z x dub.zip -odub > nul
-  - set PATH=%CD%\%binpath%;%CD%\dub;%PATH%
+  - set PATH=%CD%\%binpath%;%PATH%
   - dub --version
 
 before_build:

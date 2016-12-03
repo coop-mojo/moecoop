@@ -49,7 +49,7 @@ install:
               echo "downloading ...";
               $env:toolchain = "msvc";
               $version = $env:DVersion;
-              Invoke-WebRequest "https://code.dlang.org/files/dub-1.0.0-windows-x86.zip" -OutFile "c:\dub.zip";
+              Invoke-WebRequest "https://code.dlang.org/files/dub-1.1.1-windows-x86.zip" -OutFile "c:\dub.zip";
               pushd c:\\;
               7z x dub.zip -odub > $null;
               popd;

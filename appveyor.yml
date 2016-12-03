@@ -51,7 +51,6 @@ install:
               $version = $env:DVersion;
               Invoke-WebRequest "https://code.dlang.org/files/dub-1.0.0-windows-x86.zip" -OutFile "c:\dub.zip";
               7z x dub.zip > $null;
-              $env:PATH += ";C:\dub";
               Invoke-WebRequest "https://github.com/ldc-developers/ldc/releases/download/v$($version)/ldc2-$($version)-win$($env:Dmodel)-msvc.zip" -OutFile "c:\ldc.zip";
               echo "finished.";
               pushd c:\\;
@@ -80,7 +79,7 @@ before_build:
          }
          elseif($env:DC -eq "ldc"){
            $version = $env:DVersion;
-           $env:PATH += ";C:\ldc2-$($version)-win$($env:Dmodel)-msvc\bin";
+           $env:PATH += ";C:\dub;C:\ldc2-$($version)-win$($env:Dmodel)-msvc\bin";
            $env:DC = "ldc2";
          }
   - ps: $env:compilersetup = "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall";
@@ -95,6 +94,7 @@ test_script:
   - echo %DC%
   - echo %PATH%
   - '%DC% --version'
+  - dub --version
   - dub test --arch=%Darch% --compiler=%DC%
 
 artifacts:

@@ -1,5 +1,5 @@
 @echo off
-dub build -a %1 -b %2 --compiler=%3
+dub build -a %1 -b %2
 
 powershell -Command Compress-Archive -Path fukuro.exe, LICENSE, README.md, resource, docs -DestinationPath moecoop-%1.zip
 

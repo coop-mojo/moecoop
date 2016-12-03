@@ -107,9 +107,9 @@ artifacts:
     name: 生協の知恵袋 v$(CoopVer) ($(Dmodel)bit)
 
 after_build:
-  - archive.bat %Darch% debug %DC%
+  - archive.bat %Darch% debug
   - mv moecoop-%Darch%.zip moecoop-trunk-%Dmodel%bit-debug.zip
-  - archive.bat %Darch% release %DC%
+  - archive.bat %Darch% release
   - mv moecoop-%Darch%.zip moecoop-trunk-%Dmodel%bit.zip
   - type views\version
   - set /p CoopVer=<views\version

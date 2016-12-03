@@ -57,6 +57,7 @@ install:
               echo "finished.";
               pushd c:\\;
               7z x ldc.zip -oldc2 > $null;
+              ls
               popd;
             }
         }
@@ -108,7 +109,6 @@ artifacts:
 after_build:
   - echo %DC%
   - where %DC%
-  - ps: ls c:\ldc2
   - archive.bat %Darch% debug %DC%
   - mv moecoop-%Darch%.zip moecoop-trunk-%Dmodel%bit-debug.zip
   - archive.bat %Darch% release %DC%

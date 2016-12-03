@@ -107,6 +107,7 @@ artifacts:
 
 after_build:
   - echo %DC%
+  - where %DC%
   - archive.bat %Darch% debug %DC%
   - mv moecoop-%Darch%.zip moecoop-trunk-%Dmodel%bit-debug.zip
   - archive.bat %Darch% release %DC%

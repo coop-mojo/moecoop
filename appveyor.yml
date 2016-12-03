@@ -57,7 +57,7 @@ install:
               echo "finished.";
               pushd c:\\;
               7z x ldc.zip -oldc2 > $null;
-              ls
+              ls;
               popd;
             }
         }

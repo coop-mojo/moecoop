@@ -5,7 +5,7 @@ platform:
 environment:
   matrix:
     - DC: dmd
-      DVersion: 2.072.1
+      DVersion: 2.071.2
     - DC: ldc
       DVersion: 1.0.0
 
@@ -49,10 +49,6 @@ install:
               echo "downloading ...";
               $env:toolchain = "msvc";
               $version = $env:DVersion;
-              Invoke-WebRequest "https://code.dlang.org/files/dub-1.1.1-windows-x86.zip" -OutFile "c:\dub.zip";
-              pushd c:\\;
-              7z x dub.zip -odub > $null;
-              popd;
               Invoke-WebRequest "https://github.com/ldc-developers/ldc/releases/download/v$($version)/ldc2-$($version)-win$($env:Dmodel)-msvc.zip" -OutFile "c:\ldc.zip";
               echo "finished.";
               pushd c:\\;
@@ -62,6 +58,8 @@ install:
             }
         }
   - ps: SetUpDCompiler
+  - ps: Invoke-WebRequest "https://code.dlang.org/files/dub-1.1.1-windows-x86.zip" -OutFile "c:\dub.zip"
+  - 7z x dub.zip -odub > nul
 
 before_build:
   - ps: if($env:platform -eq "x86"){

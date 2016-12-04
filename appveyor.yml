@@ -56,11 +56,12 @@ install:
               mv ldc2-$($version)-win$($env:Dmodel)-msvc ldc2;
               popd;
             }
+            Invoke-WebRequest "https://code.dlang.org/files/dub-1.1.1-windows-x86.zip" -OutFile "c:\dub.zip";
+            pushd c:\\;
+            7z x dub.zip -odub > $null;
+            popd;
         }
   - ps: SetUpDCompiler
-  - powershell -Command Invoke-WebRequest "https://code.dlang.org/files/dub-1.1.1-windows-x86.zip" -OutFile dub.zip
-  - 7z x dub.zip -odub > nul
-  - ps: ls
 
 before_build:
   - ps: if($env:platform -eq "x86"){

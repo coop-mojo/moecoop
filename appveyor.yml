@@ -60,6 +60,7 @@ install:
   - ps: SetUpDCompiler
   - powershell -Command Invoke-WebRequest "https://code.dlang.org/files/dub-1.1.1-windows-x86.zip" -OutFile dub.zip
   - 7z x dub.zip -odub > nul
+  - ps: ls c:\
 
 before_build:
   - ps: if($env:platform -eq "x86"){
@@ -74,9 +75,9 @@ before_build:
         }
   - ps : if($env:DC -eq "dmd"){
            $env:PATH += ";C:\dmd2\windows\bin;";
+           $env:PATH += ";C:\dub";
          }
          elseif($env:DC -eq "ldc"){
-           $version = $env:DVersion;
            $env:PATH += ";C:\ldc2\bin";
            $env:PATH += ";C:\dub";
            $env:DC = "ldc2";

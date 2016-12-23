@@ -86,6 +86,8 @@ class RecipeGraph
             import std.conv;
             import std.math;
 
+            import coop.fallback;
+
             auto re = recipeFor(r);
             auto tars = recipes_[r].parents[].filter!(t => t !in mats).array;
             rs[r] = tars.map!(t => ((ms.get(t, MatTuple.init).num-owned.get(t, 0))/re.products[t].to!real).ceil.to!int).fold!max(0);

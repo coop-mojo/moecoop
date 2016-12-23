@@ -233,10 +233,8 @@ private:
     in {
         assert(parent !is null);
     } out {
-        import std.algorithm, std.format, std.array;
-        debug assert(recipes_[name].children.all!(c => name in c.parents),
-               format("initRecipe for %s (parent: %s) fails\nChildren: %s",
-                      name, parent.name, recipes_[name].children.map!(c => format("%s: (parents: %s)", c.name, c.parents)).array));
+        import std.algorithm;
+        assert(recipes_[name].children.all!(c => name in c.parents));
     } body {
         import std.algorithm;
         import std.array;

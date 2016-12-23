@@ -21,7 +21,7 @@ class RecipeGraph
     import coop.core.wisdom;
     import coop.core.recipe;
 
-    this(dstring[] names, Wisdom w, dstring[dstring] pref = defaultPreference) pure
+    this(dstring[] names, Wisdom w, dstring[dstring] pref = defaultPreference)
     {
         import std.algorithm;
         import std.array;
@@ -29,10 +29,11 @@ class RecipeGraph
         preferences_ = pref;
         recipeFor = r => w.recipeFor(r);
         rrecipeFor = i => i in w.rrecipeList;
-        roots = names.sort().map!(n => init(n, cast(RecipeContainer)null)).array;
+        names.each!(n => init(n, cast(RecipeContainer)null));
+        roots = materials_.values.filter!"a.parents.empty".array.schwartzSort!"a.name".array;
     }
 
-    this(dstring[] names, Recipe[dstring] recipeMap, RedBlackTree!dstring[dstring] rrecipeMap, dstring[dstring] pref = defaultPreference) pure
+    this(dstring[] names, Recipe[dstring] recipeMap, RedBlackTree!dstring[dstring] rrecipeMap, dstring[dstring] pref = defaultPreference)
     {
         import std.algorithm;
         import std.array;
@@ -40,7 +41,8 @@ class RecipeGraph
         preferences_ = pref;
         recipeFor = r => recipeMap[r];
         rrecipeFor = i => i in rrecipeMap;
-        roots = names.sort().map!(n => init(n, cast(RecipeContainer)null)).array;
+        names.each!(n => init(n, cast(RecipeContainer)null));
+        roots = materials_.values.filter!"a.parents.empty".array.schwartzSort!"a.name".array;
     }
 
     auto elements() pure
@@ -81,62 +83,45 @@ class RecipeGraph
         MatTuple[dstring] ms = targets.byKeyValue.map!(kv => tuple(kv.key, MatTuple(kv.value, false))).assocArray;
         foreach(r; elements.recipes.map!"a.name")
         {
+            import std.conv;
+            import std.math;
+
             auto re = recipeFor(r);
-            auto tar = setIntersection(recipes_[r].parents[].array.sort(), re.products.keys.sort()).front;
-            if (tar in mats)
+            auto tars = recipes_[r].parents[].filter!(t => t !in mats).array;
+            rs[r] = tars.map!(t => ((ms.get(t, MatTuple.init).num-owned.get(t, 0))/re.products[t].to!real).ceil.to!int).fold!max(0);
+
+            foreach(t; tars)
             {
-                continue;
-            }
-            auto nPerComb = re.products[tar];
-            if (auto o = tar in ms)
-            {
-                auto req = (*o).num;
-                auto ow = owned.get(tar, 0);
-                int nApply;
+                auto req = ms.get(t, MatTuple.init).num;
+                auto ow = owned.get(t, 0);
+                auto nPerComb = re.products[t];
+
                 if (req > ow)
                 {
-                    import std.conv;
-                    import std.math;
-
-                    nApply = ((req-ow)/nPerComb.to!real).ceil.to!int;
-                    leftover[tar] = nApply*nPerComb - (req-ow);
-                    rs[r] = nApply;
-                    assert(rs[r] > 0);
-                    recipes_[r].parents[].each!(m => ms[m].isIntermediate = true);
+                    leftover[t] = rs[r]*nPerComb-(req-ow);
+                    ms[t].isIntermediate = true;
                 }
                 else
                 {
-                    nApply = 0;
-                    leftover[tar] = ow-req;
-                }
-
-                if (leftover[tar] == 0)
-                {
-                    leftover.remove(tar);
-                }
-                if (nApply > 0)
-                {
-                    foreach(kv; re.products.byKeyValue.filter!(kv => kv.key != tar))
-                    {
-                        leftover[kv.key] += kv.value*nApply;
-                    }
-
-                    foreach(mat, n; re.ingredients)
-                    {
-                        if (mat !in ms)
-                        {
-                            ms[mat] = MatTuple.init;
-                        }
-                        ms[mat].num += n*nApply;
-                    }
+                    leftover[t] = rs[r]*nPerComb-(ow-req);
                 }
             }
-            else
+            if (rs[r] > 0)
             {
-                // 上流はもうこのアイテムを必要としていない
-                continue;
+                foreach(mat, n; re.ingredients)
+                {
+                    if (mat !in ms)
+                    {
+                        ms[mat] = MatTuple.init;
+                    }
+                    ms[mat].num += rs[r]*n;
+                }
             }
         }
+        leftover.byKeyValue
+                .array
+                .filter!(kv => kv.value == 0)
+                .each!(kv => leftover.remove(kv.key));
         alias Ret = Tuple!(int[dstring], "recipes", MatTuple[dstring], "materials", int[dstring], "leftovers");
         return Ret(rs, ms, leftover);
     }
@@ -199,17 +184,19 @@ private:
     /++
      + Init tree from a given material name
      +/
-    auto init(dstring name, RecipeContainer parent) pure
-    {
+    void init(dstring name, RecipeContainer parent) pure
+    out {
+        import std.algorithm;
+        assert(materials_[name].children.all!(c => name in c.parents));
+    } body {
         auto mat = materials_.get(name, new MaterialContainer(name));
         if (parent !is null && parent.name !in mat.parents)
         {
             mat.parents.insert(parent.name);
         }
-
         if (name in materials_)
         {
-            return mat;
+            return;
         }
         materials_[name] = mat;
 
@@ -228,36 +215,49 @@ private:
 
                 arr = (*rs)[].array;
             }
-            mat.children = arr.map!(r => this.init(r, mat)).array;
+            arr.each!(r => this.init(r, mat));
+            mat.children = arr.map!(r => recipes_[r]).array;
         }
         else
         {
             materials_[name].isProduct = false;
         }
-        return mat;
     }
 
     /++
      + Init tree from a given recipe name
      +/
-    auto init(dstring name, MaterialContainer parent) pure
-    {
+    void init(dstring name, MaterialContainer parent) pure
+    in {
+        assert(parent !is null);
+    } out {
+        import std.algorithm, std.format, std.array;
+        debug assert(recipes_[name].children.all!(c => name in c.parents),
+               format("initRecipe for %s (parent: %s) fails\nChildren: %s",
+                      name, parent.name, recipes_[name].children.map!(c => format("%s: (parents: %s)", c.name, c.parents)).array));
+    } body {
         import std.algorithm;
         import std.array;
 
         auto recipe = recipes_.get(name, new RecipeContainer(name));
-        if (parent.name !in recipe.parents)
+        auto rr = recipeFor(name);
+        // 精米/米ぬか のような、複数生成物が出るレシピ対策
+        foreach(r; rr.products.keys)
         {
-            recipe.parents.insert(parent.name);
+            if (r !in materials_)
+            {
+                this.init(r, cast(RecipeContainer)null);
+            }
+            recipe.parents.insert(r);
         }
-        assert(name !in recipes_);
+        if (name in recipes_)
+        {
+            return;
+        }
         recipes_[name] = recipe;
 
-        recipe.children = recipeFor(name)
-                           .ingredients.keys
-                           .map!(m => this.init(m, recipe))
-                           .array;
-        return recipe;
+        rr.ingredients.keys.each!(m => this.init(m, recipe));
+        recipe.children = rr.ingredients.keys.map!(m => materials_[m]).array;
     }
 
     void visit(MaterialContainer material, ref RedBlackTree!dstring rs, ref RedBlackTree!dstring ms) pure
@@ -367,7 +367,7 @@ unittest
                                  ["ロースト スネーク ミート": roastSnake],
                                  ["ロースト スネーク ミート": make!(RedBlackTree!dstring)("ロースト スネーク ミート"d)]);
     auto tpl = graph.elements;
-    assert(tpl.recipes == [RecipeInfo("ロースト スネーク ミート", "")]);import std.conv;
+    assert(tpl.recipes == [RecipeInfo("ロースト スネーク ミート", "")]);
     assert(tpl.materials == [MaterialInfo("ロースト スネーク ミート", false),
                              MaterialInfo("ヘビの肉", true)]);
 }
@@ -487,10 +487,7 @@ unittest
 
     Recipe roastTiger = {
         name: "ロースト タイガー ミート",
-        ingredients: [
-            "トラの肉": 1,
-            "塩": 1,
-            ],
+        ingredients: ["トラの肉": 1, "塩": 1],
         products: ["ロースト タイガー ミート": 1],
     };
     Recipe roastLion = {
@@ -608,6 +605,72 @@ unittest
         assert(mats.indexOf("ロースト タイガー ミート"d) < mats.indexOf("塩"d));
         assert(mats.indexOf("塩"d) < mats.indexOf("岩塩"d));
     }
+}
+
+// コンバインで複数種類の生産品が生成される場合
+unittest
+{
+    import std.container;
+
+    import coop.core.recipe;
+
+    Recipe nuka = {
+        name: "精米/米ぬか",
+        ingredients: ["玄米": 1],
+        products: ["精米": 2, "米ぬか": 1],
+    };
+
+    // 必要なレシピ・素材を全て列挙
+    typeof(RecipeGraph.defaultPreference) pref = null;
+    auto graph = new RecipeGraph(["精米"],
+                                 ["精米/米ぬか": nuka],
+                                 ["精米"d: make!(RedBlackTree!dstring)("精米/米ぬか"d),
+                                  "米ぬか": make!(RedBlackTree!dstring)("精米/米ぬか"d)],
+                                 pref);
+    auto tpl = graph.elements;
+
+    import std.algorithm;
+    import std.array;
+    assert(tpl.recipes == [RecipeInfo("精米/米ぬか", "")]);
+
+    assert(tpl.materials.dup.sort().equal(
+               [
+                   MaterialInfo("玄米", true),
+                   MaterialInfo("米ぬか", false),
+                   MaterialInfo("精米", false),
+               ]));
+    auto mats = tpl.materials.map!"a.name".array;
+    assert(mats.indexOf("精米"d) < mats.indexOf("玄米"d));
+    assert(mats.indexOf("米ぬか"d) < mats.indexOf("玄米"d));
+}
+
+// コンバインで複数種類の生産品が生成される場合
+unittest
+{
+    import std.container;
+
+    import coop.core.recipe;
+
+    Recipe nuka = {
+        name: "精米/米ぬか",
+        ingredients: ["玄米": 1],
+        products: ["精米": 2, "米ぬか": 1],
+    };
+
+    typeof(RecipeGraph.defaultPreference) pref = null;
+    auto graph = new RecipeGraph(["精米"],
+                                 ["精米/米ぬか": nuka],
+                                 ["精米"d: make!(RedBlackTree!dstring)("精米/米ぬか"d),
+                                  "米ぬか": make!(RedBlackTree!dstring)("精米/米ぬか"d)],
+                                 pref);
+
+    auto tpl = graph.elements(["精米"d: 1], (int[dstring]).init);
+    assert(tpl.recipes == ["精米/米ぬか"d: 1]);
+    assert(tpl.materials == [
+               "精米"d: MatTuple(1, true),
+               "玄米"d: MatTuple(1, false),
+               ]);
+    assert(tpl.leftovers == ["精米"d: 1, "米ぬか": 1]);
 }
 
 unittest

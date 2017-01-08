@@ -31,6 +31,7 @@ auto procurementCostFor(dstring item,
                         RedBlackTree!dstring visited = new RedBlackTree!dstring)
 {
     import std.algorithm;
+    import coop.fallback;
 
     if (auto pr = item in procurementMap)
     {

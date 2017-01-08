@@ -53,6 +53,10 @@ class ItemDetailFrame: ScrollWidget
             dstring extraRemarks = table.addExtraElem(name, model);
 
             table.addElem("NPC売却価格", format("%s g"d, item.price), item.isOverlaid!"price");
+
+            import coop.core.price;
+            table.addElem("参考価格", format("%s g"d, model.costFor(item.name, (int[dstring]).init))); // ユーザー定義価格はまだ入力が未実装
+
             table.addElem("転送可", item.transferable ? "はい" : "いいえ", item.isOverlaid!"transferable");
             table.addElem("スタック可", item.stackable ? "はい": "いいえ", item.isOverlaid!"stackable");
 

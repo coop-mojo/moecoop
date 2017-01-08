@@ -233,6 +233,18 @@ class WisdomModel
         return graph.elements(targets, owned, terminals);
     }
 
+    ///
+    auto costFor(Str)(Str item, int[dstring] procs)
+    {
+        import std.conv;
+        import coop.core.price;
+
+        return procurementCostFor(item.to!dstring, wisdom.itemList, wisdom.recipeList,
+                                  wisdom.rrecipeList,
+                                  (int[dstring]).init, (int[dstring]).init,
+                                  procs);
+    }
+
 private:
     import std.container;
     import std.traits;

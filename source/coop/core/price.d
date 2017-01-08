@@ -23,7 +23,7 @@ NPC売却価格: そのまま
 クエスト価格: クエストなどで、交換するアイテムなどから計算できる計算
 参考計算価格: レシピおよび素材の参考価格化を計算できる価格
  */
-auto procurementCostFor(dstring item,
+int procurementCostFor(dstring item,
                         Item[dstring] itemMap, Recipe[dstring] recipeMap,
                         RedBlackTree!dstring[dstring] rrecipeMap,
                         int[dstring] vendingPriceMap, int[dstring] questPriceMap,

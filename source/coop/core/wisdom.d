@@ -15,6 +15,7 @@ class Wisdom {
 
     import coop.core.item;
     import coop.core.recipe;
+    import coop.core.vendor;
 
     /// バインダーごとのレシピ名一覧
     dstring[][dstring] binderList;
@@ -36,6 +37,12 @@ class Wisdom {
 
     /// アイテム種別ごとの固有情報一覧
     ExtraInfo[dstring][ItemType] extraInfoList;
+
+    /// 販売員情報
+    Vendor[dstring] vendorList;
+
+    /// アイテムごとの売店での販売価格一覧
+    int[dstring] vendorPriceList;
 
     this(string baseDir)
     {
@@ -69,6 +76,9 @@ class Wisdom {
             extraInfoList[Shield.to!ItemType] = readShieldList(baseDir_).to!(ExtraInfo[dstring]);
         }
         itemList = readItemList(baseDir_);
+
+        vendorList = readVendorList(baseDir_);
+        vendorPriceList = genVendorPriceList(vendorList.values);
     }
 
     @property auto recipeCategories() const pure nothrow
@@ -428,6 +438,42 @@ private:
             .map!readFoodEffects
             .joiner
             .checkedAssocArray;
+    }
+
+    auto readVendorList(string sysBase)
+    {
+        import std.algorithm;
+        import std.exception;
+        import std.file;
+        import std.path;
+
+        import coop.util;
+
+        enforce(sysBase.exists);
+        enforce(sysBase.isDir);
+        auto dir = buildPath(sysBase, "売店");
+        if (!dir.exists)
+        {
+            return typeof(vendorList).init;
+        }
+        return ["present", "ancient"].filter!(d => d.exists && d.isDir)
+            .map!(d => dirEntries(d, "*.json", SpanMode.breadth))
+            .joiner
+            .map!readVendors
+            .joiner
+            .checkedAssocArray;
+    }
+
+    auto genVendorPriceList(Vendor[] vendors)
+    {
+        import std.algorithm;
+        import std.range;
+        import std.typecons;
+
+        return vendors.map!(v => v.products.byKeyValue)
+            .joiner
+            .map!(kv => tuple(kv.key, kv.value.price))
+            .assocArray;
     }
 
     /// データが保存してあるパス

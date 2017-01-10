@@ -239,9 +239,9 @@ class WisdomModel
         import std.conv;
         import coop.core.price;
 
-        return procurementCostFor(item.to!dstring, wisdom.itemList, wisdom.recipeList,
-                                  wisdom.rrecipeList,
-                                  (int[dstring]).init, (int[dstring]).init,
+        return procurementCostFor(item.to!dstring,
+                                  wisdom.itemList, wisdom.recipeList, wisdom.rrecipeList,
+                                  wisdom.vendorPriceList, (int[dstring]).init,
                                   procs);
     }
 

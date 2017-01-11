@@ -41,13 +41,16 @@ class CustomInfo
     {
         import std.algorithm;
         import std.conv;
+        import std.file;
         import std.json;
         import std.path;
         import std.range;
         import std.stdio;
         import std.typecons;
 
-        auto items = File(buildPath(baseDir_, "アイテム", "アイテム.json"), "w");
+        auto itemDir = buildPath(baseDir_, "アイテム");
+        mkdirRecurse(itemDir);
+        auto items = File(buildPath(itemDir, "アイテム.json"), "w");
         items.writeln(JSONValue(itemList.values
                               .map!(item => tuple(item.name.to!string, item.toJSON))
                               .assocArray).toPrettyString);

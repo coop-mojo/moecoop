@@ -967,3 +967,189 @@ nothrow unittest
     assert(overlaid.isOverlaid!"petFoodInfo");
     assert(overlaid.petFoodInfo == typeof(overlaid.petFoodInfo).init);
 }
+
+auto readItemList(string sysBase)
+{
+    import std.algorithm;
+    import std.array;
+    import std.exception;
+    import std.file;
+    import std.path;
+
+    import coop.core.item;
+    import coop.util;
+
+    enforce(sysBase.exists);
+    enforce(sysBase.isDir);
+
+    auto dir = buildPath(sysBase, "アイテム");
+    if (!dir.exists)
+    {
+        return (Item[dstring]).init;
+    }
+    return dirEntries(dir, "*.json", SpanMode.breadth)
+        .map!readItems
+        .array
+        .joiner
+        .checkedAssocArray;
+}
+
+auto readFoodList(string sysBase)
+{
+    import std.algorithm;
+    import std.exception;
+    import std.file;
+    import std.path;
+
+    import coop.core.item;
+    import coop.util;
+
+    enforce(sysBase.exists);
+    enforce(sysBase.isDir);
+
+    auto dir = buildPath(sysBase, "食べ物");
+    if (!dir.exists)
+    {
+        return (FoodInfo[dstring]).init;
+    }
+    return dirEntries(dir, "*.json", SpanMode.breadth)
+        .map!readFoods
+        .joiner
+        .checkedAssocArray;
+}
+
+auto readDrinkList(string sysBase)
+{
+    import std.exception;
+    import std.file;
+    import std.path;
+
+    import coop.util;
+    import coop.core.item;
+
+    enforce(sysBase.exists);
+    enforce(sysBase.isDir);
+
+    auto file = buildPath(sysBase, "飲み物", "飲み物.json");
+    if (!file.exists)
+    {
+        return (FoodInfo[dstring]).init;
+    }
+    return file.readFoods.checkedAssocArray;
+}
+
+auto readLiquorList(string sysBase)
+{
+    import std.exception;
+    import std.file;
+    import std.path;
+
+    import coop.core.item;
+    import coop.util;
+
+    enforce(sysBase.exists);
+    enforce(sysBase.isDir);
+
+    auto file = buildPath(sysBase, "飲み物", "酒.json");
+    if (!file.exists)
+    {
+        return (FoodInfo[dstring]).init;
+    }
+    return buildPath(sysBase, "飲み物", "酒.json").readFoods.checkedAssocArray;
+}
+
+auto readWeaponList(string sysBase)
+{
+    import std.algorithm;
+    import std.exception;
+    import std.file;
+    import std.path;
+
+    import coop.core.item;
+    import coop.util;
+
+    enforce(sysBase.exists);
+    enforce(sysBase.isDir);
+
+    auto dir = buildPath(sysBase, "武器");
+    if (!dir.exists)
+    {
+        return (WeaponInfo[dstring]).init;
+    }
+    return dirEntries(dir, "*.json", SpanMode.breadth)
+        .map!readWeapons
+        .joiner
+        .checkedAssocArray;
+}
+
+auto readArmorList(string sysBase)
+{
+    import std.algorithm;
+    import std.exception;
+    import std.file;
+    import std.path;
+
+    import coop.core.item;
+    import coop.util;
+
+    enforce(sysBase.exists);
+    enforce(sysBase.isDir);
+
+    auto dir = buildPath(sysBase, "防具");
+    if (!dir.exists)
+    {
+        return (ArmorInfo[dstring]).init;
+    }
+    return dirEntries(dir, "*.json", SpanMode.breadth)
+        .map!readArmors
+        .joiner
+        .checkedAssocArray;
+}
+
+auto readBulletList(string sysBase)
+{
+    import std.algorithm;
+    import std.exception;
+    import std.file;
+    import std.path;
+
+    import coop.core.item;
+    import coop.util;
+
+    enforce(sysBase.exists);
+    enforce(sysBase.isDir);
+
+    auto dir = buildPath(sysBase, "弾");
+    if (!dir.exists)
+    {
+        return (BulletInfo[dstring]).init;
+    }
+    return dirEntries(dir, "*.json", SpanMode.breadth)
+        .map!readBullets
+        .joiner
+        .checkedAssocArray;
+}
+
+auto readShieldList(string sysBase)
+{
+    import std.algorithm;
+    import std.exception;
+    import std.file;
+    import std.path;
+
+    import coop.core.item;
+    import coop.util;
+
+    enforce(sysBase.exists);
+    enforce(sysBase.isDir);
+
+    auto dir = buildPath(sysBase, "盾");
+    if (!dir.exists)
+    {
+        return (ShieldInfo[dstring]).init;
+    }
+    return dirEntries(dir, "*.json", SpanMode.breadth)
+        .map!readShields
+        .joiner
+        .checkedAssocArray;
+}

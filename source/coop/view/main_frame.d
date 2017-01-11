@@ -53,16 +53,17 @@ class MainFrame: AppFrame
     import coop.core.character;
     import coop.core.wisdom;
     import coop.model;
+    import coop.model.custom_info;
     import coop.model.config;
 
-    this(WisdomModel model, Character[dstring] chars, Config config, Wisdom customWisdom)
+    this(WisdomModel model, Character[dstring] chars, Config config, CustomInfo cInfo)
     {
         import coop.controller.binder_tab_frame_controller;
         import coop.controller.recipe_material_tab_frame_controller;
         import coop.controller.skill_tab_frame_controller;
 
         super();
-        controller_ = new MainFrameController(this, model, chars, config, customWisdom);
+        controller_ = new MainFrameController(this, model, chars, config, cInfo);
         binderTab.controller = new BinderTabFrameController(binderTab, model.getBinderCategories);
         skillTab.controller = new SkillTabFrameController(skillTab, model.getSkillCategories);
         materialTab.controller = new RecipeMaterialTabFrameController(materialTab);

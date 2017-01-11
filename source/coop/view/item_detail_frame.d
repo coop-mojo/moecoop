@@ -1,5 +1,5 @@
 /**
- * Copyright: Copyright (c) 2016 Mojo
+ * Copyright: Copyright (c) 2016-2017 Mojo
  * Authors: Mojo
  * License: $(LINK2 https://github.com/coop-mojo/moecoop/blob/master/LICENSE, MIT License)
  */
@@ -10,6 +10,7 @@ import dlangui;
 import coop.core.item;
 import coop.core.wisdom;
 import coop.model;
+import coop.model.custom_info;
 
 class ItemDetailFrame: ScrollWidget
 {
@@ -31,11 +32,11 @@ class ItemDetailFrame: ScrollWidget
         backgroundColor = "white";
     }
 
-    static auto create(dstring name, int idx, WisdomModel model, Wisdom cWisdom)
+    static auto create(dstring name, int idx, WisdomModel model, CustomInfo customInfo)
     {
         auto orig = model.getItem(name);
         auto ret = new typeof(this)("detail"~idx.to!string);
-        auto item = Overlaid!Item(orig, name in cWisdom.itemList);
+        auto item = Overlaid!Item(orig, name in customInfo.itemList);
         ret.item_ = orig;
 
         auto table = ret.childById("table");
@@ -55,7 +56,28 @@ class ItemDetailFrame: ScrollWidget
             table.addElem("NPC売却価格", format("%s g"d, item.price), item.isOverlaid!"price");
 
             import coop.core.price;
-            table.addElem("参考価格", format("%s g"d, model.costFor(item.name, (int[dstring]).init))); // ユーザー定義価格はまだ入力が未実装
+            table.addChild(new TextWidget("", "参考価格: "d));
+            auto lo = new HorizontalLayout;
+            auto refPriceWidget = new TextWidget("", format("%s g"d, model.costFor(item.name, customInfo.procurementPriceList)));
+            lo.addChild(refPriceWidget);
+            lo.addChild(new TextWidget("", "(調達価格: "d));
+            import coop.view.editors;
+            auto procurementPriceWidget = new EditIntLine("", name in customInfo.procurementPriceList ? customInfo.procurementPriceList[name].to!dstring : "");
+            procurementPriceWidget.maxWidth = 100;
+            procurementPriceWidget.contentChange = (EditableContent content) {
+                if (content.text.empty)
+                {
+                    customInfo.procurementPriceList.remove(item.name);
+                }
+                else
+                {
+                    customInfo.procurementPriceList[item.name] = content.text.to!int;
+                }
+                refPriceWidget.text = format("%s g"d, model.costFor(item.name, customInfo.procurementPriceList));
+            };
+            lo.addChild(procurementPriceWidget);
+            lo.addChild(new TextWidget("", " g)"d));
+            table.addChild(lo);
 
             table.addElem("転送可", item.transferable ? "はい" : "いいえ", item.isOverlaid!"transferable");
             table.addElem("スタック可", item.stackable ? "はい": "いいえ", item.isOverlaid!"stackable");

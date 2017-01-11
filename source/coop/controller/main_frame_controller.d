@@ -10,27 +10,28 @@ class MainFrameController
     import coop.core.character;
     import coop.model;
     import coop.model.config;
+    import coop.model.custom_info;
     import coop.core.wisdom;
     import coop.view.main_frame;
 
-    this(MainFrame frame, WisdomModel model, Character[dstring] chars, Config config, Wisdom customWisdom)
+    this(MainFrame frame, WisdomModel model, Character[dstring] chars, Config config, CustomInfo cInfo)
     {
         frame_ = frame;
         model_ = model;
         chars_ = chars;
         config_ = config;
-        cWisdom_ = customWisdom;
+        cInfo_ = cInfo;
     }
 
     @property auto frame() { return frame_; }
     @property auto config() { return config_; }
     @property auto characters() { return chars_; }
     @property auto model() { return model_; }
-    @property auto cWisdom() { return cWisdom_; }
+    @property auto customInfo() { return cInfo_; }
 
     Config config_;
     Character[dstring] chars_;
-    Wisdom cWisdom_;
+    CustomInfo cInfo_;
     WisdomModel model_;
     MainFrame frame_;
 }
@@ -61,12 +62,12 @@ public:
         return frame_.root.controller.model;
     }
 
-    @property auto cWisdom()
+    @property auto customInfo()
     out(ret)
     {
         assert(ret);
     } body {
-        return frame_.root.controller.cWisdom;
+        return frame_.root.controller.customInfo;
     }
 protected:
     FrameType frame_;

@@ -137,27 +137,6 @@ class Wisdom {
         return binders.filter!(b => recipesIn(Binder(b)).canFind(recipeName)).array;
     }
 
-    auto save() const
-    {
-        import std.algorithm;
-        import std.array;
-        import std.conv;
-        import std.file;
-        import std.json;
-        import std.path;
-        import std.stdio;
-
-        foreach(dir; ["アイテム", "バインダー", "レシピ", "飲み物", "飲食バフ",
-                      "食べ物", "武器", "弾", "防具", "盾"])
-        {
-            mkdirRecurse(buildPath(baseDir_, dir));
-        }
-
-        auto f = File(buildPath(baseDir_, "アイテム", "アイテム.json"), "w");
-        f.write(JSONValue(itemList.values
-                          .map!(item => tuple(item.name.to!string, item.toJSON))
-                          .assocArray).toPrettyString);
-    }
 private:
     auto readBinderList(string basedir)
     {
@@ -239,184 +218,6 @@ private:
         return ret;
     }
 
-    auto readItemList(string sysBase)
-    {
-        import std.algorithm;
-        import std.array;
-        import std.exception;
-        import std.file;
-        import std.path;
-
-        import coop.util;
-
-        enforce(sysBase.exists);
-        enforce(sysBase.isDir);
-
-        auto dir = buildPath(sysBase, "アイテム");
-        if (!dir.exists)
-        {
-            return typeof(itemList).init;
-        }
-        return dirEntries(dir, "*.json", SpanMode.breadth)
-            .map!readItems
-            .array
-            .joiner
-            .checkedAssocArray;
-    }
-
-    auto readFoodList(string sysBase)
-    {
-        import std.algorithm;
-        import std.exception;
-        import std.file;
-        import std.path;
-
-        import coop.util;
-
-        enforce(sysBase.exists);
-        enforce(sysBase.isDir);
-
-        auto dir = buildPath(sysBase, "食べ物");
-        if (!dir.exists)
-        {
-            return (FoodInfo[dstring]).init;
-        }
-        return dirEntries(dir, "*.json", SpanMode.breadth)
-            .map!readFoods
-            .joiner
-            .checkedAssocArray;
-    }
-
-    auto readDrinkList(string sysBase)
-    {
-        import std.exception;
-        import std.file;
-        import std.path;
-
-        import coop.util;
-
-        enforce(sysBase.exists);
-        enforce(sysBase.isDir);
-
-        auto file = buildPath(sysBase, "飲み物", "飲み物.json");
-        if (!file.exists)
-        {
-            return (FoodInfo[dstring]).init;
-        }
-        return file.readFoods.checkedAssocArray;
-    }
-
-    auto readLiquorList(string sysBase)
-    {
-        import std.exception;
-        import std.file;
-        import std.path;
-
-        import coop.util;
-
-        enforce(sysBase.exists);
-        enforce(sysBase.isDir);
-
-        auto file = buildPath(sysBase, "飲み物", "酒.json");
-        if (!file.exists)
-        {
-            return (FoodInfo[dstring]).init;
-        }
-        return buildPath(sysBase, "飲み物", "酒.json").readFoods.checkedAssocArray;
-    }
-
-    auto readWeaponList(string sysBase)
-    {
-        import std.algorithm;
-        import std.exception;
-        import std.file;
-        import std.path;
-
-        import coop.util;
-
-        enforce(sysBase.exists);
-        enforce(sysBase.isDir);
-
-        auto dir = buildPath(sysBase, "武器");
-        if (!dir.exists)
-        {
-            return (WeaponInfo[dstring]).init;
-        }
-        return dirEntries(dir, "*.json", SpanMode.breadth)
-            .map!readWeapons
-            .joiner
-            .checkedAssocArray;
-    }
-
-    auto readArmorList(string sysBase)
-    {
-        import std.algorithm;
-        import std.exception;
-        import std.file;
-        import std.path;
-
-        import coop.util;
-
-        enforce(sysBase.exists);
-        enforce(sysBase.isDir);
-
-        auto dir = buildPath(sysBase, "防具");
-        if (!dir.exists)
-        {
-            return (ArmorInfo[dstring]).init;
-        }
-        return dirEntries(dir, "*.json", SpanMode.breadth)
-            .map!readArmors
-            .joiner
-            .checkedAssocArray;
-    }
-
-    auto readBulletList(string sysBase)
-    {
-        import std.algorithm;
-        import std.exception;
-        import std.file;
-        import std.path;
-
-        import coop.util;
-
-        enforce(sysBase.exists);
-        enforce(sysBase.isDir);
-
-        auto dir = buildPath(sysBase, "弾");
-        if (!dir.exists)
-        {
-            return (BulletInfo[dstring]).init;
-        }
-        return dirEntries(dir, "*.json", SpanMode.breadth)
-            .map!readBullets
-            .joiner
-            .checkedAssocArray;
-    }
-
-    auto readShieldList(string sysBase)
-    {
-        import std.algorithm;
-        import std.exception;
-        import std.file;
-        import std.path;
-
-        import coop.util;
-
-        enforce(sysBase.exists);
-        enforce(sysBase.isDir);
-
-        auto dir = buildPath(sysBase, "盾");
-        if (!dir.exists)
-        {
-            return (ShieldInfo[dstring]).init;
-        }
-        return dirEntries(dir, "*.json", SpanMode.breadth)
-            .map!readShields
-            .joiner
-            .checkedAssocArray;
-    }
-
     auto readFoodEffectList(string sysBase)
     {
         import std.algorithm;
@@ -456,7 +257,8 @@ private:
         {
             return typeof(vendorList).init;
         }
-        return ["present", "ancient"].filter!(d => d.exists && d.isDir)
+        return ["present", "ancient"].map!(d => buildPath(dir, d))
+            .filter!(d => d.exists && d.isDir)
             .map!(d => dirEntries(d, "*.json", SpanMode.breadth))
             .joiner
             .map!readVendors
@@ -538,29 +340,4 @@ unittest
     auto w = assertNotThrown(new Wisdom("."));
     assert(w.binders.empty);
     assert(w.recipeCategories.empty);
-}
-
-unittest
-{
-    import std.exception;
-    import std.file;
-    import std.path;
-
-    enum invalidDir = "__invalid__";
-    mkdir(invalidDir);
-    scope(exit) rmdirRecurse(invalidDir);
-
-    auto w = assertNotThrown(new Wisdom(invalidDir));
-    w.save;
-
-    foreach(dir; ["アイテム", "バインダー", "レシピ", "飲み物", "飲食バフ",
-                  "食べ物", "武器", "防具"])
-    {
-        auto d = buildPath(invalidDir, dir);
-        assert(d.exists);
-        assert(d.isDir);
-    }
-    auto itemFile = buildPath(invalidDir, "アイテム", "アイテム.json");
-    assert(itemFile.exists);
-    assert(itemFile.readText == "{}");
 }

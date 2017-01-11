@@ -12,19 +12,20 @@ import std.traits;
 
 import coop.core.item;
 import coop.core.wisdom;
+import coop.model.custom_info;
 import coop.view.recipe_tab_frame;
 
 class ItemEditDialog: Dialog
 {
 
-    this(Window parent, RecipeTabFrame fr, Item orig, int index, Wisdom cw)
+    this(Window parent, RecipeTabFrame fr, Item orig, int index, CustomInfo ci)
     {
         super(UIString("アイテム情報編集"d), parent, DialogFlag.Popup);
         tabFrame = fr;
         original = orig;
         idx = index;
-        cWisdom = cw;
-        if (auto item = original.name in cw.itemList)
+        customInfo = ci;
+        if (auto item = original.name in ci.itemList)
         {
             updated = *item;
         }
@@ -204,7 +205,7 @@ class ItemEditDialog: Dialog
             {
                 if (original != updated)
                 {
-                    cWisdom.itemList[updated.name] = updated;
+                    customInfo.itemList[updated.name] = updated;
                     updateFrame;
                 }
             }
@@ -217,19 +218,19 @@ private:
     {
         import coop.view.item_detail_frame;
 
-        tabFrame.setItemDetail(ItemDetailFrame.create(original.name, idx+1, tabFrame.controller.model, cWisdom), idx);
+        tabFrame.setItemDetail(ItemDetailFrame.create(original.name, idx+1, tabFrame.controller.model, customInfo), idx);
     }
 
     Item original;
     Item updated;
-    Wisdom cWisdom;
+    CustomInfo customInfo;
     RecipeTabFrame tabFrame;
     int idx;
 }
 
-auto showItemEditDialog(Window parent, RecipeTabFrame frame, Item item, int index, Wisdom cw)
+auto showItemEditDialog(Window parent, RecipeTabFrame frame, Item item, int index, CustomInfo ci)
 {
-    auto dlg = new ItemEditDialog(parent, frame, item, index, cw);
+    auto dlg = new ItemEditDialog(parent, frame, item, index, ci);
     dlg.show;
 }
 

@@ -117,7 +117,7 @@ class RecipeTabFrame: TabFrameBase
             import coop.view.item_edit_dialog;
             import coop.view.item_detail_frame;
 
-            showItemEditDialog(root.window, this, childById!ItemDetailFrame("detail1").item, 0, controller.cWisdom);
+            showItemEditDialog(root.window, this, childById!ItemDetailFrame("detail1").item, 0, controller.customInfo);
             return true;
         };
 
@@ -125,7 +125,7 @@ class RecipeTabFrame: TabFrameBase
             import coop.view.item_edit_dialog;
             import coop.view.item_detail_frame;
 
-            showItemEditDialog(root.window, this, childById!ItemDetailFrame("detail2").item, 1, controller.cWisdom);
+            showItemEditDialog(root.window, this, childById!ItemDetailFrame("detail2").item, 1, controller.customInfo);
             return true;
         };
     }
@@ -366,7 +366,7 @@ private:
         import coop.view.controls;
 
         auto ret = new CheckableEntryWidget(recipe.to!string, recipe);
-        auto cWisdom = controller.cWisdom;
+        auto customInfo = controller.customInfo;
         auto characters = controller.characters;
         auto binders = relatedBindersFor(recipe, category);
 
@@ -458,7 +458,7 @@ private:
                 import coop.view.item_detail_frame;
 
                 showItemDetail(idx);
-                setItemDetail(ItemDetailFrame.create(name, idx+1, controller.model, cWisdom), idx);
+                setItemDetail(ItemDetailFrame.create(name, idx+1, controller.model, customInfo), idx);
             }
         };
 

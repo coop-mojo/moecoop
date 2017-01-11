@@ -201,7 +201,7 @@ class RecipeMaterialTabFrame: TabFrameBase
                     scope(exit) highlightDetailItems;
 
                     showItemDetail(0);
-                    setItemDetail(ItemDetailFrame.create(c, 1, controller.model, controller.cWisdom), 0);
+                    setItemDetail(ItemDetailFrame.create(c, 1, controller.model, controller.customInfo), 0);
                 };
                 w.checkStateChanged = (bool checked) {
                     if (checked)
@@ -406,7 +406,7 @@ class RecipeMaterialTabFrame: TabFrameBase
                     scope(exit) highlightDetailItems;
 
                     showItemDetail(0);
-                    setItemDetail(ItemDetailFrame.create(lo, 1, controller.model, controller.cWisdom), 0);
+                    setItemDetail(ItemDetailFrame.create(lo, 1, controller.model, controller.customInfo), 0);
                     return true;
                 };
                 return cast(Widget[])[w, n];
@@ -475,7 +475,7 @@ class RecipeMaterialTabFrame: TabFrameBase
                     scope(exit) highlightDetailItems;
 
                     showItemDetail(0);
-                    setItemDetail(ItemDetailFrame.create(mat.name, 1, controller.model, controller.cWisdom), 0);
+                    setItemDetail(ItemDetailFrame.create(mat.name, 1, controller.model, controller.customInfo), 0);
                 };
                 if (!mat.isLeaf)
                 {

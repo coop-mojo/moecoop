@@ -31,6 +31,7 @@ extern(C) int UIAppMain(string[] args)
     import coop.core.character;
     import coop.model;
     import coop.model.config;
+    import coop.model.custom_info;
     import coop.core.wisdom;
     import coop.view.main_frame;
     import coop.util;
@@ -39,10 +40,10 @@ extern(C) int UIAppMain(string[] args)
 
     auto wisdom = new Wisdom(SystemResourceBase);
 
-    auto cWisdomDir = buildPath(UserResourceBase, "wisdom");
-    mkdirRecurse(cWisdomDir);
-    auto customWisdom = new Wisdom(cWisdomDir);
-    scope(success) customWisdom.save;
+    auto cInfoDir = buildPath(UserResourceBase, "wisdom");
+    mkdirRecurse(cInfoDir);
+    auto customInfo = new CustomInfo(cInfoDir);
+    scope(success) customInfo.save;
 
     auto config = new Config(buildPath(UserResourceBase, "config.json"));
     scope(success) config.save;
@@ -68,7 +69,7 @@ extern(C) int UIAppMain(string[] args)
                                                  config.windowHeight);
 
     auto model = new WisdomModel(wisdom);
-    window.mainWidget = new MainFrame(model, chars, config, customWisdom);
+    window.mainWidget = new MainFrame(model, chars, config, customInfo);
     window.windowIcon = drawableCache.getImage("coop-icon");
     window.show;
     window.onClose = {

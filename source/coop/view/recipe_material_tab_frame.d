@@ -662,8 +662,6 @@ class RecipeMaterialTabFrame: TabFrameBase
     {
         auto elems = controller.model.getMenuRecipeResult(items);
         fullMaterialInfo = elems.materials;
-        import std.stdio;
-        writeln("Elems: ", elems);
 
         initRecipeTable(elems.recipes);
         initLeftoverTable(elems.materials);
@@ -680,8 +678,6 @@ class RecipeMaterialTabFrame: TabFrameBase
             preference = controller.model.getDefaultPreference;
         }
         auto elems = controller.model.getMenuRecipeResult(targets, owned, preference, leafMaterials);
-        import std.stdio;
-        writeln("Elems: ", elems);
         auto mats = setDifference!"a.key < b.key"(elems.materials.byKeyValue.array.schwartzSort!"a.key",
                                                   targets.byKeyValue.array.schwartzSort!"a.key").map!"tuple(a.key, a.value)".assocArray;
         updateMaterialTable(mats); // 最初にすること！

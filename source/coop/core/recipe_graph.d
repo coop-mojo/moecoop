@@ -22,7 +22,10 @@ class RecipeGraph
     import coop.core.recipe;
 
     this(dstring[] names, Wisdom w, dstring[dstring] pref = defaultPreference)
-    {
+    in {
+        import std.range;
+        assert(!names.empty);
+    } body {
         import std.algorithm;
         import std.array;
 
@@ -34,7 +37,10 @@ class RecipeGraph
     }
 
     this(dstring[] names, Recipe[dstring] recipeMap, RedBlackTree!dstring[dstring] rrecipeMap, dstring[dstring] pref = defaultPreference)
-    {
+    in {
+        import std.range;
+        assert(!names.empty);
+    } body {
         import std.algorithm;
         import std.array;
 
@@ -53,6 +59,7 @@ class RecipeGraph
         if (orderedRecipes_.empty)
         {
             visit;
+            assert(!orderedRecipes_.empty);
         }
         RecipeInfo[] rinfo = orderedRecipes_.map!((r) {
                 auto bros = recipes_[r].parents[].map!(p => materials_[p].children).join.map!"a.name".array.sort().uniq.array;
@@ -74,6 +81,7 @@ class RecipeGraph
         import std.array;
         import std.format;
 
+        assert(!targets.keys.empty);
         assert(targets.keys.all!(t => roots.map!"a.name".canFind(t)), format("Invalid input: %s but roots are %s", targets, roots.map!"a.name".array));
     } body {
         import std.algorithm;
@@ -194,7 +202,7 @@ private:
         assert(materials_[name].children.all!(c => name in c.parents));
     } body {
         auto mat = materials_.get(name, new MaterialContainer(name));
-        if (parent !is null && parent.name !in mat.parents)
+        if (parent !is null && parent.name !in mat.parents && name !in materials_)
         {
             mat.parents.insert(parent.name);
         }
@@ -235,8 +243,9 @@ private:
     in {
         assert(parent !is null);
     } out {
-        import std.algorithm;
-        assert(recipes_[name].children.all!(c => name in c.parents));
+        // 鉄の棒などのループするアイテムの場合には、以下は成り立たない！
+        // import std.algorithm;
+        // assert(recipes_[name].children.all!(c => name in c.parents));
     } body {
         import std.algorithm;
         import std.array;

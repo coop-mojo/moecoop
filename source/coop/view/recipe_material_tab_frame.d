@@ -520,8 +520,6 @@ class RecipeMaterialTabFrame: TabFrameBase
         unhighlightDetailRecipe;
         scope(exit) highlightDetailRecipe;
         auto tbl = enforce(childById!TableLayout("recipes"));
-        import std.stdio;import std.range;
-        writeln("RS: ", tbl.rows.map!"a[0]".map!"a.text".array);
         foreach(rs; tbl.rows)
         {
             import std.string;
@@ -530,7 +528,6 @@ class RecipeMaterialTabFrame: TabFrameBase
             if (auto n  = r in recipes)
             {
                 import std.array;
-                import std.stdio; writeln("Hit ", r);
 
                 rs.each!(w => w.visibility = Visibility.Visible);
                 rs[1].text = format("%s 回"d, *n);
@@ -551,7 +548,6 @@ class RecipeMaterialTabFrame: TabFrameBase
             }
             else
             {
-                import std.stdio; writeln("Not hit ", r);
                 rs.each!(w => w.visibility = Visibility.Gone);
             }
         }

@@ -120,8 +120,10 @@ class RecipeGraph
                 }
             }
         }
+        rs.byKeyValue
+          .filter!(kv => kv.value == 0)
+          .each!(kv => rs.remove(kv.key));
         leftover.byKeyValue
-                .array
                 .filter!(kv => kv.value == 0)
                 .each!(kv => leftover.remove(kv.key));
         alias Ret = Tuple!(int[dstring], "recipes", MatTuple[dstring], "materials", int[dstring], "leftovers");

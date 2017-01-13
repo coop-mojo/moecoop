@@ -14,6 +14,7 @@ pages:
   - バインダータブ: binder.md
   - スキルタブ: skill.md
   - レシピ材料タブ: material.md
+  - 参考価格について: refprice.md
   - オプション画面: option.md
   - Migemo 検索について: migemo.md
   - 開発者向け: devel.md

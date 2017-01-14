@@ -64,8 +64,8 @@ class MainFrame: AppFrame
 
         super();
         controller_ = new MainFrameController(this, model, chars, config, cInfo);
-        binderTab.controller = new BinderTabFrameController(binderTab, model.getBinderCategories);
-        skillTab.controller = new SkillTabFrameController(skillTab, model.getSkillCategories);
+        binderTab.controller = new BinderTabFrameController(binderTab, model.getBinderCategories.to!(dstring[]));
+        skillTab.controller = new SkillTabFrameController(skillTab, model.getSkillCategories.to!(dstring[]));
         materialTab.controller = new RecipeMaterialTabFrameController(materialTab);
 
         binderTab.controller.showRecipeNames;

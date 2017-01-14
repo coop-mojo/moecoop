@@ -78,10 +78,11 @@ class RecipeDetailFrame: ScrollWidget, MenuItemActionHandler
         {
             import std.algorithm;
             import std.array;
+            import std.conv;
             import std.format;
 
             childById("recipe").text = n;
-            childById("tech").text = r.techniques[].join(" or ");
+            childById("tech").text = r.techniques[].array.to!(dstring[]).join(" or ");
             childById("skills").text = r.requiredSkills
                                        .byKeyValue
                                        .map!(kv => format("%s (%.1f)"d,
@@ -116,12 +117,12 @@ class RecipeDetailFrame: ScrollWidget, MenuItemActionHandler
                 rouletteText = attrs.join(", ");
             }
             childById("roulette").text = rouletteText;
-            auto rem = r ? r.remarks : "作り方がわかりません（´・ω・｀）";
+            auto rem = r ? r.remarks.to!dstring : "作り方がわかりません（´・ω・｀）";
             childById("remarksInfo").visibility =
                 rem.empty ? Visibility.Gone : Visibility.Visible;
             childById("remarks").text = rem;
         }
-        ret.binders = model.getBindersFor(n);
+        ret.binders = model.getBindersFor(n).to!(dstring[]);
         if (!chars.keys.empty)
         {
             import std.algorithm;
@@ -131,9 +132,9 @@ class RecipeDetailFrame: ScrollWidget, MenuItemActionHandler
                          .keys
                          .filter!(k =>
                                   ret.binders
-                                  .any!(b => chars[k].hasRecipe(n, b)))
+                                  .any!(b => chars[k].hasRecipe(n.to!string, b.to!string)))
                          .map!(k => tuple(k,
-                                          make!(RedBlackTree!dstring)(ret.binders.filter!(b => chars[k].hasRecipe(n, b)).array)))
+                                          make!(RedBlackTree!dstring)(ret.binders.filter!(b => chars[k].hasRecipe(n.to!string, b.to!string)).array)))
                          .assocArray;
         }
 

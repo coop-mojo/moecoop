@@ -7,8 +7,8 @@ module coop.core.wisdom;
 
 import std.typecons;
 
-alias Binder = Typedef!(dstring, dstring.init, "binder");
-alias Category = Typedef!(dstring, dstring.init, "category");
+alias Binder = Typedef!(string, string.init, "binder");
+alias Category = Typedef!(string, string.init, "category");
 
 class Wisdom {
     import std.container;
@@ -18,31 +18,31 @@ class Wisdom {
     import coop.core.vendor;
 
     /// バインダーごとのレシピ名一覧
-    dstring[][dstring] binderList;
+    string[][string] binderList;
 
     /// スキルカテゴリごとのレシピ名一覧
-    RedBlackTree!dstring[dstring] skillList;
+    RedBlackTree!string[string] skillList;
 
     /// レシピ一覧
-    Recipe[dstring] recipeList;
+    Recipe[string] recipeList;
 
     /// 素材を作成するレシピ名一覧
-    RedBlackTree!dstring[dstring] rrecipeList;
+    RedBlackTree!string[string] rrecipeList;
 
     /// アイテム一覧
-    Item[dstring] itemList;
+    Item[string] itemList;
 
     /// 飲食バフ一覧
-    AdditionalEffect[dstring] foodEffectList;
+    AdditionalEffect[string] foodEffectList;
 
     /// アイテム種別ごとの固有情報一覧
-    ExtraInfo[dstring][ItemType] extraInfoList;
+    ExtraInfo[string][ItemType] extraInfoList;
 
     /// 販売員情報
-    Vendor[dstring] vendorList;
+    Vendor[string] vendorList;
 
     /// アイテムごとの売店での販売価格一覧
-    int[dstring] vendorPriceList;
+    int[string] vendorPriceList;
 
     this(string baseDir)
     {
@@ -67,13 +67,13 @@ class Wisdom {
         {
             import std.conv;
 
-            extraInfoList[Food.to!ItemType] = readFoodList(baseDir_).to!(ExtraInfo[dstring]);
-            extraInfoList[Drink.to!ItemType] = readDrinkList(baseDir_).to!(ExtraInfo[dstring]);
-            extraInfoList[Liquor.to!ItemType] = readLiquorList(baseDir_).to!(ExtraInfo[dstring]);
-            extraInfoList[Weapon.to!ItemType] = readWeaponList(baseDir_).to!(ExtraInfo[dstring]);
-            extraInfoList[Armor.to!ItemType] = readArmorList(baseDir_).to!(ExtraInfo[dstring]);
-            extraInfoList[Bullet.to!ItemType] = readBulletList(baseDir_).to!(ExtraInfo[dstring]);
-            extraInfoList[Shield.to!ItemType] = readShieldList(baseDir_).to!(ExtraInfo[dstring]);
+            extraInfoList[Food.to!ItemType] = readFoodList(baseDir_).to!(ExtraInfo[string]);
+            extraInfoList[Drink.to!ItemType] = readDrinkList(baseDir_).to!(ExtraInfo[string]);
+            extraInfoList[Liquor.to!ItemType] = readLiquorList(baseDir_).to!(ExtraInfo[string]);
+            extraInfoList[Weapon.to!ItemType] = readWeaponList(baseDir_).to!(ExtraInfo[string]);
+            extraInfoList[Armor.to!ItemType] = readArmorList(baseDir_).to!(ExtraInfo[string]);
+            extraInfoList[Bullet.to!ItemType] = readBulletList(baseDir_).to!(ExtraInfo[string]);
+            extraInfoList[Shield.to!ItemType] = readShieldList(baseDir_).to!(ExtraInfo[string]);
         }
         itemList = readItemList(baseDir_);
 
@@ -93,7 +93,7 @@ class Wisdom {
     in {
         assert(name in skillList);
     } body {
-        return skillList[cast(dstring)name];
+        return skillList[cast(string)name];
     }
 
     @property auto binders() const pure nothrow
@@ -108,10 +108,10 @@ class Wisdom {
     in {
         assert(name in binderList);
     } body {
-        return binderList[cast(dstring)name];
+        return binderList[cast(string)name];
     }
 
-    auto recipeFor(dstring recipeName) pure
+    auto recipeFor(string recipeName) pure
     {
         import std.algorithm;
         import std.range;
@@ -129,7 +129,7 @@ class Wisdom {
         }
     }
 
-    auto bindersFor(dstring recipeName) pure nothrow
+    auto bindersFor(string recipeName) pure nothrow
     {
         import std.algorithm;
         import std.range;
@@ -187,7 +187,7 @@ private:
                    .checkedAssocArray;
         auto slist = lst.byKeyValue
                         .map!(kv => tuple(kv.key,
-                                          make!(RedBlackTree!dstring)(kv.value.keys)))
+                                          make!(RedBlackTree!string)(kv.value.keys)))
                         .assocArray;
         auto rlist = lst.values
                         .map!"a.byPair"
@@ -200,14 +200,14 @@ private:
     {
         import std.algorithm;
 
-        RedBlackTree!dstring[dstring] ret;
+        RedBlackTree!string[string] ret;
         foreach(r; recipes)
         {
             foreach(p; r.products.keys)
             {
                 if (p !in ret)
                 {
-                    ret[p] = make!(RedBlackTree!dstring)(r.name);
+                    ret[p] = make!(RedBlackTree!string)(r.name);
                 }
                 else
                 {
@@ -301,9 +301,9 @@ auto readBinders(string file)
         .map!((kv) {
                 import coop.util;
 
-                auto binder = kv.key.to!dstring;
+                auto binder = kv.key.to!string;
                 enforce(kv.value.type == JSON_TYPE.ARRAY);
-                auto recipes = kv.value.jto!(dstring[]);
+                auto recipes = kv.value.jto!(string[]);
                 return tuple(binder, recipes);
             });
 }
@@ -317,19 +317,19 @@ unittest
     import coop.util;
 
     auto w = assertNotThrown(new Wisdom(SystemResourceBase));
-    assert(w.recipeCategories.equal(["合成"d, "料理", "木工", "特殊", "薬調合", "裁縫", "装飾細工", "複合", "醸造", "鍛冶"]));
-    assert(w.binders.equal(["QoAクエスト"d, "アクセサリー", "アクセサリー No.2", "カオス", "家", "家具", "木工", "木工 No.2",
+    assert(w.recipeCategories.equal(["合成", "料理", "木工", "特殊", "薬調合", "裁縫", "装飾細工", "複合", "醸造", "鍛冶"]));
+    assert(w.binders.equal(["QoAクエスト", "アクセサリー", "アクセサリー No.2", "カオス", "家", "家具", "木工", "木工 No.2",
                             "材料/道具", "材料/道具 No.2", "楽器", "罠", "裁縫", "裁縫 No.2", "複製",
                             "鍛冶 No.1", "鍛冶 No.2", "鍛冶 No.3", "鍛冶 No.4", "鍛冶 No.5", "鍛冶 No.6", "鍛冶 No.7",
                             "食べ物", "食べ物 No.2", "食べ物 No.3", "飲み物"]));
 
     assert(w.recipesIn(Binder("食べ物")).length == 128);
-    assert("ロースト スネーク ミート"d in w.recipesIn(Category("料理")));
+    assert("ロースト スネーク ミート" in w.recipesIn(Category("料理")));
 
     assert(w.recipeFor("とても美味しい食べ物").name.empty);
-    assert(w.recipeFor("ロースト スネーク ミート").ingredients == ["ヘビの肉"d: 1]);
+    assert(w.recipeFor("ロースト スネーク ミート").ingredients == ["ヘビの肉": 1]);
 
-    assert(w.bindersFor("ロースト スネーク ミート").equal(["食べ物"d]));
+    assert(w.bindersFor("ロースト スネーク ミート").equal(["食べ物"]));
 }
 
 unittest

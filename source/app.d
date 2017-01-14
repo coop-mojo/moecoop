@@ -58,7 +58,7 @@ extern(C) int UIAppMain(string[] args)
         userNames = ["かきあげ"d];
     }
     auto chars = userNames
-                 .map!(name => tuple(name, new Character(name, userDir.to!dstring)))
+                 .map!(name => tuple(name, new Character(name.to!string, userDir)))
                  .assocArray;
     scope(exit) chars.values.each!(c => c.save);
 

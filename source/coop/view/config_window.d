@@ -55,7 +55,7 @@ class ConfigDialog: Dialog
             });
 
         wLayout.childById!StringListWidget("characters").items = chars_.keys;
-        dstring baseDir = chars_.values.front.baseDirectory;
+        string baseDir = chars_.values.front.baseDirectory;
 
         if (chars_.keys.length == 1)
         {
@@ -71,8 +71,8 @@ class ConfigDialog: Dialog
                     auto cdlg = cast(CharacterSettingDialog)dlg;
                     auto name = enforce(cdlg.charNameBox.text);
                     auto url = cdlg.urlBox.text;
-                    chars_[name] = new Character(name, baseDir);
-                    chars_[name].url = url;
+                    chars_[name] = new Character(name.to!string, baseDir);
+                    chars_[name].url = url.to!string;
                     wLayout.childById!StringListWidget("characters").items = chars_.keys;
                     wLayout.childById("deleteCharacter").enabled = true;
                 }
@@ -84,13 +84,13 @@ class ConfigDialog: Dialog
         wLayout.childById("editCharacter").click = (Widget src) {
             auto charName = wLayout.childById!StringListWidget("characters").selectedItem;
             auto ch = chars_[charName];
-            auto url = ch.url;
+            auto url = ch.url.to!dstring;
 
             auto dlg = new CharacterSettingDialog(window, chars_, charName, url);
             dlg.dialogResult = (Dialog dlg, const Action action) {
                 if (action && action.id == StandardAction.Ok)
                 {
-                    ch.url = (cast(CharacterSettingDialog)dlg).urlBox.text;
+                    ch.url = (cast(CharacterSettingDialog)dlg).urlBox.text.to!string;
                 }
             };
             dlg.show;
@@ -235,10 +235,10 @@ class CharacterSettingDialog: Dialog
                 import std.exception;
                 import std.traits;
                 import std.typecons;
-                auto tpl = parseSimulatorURL(txt).ifThrown(ReturnType!parseSimulatorURL.init);
+                auto tpl = parseSimulatorURL(txt.to!string).ifThrown(ReturnType!parseSimulatorURL.init);
                 if (tpl[0] != "")
                 {
-                    charNameBox.text = tpl[0];
+                    charNameBox.text = tpl[0].to!dstring;
                     charNameBox.textColor = "black";
                 }
             }

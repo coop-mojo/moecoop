@@ -19,13 +19,15 @@ class SkillTabFrameController: RecipeTabFrameController
         import std.traits;
 
         super(frame, categories);
-        frame.relatedBindersFor = (recipe, _) => model.getBindersFor(recipe);
+        frame.relatedBindersFor = (recipe, _) => model.getBindersFor(recipe).to!(dstring[]);
         frame.tableColumnLength = (nRecipes, nColumns) => (nRecipes.to!real/nColumns).ceil.to!int;
         with(frame.childById!ComboBox("sortBy"))
         {
+            import std.algorithm;
+            import std.range;
             import coop.model;
 
-            items = [EnumMembers!SortOrder][0..$-1];
+            items = only(EnumMembers!SortOrder).map!"cast(string)a".array.to!(dstring[])[0..$-1];
             selectedItemIndex = 0;
         }
         auto revSearch = new CheckBox("revSearch", "逆引き検索"d);
@@ -34,6 +36,8 @@ class SkillTabFrameController: RecipeTabFrameController
 
     override void showRecipeNames()
     {
+        import std.algorithm;
+        import std.conv;
         import std.regex;
         import std.typecons;
 
@@ -45,10 +49,12 @@ class SkillTabFrameController: RecipeTabFrameController
             return;
         }
 
-        auto recipes = model.getRecipeList(query, Category(frame_.selectedCategory),
+        auto recipes = model.getRecipeList(query, Category(frame_.selectedCategory.to!string),
                                            cast(Flag!"useMetaSearch")frame_.useMetaSearch, cast(Flag!"useMigemo")frame_.useMigemo,
                                            cast(Flag!"useReverseSearch")frame_.useReverseSearch,
-                                           cast(SortOrder)frame_.sortKey);
-        frame_.showRecipeList(recipes);
+                                           cast(SortOrder)frame_.sortKey.to!string);
+        frame_.showRecipeList(recipes.map!(r => Tuple!(dstring, "category",
+                                                       dstring[], "recipes")(r.category.to!dstring,
+                                                                             r.recipes.to!(dstring[]))));
     }
 }

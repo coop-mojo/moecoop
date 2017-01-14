@@ -218,7 +218,7 @@ private:
     {
         import coop.view.item_detail_frame;
 
-        tabFrame.setItemDetail(ItemDetailFrame.create(original.name, idx+1, tabFrame.controller.model, customInfo), idx);
+        tabFrame.setItemDetail(ItemDetailFrame.create(original.name.to!dstring, idx+1, tabFrame.controller.model, customInfo), idx);
     }
 
     Item original;

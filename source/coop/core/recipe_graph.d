@@ -8,8 +8,8 @@ module coop.core.recipe_graph;
 import std.typecons;
 
 /// for elements/0
-alias RecipeInfo = Tuple!(dstring, "name", dstring, "parentGroup");
-alias MaterialInfo = Tuple!(dstring, "name", bool, "isLeaf");
+alias RecipeInfo = Tuple!(string, "name", string, "parentGroup");
+alias MaterialInfo = Tuple!(string, "name", bool, "isLeaf");
 
 /// for elements/4
 alias MatTuple = Tuple!(int, "num", bool, "isIntermediate");
@@ -21,7 +21,7 @@ class RecipeGraph
     import coop.core.wisdom;
     import coop.core.recipe;
 
-    this(dstring[] names, Wisdom w, dstring[dstring] pref = defaultPreference)
+    this(string[] names, Wisdom w, string[string] pref = defaultPreference)
     in {
         import std.range;
         assert(!names.empty);
@@ -36,7 +36,7 @@ class RecipeGraph
         roots = materials_.values.filter!"a.parents.empty".array.schwartzSort!"a.name".array;
     }
 
-    this(dstring[] names, Recipe[dstring] recipeMap, RedBlackTree!dstring[dstring] rrecipeMap, dstring[dstring] pref = defaultPreference)
+    this(string[] names, Recipe[string] recipeMap, RedBlackTree!string[string] rrecipeMap, string[string] pref = defaultPreference)
     in {
         import std.range;
         assert(!names.empty);
@@ -75,7 +75,7 @@ class RecipeGraph
     /++
      + targets を作るのに必要なレシピ，素材，作成時の余り素材を返す
      +/
-    auto elements(int[dstring] targets, int[dstring] owned, RedBlackTree!dstring mats = new RedBlackTree!dstring) pure
+    auto elements(int[string] targets, int[string] owned, RedBlackTree!string mats = new RedBlackTree!string) pure
     in {
         import std.algorithm;
         import std.array;
@@ -87,8 +87,8 @@ class RecipeGraph
         import std.algorithm;
         import std.array;
 
-        int[dstring] rs, leftover;
-        MatTuple[dstring] ms = targets.byKeyValue.map!(kv => tuple(kv.key, MatTuple(kv.value, false))).assocArray;
+        int[string] rs, leftover;
+        MatTuple[string] ms = targets.byKeyValue.map!(kv => tuple(kv.key, MatTuple(kv.value, false))).assocArray;
         foreach(r; elements.recipes.map!"a.name")
         {
             import std.conv;
@@ -137,7 +137,7 @@ class RecipeGraph
                            .filter!(kv => kv.value > 0)
                            .map!(kv => tuple(kv.key, kv.value))
                            .assocArray;
-        alias Ret = Tuple!(int[dstring], "recipes", MatTuple[dstring], "materials", int[dstring], "leftovers");
+        alias Ret = Tuple!(int[string], "recipes", MatTuple[string], "materials", int[string], "leftovers");
         return Ret(rs, ms, leftover);
     }
 
@@ -155,7 +155,7 @@ class RecipeGraph
 
     // material -> recipe
     enum defaultPreference = [
-        "魚の餌"d: "魚の餌(ヘビの肉)"d,
+        "魚の餌": "魚の餌(ヘビの肉)",
         "砂糖": "砂糖(臼)",
         "塩": "塩(岩塩)",
         "パン粉": "パン粉",
@@ -199,7 +199,7 @@ private:
     /++
      + Init tree from a given material name
      +/
-    void init(dstring name, RecipeContainer parent) pure
+    void init(string name, RecipeContainer parent) pure
     out {
         import std.algorithm;
         assert(materials_[name].children.all!(c => name in c.parents));
@@ -220,7 +220,7 @@ private:
             import std.algorithm;
             import std.array;
 
-            dstring[] arr;
+            string[] arr;
             if (auto elem = name in preferences_)
             {
                 arr = [*elem];
@@ -242,7 +242,7 @@ private:
     /++
      + Init tree from a given recipe name
      +/
-    void init(dstring name, MaterialContainer parent) pure
+    void init(string name, MaterialContainer parent) pure
     in {
         assert(parent !is null);
     } out {
@@ -274,7 +274,7 @@ private:
         recipe.children = rr.ingredients.keys.map!(m => materials_[m]).array;
     }
 
-    void visit(MaterialContainer material, ref RedBlackTree!dstring rs, ref RedBlackTree!dstring ms) pure
+    void visit(MaterialContainer material, ref RedBlackTree!string rs, ref RedBlackTree!string ms) pure
     {
         import std.algorithm;
 
@@ -287,7 +287,7 @@ private:
         orderedMaterials_ ~= material.name;
     }
 
-    void visit(RecipeContainer recipe, ref RedBlackTree!dstring rs, ref RedBlackTree!dstring ms) pure
+    void visit(RecipeContainer recipe, ref RedBlackTree!string rs, ref RedBlackTree!string ms) pure
     {
         import std.algorithm;
 
@@ -307,8 +307,8 @@ private:
 
         orderedRecipes_ = [];
         orderedMaterials_ = [];
-        auto visitedRecipes = new RedBlackTree!dstring;
-        auto visitedMaterials = new RedBlackTree!dstring;
+        auto visitedRecipes = new RedBlackTree!string;
+        auto visitedMaterials = new RedBlackTree!string;
         foreach(r; roots)
         {
             visit(r, visitedRecipes, visitedMaterials);
@@ -319,13 +319,13 @@ private:
 
     MaterialContainer[] roots;
 
-    MaterialContainer[dstring] materials_;
-    RecipeContainer[dstring] recipes_;
-    dstring[dstring] preferences_;
-    dstring[] orderedRecipes_;
-    dstring[] orderedMaterials_;
-    Recipe delegate(dstring) pure recipeFor;
-    RedBlackTree!dstring* delegate(dstring) pure rrecipeFor;
+    MaterialContainer[string] materials_;
+    RecipeContainer[string] recipes_;
+    string[string] preferences_;
+    string[] orderedRecipes_;
+    string[] orderedMaterials_;
+    Recipe delegate(string) pure recipeFor;
+    RedBlackTree!string* delegate(string) pure rrecipeFor;
 }
 
 
@@ -333,14 +333,14 @@ class RecipeContainer
 {
     import std.container;
 
-    this(dstring name_) @safe pure nothrow
+    this(string name_) @safe pure nothrow
     {
         name = name_;
-        parents = new RedBlackTree!dstring;
+        parents = new RedBlackTree!string;
     }
 
-    dstring name;
-    RedBlackTree!dstring parents;
+    string name;
+    RedBlackTree!string parents;
     MaterialContainer[] children;
 }
 
@@ -348,10 +348,10 @@ class MaterialContainer
 {
     import std.container;
 
-    this(dstring name_) @safe pure nothrow
+    this(string name_) @safe pure nothrow
     {
         name = name_;
-        parents = new RedBlackTree!dstring;
+        parents = new RedBlackTree!string;
     }
 
     auto isLeaf() const @safe pure nothrow
@@ -359,9 +359,9 @@ class MaterialContainer
         return !isProduct;
     }
 
-    dstring name;
+    string name;
     bool isProduct = true;
-    RedBlackTree!dstring parents;
+    RedBlackTree!string parents;
     RecipeContainer[] children;
 }
 
@@ -379,7 +379,7 @@ unittest
     };
     auto graph = new RecipeGraph(["ロースト スネーク ミート"],
                                  ["ロースト スネーク ミート": roastSnake],
-                                 ["ロースト スネーク ミート": make!(RedBlackTree!dstring)("ロースト スネーク ミート"d)]);
+                                 ["ロースト スネーク ミート": make!(RedBlackTree!string)("ロースト スネーク ミート")]);
     auto tpl = graph.elements;
     assert(tpl.recipes == [RecipeInfo("ロースト スネーク ミート", "")]);
     assert(tpl.materials == [MaterialInfo("ロースト スネーク ミート", false),
@@ -409,7 +409,7 @@ unittest
         products: ["塩": 7],
     };
     Recipe salt2 = {
-        name: "塩(木炭＋海水)"d,
+        name: "塩(木炭＋海水)",
         ingredients: ["木炭": 1, "海水": 1],
         products: ["塩": 18],
     };
@@ -424,8 +424,8 @@ unittest
                                          "塩(木炭＋海水)": salt2,
                                      ],
                                      [
-                                         "ロースト タイガー ミート"d: make!(RedBlackTree!dstring)("ロースト タイガー ミート"d),
-                                         "塩": make!(RedBlackTree!dstring)("塩(岩塩)"d, "塩(木炭＋海水)"d),
+                                         "ロースト タイガー ミート": make!(RedBlackTree!string)("ロースト タイガー ミート"),
+                                         "塩": make!(RedBlackTree!string)("塩(岩塩)", "塩(木炭＋海水)"),
                                      ],
                                      pref);
 
@@ -452,14 +452,14 @@ unittest
                    ]));
         auto mats = tpl.materials.map!"a.name".array;
         assert(mats.front == "ロースト タイガー ミート");
-        assert(mats.indexOf("塩"d) < mats.indexOf("木炭"d));
-        assert(mats.indexOf("塩"d) < mats.indexOf("海水"d));
-        assert(mats.indexOf("塩"d) < mats.indexOf("岩塩"d));
+        assert(mats.indexOf("塩") < mats.indexOf("木炭"));
+        assert(mats.indexOf("塩") < mats.indexOf("海水"));
+        assert(mats.indexOf("塩") < mats.indexOf("岩塩"));
     }
 
     {
         // 塩(岩塩)のレシピを使う場合のレシピ・素材を列挙
-        auto pref = ["塩"d: "塩(岩塩)"d];
+        auto pref = ["塩": "塩(岩塩)"];
         auto graph = new RecipeGraph(["ロースト タイガー ミート"],
                                      [
                                          "ロースト タイガー ミート": roastTiger,
@@ -467,8 +467,8 @@ unittest
                                          "塩(木炭＋海水)": salt2,
                                      ],
                                      [
-                                         "ロースト タイガー ミート"d: make!(RedBlackTree!dstring)("ロースト タイガー ミート"d),
-                                         "塩": make!(RedBlackTree!dstring)("塩(岩塩)"d, "塩(木炭＋海水)"d),
+                                         "ロースト タイガー ミート": make!(RedBlackTree!string)("ロースト タイガー ミート"),
+                                         "塩": make!(RedBlackTree!string)("塩(岩塩)", "塩(木炭＋海水)"),
                                      ],
                                      pref);
         auto tpl = graph.elements;
@@ -488,7 +488,7 @@ unittest
                    ]));
         auto mats = tpl.materials.map!"a.name".array;
         assert(mats.front == "ロースト タイガー ミート");
-        assert(mats.indexOf("塩"d) < mats.indexOf("岩塩"d));
+        assert(mats.indexOf("塩") < mats.indexOf("岩塩"));
     }
 }
 
@@ -515,7 +515,7 @@ unittest
         products: ["塩": 7],
     };
     Recipe salt2 = {
-        name: "塩(木炭＋海水)"d,
+        name: "塩(木炭＋海水)",
         ingredients: ["木炭": 1, "海水": 1],
         products: ["塩": 18],
     };
@@ -531,9 +531,9 @@ unittest
                                          "塩(木炭＋海水)": salt2,
                                      ],
                                      [
-                                         "ロースト タイガー ミート"d: make!(RedBlackTree!dstring)("ロースト タイガー ミート"d),
-                                         "ロースト ライオン ミート"d: make!(RedBlackTree!dstring)("ロースト ライオン ミート"d),
-                                         "塩": make!(RedBlackTree!dstring)("塩(岩塩)"d, "塩(木炭＋海水)"d),
+                                         "ロースト タイガー ミート": make!(RedBlackTree!string)("ロースト タイガー ミート"),
+                                         "ロースト ライオン ミート": make!(RedBlackTree!string)("ロースト ライオン ミート"),
+                                         "塩": make!(RedBlackTree!string)("塩(岩塩)", "塩(木炭＋海水)"),
                                      ],
                                      pref);
         auto tpl = graph.elements;
@@ -548,10 +548,10 @@ unittest
                        RecipeInfo("塩(木炭＋海水)", "塩"),
                    ]));
         auto rs = tpl.recipes.map!"a.name".array;
-        assert(rs.indexOf("ロースト タイガー ミート"d) < rs.indexOf("塩(岩塩)"d));
-        assert(rs.indexOf("ロースト タイガー ミート"d) < rs.indexOf("塩(木炭＋海水)"d));
-        assert(rs.indexOf("ロースト ライオン ミート"d) < rs.indexOf("塩(岩塩)"d));
-        assert(rs.indexOf("ロースト ライオン ミート"d) < rs.indexOf("塩(木炭＋海水)"d));
+        assert(rs.indexOf("ロースト タイガー ミート") < rs.indexOf("塩(岩塩)"));
+        assert(rs.indexOf("ロースト タイガー ミート") < rs.indexOf("塩(木炭＋海水)"));
+        assert(rs.indexOf("ロースト ライオン ミート") < rs.indexOf("塩(岩塩)"));
+        assert(rs.indexOf("ロースト ライオン ミート") < rs.indexOf("塩(木炭＋海水)"));
 
         assert(tpl.materials.dup.sort().equal(
                    [
@@ -565,18 +565,18 @@ unittest
                        MaterialInfo("海水", true),
                    ]));
         auto mats = tpl.materials.map!"a.name".array;
-        assert(mats.indexOf("ロースト ライオン ミート"d) < mats.indexOf("ライオンの肉"d));
-        assert(mats.indexOf("ロースト ライオン ミート"d) < mats.indexOf("塩"d));
-        assert(mats.indexOf("ロースト タイガー ミート"d) < mats.indexOf("トラの肉"d));
-        assert(mats.indexOf("ロースト タイガー ミート"d) < mats.indexOf("塩"d));
-        assert(mats.indexOf("塩"d) < mats.indexOf("岩塩"d));
-        assert(mats.indexOf("塩"d) < mats.indexOf("木炭"d));
-        assert(mats.indexOf("塩"d) < mats.indexOf("海水"d));
+        assert(mats.indexOf("ロースト ライオン ミート") < mats.indexOf("ライオンの肉"));
+        assert(mats.indexOf("ロースト ライオン ミート") < mats.indexOf("塩"));
+        assert(mats.indexOf("ロースト タイガー ミート") < mats.indexOf("トラの肉"));
+        assert(mats.indexOf("ロースト タイガー ミート") < mats.indexOf("塩"));
+        assert(mats.indexOf("塩") < mats.indexOf("岩塩"));
+        assert(mats.indexOf("塩") < mats.indexOf("木炭"));
+        assert(mats.indexOf("塩") < mats.indexOf("海水"));
     }
 
     {
         // 塩(岩塩)のレシピを使う場合のレシピ・素材を列挙
-        auto pref = ["塩"d: "塩(岩塩)"d];
+        auto pref = ["塩": "塩(岩塩)"];
         auto graph = new RecipeGraph(["ロースト タイガー ミート", "ロースト ライオン ミート"],
                                      [
                                          "ロースト タイガー ミート": roastTiger,
@@ -585,9 +585,9 @@ unittest
                                          "塩(木炭＋海水)": salt2,
                                      ],
                                      [
-                                         "ロースト タイガー ミート"d: make!(RedBlackTree!dstring)("ロースト タイガー ミート"d),
-                                         "ロースト ライオン ミート"d: make!(RedBlackTree!dstring)("ロースト ライオン ミート"d),
-                                         "塩": make!(RedBlackTree!dstring)("塩(岩塩)"d, "塩(木炭＋海水)"d),
+                                         "ロースト タイガー ミート": make!(RedBlackTree!string)("ロースト タイガー ミート"),
+                                         "ロースト ライオン ミート": make!(RedBlackTree!string)("ロースト ライオン ミート"),
+                                         "塩": make!(RedBlackTree!string)("塩(岩塩)", "塩(木炭＋海水)"),
                                      ],
                                      pref);
         auto tpl = graph.elements;
@@ -613,11 +613,11 @@ unittest
                        MaterialInfo("岩塩", true),
                    ]));
         auto mats = tpl.materials.map!"a.name".array;
-        assert(mats.indexOf("ロースト ライオン ミート"d) < mats.indexOf("ライオンの肉"d));
-        assert(mats.indexOf("ロースト ライオン ミート"d) < mats.indexOf("塩"d));
-        assert(mats.indexOf("ロースト タイガー ミート"d) < mats.indexOf("トラの肉"d));
-        assert(mats.indexOf("ロースト タイガー ミート"d) < mats.indexOf("塩"d));
-        assert(mats.indexOf("塩"d) < mats.indexOf("岩塩"d));
+        assert(mats.indexOf("ロースト ライオン ミート") < mats.indexOf("ライオンの肉"));
+        assert(mats.indexOf("ロースト ライオン ミート") < mats.indexOf("塩"));
+        assert(mats.indexOf("ロースト タイガー ミート") < mats.indexOf("トラの肉"));
+        assert(mats.indexOf("ロースト タイガー ミート") < mats.indexOf("塩"));
+        assert(mats.indexOf("塩") < mats.indexOf("岩塩"));
     }
 }
 
@@ -638,8 +638,8 @@ unittest
     typeof(RecipeGraph.defaultPreference) pref = null;
     auto graph = new RecipeGraph(["精米"],
                                  ["精米/米ぬか": nuka],
-                                 ["精米"d: make!(RedBlackTree!dstring)("精米/米ぬか"d),
-                                  "米ぬか": make!(RedBlackTree!dstring)("精米/米ぬか"d)],
+                                 ["精米": make!(RedBlackTree!string)("精米/米ぬか"),
+                                  "米ぬか": make!(RedBlackTree!string)("精米/米ぬか")],
                                  pref);
     auto tpl = graph.elements;
 
@@ -654,8 +654,8 @@ unittest
                    MaterialInfo("精米", false),
                ]));
     auto mats = tpl.materials.map!"a.name".array;
-    assert(mats.indexOf("精米"d) < mats.indexOf("玄米"d));
-    assert(mats.indexOf("米ぬか"d) < mats.indexOf("玄米"d));
+    assert(mats.indexOf("精米") < mats.indexOf("玄米"));
+    assert(mats.indexOf("米ぬか") < mats.indexOf("玄米"));
 }
 
 // コンバインで複数種類の生産品が生成される場合
@@ -674,17 +674,17 @@ unittest
     typeof(RecipeGraph.defaultPreference) pref = null;
     auto graph = new RecipeGraph(["精米"],
                                  ["精米/米ぬか": nuka],
-                                 ["精米"d: make!(RedBlackTree!dstring)("精米/米ぬか"d),
-                                  "米ぬか": make!(RedBlackTree!dstring)("精米/米ぬか"d)],
+                                 ["精米": make!(RedBlackTree!string)("精米/米ぬか"),
+                                  "米ぬか": make!(RedBlackTree!string)("精米/米ぬか")],
                                  pref);
 
-    auto tpl = graph.elements(["精米"d: 1], (int[dstring]).init);
-    assert(tpl.recipes == ["精米/米ぬか"d: 1]);
+    auto tpl = graph.elements(["精米": 1], (int[string]).init);
+    assert(tpl.recipes == ["精米/米ぬか": 1]);
     assert(tpl.materials == [
-               "精米"d: MatTuple(1, true),
-               "玄米"d: MatTuple(1, false),
+               "精米": MatTuple(1, true),
+               "玄米": MatTuple(1, false),
                ]);
-    assert(tpl.leftovers == ["精米"d: 1, "米ぬか": 1]);
+    assert(tpl.leftovers == ["精米": 1, "米ぬか": 1]);
 }
 
 unittest
@@ -737,16 +737,16 @@ unittest
                                      "塩(岩塩)": salt,
                                  ],
                                  [
-                                     "チーズ パイ"d: make!(RedBlackTree!dstring)("チーズ パイ"d),
-                                     "パイ生地"d: make!(RedBlackTree!dstring)("パイ生地(ミニ ウォーター ボトル)"d),
-                                     "バター"d: make!(RedBlackTree!dstring)("バター"d),
-                                     "小麦粉"d: make!(RedBlackTree!dstring)("小麦粉"d),
-                                     "チーズ"d: make!(RedBlackTree!dstring)("チーズ"d),
-                                     "塩": make!(RedBlackTree!dstring)("塩(岩塩)"d),
+                                     "チーズ パイ": make!(RedBlackTree!string)("チーズ パイ"),
+                                     "パイ生地": make!(RedBlackTree!string)("パイ生地(ミニ ウォーター ボトル)"),
+                                     "バター": make!(RedBlackTree!string)("バター"),
+                                     "小麦粉": make!(RedBlackTree!string)("小麦粉"),
+                                     "チーズ": make!(RedBlackTree!string)("チーズ"),
+                                     "塩": make!(RedBlackTree!string)("塩(岩塩)"),
                                  ]);
     auto tpl = graph.elements(["チーズ パイ": 1], ["塩": 1]);
     assert(tpl.recipes == [
-               "チーズ パイ"d: 1,
+               "チーズ パイ": 1,
                "パイ生地(ミニ ウォーター ボトル)": 1,
                "バター": 1,
                "小麦粉": 1,
@@ -764,8 +764,8 @@ unittest
                "ミニ ウォーター ボトル": MatTuple(1, false),
                "臼": MatTuple(1, false),
                "酢": MatTuple(1, false),
-               "チーズ パイ"d: MatTuple(1, true),
+               "チーズ パイ": MatTuple(1, true),
                "塩": MatTuple(2, true),
                ]);
-    assert(tpl.leftovers == ["小麦粉": 4, "チーズ パイ"d: 1, "塩": 6]);
+    assert(tpl.leftovers == ["小麦粉": 4, "チーズ パイ": 1, "塩": 6]);
 }

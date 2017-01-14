@@ -6,7 +6,7 @@
 module coop.model;
 
 enum SortOrder {
-    BySkill       = "スキル値順"d,
+    BySkill       = "スキル値順",
     ByName        = "名前順",
     ByBinderOrder = "バインダー順",
 }
@@ -44,7 +44,7 @@ class WisdomModel
     auto getRecipe(Str)(Str name) if (isSomeString!Str)
     {
         import std.conv;
-        return wisdom.recipeFor(name.to!dstring);
+        return wisdom.recipeFor(name.to!string);
     }
 
     /// アイテム情報を返す
@@ -53,7 +53,7 @@ class WisdomModel
         import std.conv;
         import coop.core.item;
 
-        if (auto i = name.to!dstring in wisdom.itemList)
+        if (auto i = name.to!string in wisdom.itemList)
         {
             return *i;
         }
@@ -70,7 +70,7 @@ class WisdomModel
     auto getBindersFor(Str)(Str name) if (isSomeString!Str)
     {
         import std.conv;
-        return wisdom.bindersFor(name.to!dstring);
+        return wisdom.bindersFor(name.to!string);
     }
 
     /// アイテムの固有情報を返す
@@ -82,7 +82,7 @@ class WisdomModel
 
         alias RetType = Tuple!(ItemType, "type", ExtraInfo, "extra");
 
-        if (auto i = name.to!dstring in wisdom.itemList)
+        if (auto i = name.to!string in wisdom.itemList)
         {
             if ((*i).type == ItemType.Others)
             {
@@ -108,7 +108,7 @@ class WisdomModel
     auto getFoodEffect(Str)(Str name) if (isSomeString!Str)
     {
         import std.conv;
-        if (auto einfo = name.to!dstring in wisdom.foodEffectList)
+        if (auto einfo = name.to!string in wisdom.foodEffectList)
         {
             return *einfo;
         }
@@ -130,12 +130,12 @@ class WisdomModel
         import std.conv;
         import std.typecons;
 
-        alias RecipePair = Tuple!(dstring, "category", dstring[], "recipes");
+        alias RecipePair = Tuple!(string, "category", string[], "recipes");
 
         auto allRecipes = useMetaSearch ?
                           wisdom.binderList :
-                          [tuple(cast(dstring)binder, wisdom.recipesIn(binder))].assocArray;
-        auto queryResult = getQueryResultBase(query.to!dstring, allRecipes, useMetaSearch, useMigemo);
+                          [tuple(cast(string)binder, wisdom.recipesIn(binder))].assocArray;
+        auto queryResult = getQueryResultBase(query.to!string, allRecipes, useMetaSearch, useMigemo);
         return queryResult.byKeyValue.map!((kv) {
                 return [RecipePair(kv.key, kv.value.array)];
             }).joiner;
@@ -152,12 +152,12 @@ class WisdomModel
         import std.conv;
         import std.typecons;
 
-        alias RecipePair = Tuple!(dstring, "category", dstring[], "recipes");
+        alias RecipePair = Tuple!(string, "category", string[], "recipes");
 
         auto allRecipes = useMetaSearch ?
                           wisdom.skillList.byKeyValue.map!(kv => tuple(kv.key, kv.value.array)).assocArray :
-                          [tuple(cast(dstring)category, wisdom.recipesIn(category).array)].assocArray;
-        auto queryResult = getQueryResultBase(query.to!dstring, allRecipes, useMetaSearch, useMigemo, useReverseSearch);
+                          [tuple(cast(string)category, wisdom.recipesIn(category).array)].assocArray;
+        auto queryResult = getQueryResultBase(query.to!string, allRecipes, useMetaSearch, useMigemo, useReverseSearch);
         return queryResult.byKeyValue.map!((kv) {
                 import std.range;
                 auto category = kv.key;
@@ -168,18 +168,20 @@ class WisdomModel
                     return [RecipePair(category, rs.array)];
                 }
 
+                import std.stdio;
+                writeln("Order: ", order);
                 final switch(order) with(SortOrder)
                 {
                 case BySkill:
-                    auto levels(dstring s) {
+                    auto levels(string s) {
                         auto arr = wisdom.recipeFor(s).requiredSkills.byKeyValue.map!(a => tuple(a.key, a.value)).array;
                         arr.multiSort!("a[0] < b[0]", "a[1] < b[1]");
                         return arr;
                     }
-                    auto lvToStr(Tuple!(dstring, real)[] tpls)
+                    auto lvToStr(Tuple!(string, real)[] tpls)
                     {
                         import std.format;
-                        return tpls.map!(t => format("%s (%.1f)"d, t.tupleof)).join(", ");
+                        return tpls.map!(t => format("%s (%.1f)", t.tupleof)).join(", ");
                     }
                     auto arr = rs.map!(a => tuple(a, levels(a))).array;
                     arr.multiSort!("a[1] < b[1]", "a[0] < b[0]");
@@ -219,29 +221,34 @@ class WisdomModel
     auto getMenuRecipeResult(Str)(Str[] targets)
         if (isSomeString!Str)
     {
+        import std.conv;
         import coop.core.recipe_graph;
-        auto graph = new RecipeGraph(targets, wisdom, null);
+        auto graph = new RecipeGraph(targets.to!(string[]), wisdom, null);
         return graph.elements;
     }
 
     /// 
-    auto getMenuRecipeResult(Str)(int[Str] targets, int[Str] owned, Str[Str] preference, RedBlackTree!Str terminals)
-        if (isSomeString!Str)
+    auto getMenuRecipeResult(Str1, Str2, Str3, Str4)(int[Str1] targets, int[Str2] owned, Str3[Str3] preference, RedBlackTree!Str4 terminals)
+        if (isSomeString!Str1 && isSomeString!Str2 &&
+            isSomeString!Str3 && isSomeString!Str4)
     {
+        import std.conv;
+        import std.range;
         import coop.core.recipe_graph;
-        auto graph = new RecipeGraph(targets.keys, wisdom, preference);
-        return graph.elements(targets, owned, terminals);
+        auto graph = new RecipeGraph(targets.keys.to!(string[]), wisdom, preference.to!(string[string]));
+        return graph.elements(targets.to!(int[string]), owned.to!(int[string]), new RedBlackTree!string(terminals[].array.to!(string[])));
     }
 
     ///
-    auto costFor(Str)(Str item, int[dstring] procs)
+    auto costFor(Str)(Str item, int[string] procs)
+        if (isSomeString!Str)
     {
         import std.conv;
         import coop.core.price;
 
-        return procurementCostFor(item.to!dstring,
+        return procurementCostFor(item.to!string,
                                   wisdom.itemList, wisdom.recipeList, wisdom.rrecipeList,
-                                  wisdom.vendorPriceList, (int[dstring]).init,
+                                  wisdom.vendorPriceList, (int[string]).init,
                                   procs);
     }
 
@@ -252,7 +259,7 @@ private:
     import coop.core.wisdom;
     import coop.migemo;
 
-    auto getQueryResultBase(dstring query, dstring[][dstring] allRecipes,
+    auto getQueryResultBase(string query, string[][string] allRecipes,
                             Flag!"useMetaSearch" useMetaSearch, Flag!"useMigemo" useMigemo,
                             Flag!"useReverseSearch" useReverseSearch = No.useReverseSearch)
     {
@@ -273,17 +280,17 @@ private:
                       .assocArray;
     }
 
-    auto matchFunFor(dstring query, Flag!"useMigemo" useMigemo, Flag!"useReverseSearch" useReverseSearch = No.useReverseSearch)
+    auto matchFunFor(string query, Flag!"useMigemo" useMigemo, Flag!"useReverseSearch" useReverseSearch = No.useReverseSearch)
     {
         import std.regex;
         import std.string;
-        bool delegate(dstring) fun;
+        bool delegate(string) fun;
         if (useMigemo)
         {
             assert(migemo);
             try{
                 auto q = migemo.query(query).regex;
-                fun = (dstring s) => !s.removechars(r"/[ 　]/").matchFirst(q).empty;
+                fun = (string s) => !s.removechars(r"/[ 　]/").matchFirst(q).empty;
             } catch(RegexException e) {
                 // use default matchFun
             }
@@ -293,17 +300,17 @@ private:
             import std.algorithm;
             import std.range;
 
-            fun = (dstring s) => !find(s.removechars(r"/[ 　]/"), boyerMooreFinder(query)).empty;
+            fun = (string s) => !find(s.removechars(r"/[ 　]/"), boyerMooreFinder(query)).empty;
         }
 
         if (useReverseSearch)
         {
             import std.algorithm;
-            return (dstring s) => wisdom.recipeFor(s).ingredients.keys.any!(ing => fun(ing));
+            return (string s) => wisdom.recipeFor(s).ingredients.keys.any!(ing => fun(ing));
         }
         else
         {
-            return (dstring s) => fun(s);
+            return (string s) => fun(s);
         }
         assert(false);
     }

@@ -23,15 +23,15 @@ struct Item
     }
 
     /// アイテム名
-    dstring name;
+    string name;
     /// 英語名
-    dstring ename;
+    string ename;
     /// 重さ
     real weight;
     /// NPC 売却価格
     uint price;
     /// info
-    dstring info;
+    string info;
     /// 特殊条件
     ushort properties;
     /// 転送可能かどうか
@@ -41,7 +41,7 @@ struct Item
     /// ペットアイテム
     real[PetFoodType] petFoodInfo;
     /// 備考
-    dstring remarks;
+    string remarks;
     /// アイテム種別
     ItemType type;
 
@@ -138,7 +138,7 @@ auto readItems(string fname)
     enforce(res.type == JSON_TYPE.OBJECT);
     auto items = res.object;
     return items.keys.map!(key =>
-                           tuple(key.to!dstring,
+                           tuple(key.to!string,
                                  key.toItem(items[key].object,
                                             fname)));
 }
@@ -154,11 +154,11 @@ auto toItem(string s, JSONValue[string] json, string fname)
         import std.conv: to;
         import coop.util: jto;
 
-        name = s.to!dstring;
-        ename = json["英名"].jto!dstring;
+        name = s.to!string;
+        ename = json["英名"].jto!string;
         price = json["NPC売却価格"].jto!uint;
         weight = json["重さ"].jto!real;
-        info = json["info"].jto!dstring;
+        info = json["info"].jto!string;
         transferable = json["転送できる"].jto!bool;
         stackable = json["スタックできる"].jto!bool;
 
@@ -264,9 +264,9 @@ alias ItemType = ExtendedEnum!(
 /// 料理固有の情報
 struct FoodInfo
 {
-    dstring name;
+    string name;
     real effect;
-    dstring additionalEffect;
+    string additionalEffect;
 }
 
 auto readFoods(string fname)
@@ -282,7 +282,7 @@ auto readFoods(string fname)
     enforce(res.type == JSON_TYPE.OBJECT);
     auto foods = res.object;
     return foods.keys.map!(key =>
-                           tuple(key.to!dstring,
+                           tuple(key.to!string,
                                  key.toFoodInfo(foods[key].object)));
 }
 
@@ -294,11 +294,11 @@ auto toFoodInfo(string s, JSONValue[string] json) @safe pure
         import std.conv: to;
         import coop.util: jto;
 
-        name = s.to!dstring;
+        name = s.to!string;
         effect = json["効果"].jto!real;
         if (auto addition = "付加効果" in json)
         {
-            additionalEffect = (*addition).jto!dstring;
+            additionalEffect = (*addition).jto!string;
         }
     }
     return info;
@@ -313,12 +313,12 @@ enum AdditionalEffectGroup
 /// 飲食バフの効果情報
 struct AdditionalEffect
 {
-    dstring name;
+    string name;
     AdditionalEffectGroup group;
-    int[dstring] effects;
-    dstring otherEffects;
+    int[string] effects;
+    string otherEffects;
     uint duration;
-    dstring remarks;
+    string remarks;
 
     auto opCast(T: bool)()
     {
@@ -340,7 +340,7 @@ auto readFoodEffects(string fname)
     enforce(res.type == JSON_TYPE.OBJECT);
     auto effects = res.object;
     return effects.keys.map!(key =>
-                             tuple(key.to!dstring,
+                             tuple(key.to!string,
                                    key.toFoodEffect(effects[key].object)));
 }
 
@@ -352,17 +352,17 @@ auto toFoodEffect(string s, JSONValue[string] json) pure
         import std.conv: to;
         import coop.util: jto;
 
-        name = s.to!dstring;
-        effects = json["効果"].jto!(int[dstring]);
+        name = s.to!string;
+        effects = json["効果"].jto!(int[string]);
         if (auto others = "その他効果" in json)
         {
-            otherEffects = (*others).jto!dstring;
+            otherEffects = (*others).jto!string;
         }
         duration = json["効果時間"].jto!uint;
         group = json["グループ"].jto!AdditionalEffectGroup;
         if (auto rem = "備考" in json)
         {
-            remarks = (*rem).jto!dstring;
+            remarks = (*rem).jto!string;
         }
     }
     return effect;
@@ -379,7 +379,7 @@ struct WeaponInfo
     /// 有効レンジ
     real range;
     /// 必要スキル
-    real[dstring] skills;
+    real[string] skills;
     /// 両手持ちかどうか
     bool isDoubleHands;
     /// 装備スロット
@@ -393,11 +393,11 @@ struct WeaponInfo
     /// 消耗度
     int exhaustion;
     /// 追加効果
-    real[dstring] effects;
+    real[string] effects;
     /// 付与効果
-    int[dstring] additionalEffect;
+    int[string] additionalEffect;
     /// 効果アップ
-    RedBlackTree!dstring specials;
+    RedBlackTree!string specials;
     /// 魔法チャージ可能かどうか
     bool canMagicCharged;
     /// 属性チャージ可能かどうか
@@ -420,7 +420,7 @@ auto readWeapons(string fname)
     enforce(res.type == JSON_TYPE.OBJECT);
     auto weapons = res.object;
     return weapons.keys.map!(key =>
-                             tuple(key.to!dstring,
+                             tuple(key.to!string,
                                    weapons[key].object.toWeaponInfo(fname)));
 }
 
@@ -435,7 +435,7 @@ auto toWeaponInfo(JSONValue[string] json, string fname)
         damage = json["攻撃力"].jto!(real[Grade]);
         duration = json["攻撃間隔"].jto!int;
         range = json["射程"].jto!real;
-        skills = json["必要スキル"].jto!(real[dstring]);
+        skills = json["必要スキル"].jto!(real[string]);
         slot = json["装備箇所"].jto!WeaponSlot;
         isDoubleHands = json["両手装備"].jto!bool;
         material = json["素材"].jto!Material;
@@ -446,17 +446,17 @@ auto toWeaponInfo(JSONValue[string] json, string fname)
         exhaustion = json["耐久"].jto!int;
         if (auto f = "追加効果" in json)
         {
-            effects = (*f).jto!(real[dstring]);
+            effects = (*f).jto!(real[string]);
         }
         if (auto af = "付与効果" in json)
         {
-            additionalEffect = (*af).jto!(int[dstring]);
+            additionalEffect = (*af).jto!(int[string]);
         }
 
-        specials = new RedBlackTree!dstring;
+        specials = new RedBlackTree!string;
         if (auto sp = "効果アップ" in json)
         {
-            specials.insert((*sp).jto!(dstring[]));
+            specials.insert((*sp).jto!(string[]));
         }
 
         if (auto rest = "使用可能シップ" in json)
@@ -482,7 +482,7 @@ struct ArmorInfo
     /// アーマークラス
     real[Grade] AC;
     /// 必要スキル
-    real[dstring] skills;
+    real[string] skills;
     /// 装備スロット
     ArmorSlot slot;
     /// 使用可能シップ
@@ -494,11 +494,11 @@ struct ArmorInfo
     /// 消耗度
     int exhaustion;
     /// 追加効果
-    real[dstring] effects;
+    real[string] effects;
     /// 付加効果
-    dstring additionalEffect;
+    string additionalEffect;
     /// 効果アップ
-    RedBlackTree!dstring specials;
+    RedBlackTree!string specials;
     /// 魔法チャージ可能かどうか
     bool canMagicCharged;
     /// 属性チャージ可能かどうか
@@ -521,7 +521,7 @@ auto readArmors(string fname)
     enforce(res.type == JSON_TYPE.OBJECT);
     auto armors = res.object;
     return armors.keys.map!(key =>
-                             tuple(key.to!dstring,
+                             tuple(key.to!string,
                                    armors[key].object.toArmorInfo(fname)));
 }
 
@@ -534,7 +534,7 @@ auto toArmorInfo(JSONValue[string] json, string fname)
         import coop.util: jto;
 
         AC = json["アーマークラス"].jto!(real[Grade]);
-        skills = json["必要スキル"].jto!(real[dstring]);
+        skills = json["必要スキル"].jto!(real[string]);
         slot = json["装備箇所"].jto!ArmorSlot;
         material = json["素材"].jto!Material;
         if (auto t = "消耗タイプ" in json)
@@ -544,17 +544,17 @@ auto toArmorInfo(JSONValue[string] json, string fname)
         exhaustion = json["耐久"].jto!int;
         if (auto f = "追加効果" in json)
         {
-            effects = (*f).jto!(real[dstring]);
+            effects = (*f).jto!(real[string]);
         }
         if (auto af = "付加効果" in json)
         {
-            additionalEffect = (*af).jto!dstring;
+            additionalEffect = (*af).jto!string;
         }
 
-        specials = new RedBlackTree!dstring;
+        specials = new RedBlackTree!string;
         if (auto sp = "効果アップ" in json)
         {
-            specials.insert((*sp).jto!(dstring[]));
+            specials.insert((*sp).jto!(string[]));
         }
 
         if (auto rest = "使用可能シップ" in json)
@@ -579,9 +579,9 @@ struct BulletInfo
     real range;
     int angle;
     ShipRestriction[] restriction;
-    real[dstring] skills;
-    real[dstring] effects;
-    dstring additionalEffect;
+    real[string] skills;
+    real[string] effects;
+    string additionalEffect;
 }
 
 auto readBullets(string fname)
@@ -597,7 +597,7 @@ auto readBullets(string fname)
     enforce(res.type == JSON_TYPE.OBJECT);
     auto bullets = res.object;
     return bullets.keys.map!(key =>
-                             tuple(key.to!dstring,
+                             tuple(key.to!string,
                                    bullets[key].object.toBulletInfo));
 }
 
@@ -612,14 +612,14 @@ auto toBulletInfo(JSONValue[string] json)
         damage = json["ダメージ"].jto!real;
         range = json["有効レンジ"].jto!real;
         angle = json["角度補正角"].jto!int;
-        skills = json["必要スキル"].jto!(real[dstring]);
+        skills = json["必要スキル"].jto!(real[string]);
         if (auto f = "追加効果" in json)
         {
-            effects = (*f).jto!(real[dstring]);
+            effects = (*f).jto!(real[string]);
         }
         if (auto af = "付与効果" in json)
         {
-            additionalEffect = (*af).jto!dstring;
+            additionalEffect = (*af).jto!string;
         }
 
         if (auto rest = "使用可能シップ" in json)
@@ -641,7 +641,7 @@ struct ShieldInfo
     /// アーマークラス
     real[Grade] AC;
     /// 必要スキル
-    real[dstring] skills;
+    real[string] skills;
     /// 回避率
     int avoidRatio;
     /// 使用可能シップ
@@ -653,11 +653,11 @@ struct ShieldInfo
     /// 消耗度
     int exhaustion;
     /// 追加効果
-    real[dstring] effects;
+    real[string] effects;
     /// 付加効果
-    dstring additionalEffect;
+    string additionalEffect;
     /// 効果アップ
-    RedBlackTree!dstring specials;
+    RedBlackTree!string specials;
     /// 魔法チャージ可能かどうか
     bool canMagicCharged;
     /// 属性チャージ可能かどうか
@@ -680,7 +680,7 @@ auto readShields(string fname)
     enforce(res.type == JSON_TYPE.OBJECT);
     auto shields = res.object;
     return shields.keys.map!(key =>
-                             tuple(key.to!dstring,
+                             tuple(key.to!string,
                                    shields[key].object.toShieldInfo(fname)));
 }
 
@@ -693,7 +693,7 @@ auto toShieldInfo(JSONValue[string] json, string fname)
         import coop.util: jto;
 
         AC = json["アーマークラス"].jto!(real[Grade]);
-        skills = json["必要スキル"].jto!(real[dstring]);
+        skills = json["必要スキル"].jto!(real[string]);
         avoidRatio = json["回避"].jto!int;
         material = json["素材"].jto!Material;
         if (auto t = "消耗タイプ" in json)
@@ -703,17 +703,17 @@ auto toShieldInfo(JSONValue[string] json, string fname)
         exhaustion = json["耐久"].jto!int;
         if (auto f = "追加効果" in json)
         {
-            effects = (*f).jto!(real[dstring]);
+            effects = (*f).jto!(real[string]);
         }
         if (auto af = "付加効果" in json)
         {
-            additionalEffect = (*af).jto!dstring;
+            additionalEffect = (*af).jto!string;
         }
 
-        specials = new RedBlackTree!dstring;
+        specials = new RedBlackTree!string;
         if (auto sp = "効果アップ" in json)
         {
-            specials.insert((*sp).jto!(dstring[]));
+            specials.insert((*sp).jto!(string[]));
         }
 
         if (auto rest = "使用可能シップ" in json)
@@ -823,8 +823,8 @@ alias ExhaustionType = ExtendedEnum!(
 /// 消耗品固有の情報
 struct ExpendableInfo
 {
-    real[dstring] skill;
-    dstring effect;
+    real[string] skill;
+    string effect;
 }
 
 auto readExpendables(string fname)
@@ -840,7 +840,7 @@ auto readExpendables(string fname)
     enforce(res.type == JSON_TYPE.OBJECT);
     auto expendables = res.object;
     return expendables.keys.map!(key =>
-                             tuple(key.to!dstring,
+                             tuple(key.to!string,
                                    expendables[key].object.toExpendableInfo));
 }
 
@@ -851,10 +851,10 @@ auto toExpendableInfo(JSONValue[string] json) pure
     {
         import coop.util: jto;
 
-        effect = json["効果"].jto!dstring;
+        effect = json["効果"].jto!string;
         if (auto f = "必要スキル" in json)
         {
-            skill = (*f).jto!(real[dstring]);
+            skill = (*f).jto!(real[string]);
         }
     }
     return info;
@@ -985,7 +985,7 @@ auto readItemList(string sysBase)
     auto dir = buildPath(sysBase, "アイテム");
     if (!dir.exists)
     {
-        return (Item[dstring]).init;
+        return (Item[string]).init;
     }
     return dirEntries(dir, "*.json", SpanMode.breadth)
         .map!readItems
@@ -1010,7 +1010,7 @@ auto readFoodList(string sysBase)
     auto dir = buildPath(sysBase, "食べ物");
     if (!dir.exists)
     {
-        return (FoodInfo[dstring]).init;
+        return (FoodInfo[string]).init;
     }
     return dirEntries(dir, "*.json", SpanMode.breadth)
         .map!readFoods
@@ -1033,7 +1033,7 @@ auto readDrinkList(string sysBase)
     auto file = buildPath(sysBase, "飲み物", "飲み物.json");
     if (!file.exists)
     {
-        return (FoodInfo[dstring]).init;
+        return (FoodInfo[string]).init;
     }
     return file.readFoods.checkedAssocArray;
 }
@@ -1053,7 +1053,7 @@ auto readLiquorList(string sysBase)
     auto file = buildPath(sysBase, "飲み物", "酒.json");
     if (!file.exists)
     {
-        return (FoodInfo[dstring]).init;
+        return (FoodInfo[string]).init;
     }
     return buildPath(sysBase, "飲み物", "酒.json").readFoods.checkedAssocArray;
 }
@@ -1074,7 +1074,7 @@ auto readWeaponList(string sysBase)
     auto dir = buildPath(sysBase, "武器");
     if (!dir.exists)
     {
-        return (WeaponInfo[dstring]).init;
+        return (WeaponInfo[string]).init;
     }
     return dirEntries(dir, "*.json", SpanMode.breadth)
         .map!readWeapons
@@ -1098,7 +1098,7 @@ auto readArmorList(string sysBase)
     auto dir = buildPath(sysBase, "防具");
     if (!dir.exists)
     {
-        return (ArmorInfo[dstring]).init;
+        return (ArmorInfo[string]).init;
     }
     return dirEntries(dir, "*.json", SpanMode.breadth)
         .map!readArmors
@@ -1122,7 +1122,7 @@ auto readBulletList(string sysBase)
     auto dir = buildPath(sysBase, "弾");
     if (!dir.exists)
     {
-        return (BulletInfo[dstring]).init;
+        return (BulletInfo[string]).init;
     }
     return dirEntries(dir, "*.json", SpanMode.breadth)
         .map!readBullets
@@ -1146,7 +1146,7 @@ auto readShieldList(string sysBase)
     auto dir = buildPath(sysBase, "盾");
     if (!dir.exists)
     {
-        return (ShieldInfo[dstring]).init;
+        return (ShieldInfo[string]).init;
     }
     return dirEntries(dir, "*.json", SpanMode.breadth)
         .map!readShields

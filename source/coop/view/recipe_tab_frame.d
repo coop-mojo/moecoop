@@ -50,7 +50,7 @@ class RecipeTabFrame: TabFrameBase
 
             import coop.model;
 
-            items = [EnumMembers!SortOrder];
+            items = [EnumMembers!SortOrder].to!(dstring[]);
             selectedItemIndex = 0;
             itemClick = (Widget src, int idx) {
                 sortKeyChanged();
@@ -211,11 +211,11 @@ class RecipeTabFrame: TabFrameBase
         return pairs.map!((pair) {
                 import coop.model;
 
-                auto category = pair.category;
-                auto recipes = pair.recipes;
+                auto category = pair.category.to!dstring;
+                auto recipes = pair.recipes.to!(dstring[]);
 
                 Widget[] header = [];
-                if (useMetaSearch || sortKey == SortOrder.BySkill)
+                if (useMetaSearch || sortKey.to!string == SortOrder.BySkill)
                 {
                     Widget hd = new TextWidget("", category);
                     hd.backgroundColor = 0xCCCCCC;
@@ -376,7 +376,7 @@ private:
             auto c = characters[charactersBox.selectedItem];
             if (marked)
             {
-                binders.each!(b => c.markFiledRecipe(recipe, b));
+                binders.each!(b => c.markFiledRecipe(recipe.to!string, b.to!string));
                 if (c.hasSkillFor(r))
                 {
                     ret.textColor = "black";
@@ -384,14 +384,14 @@ private:
             }
             else
             {
-                binders.each!(b => c.unmarkFiledRecipe(recipe, b));
+                binders.each!(b => c.unmarkFiledRecipe(recipe.to!string, b.to!string));
                 if (!c.hasSkillFor(r) || r.requiresRecipe)
                 {
                     ret.textColor = "gray";
                 }
             }
         };
-        ret.checked = binders.canFind!(b => characters[charactersBox.selectedItem].hasRecipe(recipe, b));
+        ret.checked = binders.canFind!(b => characters[charactersBox.selectedItem].hasRecipe(recipe.to!string, b.to!string));
         ret.enabled = binders.length == 1;
         if (r.requiresRecipe)
         {
@@ -443,7 +443,7 @@ private:
 
             recipeDetail = RecipeDetailFrame.create(recipe, controller.model, characters);
 
-            auto itemNames = controller.model.getRecipe(recipe).products.keys;
+            auto itemNames = controller.model.getRecipe(recipe).products.keys.to!(dstring[]);
             enforce(itemNames.length <= 2);
             if (itemNames.empty)
             {

@@ -10,13 +10,13 @@ class CustomInfo
     import coop.core.item;
 
     /// アイテム一覧
-    Item[dstring] itemList;
+    Item[string] itemList;
 
     /// アイテム種別ごとの固有情報一覧
-    ExtraInfo[dstring][ItemType] extraInfoList;
+    ExtraInfo[string][ItemType] extraInfoList;
 
     /// アイテムごとの調達価格
-    int[dstring] procurementPriceList;
+    int[string] procurementPriceList;
 
     this(string baseDir)
     {
@@ -25,13 +25,13 @@ class CustomInfo
         {
             import std.conv;
 
-            extraInfoList[Food.to!ItemType] = readFoodList(baseDir_).to!(ExtraInfo[dstring]);
-            extraInfoList[Drink.to!ItemType] = readDrinkList(baseDir_).to!(ExtraInfo[dstring]);
-            extraInfoList[Liquor.to!ItemType] = readLiquorList(baseDir_).to!(ExtraInfo[dstring]);
-            extraInfoList[Weapon.to!ItemType] = readWeaponList(baseDir_).to!(ExtraInfo[dstring]);
-            extraInfoList[Armor.to!ItemType] = readArmorList(baseDir_).to!(ExtraInfo[dstring]);
-            extraInfoList[Bullet.to!ItemType] = readBulletList(baseDir_).to!(ExtraInfo[dstring]);
-            extraInfoList[Shield.to!ItemType] = readShieldList(baseDir_).to!(ExtraInfo[dstring]);
+            extraInfoList[Food.to!ItemType] = readFoodList(baseDir_).to!(ExtraInfo[string]);
+            extraInfoList[Drink.to!ItemType] = readDrinkList(baseDir_).to!(ExtraInfo[string]);
+            extraInfoList[Liquor.to!ItemType] = readLiquorList(baseDir_).to!(ExtraInfo[string]);
+            extraInfoList[Weapon.to!ItemType] = readWeaponList(baseDir_).to!(ExtraInfo[string]);
+            extraInfoList[Armor.to!ItemType] = readArmorList(baseDir_).to!(ExtraInfo[string]);
+            extraInfoList[Bullet.to!ItemType] = readBulletList(baseDir_).to!(ExtraInfo[string]);
+            extraInfoList[Shield.to!ItemType] = readShieldList(baseDir_).to!(ExtraInfo[string]);
         }
         itemList = readItemList(baseDir_);
         procurementPriceList = readProcPriceList(baseDir_);
@@ -56,7 +56,7 @@ class CustomInfo
                               .assocArray).toPrettyString);
 
         auto prices = File(buildPath(baseDir_, "調達価格.json"), "w");
-        prices.writeln(JSONValue(procurementPriceList.to!(int[string])).toPrettyString);
+        prices.writeln(JSONValue(procurementPriceList).toPrettyString);
     }
 private:
     string baseDir_;
@@ -77,7 +77,7 @@ auto readProcPriceList(string sysBase)
     auto file = buildPath(sysBase, "調達価格.json");
     if (!file.exists)
     {
-        return (int[dstring]).init;
+        return (int[string]).init;
     }
-    return file.readText.parseJSON.jto!(int[dstring]);
+    return file.readText.parseJSON.jto!(int[string]);
 }

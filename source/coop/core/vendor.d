@@ -8,11 +8,11 @@ module coop.core.vendor;
 import std.json;
 import std.typecons;
 
-alias ProductInfo = Tuple!(int, "price", dstring, "remarks");
+alias ProductInfo = Tuple!(int, "price", string, "remarks");
 
 struct Vendor{
-    dstring name;
-    ProductInfo[dstring] products;
+    string name;
+    ProductInfo[string] products;
 }
 
 auto readVendors(string fname)
@@ -27,7 +27,7 @@ auto readVendors(string fname)
     enforce(res.type == JSON_TYPE.OBJECT);
     auto vendors = res.object;
     return vendors.keys.map!(key =>
-                             tuple(key.to!dstring,
+                             tuple(key.to!string,
                                    key.toVendor(vendors[key].object, fname)));
 }
 
@@ -45,12 +45,12 @@ auto toVendor(string s, JSONValue[string] json, string fname)
 
         import coop.util;
 
-        name = s.to!dstring;
+        name = s.to!string;
         products = json.keys
                        .map!(key =>
-                             tuple(key.to!dstring,
+                             tuple(key.to!string,
                                    ProductInfo(json[key]["価格"].jto!int,
-                                               json[key].object.get("備考", JSONValue("")).jto!dstring)))
+                                               json[key].object.get("備考", JSONValue("")).jto!string)))
                        .assocArray;
     }
     return v;

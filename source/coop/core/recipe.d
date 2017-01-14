@@ -12,25 +12,25 @@ struct Recipe
     import std.container;
 
     /// レシピ名
-    dstring name;
+    string name;
 
     /// 材料
-    int[dstring] ingredients;
+    int[string] ingredients;
 
     /// 生成物
-    int[dstring] products;
+    int[string] products;
 
     /// 必要テクニック
-    RedBlackTree!dstring techniques;
+    RedBlackTree!string techniques;
 
     /// 必要スキル
-    real[dstring] requiredSkills;
+    real[string] requiredSkills;
 
     bool requiresRecipe;
     bool isGambledRoulette;
     bool isPenaltyRoulette;
 
-    dstring remarks;
+    string remarks;
 
     auto opCmp(ref const typeof(this) other) const
     {
@@ -93,10 +93,10 @@ in{
     enforce(res.type == JSON_TYPE.OBJECT);
 
     auto recipes = res.object;
-    return tuple(category.to!dstring,
+    return tuple(category.to!string,
                  recipes.keys
                         .map!(key =>
-                              tuple(key.to!dstring,
+                              tuple(key.to!string,
                                     key.toRecipe(recipes[key].object)))
                         .assocArray);
 }
@@ -110,17 +110,17 @@ auto toRecipe(string s, JSONValue[string] json)
 
         import coop.util;
 
-        name = s.to!dstring;
-        ingredients = json["材料"].jto!(int[dstring]);
-        products = json["生成物"].jto!(int[dstring]);
-        techniques = make!(typeof(techniques))(json["テクニック"].jto!(dstring[]));
-        requiredSkills = json["スキル"].jto!(real[dstring]);
+        name = s.to!string;
+        ingredients = json["材料"].jto!(int[string]);
+        products = json["生成物"].jto!(int[string]);
+        techniques = make!(typeof(techniques))(json["テクニック"].jto!(string[]));
+        requiredSkills = json["スキル"].jto!(real[string]);
         requiresRecipe = json["レシピが必要"].jto!bool;
         isGambledRoulette = json["ギャンブル型"].jto!bool;
         isPenaltyRoulette = json["ペナルティ型"].jto!bool;
         if (auto rem = ("備考" in json))
         {
-            remarks = (*rem).jto!dstring;
+            remarks = (*rem).jto!string;
         }
     }
     return ret;
@@ -129,7 +129,7 @@ auto toRecipe(string s, JSONValue[string] json)
 @safe pure nothrow unittest
 {
     Recipe r1;
-    r1.name = "ロースト スネーク ミート"d;
+    r1.name = "ロースト スネーク ミート";
     assert(r1 == r1);
     assert(r1.toHash == r1.toHash);
 }
@@ -137,7 +137,7 @@ auto toRecipe(string s, JSONValue[string] json)
 @safe pure nothrow unittest
 {
     Recipe r1;
-    r1.name = "ロースト スネーク ミート"d;
+    r1.name = "ロースト スネーク ミート";
 
     Recipe r2;
     r2.name = "ライス";
@@ -145,7 +145,7 @@ auto toRecipe(string s, JSONValue[string] json)
     assert(r1.toHash != r2.toHash);
 
     Recipe r3;
-    r3.name = "ワイン"d;
+    r3.name = "ワイン";
     assert(r1 < r3);
     assert(r1.toHash != r3.toHash);
 }
@@ -165,9 +165,9 @@ unittest
                  "ペナルティ型": JSONValue(false)];
     auto recipe = name.toRecipe(json);
     assert(recipe.name == "ロースト スネーク ミート");
-    assert(recipe.ingredients == ["ヘビの肉"d: 1]);
-    assert(recipe.products == ["ロースト スネーク ミート"d: 1]);
-    assert(recipe.techniques[].equal(["料理(焼く)"d]));
+    assert(recipe.ingredients == ["ヘビの肉": 1]);
+    assert(recipe.products == ["ロースト スネーク ミート": 1]);
+    assert(recipe.techniques[].equal(["料理(焼く)"]));
     assert(!recipe.requiresRecipe);
     assert(!recipe.isGambledRoulette);
     assert(!recipe.isPenaltyRoulette);

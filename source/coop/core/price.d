@@ -23,12 +23,12 @@ NPC売却価格: そのまま
 クエスト価格: クエストなどで、交換するアイテムなどから計算できる計算
 参考計算価格: レシピおよび素材の参考価格化を計算できる価格
  */
-int procurementCostFor(dstring item,
-                        Item[dstring] itemMap, Recipe[dstring] recipeMap,
-                        RedBlackTree!dstring[dstring] rrecipeMap,
-                        int[dstring] vendingPriceMap, int[dstring] questPriceMap,
-                        int[dstring] procurementMap,
-                        RedBlackTree!dstring visited = new RedBlackTree!dstring)
+int procurementCostFor(string item,
+                       Item[string] itemMap, Recipe[string] recipeMap,
+                       RedBlackTree!string[string] rrecipeMap,
+                       int[string] vendingPriceMap, int[string] questPriceMap,
+                       int[string] procurementMap,
+                       RedBlackTree!string visited = new RedBlackTree!string)
 {
     import std.algorithm;
     import coop.fallback;
@@ -74,8 +74,8 @@ int procurementCostFor(dstring item,
 // 単純な場合
 unittest
 {
-    Item roastSnakeMeat = { name: "ロースト スネーク ミート"d, price: 8 };
-    Item snakeMeat = { name: "ヘビの肉"d, price: 5 };
+    Item roastSnakeMeat = { name: "ロースト スネーク ミート", price: 8 };
+    Item snakeMeat = { name: "ヘビの肉", price: 5 };
     Recipe r = {
         name: "ロースト スネーク ミート",
         ingredients: ["ヘビの肉": 1],
@@ -83,84 +83,84 @@ unittest
     };
 
     // 単純なケース
-    assert(procurementCostFor("ロースト スネーク ミート"d,
-                              ["ロースト スネーク ミート"d: roastSnakeMeat,
+    assert(procurementCostFor("ロースト スネーク ミート",
+                              ["ロースト スネーク ミート": roastSnakeMeat,
                                "ヘビの肉": snakeMeat],
-                              ["ロースト スネーク ミート"d: r],
-                              ["ロースト スネーク ミート"d: make!(RedBlackTree!dstring)("ロースト スネーク ミート"d)],
-                              (int[dstring]).init, (int[dstring]).init,
-                              (int[dstring]).init) == 8);
+                              ["ロースト スネーク ミート": r],
+                              ["ロースト スネーク ミート": make!(RedBlackTree!string)("ロースト スネーク ミート")],
+                              (int[string]).init, (int[string]).init,
+                              (int[string]).init) == 8);
 
     // 材料の価格がユーザー定義されているケース
-    assert(procurementCostFor("ロースト スネーク ミート"d,
-                              ["ロースト スネーク ミート"d: roastSnakeMeat,
+    assert(procurementCostFor("ロースト スネーク ミート",
+                              ["ロースト スネーク ミート": roastSnakeMeat,
                                "ヘビの肉": snakeMeat],
-                              ["ロースト スネーク ミート"d: r],
-                              ["ロースト スネーク ミート"d: make!(RedBlackTree!dstring)("ロースト スネーク ミート"d)],
-                              (int[dstring]).init, (int[dstring]).init,
-                              ["ヘビの肉"d: 10]) == 10);
+                              ["ロースト スネーク ミート": r],
+                              ["ロースト スネーク ミート": make!(RedBlackTree!string)("ロースト スネーク ミート")],
+                              (int[string]).init, (int[string]).init,
+                              ["ヘビの肉": 10]) == 10);
 
     // 生成物の価格がユーザー定義されているケース
-    assert(procurementCostFor("ロースト スネーク ミート"d,
-                              ["ロースト スネーク ミート"d: roastSnakeMeat,
+    assert(procurementCostFor("ロースト スネーク ミート",
+                              ["ロースト スネーク ミート": roastSnakeMeat,
                                "ヘビの肉": snakeMeat],
-                              ["ロースト スネーク ミート"d: r],
-                              ["ロースト スネーク ミート"d: make!(RedBlackTree!dstring)("ロースト スネーク ミート"d)],
-                              (int[dstring]).init, (int[dstring]).init,
-                              ["ロースト スネーク ミート"d: 5]) == 5);
+                              ["ロースト スネーク ミート": r],
+                              ["ロースト スネーク ミート": make!(RedBlackTree!string)("ロースト スネーク ミート")],
+                              (int[string]).init, (int[string]).init,
+                              ["ロースト スネーク ミート": 5]) == 5);
 }
 
 // 必要素材がループする場合
 unittest
 {
-    Item ironBar = { name: "鉄の棒"d, price: 12 };
-    Item ironIngot = { name: "アイアンインゴット"d, price: 10 };
-    Item scrapIron = { name: "鉄屑"d, price: 25 };
-    Item ironOre = { name: "鉄鉱石"d, price: 13 };
-    Item ironOreFragment = { name: "鉄鉱石の破片"d, price: 4 };
+    Item ironBar = { name: "鉄の棒", price: 12 };
+    Item ironIngot = { name: "アイアンインゴット", price: 10 };
+    Item scrapIron = { name: "鉄屑", price: 25 };
+    Item ironOre = { name: "鉄鉱石", price: 13 };
+    Item ironOreFragment = { name: "鉄鉱石の破片", price: 4 };
 
     Recipe barFromIng = {
-        name: "鉄の棒(アイアンインゴット)"d,
+        name: "鉄の棒(アイアンインゴット)",
         ingredients: ["アイアンインゴット": 1],
         products: ["鉄の棒": 3]
     };
     Recipe barFromScrap = {
-        name: "鉄の棒(鉄屑)"d,
+        name: "鉄の棒(鉄屑)",
         ingredients: ["鉄屑": 2],
         products: ["鉄の棒": 1]
     };
     Recipe ingFromOre = {
-        name: "アイアンインゴット(鉱石)"d,
+        name: "アイアンインゴット(鉱石)",
         ingredients: ["鉄鉱石": 1],
         products: ["アイアンインゴット": 1]
     };
     Recipe ingFromOreFrag = {
-        name: "アイアンインゴット(破片)"d,
+        name: "アイアンインゴット(破片)",
         ingredients: ["鉄鉱石の破片": 3],
         products: ["アイアンインゴット": 1]
     };
     Recipe ingFromBar = {
-        name: "アイアンインゴット(鉄の棒)"d,
+        name: "アイアンインゴット(鉄の棒)",
         ingredients: ["鉄の棒": 5],
         products: ["アイアンインゴット": 1]
     };
 
-    assert(procurementCostFor("鉄の棒"d,
-                              ["鉄の棒"d: ironBar,
+    assert(procurementCostFor("鉄の棒",
+                              ["鉄の棒": ironBar,
                                "アイアンインゴット": ironIngot,
                                "鉄屑": scrapIron,
                                "鉄鉱石": ironOre,
                                "鉄鉱石の破片": ironOreFragment],
-                              ["鉄の棒(アイアンインゴット)"d: barFromIng,
+                              ["鉄の棒(アイアンインゴット)": barFromIng,
                                "鉄の棒(鉄屑)": barFromScrap,
                                "アイアンインゴット(鉱石)": ingFromOre,
                                "アイアンインゴット(破片)": ingFromOreFrag,
                                "アイアンインゴット(鉄の棒)": ingFromBar],
-                              ["鉄の棒"d: make!(RedBlackTree!dstring)("鉄の棒(アイアンインゴット)"d,
-                                                                      "鉄の棒(鉄屑)"d),
-                               "アイアンインゴット": make!(RedBlackTree!dstring)("アイアンインゴット(鉱石)"d,
-                                                                                 "アイアンインゴット(破片)"d,
-                                                                                 "アイアンインゴット(鉄の棒)"d)],
-                              (int[dstring]).init, (int[dstring]).init,
-                              (int[dstring]).init) == 12);
+                              ["鉄の棒": make!(RedBlackTree!string)("鉄の棒(アイアンインゴット)",
+                                                                    "鉄の棒(鉄屑)"),
+                               "アイアンインゴット": make!(RedBlackTree!string)("アイアンインゴット(鉱石)",
+                                                                                "アイアンインゴット(破片)",
+                                                                                "アイアンインゴット(鉄の棒)")],
+                              (int[string]).init, (int[string]).init,
+                              (int[string]).init) == 12);
 }

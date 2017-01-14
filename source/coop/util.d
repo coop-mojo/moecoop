@@ -400,10 +400,11 @@ auto checkedAssocArray(Range)(Range r) if (isInputRange!Range)
  * 入力文字列の全角カタカナを半角カタカナに変換した文字列を返す
  * Note: std.string.tarnslate は濁点を含む全角カタカナを処理できない
  */
-@property auto toHankaku(dstring str) @safe
+@property auto toHankaku(Str)(Str str) @safe
 {
-    static dstring trans(dchar c)
+    static Str trans(ElementType!Str c)
     {
+        import std.conv;
         switch(c)
         {
         case 'ア': return "ｱ"; case 'イ': return "ｲ"; case 'ウ': return "ｳ"; case 'エ': return "ｴ"; case 'オ': return "ｵ";
@@ -427,7 +428,7 @@ auto checkedAssocArray(Range)(Range r) if (isInputRange!Range)
         case 'ダ': return "ﾀﾞ"; case 'ヂ': return "ﾁﾞ"; case 'ヅ': return "ﾂﾞ"; case 'デ': return "ﾃﾞ"; case 'ド': return "ﾄﾞ";
         case 'バ': return "ﾊﾞ"; case 'ビ': return "ﾋﾞ"; case 'ブ': return "ﾌﾞ"; case 'ベ': return "ﾍﾞ"; case 'ボ': return "ﾎﾞ";
         case 'パ': return "ﾊﾟ"; case 'ピ': return "ﾋﾟ"; case 'プ': return "ﾌﾟ"; case 'ペ': return "ﾍﾟ"; case 'ポ': return "ﾎﾟ";
-        default:   return [c];
+        default:   return () @trusted { return [c].to!Str; }();
         }
     }
     import std.algorithm;

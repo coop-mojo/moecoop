@@ -9,7 +9,7 @@ class Character
 {
     import std.container.rbtree;
 
-    this(dstring n, dstring baseDir)
+    this(string n, string baseDir)
     {
         import std.file;
         import std.path;
@@ -22,18 +22,18 @@ class Character
             import std.array;
             import std.conv;
 
-            auto binderDir = buildPath(dir_, name_, "バインダー"d).to!string;
+            auto binderDir = buildPath(dir_, name_, "バインダー").to!string;
             mkdirRecurse(binderDir);
             filedMap_ = dirEntries(binderDir, "*.json", SpanMode.breadth)
                         .map!(s => s.readBindersInfo)
                         .joiner
                         .assocArray;
 
-            auto configFile = buildPath(dir_, name_, "config.json"d);
+            auto configFile = buildPath(dir_, name_, "config.json");
             if (configFile.exists)
             {
                 import std.json;
-                url = configFile.readText.parseJSON["URL"].str.to!dstring;
+                url = configFile.readText.parseJSON["URL"].str.to!string;
             }
         }
     }
@@ -45,7 +45,7 @@ class Character
         return recipe.requiredSkills.byKeyValue.all!(kv => (kv.key in skills) && skills[kv.key] >= kv.value);
     }
 
-    auto hasRecipe(dstring recipe, dstring binder = "")
+    auto hasRecipe(string recipe, string binder = "")
     {
         import std.array;
         import std.algorithm;
@@ -59,14 +59,14 @@ class Character
         }
     }
 
-    auto markFiledRecipe(dstring recipe, dstring binder)
+    auto markFiledRecipe(string recipe, string binder)
     {
         if (binder !in filedMap_)
-            filedMap_[binder] = new RedBlackTree!dstring;
+            filedMap_[binder] = new RedBlackTree!string;
         filedMap_[binder].insert(recipe);
     }
 
-    auto unmarkFiledRecipe(dstring recipe, dstring binder)
+    auto unmarkFiledRecipe(string recipe, string binder)
     in{
         assert(binder in filedMap_);
         assert(recipe in filedMap_[binder]);
@@ -79,7 +79,7 @@ class Character
         return name_;
     }
 
-    @property auto name(dstring newName)
+    @property auto name(string newName)
     {
         name_ = newName;
     }
@@ -89,7 +89,7 @@ class Character
         return url_;
     }
 
-    @property auto url(dstring u)
+    @property auto url(string u)
     {
         import coop.core.skills;
         import std.exception;
@@ -142,7 +142,7 @@ private:
         import std.path;
         import std.stdio;
 
-        auto file = buildPath(dir_, name, "config.json"d);
+        auto file = buildPath(dir_, name, "config.json");
         JSONValue vals = [
             "URL": url.to!string,
             ];
@@ -157,7 +157,7 @@ private:
         import std.json;
         import std.path;
 
-        auto binderDir = buildPath(dir_, name_, "バインダー"d).to!string;
+        auto binderDir = buildPath(dir_, name_, "バインダー").to!string;
         if (binderDir.exists)
         {
             rmdirRecurse(binderDir);
@@ -201,11 +201,11 @@ private:
         }
     }
 
-    RedBlackTree!dstring[dstring] filedMap_;
-    dstring name_;
-    dstring dir_;
-    dstring url_;
-    double[dstring] skills;
+    RedBlackTree!string[string] filedMap_;
+    string name_;
+    string dir_;
+    string url_;
+    double[string] skills;
 }
 
 auto readBindersInfo(string file)
@@ -222,8 +222,8 @@ auto readBindersInfo(string file)
             import std.conv;
             import std.typecons;
 
-            auto binder = kv.key.to!dstring;
-            auto recipes = make!(RedBlackTree!dstring)(kv.value.object.keys.to!(dstring[]));
+            auto binder = kv.key.to!string;
+            auto recipes = make!(RedBlackTree!string)(kv.value.object.keys.to!(string[]));
             return tuple(binder, recipes);
         });
 }

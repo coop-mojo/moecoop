@@ -51,14 +51,15 @@ class RecipeMaterialTabFrameController
 
     auto showProductCandidate(dstring query)
     {
+        import std.conv;
         import std.regex;
 
         if (query.matchFirst(ctRegex!r"^\s*$"d))
         {
             return;
         }
-        auto candidates = model.getItemList(query, cast(Flag!"useMigemo")frame_.useMigemo, Yes.canBeProduced);
+        auto candidates = model.getItemList(query.to!string, cast(Flag!"useMigemo")frame_.useMigemo, Yes.canBeProduced);
 
-        frame_.showCandidates(candidates);
+        frame_.showCandidates(candidates.to!(dstring[]));
     }
 }

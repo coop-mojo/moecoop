@@ -340,14 +340,14 @@ class RecipeMaterialTabFrame: TabFrameBase
 
                 import coop.view.controls;
 
-                auto w = new LinkWidget(r.to!string, r.name~": ");
+                auto w = new LinkWidget(r.to!string, r.name.to!dstring~": ");
                 auto t = new TextWidget("times", format("%s 回"d, 0));
                 w.click = (Widget _) {
                     import coop.view.recipe_detail_frame;
 
                     unhighlightDetailRecipe;
                     scope(exit) highlightDetailRecipe;
-                    recipeDetail = RecipeDetailFrame.create(r.name, controller.model, controller.characters);
+                    recipeDetail = RecipeDetailFrame.create(r.name.to!dstring, controller.model, controller.characters);
                     return true;
                 };
                 if (!r.parentGroup.empty)
@@ -361,7 +361,7 @@ class RecipeMaterialTabFrame: TabFrameBase
                             auto a = new Action(idx++, format("%s を使う"d, b.name));
                             auto it = new MenuItem(a);
                             it.menuItemClick = (MenuItem _) {
-                                preference[b.parentGroup] = b.name;
+                                preference[b.parentGroup.to!dstring] = b.name.to!dstring;
                                 reload;
                                 return false;
                             };
@@ -395,7 +395,7 @@ class RecipeMaterialTabFrame: TabFrameBase
 
                 import coop.view.controls;
 
-                auto w = new LinkWidget(lo.to!string, lo~": ");
+                auto w = new LinkWidget(lo.to!string, lo.to!dstring~": ");
                 auto n = new TextWidget("num", format("%s 個"d, 0));
                 w.click = (Widget _) {
                     import coop.core.item;
@@ -406,7 +406,7 @@ class RecipeMaterialTabFrame: TabFrameBase
                     scope(exit) highlightDetailItems;
 
                     showItemDetail(0);
-                    setItemDetail(ItemDetailFrame.create(lo, 1, controller.model, controller.customInfo), 0);
+                    setItemDetail(ItemDetailFrame.create(lo.to!dstring, 1, controller.model, controller.customInfo), 0);
                     return true;
                 };
                 return cast(Widget[])[w, n];
@@ -441,7 +441,7 @@ class RecipeMaterialTabFrame: TabFrameBase
                 import coop.view.controls;
                 import coop.view.editors;
 
-                auto w = new CheckableEntryWidget(mat.name.to!string, mat.name~": ");
+                auto w = new CheckableEntryWidget(mat.name.to!string, mat.name.to!dstring~": ");
                 auto o = new EditIntLine("own");
                 auto t = new TextWidget("times", format("/%s 個"d, 0));
                 o.minWidth = 55;
@@ -475,7 +475,7 @@ class RecipeMaterialTabFrame: TabFrameBase
                     scope(exit) highlightDetailItems;
 
                     showItemDetail(0);
-                    setItemDetail(ItemDetailFrame.create(mat.name, 1, controller.model, controller.customInfo), 0);
+                    setItemDetail(ItemDetailFrame.create(mat.name.to!dstring, 1, controller.model, controller.customInfo), 0);
                 };
                 if (!mat.isLeaf)
                 {
@@ -533,7 +533,7 @@ class RecipeMaterialTabFrame: TabFrameBase
                 rs[1].text = format("%s 回"d, *n);
                 auto detail = controller.model.getRecipe(r);
                 auto c = controller.characters[charactersBox.selectedItem];
-                if (!c.hasSkillFor(detail) || (detail.requiresRecipe && !c.hasRecipe(r)))
+                if (!c.hasSkillFor(detail) || (detail.requiresRecipe && !c.hasRecipe(r.to!string)))
                 {
                     rs[0].textColor = "gray";
                 }
@@ -617,7 +617,7 @@ class RecipeMaterialTabFrame: TabFrameBase
                         rs[0].checked = false;
                     }
 
-                    auto mat = fullMaterialInfo.find!(mi => mi.name == m).front;
+                    auto mat = fullMaterialInfo.find!(mi => mi.name.to!dstring == m).front;
                     if (!mat.isLeaf)
                     {
                         import std.typecons;
@@ -625,12 +625,12 @@ class RecipeMaterialTabFrame: TabFrameBase
                         import coop.view.controls;
 
                         auto menu = new MenuItem;
-                        if (mat.name in leafMaterials)
+                        if (mat.name.to!dstring in leafMaterials)
                         {
                             auto a = new Action(25000, "材料から用意する"d);
                             auto it = new MenuItem(a);
                             it.menuItemClick = (MenuItem _) {
-                                leafMaterials.removeKey(mat.name);
+                                leafMaterials.removeKey(mat.name.to!dstring);
                                 reload;
                                 return false;
                             };
@@ -641,7 +641,7 @@ class RecipeMaterialTabFrame: TabFrameBase
                             auto a = new Action(25001, "直接用意する"d);
                             auto it = new MenuItem(a);
                             it.menuItemClick = (MenuItem _) {
-                                leafMaterials.insert(mat.name);
+                                leafMaterials.insert(mat.name.to!dstring);
                                 reload;
                                 return false;
                             };
@@ -672,17 +672,20 @@ class RecipeMaterialTabFrame: TabFrameBase
     {
         import std.algorithm;
         import std.array;
+        import std.conv;
 
         if (preference.keys.empty)
         {
-            preference = controller.model.getDefaultPreference;
+            preference = controller.model.getDefaultPreference.to!(dstring[dstring]);
         }
         auto elems = controller.model.getMenuRecipeResult(targets, owned, preference, leafMaterials);
-        auto mats = setDifference!"a.key < b.key"(elems.materials.byKeyValue.array.schwartzSort!"a.key",
-                                                  targets.byKeyValue.array.schwartzSort!"a.key").map!"tuple(a.key, a.value)".assocArray;
-        updateMaterialTable(mats); // 最初にすること！
-        updateRecipeTable(elems.recipes);
-        updateLeftoverTable(elems.leftovers);
+        updateMaterialTable(elems.materials
+                                 .byKeyValue
+                                 .filter!(kv => kv.key.to!dstring !in targets)
+                                 .map!"tuple(a.key.to!dstring, a.value)"
+                                 .assocArray); // 最初にすること！
+        updateRecipeTable(elems.recipes.to!(int[dstring]));
+        updateLeftoverTable(elems.leftovers.to!(int[dstring]));
         showResult;
     }
 

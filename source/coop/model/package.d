@@ -168,8 +168,6 @@ class WisdomModel
                     return [RecipePair(category, rs.array)];
                 }
 
-                import std.stdio;
-                writeln("Order: ", order);
                 final switch(order) with(SortOrder)
                 {
                 case BySkill:

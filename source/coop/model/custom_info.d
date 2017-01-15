@@ -1,5 +1,5 @@
 /**
- * Copyright: Copyright (c) 2016-2017 Mojo
+ * Copyright: Copyright 2017 Mojo
  * Authors: Mojo
  * License: $(LINK2 https://github.com/coop-mojo/moecoop/blob/master/LICENSE, MIT License)
  */

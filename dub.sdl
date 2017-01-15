@@ -8,6 +8,7 @@ authors "もじょんぬ <moe.e.coop@gmail.com>"
 
 dependency "dlangui" version="0.9.46"
 dependency "derelict-util" version="2.0.6"
+dependency "vibe-d:data" version="0.7.30"
 
 stringImportPaths "views" "views/res"
 

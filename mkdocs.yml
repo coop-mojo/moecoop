@@ -3,7 +3,7 @@ site_description: 生協の知恵袋は、Master of Epic のバインダー管�
 site_url: http://docs.fukuro.coop.moe
 repo_url: https://github.com/coop-mojo/moecoop
 site_author: もじょんぬ
-copyright: Copyright (c) 2016, もじょんぬ
+copyright: Copyright 2016, もじょんぬ
 site_favicon: coop-icon.ico
 extra_css:
   - css/custom.css

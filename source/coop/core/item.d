@@ -264,44 +264,24 @@ alias ItemType = ExtendedEnum!(
 /// 料理固有の情報
 struct FoodInfo
 {
-    string name;
-    real effect;
-    string additionalEffect;
+    import vibe.data.json: name_ = name, optional;
+    @name_("名前") string name;
+    @name_("効果") double effect;
+    @name_("付加効果") @optional string additionalEffect;
 }
 
 auto readFoods(string fname)
 {
-    import std.algorithm: map;
-    import std.conv: to;
-    import std.exception: enforce;
-    import std.file: readText;
-    import std.json: JSON_TYPE, parseJSON;
-    import std.typecons: tuple;
+    import vibe.data.json;
 
-    auto res = fname.readText.parseJSON;
-    enforce(res.type == JSON_TYPE.OBJECT);
-    auto foods = res.object;
-    return foods.keys.map!(key =>
-                           tuple(key.to!string,
-                                 key.toFoodInfo(foods[key].object)));
-}
+    import std.algorithm;
+    import std.file;
+    import std.typecons;
 
-auto toFoodInfo(string s, JSONValue[string] json) @safe pure
-{
-    FoodInfo info;
-    with(info)
-    {
-        import std.conv: to;
-        import coop.util: jto;
-
-        name = s.to!string;
-        effect = json["効果"].jto!real;
-        if (auto addition = "付加効果" in json)
-        {
-            additionalEffect = (*addition).jto!string;
-        }
-    }
-    return info;
+    return fname.readText
+                .parseJsonString
+                .deserialize!(JsonSerializer, FoodInfo[])
+                .map!"tuple(a.name, a)";
 }
 
 /// 飲食バフのグループ

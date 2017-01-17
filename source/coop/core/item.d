@@ -293,12 +293,13 @@ enum AdditionalEffectGroup
 /// 飲食バフの効果情報
 struct AdditionalEffect
 {
-    string name;
-    AdditionalEffectGroup group;
-    int[string] effects;
-    string otherEffects;
-    uint duration;
-    string remarks;
+    import vibe.data.json: name_ = name, optional, byName;
+    @name_("名前") string name;
+    @name_("グループ") @byName AdditionalEffectGroup group;
+    @name_("効果") int[string] effects;
+    @name_("その他効果") @optional string otherEffects;
+    @name_("効果時間") uint duration;
+    @name_("備考") @optional string remarks;
 
     auto opCast(T: bool)()
     {
@@ -309,43 +310,16 @@ struct AdditionalEffect
 
 auto readFoodEffects(string fname)
 {
-    import std.algorithm: map;
-    import std.conv: to;
-    import std.exception: enforce;
-    import std.file: readText;
-    import std.json: JSON_TYPE, parseJSON;
-    import std.typecons: tuple;
+    import vibe.data.json;
 
-    auto res = fname.readText.parseJSON;
-    enforce(res.type == JSON_TYPE.OBJECT);
-    auto effects = res.object;
-    return effects.keys.map!(key =>
-                             tuple(key.to!string,
-                                   key.toFoodEffect(effects[key].object)));
-}
+    import std.algorithm;
+    import std.file;
+    import std.typecons;
 
-auto toFoodEffect(string s, JSONValue[string] json) pure
-{
-    AdditionalEffect effect;
-    with(effect)
-    {
-        import std.conv: to;
-        import coop.util: jto;
-
-        name = s.to!string;
-        effects = json["効果"].jto!(int[string]);
-        if (auto others = "その他効果" in json)
-        {
-            otherEffects = (*others).jto!string;
-        }
-        duration = json["効果時間"].jto!uint;
-        group = json["グループ"].jto!AdditionalEffectGroup;
-        if (auto rem = "備考" in json)
-        {
-            remarks = (*rem).jto!string;
-        }
-    }
-    return effect;
+    return fname.readText
+                .parseJsonString
+                .deserialize!(JsonSerializer, AdditionalEffect[])
+                .map!"tuple(a.name, a)";
 }
 
 struct WeaponInfo

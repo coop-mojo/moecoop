@@ -531,64 +531,28 @@ auto toArmorInfo(JSONValue[string] json, string fname)
 
 struct BulletInfo
 {
-    real damage;
-    real range;
-    int angle;
-    ShipRestriction[] restriction;
-    real[string] skills;
-    real[string] effects;
-    string additionalEffect;
+    import vibe.data.json: name_ = name, optional;
+    @name_("名前") string name;
+    @name_("ダメージ") double damage;
+    @name_("有効レンジ") double range;
+    @name_("角度補正角") int angle;
+    @name_("使用可能シップ") @optional ShipRestriction[] restriction = [ShipRestriction.Any];
+    @name_("必要スキル") double[string] skills;
+    @name_("追加効果") @optional double[string] effects;
+    @name_("付与効果") @optional string additionalEffect;
 }
 
 auto readBullets(string fname)
 {
+    import vibe.data.json;
     import std.algorithm: map;
-    import std.conv: to;
-    import std.exception: enforce;
     import std.file: readText;
-    import std.json: JSON_TYPE, parseJSON;
     import std.typecons: tuple;
 
-    auto res = fname.readText.parseJSON;
-    enforce(res.type == JSON_TYPE.OBJECT);
-    auto bullets = res.object;
-    return bullets.keys.map!(key =>
-                             tuple(key.to!string,
-                                   bullets[key].object.toBulletInfo));
-}
-
-auto toBulletInfo(JSONValue[string] json)
-{
-    BulletInfo info;
-    with(info)
-    {
-        import std.conv: to;
-        import coop.util: jto;
-
-        damage = json["ダメージ"].jto!real;
-        range = json["有効レンジ"].jto!real;
-        angle = json["角度補正角"].jto!int;
-        skills = json["必要スキル"].jto!(real[string]);
-        if (auto f = "追加効果" in json)
-        {
-            effects = (*f).jto!(real[string]);
-        }
-        if (auto af = "付与効果" in json)
-        {
-            additionalEffect = (*af).jto!string;
-        }
-
-        if (auto rest = "使用可能シップ" in json)
-        {
-            import std.algorithm, std.range;
-            restriction = (*rest).array.map!(a => cast(ShipRestriction)a.str).array;
-        }
-        else
-        {
-            restriction = [ShipRestriction.Any];
-        }
-    }
-    return info;
+    return fname.readText
+                .parseJsonString
+                .deserialize!(JsonSerializer, BulletInfo[])
+                .map!"tuple(a.name, a)";
 }
 
 struct ShieldInfo

@@ -578,7 +578,7 @@ struct ShieldInfo
     /// 付加効果
     string additionalEffect;
     /// 効果アップ
-    RedBlackTree!string specials;
+    string[] specials;
     /// 魔法チャージ可能かどうか
     bool canMagicCharged;
     /// 属性チャージ可能かどうか
@@ -631,10 +631,9 @@ auto toShieldInfo(JSONValue[string] json, string fname)
             additionalEffect = (*af).jto!string;
         }
 
-        specials = new RedBlackTree!string;
         if (auto sp = "効果アップ" in json)
         {
-            specials.insert((*sp).jto!(string[]));
+            specials = (*sp).jto!(string[]);
         }
 
         if (auto rest = "使用可能シップ" in json)

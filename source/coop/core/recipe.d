@@ -9,28 +9,17 @@ import std.json;
 
 struct Recipe
 {
-    import std.container;
+    import vibe.data.json: name_ = name, optional;
 
-    /// レシピ名
-    string name;
-
-    /// 材料
-    int[string] ingredients;
-
-    /// 生成物
-    int[string] products;
-
-    /// 必要テクニック
-    RedBlackTree!string techniques;
-
-    /// 必要スキル
-    real[string] requiredSkills;
-
-    bool requiresRecipe;
-    bool isGambledRoulette;
-    bool isPenaltyRoulette;
-
-    string remarks;
+    @name_("名前") string name;
+    @name_("材料") int[string] ingredients;
+    @name_("生成物") int[string] products;
+    @name_("テクニック") string[] techniques;
+    @name_("スキル") double[string] requiredSkills;
+    @name_("レシピが必要") bool requiresRecipe;
+    @name_("ギャンブル型") bool isGambledRoulette;
+    @name_("ペナルティ型") bool isPenaltyRoulette;
+    @name_("備考") @optional string remarks;
 
     auto opCmp(ref const typeof(this) other) const
     {
@@ -80,50 +69,21 @@ in{
 
     assert(file.exists);
 } body {
+    import vibe.data.json;
+
     import std.algorithm;
-    import std.conv;
-    import std.exception;
     import std.file;
     import std.path;
     import std.range;
     import std.typecons;
 
     auto category = file.baseName(".json");
-    auto res = file.readText.parseJSON;
-    enforce(res.type == JSON_TYPE.OBJECT);
-
-    auto recipes = res.object;
-    return tuple(category.to!string,
-                 recipes.keys
-                        .map!(key =>
-                              tuple(key.to!string,
-                                    key.toRecipe(recipes[key].object)))
-                        .assocArray);
-}
-
-auto toRecipe(string s, JSONValue[string] json)
-{
-    Recipe ret;
-    with(ret) {
-        import std.conv;
-        import std.container;
-
-        import coop.util;
-
-        name = s.to!string;
-        ingredients = json["材料"].jto!(int[string]);
-        products = json["生成物"].jto!(int[string]);
-        techniques = make!(typeof(techniques))(json["テクニック"].jto!(string[]));
-        requiredSkills = json["スキル"].jto!(real[string]);
-        requiresRecipe = json["レシピが必要"].jto!bool;
-        isGambledRoulette = json["ギャンブル型"].jto!bool;
-        isPenaltyRoulette = json["ペナルティ型"].jto!bool;
-        if (auto rem = ("備考" in json))
-        {
-            remarks = (*rem).jto!string;
-        }
-    }
-    return ret;
+    return tuple(category,
+                 file.readText
+                     .parseJsonString
+                     .deserialize!(JsonSerializer, Recipe[])
+                     .map!"tuple(a.name, a)"
+                     .assocArray);
 }
 
 @safe pure nothrow unittest
@@ -152,25 +112,27 @@ auto toRecipe(string s, JSONValue[string] json)
 
 unittest
 {
-    import std.algorithm;
-    import std.range;
-
-    auto name = "ロースト スネーク ミート";
-    auto json = ["材料": JSONValue([ "ヘビの肉": 1 ]),
-                 "生成物": JSONValue([ "ロースト スネーク ミート": 1 ]),
-                 "テクニック": JSONValue([ "料理(焼く)" ]),
-                 "スキル": JSONValue([ "料理": 0.0 ]),
-                 "レシピが必要": JSONValue(false),
-                 "ギャンブル型": JSONValue(false),
-                 "ペナルティ型": JSONValue(false)];
-    auto recipe = name.toRecipe(json);
-    assert(recipe.name == "ロースト スネーク ミート");
-    assert(recipe.ingredients == ["ヘビの肉": 1]);
-    assert(recipe.products == ["ロースト スネーク ミート": 1]);
-    assert(recipe.techniques[].equal(["料理(焼く)"]));
-    assert(!recipe.requiresRecipe);
-    assert(!recipe.isGambledRoulette);
-    assert(!recipe.isPenaltyRoulette);
-    assert(recipe.remarks.empty);
+    import vibe.data.json;
+    auto str = q"EOS
+{
+    "名前": "ロースト スネーク ミート",
+    "材料": {
+        "ヘビの肉": 1
+    },
+    "生成物": {
+        "ロースト スネーク ミート": 1
+    },
+    "テクニック": [
+        "料理(焼く)"
+    ],
+    "スキル": {
+        "料理": 0.0
+    },
+    "レシピが必要": false,
+    "ギャンブル型": false,
+    "ペナルティ型": false
+}
+EOS";
+    auto recipe = str.parseJsonString.deserialize!(JsonSerializer, Recipe);
     assert(recipe.toShortString == "ﾛｰｽﾄｽﾈｰｸﾐｰﾄx1 (料理0.0) = ﾍﾋﾞの肉x1");
 }

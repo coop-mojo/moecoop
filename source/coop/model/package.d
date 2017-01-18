@@ -176,7 +176,7 @@ class WisdomModel
                         arr.multiSort!("a[0] < b[0]", "a[1] < b[1]");
                         return arr;
                     }
-                    auto lvToStr(Tuple!(string, real)[] tpls)
+                    auto lvToStr(Tuple!(string, double)[] tpls)
                     {
                         import std.format;
                         return tpls.map!(t => format("%s (%.1f)", t.tupleof)).join(", ");

@@ -113,20 +113,7 @@ class Wisdom {
 
     auto recipeFor(string recipeName) pure
     {
-        import std.algorithm;
-        import std.range;
-
-        if (auto ret = recipeName in recipeList)
-        {
-            return *ret;
-        }
-        else
-        {
-            import std.container.util;
-            Recipe dummy;
-            dummy.techniques = make!(typeof(dummy.techniques))(null);
-            return dummy;
-        }
+        return recipeList.get(recipeName, Recipe.init);
     }
 
     auto bindersFor(string recipeName) pure nothrow

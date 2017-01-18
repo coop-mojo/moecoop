@@ -415,11 +415,12 @@ auto toWeaponInfo(JSONValue[string] json, string fname)
 
         if (auto rest = "使用可能シップ" in json)
         {
-            restriction = (*rest).jto!(ShipRestriction[]);
+            import std.algorithm, std.range;
+            restriction = (*rest).array.map!(a => cast(ShipRestriction)a.str).array;
         }
         else
         {
-            restriction = [ShipRestriction.Any.to!ShipRestriction];
+            restriction = [ShipRestriction.Any];
         }
         canMagicCharged = json["魔法チャージ"].jto!bool;
         canElementCharged = json["属性チャージ"].jto!bool;
@@ -513,11 +514,12 @@ auto toArmorInfo(JSONValue[string] json, string fname)
 
         if (auto rest = "使用可能シップ" in json)
         {
-            restriction = (*rest).jto!(ShipRestriction[]);
+            import std.algorithm, std.range;
+            restriction = (*rest).array.map!(a => cast(ShipRestriction)a.str).array;
         }
         else
         {
-            restriction = [ShipRestriction.Any.to!ShipRestriction];
+            restriction = [ShipRestriction.Any];
         }
         canMagicCharged = json["魔法チャージ"].jto!bool;
         canElementCharged = json["属性チャージ"].jto!bool;
@@ -578,11 +580,12 @@ auto toBulletInfo(JSONValue[string] json)
 
         if (auto rest = "使用可能シップ" in json)
         {
-            restriction = (*rest).jto!(ShipRestriction[]);
+            import std.algorithm, std.range;
+            restriction = (*rest).array.map!(a => cast(ShipRestriction)a.str).array;
         }
         else
         {
-            restriction = [ShipRestriction.Any.to!ShipRestriction];
+            restriction = [ShipRestriction.Any];
         }
     }
     return info;
@@ -672,11 +675,12 @@ auto toShieldInfo(JSONValue[string] json, string fname)
 
         if (auto rest = "使用可能シップ" in json)
         {
-            restriction = (*rest).jto!(ShipRestriction[]);
+            import std.algorithm, std.range;
+            restriction = (*rest).array.map!(a => cast(ShipRestriction)a.str).array;
         }
         else
         {
-            restriction = [ShipRestriction.Any.to!ShipRestriction];
+            restriction = [ShipRestriction.Any];
         }
         canMagicCharged = json["魔法チャージ"].jto!bool;
         canElementCharged = json["属性チャージ"].jto!bool;
@@ -693,56 +697,57 @@ struct AssetInfo
     int exhaustion;
 }
 
-alias ShipRestriction = ExtendedEnum!(
-    UNKNOWN => "不明", Any => "なし",
+enum ShipRestriction: string
+{
+    UNKNOWN = "不明", Any = "なし",
     // 基本シップ
     // 熟練
-    Puncher => "パンチャー", Swordsman => "剣士",
-    Macer => "メイサー",
-    Lancer => "ランサー", Gunner => "ガンナー", Archer => "アーチャー",
-    Guardsman => "ガーズマン",
+    Puncher = "パンチャー", Swordsman = "剣士",
+    Macer = "メイサー",
+    Lancer = "ランサー", Gunner = "ガンナー", Archer = "アーチャー",
+    Guardsman = "ガーズマン",
     //"投げ士",
-    Ranger => "レンジャー", BloodSucker => "ブラッド サッカー",
-    Kicker => "キッカー", Wildman => "ワイルドマン", Drinker => "ドリンカー", Copycat => "物まね師",
-    Tamer => "テイマー", Wizard => "ウィザード", Priest => "プリースト", Shaman => "シャーマン",
-    Enchanter => "エンチャンター", Summoner => "サモナー", Shadow => "シャドウ", Magician => "魔術師",
-    WildBoy => "野生児", Gremlin => "小悪魔", Vendor =>"ベンダー", RockSinger => "ロックシンガー",
-    Songsinger => "ソングシンガー", //"スリ",
-    Showboat => "目立ちたがり", StreetDancer => "ストリートダンサー",
+    Ranger = "レンジャー", BloodSucker = "ブラッド サッカー",
+    Kicker = "キッカー", Wildman = "ワイルドマン", Drinker = "ドリンカー", Copycat = "物まね師",
+    Tamer = "テイマー", Wizard = "ウィザード", Priest = "プリースト", Shaman = "シャーマン",
+    Enchanter = "エンチャンター", Summoner = "サモナー", Shadow = "シャドウ", Magician = "魔術師",
+    WildBoy = "野生児", Gremlin = "小悪魔", Vendor = "ベンダー", RockSinger = "ロックシンガー",
+    Songsinger = "ソングシンガー", //"スリ",
+    Showboat = "目立ちたがり", StreetDancer = "ストリートダンサー",
 
     // 基本
-    Fallman => "フォールマン",
-    Swimmer => "スイマー", // DeadMan => "デッドマン",
-    Helper => "ヘルパー",
-    Recoverer => "休憩人",
-    Miner => "マイナー",
-    Woodsman => "木こり", Plower => "耕作師",
-    Angler => "釣り人", // "解読者",
+    Fallman = "フォールマン",
+    Swimmer = "スイマー", // DeadMan => "デッドマン",
+    Helper = "ヘルパー",
+    Recoverer = "休憩人",
+    Miner = "マイナー",
+    Woodsman = "木こり", Plower = "耕作師",
+    Angler = "釣り人", // "解読者",
 
     // 生産
-    Cook => "料理師",
+    Cook = "料理師",
     //"鍛冶師",
-    Bartender => "バーテンダー", WoodWorker => "木工師", Tailor => "仕立て屋",
-    Drugmaker => "調合師", Decorator => "細工師", Scribe => "筆記師",
-    Barber => "調髪師", Cultivator => "栽培師",
+    Bartender = "バーテンダー", WoodWorker = "木工師", Tailor = "仕立て屋",
+    Drugmaker = "調合師", Decorator = "細工師", Scribe = "筆記師",
+    Barber = "調髪師", Cultivator = "栽培師",
 
     // 複合
-    Warrior => "ウォーリアー",  Alchemist => "アルケミスト", Forester => "フォレスター",
-    Necromancer => "ネクロマンサー", Creator => "クリエイター", Bomberman => "爆弾男",
-    Breeder => "ブリーダー", TempleKnight => "テンプルナイト", Druid => "ドルイド",
-    SageOfCerulean => "紺碧の賢者", GreatCreator => "グレート クリエイター",
-    Mercenary => "傭兵", Samurai => "サムライ", MineBishop => "マイン ビショップ",
-    KitchenMaster => "厨房師", Assassin => "アサシン", SeaFighter => "海戦士",
-    BraveKnight => "ブレイブナイト", EvilKnight => "イビルナイト",
-    CosPlayer => "コスプレイヤー", Dabster => "物好き", Athlete => "アスリート",
-    DrunkenFighter => "酔拳士", Rowdy => "荒くれ者", NewIdol => "新人アイドル",
-    HouseKeeper => "ハウスキーパー", Adventurer => "アドベンチャラー",
-    Spy => "スパイ", Punk => "チンピラ", Academian => "アカデミアン",
-    BloodBard => "ブラッドバード", Duelist => "デュエリスト", Collector => "コレクター",
+    Warrior = "ウォーリアー",  Alchemist = "アルケミスト", Forester = "フォレスター",
+    Necromancer = "ネクロマンサー", Creator = "クリエイター", Bomberman = "爆弾男",
+    Breeder = "ブリーダー", TempleKnight = "テンプルナイト", Druid = "ドルイド",
+    SageOfCerulean = "紺碧の賢者", GreatCreator = "グレート クリエイター",
+    Mercenary = "傭兵", Samurai = "サムライ", MineBishop = "マイン ビショップ",
+    KitchenMaster = "厨房師", Assassin = "アサシン", SeaFighter = "海戦士",
+    BraveKnight = "ブレイブナイト", EvilKnight = "イビルナイト",
+    CosPlayer = "コスプレイヤー", Dabster = "物好き", Athlete = "アスリート",
+    DrunkenFighter = "酔拳士", Rowdy = "荒くれ者", NewIdol = "新人アイドル",
+    HouseKeeper = "ハウスキーパー", Adventurer = "アドベンチャラー",
+    Spy = "スパイ", Punk = "チンピラ", Academian = "アカデミアン",
+    BloodBard = "ブラッドバード", Duelist = "デュエリスト", Collector = "コレクター",
 
     // 二次シップ
-    Sniper => "スナイパー", Hawkeye => "ホークアイ",
-    );
+    Sniper = "スナイパー", Hawkeye = "ホークアイ",
+}
 
 alias WeaponSlot = ExtendedEnum!(
     UNKNOWN => "不明", Right => "右手", Left => "左手", Both => "左右",

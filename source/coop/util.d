@@ -172,9 +172,7 @@ struct ExtendedEnum(KVs...)
 
     ///
     this(int m) @safe nothrow
-    in {
-        assert(m in bimap);
-    } body {
+    {
         val = m;
     }
 
@@ -193,17 +191,28 @@ struct ExtendedEnum(KVs...)
         return bimap[val];
     }
 
+    static auto fromString(string s)
+    {
+        return typeof(this)(s);
+    }
+
+    import vibe.data.json;
+    auto toJson() const
+    {
+        return Json(toString);
+    }
+
+    static auto fromJson(Json src)
+    {
+        return fromString(src.get!string);
+    }
+
 private:
     // _aaRange cannot be interpreted at compile time
     static const BiMap!(string, int) bimap;
     shared static this()
     {
         bimap = zip(values, svalues).assocArray;
-    }
-
-    invariant
-    {
-        assert(val in bimap);
     }
 }
 

@@ -457,11 +457,8 @@ auto readArmors(string fname)
     import vibe.data.json;
 
     import std.algorithm: map;
-    // import std.conv: to;
-    // import std.exception: enforce;
     import std.file: readText;
     import std.range;
-    // import std.json: JSON_TYPE, parseJSON;
     import std.typecons: tuple;
 
     return fname.readText
@@ -469,62 +466,7 @@ auto readArmors(string fname)
                 .deserialize!(JsonSerializer, ArmorInfo[])
                 .tee!(a => a.file = fname)
                 .map!"tuple(a.name, a)";
-    // auto res = fname.readText.parseJSON;
-    // enforce(res.type == JSON_TYPE.OBJECT);
-    // auto armors = res.object;
-    // return armors.keys.map!(key =>
-    //                          tuple(key.to!string,
-    //                                armors[key].object.toArmorInfo(fname)));
 }
-
-// auto toArmorInfo(JSONValue[string] json, string fname)
-// {
-//     ArmorInfo info;
-//     with(info)
-//     {
-//         import std.conv: to;
-//         import coop.util: jto;
-
-//         AC = json["アーマークラス"].jto!(real[Grade]);
-//         skills = json["必要スキル"].jto!(real[string]);
-//         slot = json["装備箇所"].jto!ArmorSlot;
-//         material = json["素材"].jto!Material;
-//         if (auto t = "消耗タイプ" in json)
-//         {
-//             type = (*t).jto!ExhaustionType;
-//         }
-//         exhaustion = json["耐久"].jto!int;
-//         if (auto f = "追加効果" in json)
-//         {
-//             effects = (*f).jto!(real[string]);
-//         }
-//         if (auto af = "付加効果" in json)
-//         {
-//             additionalEffect = (*af).jto!string;
-//         }
-
-//         specials = new RedBlackTree!string;
-//         if (auto sp = "効果アップ" in json)
-//         {
-//             specials.insert((*sp).jto!(string[]));
-//         }
-
-//         if (auto rest = "使用可能シップ" in json)
-//         {
-//             import std.algorithm, std.range;
-//             restriction = (*rest).array.map!(a => cast(ShipRestriction)a.str).array;
-//         }
-//         else
-//         {
-//             restriction = [ShipRestriction.Any];
-//         }
-//         canMagicCharged = json["魔法チャージ"].jto!bool;
-//         canElementCharged = json["属性チャージ"].jto!bool;
-
-//         file = fname;
-//     }
-//     return info;
-// }
 
 struct BulletInfo
 {

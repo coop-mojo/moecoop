@@ -464,7 +464,7 @@ auto readArmors(string fname)
     return fname.readText
                 .parseJsonString
                 .deserialize!(JsonSerializer, ArmorInfo[])
-                .tee!(a => a.file = fname)
+                .map!((a) { a.file = fname; return a; }) // tee だと動かない
                 .map!"tuple(a.name, a)";
 }
 
@@ -528,7 +528,7 @@ auto readShields(string fname)
     return fname.readText
                 .parseJsonString
                 .deserialize!(JsonSerializer, ShieldInfo[])
-                .tee!(a => a.file = fname)
+                .map!((a) { a.file = fname; return a; }) // tee だと動かない
                 .map!"tuple(a.name, a)";
 }
 

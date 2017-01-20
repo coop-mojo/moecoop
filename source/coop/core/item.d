@@ -324,110 +324,42 @@ auto readFoodEffects(string fname)
 
 struct WeaponInfo
 {
-    import std.container.rbtree: RedBlackTree;
+    import vibe.data.json: name_ = name, optional, ignore;
 
-    /// ダメージ
-    real[Grade] damage;
-    /// 攻撃間隔
-    int duration;
-    /// 有効レンジ
-    real range;
-    /// 必要スキル
-    real[string] skills;
-    /// 両手持ちかどうか
-    bool isDoubleHands;
-    /// 装備スロット
-    WeaponSlot slot;
-    /// 使用可能シップ
-    ShipRestriction[] restriction;
-    /// 素材
-    Material material;
-    /// 消耗タイプ
-    ExhaustionType type;
-    /// 消耗度
-    int exhaustion;
-    /// 追加効果
-    real[string] effects;
-    /// 付与効果
-    int[string] additionalEffect;
-    /// 効果アップ
-    RedBlackTree!string specials;
-    /// 魔法チャージ可能かどうか
-    bool canMagicCharged;
-    /// 属性チャージ可能かどうか
-    bool canElementCharged;
+    @name_("名前") string name;
+    @name_("攻撃力") double[Grade] damage;
+    @name_("攻撃間隔") int duration;
+    @name_("射程") double range;
+    @name_("必要スキル") double[string] skills;
+    @name_("両手装備") bool isDoubleHands;
+    @name_("装備箇所") WeaponSlot slot;
+    @name_("装備可能シップ") @optional ShipRestriction[] restriction = [ShipRestriction.Any];
+    @name_("素材") Material material;
+    @name_("消耗タイプ") @optional ExhaustionType type;
+    @name_("耐久") int exhaustion;
+    @name_("追加効果") @optional double[string] effects;
+    @name_("付加効果") @optional int[string] additionalEffect;
+    @name_("効果アップ") @optional string[] specials;
+    @name_("魔法チャージ") bool canMagicCharged;
+    @name_("属性チャージ") bool canElementCharged;
 
     /// デバッグ用。このアイテム情報が収録されているファイル名
-    string file;
+    @ignore string file;
 }
 
 auto readWeapons(string fname)
 {
+    import vibe.data.json;
+
     import std.algorithm: map;
-    import std.conv: to;
-    import std.exception: enforce;
     import std.file: readText;
-    import std.json: JSON_TYPE, parseJSON;
     import std.typecons: tuple;
 
-    auto res = fname.readText.parseJSON;
-    enforce(res.type == JSON_TYPE.OBJECT);
-    auto weapons = res.object;
-    return weapons.keys.map!(key =>
-                             tuple(key.to!string,
-                                   weapons[key].object.toWeaponInfo(fname)));
-}
-
-auto toWeaponInfo(JSONValue[string] json, string fname)
-{
-    WeaponInfo info;
-    with(info)
-    {
-        import std.conv: to;
-        import coop.util: jto;
-
-        damage = json["攻撃力"].jto!(real[Grade]);
-        duration = json["攻撃間隔"].jto!int;
-        range = json["射程"].jto!real;
-        skills = json["必要スキル"].jto!(real[string]);
-        slot = json["装備箇所"].jto!WeaponSlot;
-        isDoubleHands = json["両手装備"].jto!bool;
-        material = json["素材"].jto!Material;
-        if (auto t = "消耗タイプ" in json)
-        {
-            type = (*t).jto!ExhaustionType;
-        }
-        exhaustion = json["耐久"].jto!int;
-        if (auto f = "追加効果" in json)
-        {
-            effects = (*f).jto!(real[string]);
-        }
-        if (auto af = "付与効果" in json)
-        {
-            additionalEffect = (*af).jto!(int[string]);
-        }
-
-        specials = new RedBlackTree!string;
-        if (auto sp = "効果アップ" in json)
-        {
-            specials.insert((*sp).jto!(string[]));
-        }
-
-        if (auto rest = "使用可能シップ" in json)
-        {
-            import std.algorithm, std.range;
-            restriction = (*rest).array.map!(a => cast(ShipRestriction)a.str).array;
-        }
-        else
-        {
-            restriction = [ShipRestriction.Any];
-        }
-        canMagicCharged = json["魔法チャージ"].jto!bool;
-        canElementCharged = json["属性チャージ"].jto!bool;
-
-        file = fname;
-    }
-    return info;
+    return fname.readText
+                .parseJsonString
+                .deserialize!(JsonSerializer, WeaponInfo[])
+                .map!((a) { a.file = fname; return a; }) // tee だと動かない
+                .map!"tuple(a.name, a)";
 }
 
 struct ArmorInfo

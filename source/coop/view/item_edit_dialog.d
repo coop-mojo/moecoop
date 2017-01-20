@@ -149,17 +149,17 @@ class ItemEditDialog: Dialog
         {
             import std.array;
 
-            alias updateFun = (bool c) {
+            alias updateFun = p => (bool c) {
                 if (c) {
-                    updated.properties ~= SpecialProperty(pr);
+                    updated.properties = (updated.properties~SpecialProperty(p)).schwartzSort!"a.val".array;
                 }
                 else
                 {
-                    updated.properties.remove(SpecialProperty(pr));
+                    updated.properties = updated.properties.filter!(a => a != p).array;
                 }
             };
-            table.addCheckElem(pr.to!dstring, props.canFind(pr), item.isOverlaid!"properties",
-                               updateFun, SpecialProperty(pr).to!dstring);
+            table.addCheckElem(SpecialProperty(pr).toString(true).to!dstring, props.canFind(pr), item.isOverlaid!"properties",
+                               updateFun(pr), SpecialProperty(pr).to!dstring);
         }
         main.addChild(propCap);
         main.addChild(table);

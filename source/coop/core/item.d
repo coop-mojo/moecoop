@@ -74,7 +74,7 @@ struct Item
         {
             import std.algorithm;
             import std.range;
-            hash["特殊条件"] = JSONValue(properties.map!"a.to!string".array);
+            hash["特殊条件"] = JSONValue(properties.map!"a.toString(true)".array);
         }
         if (!remarks.empty)
         {
@@ -175,27 +175,10 @@ auto toItem(string s, JSONValue[string] json, string fname)
 
         if (auto props = "特殊条件" in json)
         {
-            enum arr = [
-                "NT",
-                "OP",
-                "CS",
-                "CR",
-                "PM",
-                "NC",
-                "NB",
-                "ND",
-                "CA",
-                "DL",
-                "TC",
-                "LO",
-                "AL",
-                "WA",
-            ];
             import std.algorithm;
-            import std.conv;
             import std.range;
-            import std.traits;import coop.util;
-            alias idx = s => arr.indexOf(s);
+
+            alias idx = s => SpecialProperty.values.find!((a, b) => SpecialProperty(a).toString(true) == b)(s).front;
             properties = (*props).jto!(string[]).map!idx.map!(i => SpecialProperty(cast(int)i)).array;
         }
         type = json["種類"].jto!ItemType;

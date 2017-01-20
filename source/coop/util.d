@@ -186,9 +186,16 @@ struct ExtendedEnum(KVs...)
     }
 
     ///
-    auto toString() @safe const nothrow
+    auto toString(bool shortRepr = false) @safe const nothrow
     {
-        return bimap[val];
+        if (shortRepr)
+        {
+            return only(staticMap!(ParamName, KVs))[val];
+        }
+        else
+        {
+            return bimap[val];
+        }
     }
 
     static auto fromString(string s)
@@ -242,6 +249,7 @@ version(unittest)
 
     util_EEnum val = util_EEnum.A;
     assert(assertNotThrown(val.to!string) == "い");
+    assert(assertNotThrown(val.toString(true) == "A"));
     assert("い".to!util_EEnum == val);
 }
 

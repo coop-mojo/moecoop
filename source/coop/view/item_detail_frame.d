@@ -87,9 +87,10 @@ class ItemDetailFrame: ScrollWidget
             table.addElem("転送可", item.transferable ? "はい" : "いいえ", item.isOverlaid!"transferable");
             table.addElem("スタック可", item.stackable ? "はい": "いいえ", item.isOverlaid!"stackable");
 
-            if (item.properties != 0)
+            if (!item.properties.empty)
             {
-                table.addElem("特殊条件", item.properties.toStrings.join(", ").to!dstring, item.isOverlaid!"properties");
+                import std.algorithm;
+                table.addElem("特殊条件", item.properties.map!"a.to!string".join(", ").to!dstring, item.isOverlaid!"properties");
             }
 
             if (item.petFoodInfo.keys[0] != PetFoodType.NoEatable)

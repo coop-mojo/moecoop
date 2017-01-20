@@ -145,21 +145,21 @@ class ItemEditDialog: Dialog
         auto table = new TableLayout;
         table.colCount = 14;
         auto props = item.properties;
-        foreach(pr; [EnumMembers!SpecialProperty])
+        foreach(pr; SpecialProperty.values)
         {
             import std.array;
 
-            alias updateFun = (ushort p) => (bool c) {
+            alias updateFun = (bool c) {
                 if (c) {
-                    updated.properties |= p;
+                    updated.properties ~= SpecialProperty(pr);
                 }
                 else
                 {
-                    updated.properties &= ~p;
+                    updated.properties.remove(SpecialProperty(pr));
                 }
             };
-            table.addCheckElem(pr.to!dstring, (props&pr) != 0, item.isOverlaid!"properties",
-                               updateFun(pr), pr.toStrings.join.to!dstring);
+            table.addCheckElem(pr.to!dstring, props.canFind(pr), item.isOverlaid!"properties",
+                               updateFun, SpecialProperty(pr).to!dstring);
         }
         main.addChild(propCap);
         main.addChild(table);

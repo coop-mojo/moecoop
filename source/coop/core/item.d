@@ -33,7 +33,7 @@ struct Item
     /// info
     string info;
     /// 特殊条件
-    ushort properties;
+    SpecialProperty[] properties;
     /// 転送可能かどうか
     bool transferable;
     /// スタックできるかどうか
@@ -72,7 +72,9 @@ struct Item
 
         if (properties)
         {
-            hash["特殊条件"] = JSONValue(properties.toStrings(false));
+            import std.algorithm;
+            import std.range;
+            hash["特殊条件"] = JSONValue(properties.map!"a.to!string".array);
         }
         if (!remarks.empty)
         {
@@ -101,7 +103,7 @@ unittest
         weight = 0.03;
         petFoodInfo = [ PetFoodType.UNKNOWN.to!PetFoodType: 0.0 ];
         stackable = true;
-        properties = SpecialProperty.OP;
+        properties = [SpecialProperty.OP.to!SpecialProperty];
         type = ItemType.Others;
         remarks = "クエストで使う";
     }
@@ -173,7 +175,28 @@ auto toItem(string s, JSONValue[string] json, string fname)
 
         if (auto props = "特殊条件" in json)
         {
-            properties = (*props).array.toSpecialProperties;
+            enum arr = [
+                "NT",
+                "OP",
+                "CS",
+                "CR",
+                "PM",
+                "NC",
+                "NB",
+                "ND",
+                "CA",
+                "DL",
+                "TC",
+                "LO",
+                "AL",
+                "WA",
+            ];
+            import std.algorithm;
+            import std.conv;
+            import std.range;
+            import std.traits;import coop.util;
+            alias idx = s => arr.indexOf(s);
+            properties = (*props).jto!(string[]).map!idx.map!(i => SpecialProperty(cast(int)i)).array;
         }
         type = json["種類"].jto!ItemType;
         file = fname;
@@ -188,73 +211,22 @@ alias PetFoodType = ExtendedEnum!(
     Leather => "皮", Paper => "紙", Cloth => "布", Others => "その他",
     NoEatable => "犬も喰わない",);
 
-enum SpecialProperty: ushort
-{
-    NT = 0b00000000000001,
-    OP = 0b00000000000010,
-    CS = 0b00000000000100,
-    CR = 0b00000000001000,
-    PM = 0b00000000010000,
-    NC = 0b00000000100000,
-    NB = 0b00000001000000,
-    ND = 0b00000010000000,
-    CA = 0b00000100000000,
-    DL = 0b00001000000000,
-    TC = 0b00010000000000,
-    LO = 0b00100000000000,
-    AL = 0b01000000000000,
-    WA = 0b10000000000000,
-}
-
-auto toStrings(ushort sps, bool detailed = true) pure
-{
-    with(SpecialProperty)
-    {
-        import std.algorithm: filter, map;
-        import std.range: array;
-
-        auto propMap = [
-            NT: "他のプレイヤーにトレードで渡せない",
-            OP: "一人一個のみ",
-            CS: "売ることができない",
-            CR: "修理できない",
-            PM: "消耗度による威力計算を行わない",
-            NC: "修理による最大耐久度低下を行わない",
-            NB: "耐久度による武器の破壊が行われない",
-            ND: "死亡時ドロップしない",
-            CA: "カオスエイジで死亡しても消えない",
-            DL: "死亡すると消える",
-            TC: "タイムカプセルボックスに入れることが出来ない",
-            LO: "ログアウトすると消える",
-            AL: "現在のエリア限定",
-            WA: "WarAgeでは性能が低下する",
-            ];
-        auto str(SpecialProperty p)
-        {
-            import std.conv: to;
-            return detailed ? propMap[p] : p.to!string;
-        }
-        return propMap.keys.filter!(p => sps&p).map!(p => str(p)).array;
-    }
-}
-
-pure unittest
-{
-    import std.algorithm: equal, sort;
-    assert(SpecialProperty.OP.toStrings.equal(["一人一個のみ"]));
-    assert((SpecialProperty.CS | SpecialProperty.CR).toStrings.sort().equal(["修理できない", "売ることができない"]));
-
-    assert(SpecialProperty.OP.toStrings(false).equal(["OP"]));
-}
-
-auto toSpecialProperties(JSONValue[] vals) pure
-{
-    import std.algorithm: map, reduce;
-    import std.conv: to;
-    import std.range: array;
-    auto props = vals.map!"a.str".map!(s => s.to!SpecialProperty).array;
-    return props.reduce!((a, b) => a|b).to!ushort;
-}
+alias SpecialProperty = ExtendedEnum!(
+    NT => "他のプレイヤーにトレードで渡せない",
+    OP => "一人一個のみ",
+    CS => "売ることができない",
+    CR => "修理できない",
+    PM => "消耗度による威力計算を行わない",
+    NC => "修理による最大耐久度低下を行わない",
+    NB => "耐久度による武器の破壊が行われない",
+    ND => "死亡時ドロップしない",
+    CA => "カオスエイジで死亡しても消えない",
+    DL => "死亡すると消える",
+    TC => "タイムカプセルボックスに入れることが出来ない",
+    LO => "ログアウトすると消える",
+    AL => "現在のエリア限定",
+    WA => "WarAgeでは性能が低下する",
+    );
 
 alias ItemType = ExtendedEnum!(
     UNKNOWN => "不明", Others => "その他", Food => "食べ物", Drink => "飲み物",

@@ -39,24 +39,18 @@ class CustomInfo
 
     auto save()
     {
-        import std.algorithm;
-        import std.conv;
         import std.file;
-        import std.json;
         import std.path;
-        import std.range;
         import std.stdio;
-        import std.typecons;
+        import vibe.data.json;
 
         auto itemDir = buildPath(baseDir_, "アイテム");
         mkdirRecurse(itemDir);
         auto items = File(buildPath(itemDir, "アイテム.json"), "w");
-        items.writeln(JSONValue(itemList.values
-                              .map!(item => tuple(item.name.to!string, item.toJSON))
-                              .assocArray).toPrettyString);
+        items.writeln(itemList.values.serializeToPrettyJson);
 
         auto prices = File(buildPath(baseDir_, "調達価格.json"), "w");
-        prices.writeln(JSONValue(procurementPriceList).toPrettyString);
+        prices.writeln(procurementPriceList.serializeToPrettyJson);
     }
 private:
     string baseDir_;
@@ -64,13 +58,11 @@ private:
 
 auto readProcPriceList(string sysBase)
 {
-    import std.algorithm;
     import std.exception;
     import std.file;
-    import std.json;
     import std.path;
 
-    import coop.util;
+    import vibe.data.json;
 
     enforce(sysBase.exists);
     enforce(sysBase.isDir);
@@ -79,5 +71,7 @@ auto readProcPriceList(string sysBase)
     {
         return (int[string]).init;
     }
-    return file.readText.parseJSON.jto!(int[string]);
+    return file.readText
+               .parseJsonString
+               .deserialize!(JsonSerializer, int[string]);
 }

@@ -6,9 +6,11 @@
 module coop.core.item;
 
 import std.json: JSONValue;
+import std.typecons;
 import std.variant: Algebraic;
 
-import coop.util: ExtendedEnum;
+import vibe.data.json;
+import coop.util: ExtendedEnum, Enum, EnumMembers;
 
 /// アイテムの追加情報
 alias ExtraInfo = Algebraic!(FoodInfo, WeaponInfo, ArmorInfo, BulletInfo, ShieldInfo, ExpendableInfo);
@@ -22,66 +24,22 @@ struct Item
         petFoodInfo = assumeWontThrow(petFoodInfo.dup);
     }
 
-    /// アイテム名
-    string name;
-    /// 英語名
-    string ename;
-    /// 重さ
-    real weight;
-    /// NPC 売却価格
-    uint price;
-    /// info
-    string info;
-    /// 特殊条件
-    SpecialProperty[] properties;
-    /// 転送可能かどうか
-    bool transferable;
-    /// スタックできるかどうか
-    bool stackable;
-    /// ペットアイテム
-    real[PetFoodType] petFoodInfo;
-    /// 備考
-    string remarks;
-    /// アイテム種別
-    ItemType type;
+    import vibe.data.json: name_ = name, optional, byName, ignore;
+
+    @name_("名前") string name;
+    @name_("英名") string ename;
+    @name_("重さ") double weight;
+    @name_("NPC売却価格") uint price;
+    @name_("info") string info;
+    @name_("特殊条件") @optional SpecialProperty[] properties;
+    @name_("転送できる") bool transferable;
+    @name_("スタックできる") bool stackable;
+    @name_("ペットアイテム") @optional double[PetFoodType] petFoodInfo;
+    @name_("備考") @optional string remarks;
+    @name_("種類") ItemType type;
 
     /// デバッグ用。このアイテム情報が収録されているファイル名
-    string file;
-
-    auto toJSON() const
-    {
-        import std.conv: to;
-        import std.math: isNaN;
-        import std.range: empty;
-
-        auto hash = [
-            "英名": JSONValue(ename.to!string),
-            "NPC売却価格": JSONValue(price),
-            "重さ": JSONValue(weight.isNaN ? 0 : weight),
-            "info": JSONValue(info.to!string),
-            "転送できる": JSONValue(transferable),
-            "スタックできる": JSONValue(stackable),
-            "種類": JSONValue(type.to!string),
-            ];
-
-        assert(petFoodInfo.keys.length == 1);
-        if (petFoodInfo.keys[0] != PetFoodType.NoEatable)
-        {
-            hash["ペットアイテム"] = JSONValue(petFoodInfo.to!(real[string]));
-        }
-
-        if (properties)
-        {
-            import std.algorithm;
-            import std.range;
-            hash["特殊条件"] = JSONValue(properties.map!"a.toString(true)".array);
-        }
-        if (!remarks.empty)
-        {
-            hash["備考"] = JSONValue(remarks.to!string);
-        }
-        return JSONValue(hash);
-    }
+    @ignore string file;
 
     auto opCast(T: bool)()
     {
@@ -108,65 +66,70 @@ unittest
         remarks = "クエストで使う";
     }
     assert(cast(bool)item == true);
-
-    auto json = item.toJSON;
-    with(json)
-    {
-        import std.json: JSON_TYPE;
-        import std.math: approxEqual;
-
-        assert(json["英名"].str == item.ename.to!string);
-        assert(json["info"].str == item.info.to!string);
-        assert(json["NPC売却価格"].uinteger == item.price);
-        assert(json["重さ"].floating.approxEqual(item.weight));
-        assert(json["転送できる"].type == JSON_TYPE.FALSE);
-        assert(json["スタックできる"].type == JSON_TYPE.TRUE);
-        assert(json["ペットアイテム"].object == ["不明": JSONValue(0.0)]);
-        assert(json["種類"].str == item.type.to!string);
-        assert(json["備考"].str == item.remarks.to!string);
-    }
 }
 
 auto readItems(string fname)
 {
+    import vibe.data.json;
+
     import std.algorithm: map;
-    import std.conv: to;
-    import std.exception: enforce;
     import std.file: readText;
-    import std.json: JSON_TYPE, parseJSON;
+    import std.range;
     import std.typecons: tuple;
 
-    auto res = fname.readText.parseJSON;
-    enforce(res.type == JSON_TYPE.OBJECT);
-    auto items = res.object;
-    return items.keys.map!(key =>
-                           tuple(key.to!string,
-                                 key.toItem(items[key].object,
-                                            fname)));
+    auto json = fname.readText
+                     .parseJsonString;
+
+    if (json.type == Json.Type.array)
+    {
+        return json.deserialize!(JsonSerializer, Item[])
+                   .map!((a) {
+                           import std.conv;
+                           import std.range;
+                           if (a.petFoodInfo.keys.empty)
+                           {
+                               a.petFoodInfo[PetFoodType.NoEatable.to!PetFoodType] = 0;
+                           }
+                           a.file = fname;
+                           return a;
+                       })
+                   .map!"tuple(a.name, a)"
+                   .array;
+    }
+    else
+    {
+        assert(json.type == Json.Type.object);
+        return json.get!(Json[string])
+                   .byKeyValue
+                   .map!(kv => tuple(kv.key,
+                                     kv.key.toItem_fallback(kv.value, fname)))
+                   .array;
+    }
 }
 
 /**
  * アイテム s の情報を、ファイル fname に書かれている json から読み込む
  */
-auto toItem(string s, JSONValue[string] json, string fname)
-{
+auto toItem_fallback(string s, Json json, string fname)
+in {
+    assert(json.type == Json.Type.object);
+} body {
     Item item;
     with(item)
     {
         import std.conv: to;
-        import coop.util: jto;
 
         name = s.to!string;
-        ename = json["英名"].jto!string;
-        price = json["NPC売却価格"].jto!uint;
-        weight = json["重さ"].jto!real;
-        info = json["info"].jto!string;
-        transferable = json["転送できる"].jto!bool;
-        stackable = json["スタックできる"].jto!bool;
+        ename = json["英名"].get!string;
+        price = json["NPC売却価格"].get!uint;
+        weight = json["重さ"].get!double;
+        info = json["info"].get!string;
+        transferable = json["転送できる"].get!bool;
+        stackable = json["スタックできる"].get!bool;
 
         if (auto petFood = "ペットアイテム" in json)
         {
-            petFoodInfo = (*petFood).jto!(real[PetFoodType]);
+            petFoodInfo = (*petFood).deserialize!(JsonSerializer, double[PetFoodType]);
         }
         else
         {
@@ -178,10 +141,9 @@ auto toItem(string s, JSONValue[string] json, string fname)
             import std.algorithm;
             import std.range;
 
-            alias idx = s => SpecialProperty.values.find!((a, b) => SpecialProperty(a).toString(true) == b)(s).front;
-            properties = (*props).jto!(string[]).map!idx.map!(i => SpecialProperty(cast(int)i)).array;
+            properties = (*props).deserialize!(JsonSerializer, SpecialProperty[]);
         }
-        type = json["種類"].jto!ItemType;
+        type = json["種類"].deserialize!(JsonSerializer, ItemType);
         file = fname;
     }
     return item;
@@ -194,7 +156,8 @@ alias PetFoodType = ExtendedEnum!(
     Leather => "皮", Paper => "紙", Cloth => "布", Others => "その他",
     NoEatable => "犬も喰わない",);
 
-alias SpecialProperty = ExtendedEnum!(
+alias SpecialProperty = Enum!(
+    Yes.useByName,
     NT => "他のプレイヤーにトレードで渡せない",
     OP => "一人一個のみ",
     CS => "売ることができない",
@@ -652,8 +615,8 @@ nothrow unittest
     assert(overlaid.isOverlaid!"price");
     assert(overlaid.price == 0);
 
-    assert(overlaid.isOverlaid!"petFoodInfo");
-    assert(overlaid.petFoodInfo == typeof(overlaid.petFoodInfo).init);
+    assert(!overlaid.isOverlaid!"petFoodInfo");
+    assert(overlaid.petFoodInfo == [PetFoodType.UNKNOWN.to!PetFoodType: 0.0]);
 }
 
 auto readItemList(string sysBase)

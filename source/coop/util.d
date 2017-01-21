@@ -186,16 +186,14 @@ struct ExtendedEnum(KVs...)
     }
 
     ///
-    auto toString(bool shortRepr = false) @safe const nothrow
+    auto toString() @safe const nothrow
     {
-        if (shortRepr)
-        {
-            return only(staticMap!(ParamName, KVs))[val];
-        }
-        else
-        {
-            return bimap[val];
-        }
+        return bimap[val];
+    }
+
+    auto toShortString() @safe const nothrow
+    {
+        return only(staticMap!(ParamName, KVs))[val];
     }
 
     static auto fromString(string s)
@@ -232,6 +230,132 @@ private enum ParamName(alias T) = {
     return str[0 .. str.indexOf(")")];
 }();
 
+
+import std.typecons;
+auto assignStr(Tuple!(string, string) var) { return var[0]~` = "`~var[1]~`"`; }
+
+struct Enum(Flag!"useByName" useByName, KVs...)
+{
+    import std.algorithm;
+    import std.meta;
+    mixin(format(q{
+                enum{
+                    %s
+                }
+            }, zip([staticMap!(ParamName, KVs)], [staticMap!(ReturnValue, KVs)]).map!assignStr.join(", ")));
+
+    string val;
+    alias val this;
+
+    ///
+    this(string s) @safe nothrow
+    {
+        val = s;
+    }
+
+    ///
+    auto toString() @safe const nothrow
+    {
+        return val;
+    }
+
+    auto toNameString() @safe const nothrow
+    {
+        auto val = only(staticMap!(ReturnValue, KVs)).indexOf(val);
+        return only(staticMap!(ParamName, KVs))[val];
+    }
+
+    import vibe.data.json;
+    auto toJson() const
+    {
+        static if (Yes.useByName)
+        {
+            return Json(toNameString);
+        }
+        else
+        {
+            return Json(toString);
+        }
+    }
+
+    static auto fromJson(Json src)
+    {
+        import coop.util;
+        import std.conv;
+        return typeof(this)(src.get!string);
+    }
+}
+
+template EnumMembers(E)
+    if (__traits(isSame, TemplateOf!E, Enum))
+{
+    import std.meta;
+
+    // Supply the specified identifier to an constant value.
+    // from dmd 2.021.7
+    template WithIdentifier(string ident)
+    {
+        static if (ident == "Symbolize")
+        {
+            template Symbolize(alias value)
+            {
+                enum Symbolize = value;
+            }
+        }
+        else
+        {
+            mixin("template Symbolize(alias "~ ident ~")"
+                 ~"{"
+                     ~"alias Symbolize = "~ ident ~";"
+                 ~"}");
+        }
+    }
+
+    template EnumSpecificMembers(names...)
+    {
+        static if (names.length > 0)
+        {
+            static if (is(typeof(WithIdentifier!(names[0])
+                                 .Symbolize!(__traits(getMember, E, names[0]))) == string))
+            {
+                alias EnumSpecificMembers = AliasSeq!(WithIdentifier!(names[0])
+                                                       .Symbolize!(__traits(getMember, E, names[0])),
+                                                       EnumSpecificMembers!(names[1..$]));
+            }
+            else
+            {
+                alias EnumSpecificMembers = AliasSeq!(EnumSpecificMembers!(names[1..$]));
+            }
+        }
+        else
+        {
+            alias EnumSpecificMembers = AliasSeq!();
+        }
+    }
+    alias EnumMembers = EnumSpecificMembers!(__traits(allMembers, E));
+}
+
+version(unittest)
+{
+    ///
+    alias util_EEE1 = Enum!(
+        No.useByName,
+        A => "い", B => "ろ", C => "は",
+        );
+}
+///
+unittest
+{
+    import std.conv;
+    import std.exception;
+
+    util_EEE1 val = util_EEE1.A;
+    assert(assertNotThrown(val.to!string) == "い");
+    assert(assertNotThrown(val.toNameString) == "A");
+    assert(val.toJson == "A");
+    assert([EnumMembers!util_EEE1] == [util_EEE1.A, util_EEE1.B, util_EEE1.C]);
+}
+
 version(unittest)
 {
     ///
@@ -249,7 +373,7 @@ version(unittest)
 
     util_EEnum val = util_EEnum.A;
     assert(assertNotThrown(val.to!string) == "い");
-    assert(assertNotThrown(val.toString(true) == "A"));
+    assert(assertNotThrown(val.toShortString == "A"));
     assert("い".to!util_EEnum == val);
 }
 

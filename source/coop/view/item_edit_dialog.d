@@ -145,7 +145,8 @@ class ItemEditDialog: Dialog
         auto table = new TableLayout;
         table.colCount = 14;
         auto props = item.properties;
-        foreach(pr; SpecialProperty.values)
+        import coop.util;
+        foreach(pr; [EnumMembers!SpecialProperty])
         {
             import std.array;
 
@@ -158,7 +159,7 @@ class ItemEditDialog: Dialog
                     updated.properties = updated.properties.filter!(a => a != p).array;
                 }
             };
-            table.addCheckElem(SpecialProperty(pr).toString(true).to!dstring, props.canFind(pr), item.isOverlaid!"properties",
+            table.addCheckElem(SpecialProperty(pr).toNameString.to!dstring, props.canFind(pr), item.isOverlaid!"properties",
                                updateFun(pr), SpecialProperty(pr).to!dstring);
         }
         main.addChild(propCap);

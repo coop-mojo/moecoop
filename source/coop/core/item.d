@@ -476,7 +476,7 @@ alias Grade = ExtendedEnum!(
 
 enum ExhaustionType: string
 {
-    UNKNOWN = "不明", Points = "耐久値", Times = "使用可能回数",
+    Points = "消耗度", Times = "使用可能回数",
 }
 
 /// 消耗品固有の情報

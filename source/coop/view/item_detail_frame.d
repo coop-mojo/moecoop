@@ -228,8 +228,7 @@ auto addExtraElem(Str)(Widget layout, Str name, WisdomModel model)
         layout.addElem("ダメージ", damageStr);
         layout.addElem("攻撃間隔", info.duration.to!string);
         layout.addElem("有効レンジ", format("%.1f", info.range));
-        layout.addElem(info.type == ExhaustionType.Points ? "使用可能回数" : "消耗度",
-                       info.exhaustion.to!dstring);
+        layout.addElem(cast(string)info.type, info.exhaustion.to!dstring);
         layout.addElem("必要スキル",
                        info.skills
                            .byKeyValue
@@ -290,8 +289,7 @@ auto addExtraElem(Str)(Widget layout, Str name, WisdomModel model)
                           .map!(g => format("%s: %.1f"d, g.to!Grade, info.AC[g.to!Grade]))
                           .join(", ");
         layout.addElem("アーマークラス", ACStr);
-        layout.addElem(info.type == ExhaustionType.Points ? "使用可能回数" : "消耗度",
-                       info.exhaustion.to!string);
+        layout.addElem(cast(string)info.type, info.exhaustion.to!string);
         layout.addElem("必要スキル",
                        info.skills
                            .byKeyValue
@@ -385,8 +383,7 @@ auto addExtraElem(Str)(Widget layout, Str name, WisdomModel model)
                           .map!(g => format("%s: %.1f", g.to!Grade, info.AC[g.to!Grade]))
                           .join(", ");
         layout.addElem("アーマークラス", ACStr);
-        layout.addElem(info.type == ExhaustionType.Points ? "使用可能回数" : "消耗度",
-                       info.exhaustion.to!string);
+        layout.addElem(cast(string)info.type, info.exhaustion.to!string);
         layout.addElem("必要スキル",
                        info.skills
                            .byKeyValue

@@ -29,9 +29,9 @@ extern(C) int UIAppMain(string[] args)
     import std.typecons;
 
     import coop.core.character;
-    import coop.model;
     import coop.model.config;
     import coop.model.custom_info;
+    import coop.core;
     import coop.core.wisdom;
     import coop.view.main_frame;
     import coop.util;

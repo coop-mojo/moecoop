@@ -52,7 +52,7 @@ class MainFrame: AppFrame
 {
     import coop.core.character;
     import coop.core.wisdom;
-    import coop.model;
+    import coop.core;
     import coop.model.custom_info;
     import coop.model.config;
 

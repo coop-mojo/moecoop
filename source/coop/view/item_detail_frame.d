@@ -11,7 +11,7 @@ import std.traits;
 
 import coop.core.item;
 import coop.core.wisdom;
-import coop.model;
+import coop.core;
 import coop.model.custom_info;
 
 class ItemDetailFrame: ScrollWidget

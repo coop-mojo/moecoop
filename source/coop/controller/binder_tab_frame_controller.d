@@ -16,7 +16,7 @@ class BinderTabFrameController: RecipeTabFrameController
         import dlangui;
         import std.traits;
 
-        import coop.model;
+        import coop.core;
 
         super(frame, categories);
         frame.relatedBindersFor = (recipe, binder) => [binder];

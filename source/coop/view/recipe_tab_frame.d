@@ -48,7 +48,7 @@ class RecipeTabFrame: TabFrameBase
         {
             import std.traits;
 
-            import coop.model;
+            import coop.core;
 
             items = [EnumMembers!SortOrder].to!(dstring[]);
             selectedItemIndex = 0;
@@ -209,7 +209,7 @@ class RecipeTabFrame: TabFrameBase
         import std.algorithm;
 
         return pairs.map!((pair) {
-                import coop.model;
+                import coop.core;
 
                 auto category = pair.category.to!dstring;
                 auto recipes = pair.recipes.to!(dstring[]);

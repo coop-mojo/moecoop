@@ -25,7 +25,7 @@ class SkillTabFrameController: RecipeTabFrameController
         {
             import std.algorithm;
             import std.range;
-            import coop.model;
+            import coop.core;
 
             items = only(EnumMembers!SortOrder).map!"cast(string)a".array.to!(dstring[])[0..$-1];
             selectedItemIndex = 0;
@@ -41,7 +41,7 @@ class SkillTabFrameController: RecipeTabFrameController
         import std.regex;
         import std.typecons;
 
-        import coop.model;
+        import coop.core;
 
         auto query = frame_.queryBox.text == frame_.defaultMessage ? ""d : frame_.queryBox.text;
         if (frame_.useMetaSearch && query.matchFirst(ctRegex!r"^\s*$"d))

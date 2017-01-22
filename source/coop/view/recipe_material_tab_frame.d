@@ -194,7 +194,7 @@ class RecipeMaterialTabFrame: TabFrameBase
 
                 w.detailClicked = {
                     import coop.core.item;
-                    import coop.model;
+                    import coop.core;
                     import coop.view.item_detail_frame;
 
                     unhighlightDetailItems;
@@ -399,7 +399,7 @@ class RecipeMaterialTabFrame: TabFrameBase
                 auto n = new TextWidget("num", format("%s 個"d, 0));
                 w.click = (Widget _) {
                     import coop.core.item;
-                    import coop.model;
+                    import coop.core;
                     import coop.view.item_detail_frame;
 
                     unhighlightDetailItems;
@@ -468,7 +468,7 @@ class RecipeMaterialTabFrame: TabFrameBase
                 };
                 w.detailClicked = {
                     import coop.core.item;
-                    import coop.model;
+                    import coop.core;
                     import coop.view.item_detail_frame;
 
                     unhighlightDetailItems;

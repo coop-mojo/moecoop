@@ -8,7 +8,7 @@ module coop.controller.main_frame_controller;
 class MainFrameController
 {
     import coop.core.character;
-    import coop.model;
+    import coop.core;
     import coop.model.config;
     import coop.model.custom_info;
     import coop.core.wisdom;

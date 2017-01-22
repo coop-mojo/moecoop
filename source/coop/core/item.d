@@ -482,41 +482,27 @@ enum ExhaustionType: string
 /// 消耗品固有の情報
 struct ExpendableInfo
 {
-    real[string] skill;
-    string effect;
+    import vibe.data.json: name_ = name, optional, ignore;
+    @name_("名前") string name;
+    @name_("必要スキル") @optional double[string] skill;
+    @name_("効果") string effect;
+
+    @ignore string file;
 }
 
 auto readExpendables(string fname)
 {
-    import std.algorithm: map;
-    import std.conv: to;
-    import std.exception: enforce;
-    import std.file: readText;
-    import std.json: JSON_TYPE, parseJSON;
-    import std.typecons: tuple;
+    import vibe.data.json;
 
-    auto res = fname.readText.parseJSON;
-    enforce(res.type == JSON_TYPE.OBJECT);
-    auto expendables = res.object;
-    return expendables.keys.map!(key =>
-                             tuple(key.to!string,
-                                   expendables[key].object.toExpendableInfo));
-}
+    import std.algorithm;
+    import std.file;
+    import std.typecons;
 
-auto toExpendableInfo(JSONValue[string] json) pure
-{
-    ExpendableInfo info;
-    with(info)
-    {
-        import coop.util: jto;
-
-        effect = json["効果"].jto!string;
-        if (auto f = "必要スキル" in json)
-        {
-            skill = (*f).jto!(real[string]);
-        }
-    }
-    return info;
+    return fname.readText
+                .parseJsonString
+                .deserialize!(JsonSerializer, ExpendableInfo[])
+                .map!((a) { a.file = fname; return a; }) // tee だと動かない
+                .map!"tuple(a.name, a)";
 }
 
 struct Overlaid(T)

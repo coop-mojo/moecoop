@@ -271,28 +271,19 @@ private:
 
 auto readBinders(string file)
 {
+    import vibe.data.json;
+
     import std.algorithm;
-    import std.conv;
     import std.exception;
     import std.file;
-    import std.json;
+    import std.typecons;
 
     enforce(file.exists);
-    auto res = file
-               .readText
-               .parseJSON;
-    enforce(res.type == JSON_TYPE.OBJECT);
-    return res
-        .object
-        .byKeyValue
-        .map!((kv) {
-                import coop.util;
-
-                auto binder = kv.key.to!string;
-                enforce(kv.value.type == JSON_TYPE.ARRAY);
-                auto recipes = kv.value.jto!(string[]);
-                return tuple(binder, recipes);
-            });
+    return file.readText
+               .parseJsonString
+               .deserialize!(JsonSerializer, string[][string])
+               .byKeyValue
+               .map!"tuple(a.key, a.value)";
 }
 
 unittest

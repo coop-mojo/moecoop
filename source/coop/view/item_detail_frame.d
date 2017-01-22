@@ -90,7 +90,8 @@ class ItemDetailFrame: ScrollWidget
             if (!item.properties.empty)
             {
                 import std.algorithm;
-                table.addElem("特殊条件", item.properties.map!"a.to!string".join(", ").to!dstring, item.isOverlaid!"properties");
+                import std.conv;
+                table.addElem("特殊条件", (cast(string[])item.properties).join(", ").to!dstring, item.isOverlaid!"properties");
             }
 
             if (item.petFoodInfo.keys[0] != PetFoodType.NoEatable)

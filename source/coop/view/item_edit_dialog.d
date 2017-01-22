@@ -145,22 +145,22 @@ class ItemEditDialog: Dialog
         auto table = new TableLayout;
         table.colCount = 14;
         auto props = item.properties;
-        import coop.util;
         foreach(pr; [EnumMembers!SpecialProperty])
         {
             import std.array;
 
             alias updateFun = p => (bool c) {
                 if (c) {
-                    updated.properties = (updated.properties~SpecialProperty(p)).schwartzSort!"a.val".array;
+                    auto newElems = updated.properties~p;
+                    updated.properties = [EnumMembers!SpecialProperty].filter!(e => newElems.canFind(e)).array;
                 }
                 else
                 {
                     updated.properties = updated.properties.filter!(a => a != p).array;
                 }
             };
-            table.addCheckElem(SpecialProperty(pr).toNameString.to!dstring, props.canFind(pr), item.isOverlaid!"properties",
-                               updateFun(pr), SpecialProperty(pr).to!dstring);
+            table.addCheckElem(pr.to!dstring, props.canFind(pr), item.isOverlaid!"properties",
+                               updateFun(pr), (cast(string)pr).to!dstring);
         }
         main.addChild(propCap);
         main.addChild(table);
@@ -169,13 +169,14 @@ class ItemEditDialog: Dialog
         main.addTextElem!"remarks"("備考", item);
 
         auto itemTypeCap = new TextWidget("", "種別"d);
-        auto itemComboBox = new ComboBox("", ItemType.svalues.to!(dstring[]));
-        auto kv = ItemType.values.enumerate.find!"a[1] == b"(item.type).front;
+        auto types = [EnumMembers!ItemType];
+        auto itemComboBox = new ComboBox("", (cast(string[])types).to!(dstring[]));
+        auto kv = types.enumerate.find!"a[1] == b"(item.type).front;
         itemComboBox.selectedItemIndex = kv[0].to!int;
         itemComboBox.enabled = item.isOverlaid!"type";
         main.addChild(itemTypeCap);
         itemComboBox.itemClick = (Widget src, int idx) {
-            updated.type = idx;
+            updated.type = types[idx];
             return true;
         };
 

@@ -10,7 +10,7 @@ import std.typecons;
 import std.variant: Algebraic;
 
 import vibe.data.json;
-import coop.util: ExtendedEnum, Enum, EnumMembers;
+import coop.util: ExtendedEnum;
 
 /// アイテムの追加情報
 alias ExtraInfo = Algebraic!(FoodInfo, WeaponInfo, ArmorInfo, BulletInfo, ShieldInfo, ExpendableInfo);
@@ -31,7 +31,7 @@ struct Item
     @name_("重さ") double weight;
     @name_("NPC売却価格") uint price;
     @name_("info") string info;
-    @name_("特殊条件") @optional SpecialProperty[] properties;
+    @name_("特殊条件") @optional @byName SpecialProperty[] properties;
     @name_("転送できる") bool transferable;
     @name_("スタックできる") bool stackable;
     @name_("ペットアイテム") @optional double[PetFoodType] petFoodInfo;
@@ -61,7 +61,7 @@ unittest
         weight = 0.03;
         petFoodInfo = [ PetFoodType.UNKNOWN.to!PetFoodType: 0.0 ];
         stackable = true;
-        properties = [SpecialProperty.OP.to!SpecialProperty];
+        properties = [SpecialProperty.OP];
         type = ItemType.Others;
         remarks = "クエストで使う";
     }
@@ -156,28 +156,30 @@ alias PetFoodType = ExtendedEnum!(
     Leather => "皮", Paper => "紙", Cloth => "布", Others => "その他",
     NoEatable => "犬も喰わない",);
 
-alias SpecialProperty = Enum!(
-    Yes.useByName,
-    NT => "他のプレイヤーにトレードで渡せない",
-    OP => "一人一個のみ",
-    CS => "売ることができない",
-    CR => "修理できない",
-    PM => "消耗度による威力計算を行わない",
-    NC => "修理による最大耐久度低下を行わない",
-    NB => "耐久度による武器の破壊が行われない",
-    ND => "死亡時ドロップしない",
-    CA => "カオスエイジで死亡しても消えない",
-    DL => "死亡すると消える",
-    TC => "タイムカプセルボックスに入れることが出来ない",
-    LO => "ログアウトすると消える",
-    AL => "現在のエリア限定",
-    WA => "WarAgeでは性能が低下する",
-    );
+enum SpecialProperty: string
+{
+    NT = "他のプレイヤーにトレードで渡せない",
+    OP = "一人一個のみ",
+    CS = "売ることができない",
+    CR = "修理できない",
+    PM = "消耗度による威力計算を行わない",
+    NC = "修理による最大耐久度低下を行わない",
+    NB = "耐久度による武器の破壊が行われない",
+    ND = "死亡時ドロップしない",
+    CA = "カオスエイジで死亡しても消えない",
+    DL = "死亡すると消える",
+    TC = "タイムカプセルボックスに入れることが出来ない",
+    LO = "ログアウトすると消える",
+    AL = "現在のエリア限定",
+    WA = "WarAgeでは性能が低下する",
+}
 
-alias ItemType = ExtendedEnum!(
-    UNKNOWN => "不明", Others => "その他", Food => "食べ物", Drink => "飲み物",
-    Liquor => "酒", Expendable => "消耗品", Weapon => "武器", Armor => "防具",
-    Bullet => "弾", Shield => "盾", Asset => "アセット",);
+enum ItemType: string
+{
+    UNKNOWN = "不明", Others = "その他", Food = "食べ物", Drink = "飲み物",
+    Liquor = "酒", Expendable = "消耗品", Weapon = "武器", Armor = "防具",
+    Bullet = "弾", Shield = "盾", Asset = "アセット",
+}
 
 /// 料理固有の情報
 struct FoodInfo
@@ -354,7 +356,7 @@ struct ShieldInfo
     @name_("回避") int avoidRatio;
     @name_("使用可能シップ") @optional ShipRestriction[] restriction = [ShipRestriction.Any];
     @name_("素材") Material material;
-    @name_("消耗タイプ") @optional ExhaustionType type = ExhaustionType.Points;
+    @name_("消耗タイプ") @optional ExhaustionType type;
     @name_("耐久") int exhaustion;
     @name_("追加効果") @optional double[string] effects;
     @name_("付加効果") @optional string additionalEffect;

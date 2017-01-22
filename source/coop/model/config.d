@@ -14,15 +14,15 @@ class Config {
         configFile = file;
         if (file.exists)
         {
+            import vibe.data.json;
             import std.exception;
-            import std.json;
 
             import coop.util;
 
-            auto json = file.readText.parseJSON;
-            enforce(json.type == JSON_TYPE.OBJECT);
-            windowWidth = json["initWindowWidth"].jto!uint;
-            windowHeight = json["initWindowHeight"].jto!uint;
+            auto json = file.readText.parseJsonString;
+            enforce(json.type == Json.Type.object);
+            windowWidth = json["initWindowWidth"].get!uint;
+            windowHeight = json["initWindowHeight"].get!uint;
         }
         else
         {
@@ -45,11 +45,11 @@ class Config {
 
     auto toJSON()
     {
-        import std.json;
-        auto json = JSONValue([ "initWindowWidth": JSONValue(windowWidth),
-                                "initWindowHeight": JSONValue(windowHeight),
-                                  ]);
-        return json.toPrettyString;
+        import vibe.data.json;
+        auto json = Json([ "initWindowWidth": Json(windowWidth),
+                           "initWindowHeight": Json(windowHeight),
+                             ]);
+        return json.serializeToPrettyJson;
     }
     uint windowWidth, windowHeight;
 private:

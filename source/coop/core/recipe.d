@@ -5,8 +5,6 @@
  */
 module coop.core.recipe;
 
-import std.json;
-
 struct Recipe
 {
     import vibe.data.json: name_ = name, optional;

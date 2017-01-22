@@ -5,8 +5,6 @@
  */
 module coop.core.item;
 
-import std.json: JSONValue;
-import std.typecons;
 import std.variant: Algebraic;
 
 import vibe.data.json;

@@ -5,7 +5,6 @@
  */
 module coop.util;
 
-import std.json;
 import std.range;
 import std.string;
 import std.traits;

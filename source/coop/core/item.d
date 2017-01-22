@@ -516,7 +516,7 @@ struct Overlaid(T)
     @property auto ref opDispatch(string field)()
         if (hasMember!(T, field))
     {
-        if (isOverlaid!field)
+        if (isWritable!field)
         {
             return mixin("overlaid."~field);
         }
@@ -529,27 +529,23 @@ struct Overlaid(T)
     @property auto isOverlaid(string field)() const pure nothrow
         if (hasMember!(T, field))
     {
-        return overlaid !is null && !isValidValue(mixin("original."~field));
+        return overlaid !is null &&
+            !isDefaultValue(mixin("overlaid."~field)) &&
+            mixin("original."~field~" != "~"overlaid."~field);
+    }
+
+    @property auto isWritable(string field)() const pure nothrow
+        if (hasMember!(T, field))
+    {
+        return overlaid !is null && (isOverlaid!field || isDefaultValue(mixin("original."~field)));
     }
 private:
-    static auto isValidValue(T)(const T val) pure nothrow
+    static auto isDefaultValue(T)(const T val) pure nothrow
     {
-        import std.range: empty;
-        import std.math: isNaN;
-        import std.traits: isFloatingPoint, isSomeString, isIntegral;
-
-        static if (isFloatingPoint!T)
-            return !val.isNaN;
-        else static if (isSomeString!T)
-            return !val.empty;
-        else static if (isIntegral!T)
-            return val > 0;
-        else static if (is(T == bool))
-            return val;
-        else static if (is(T == const(real)[PetFoodType]))
-            return val.keys[0] != PetFoodType.UNKNOWN;
+        static if (is(T == const(double)[PetFoodType]))
+            return val.keys[0] == PetFoodType.UNKNOWN;
         else
-            return val != T.init;
+            return val == T.init;
     }
 
     T original;
@@ -593,21 +589,27 @@ nothrow unittest
     item.name = "テスト";
     item.ename = "test";
     item.weight = 1.4;
+    item.petFoodInfo[PetFoodType.UNKNOWN.to!PetFoodType] = 0;
 
     auto overlaid = Overlaid!Item(orig, &item);
     assert(!overlaid.isOverlaid!"name");
+    assert(!overlaid.isWritable!"name");
     assert(overlaid.name == "テスト");
 
     assert(overlaid.isOverlaid!"ename");
+    assert(overlaid.isWritable!"ename");
     assert(overlaid.ename == "test");
 
     assert(overlaid.isOverlaid!"weight");
+    assert(overlaid.isWritable!"weight");
     assert(overlaid.weight == 1.4);
 
-    assert(overlaid.isOverlaid!"price");
+    assert(!overlaid.isOverlaid!"price");
+    assert(overlaid.isWritable!"price");
     assert(overlaid.price == 0);
 
     assert(!overlaid.isOverlaid!"petFoodInfo");
+    assert(overlaid.isWritable!"petFoodInfo");
     assert(overlaid.petFoodInfo == [PetFoodType.UNKNOWN.to!PetFoodType: 0.0]);
 }
 

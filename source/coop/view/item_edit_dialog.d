@@ -68,11 +68,11 @@ class ItemEditDialog: Dialog
         main.addTextElem!"price"("NPC売却価格", item);
 
         auto tr = new HorizontalLayout;
-        tr.addCheckElem("転送可", item.transferable, item.isOverlaid!"transferable",
+        tr.addCheckElem("転送可", item.transferable, item.isWritable!"transferable",
                         (b) { item.transferable = b; return; });
 
         auto st = new HorizontalLayout;
-        st.addCheckElem("スタック可", item.stackable, item.isOverlaid!"stackable",
+        st.addCheckElem("スタック可", item.stackable, item.isWritable!"stackable",
                         (b) { item.stackable = b; return; });
 
         main.addChild(tr);
@@ -130,8 +130,8 @@ class ItemEditDialog: Dialog
             auto key = item.petFoodInfo.keys[0];
             textBox.enabled = key != PetFoodType.UNKNOWN &&
                               key != PetFoodType.NoEatable &&
-                              item.isOverlaid!"petFoodInfo";
-            petComboBox.enabled = item.isOverlaid!"petFoodInfo";
+                              item.isWritable!"petFoodInfo";
+            petComboBox.enabled = item.isWritable!"petFoodInfo";
             textBox.text = (key == PetFoodType.UNKNOWN || key == PetFoodType.NoEatable) ?
                            ""d : format("%.1f"d, item.petFoodInfo[key]);
             addChild(petComboBox);
@@ -159,7 +159,7 @@ class ItemEditDialog: Dialog
                     updated.properties = updated.properties.filter!(a => a != p).array;
                 }
             };
-            table.addCheckElem(pr.to!dstring, props.canFind(pr), item.isOverlaid!"properties",
+            table.addCheckElem(pr.to!dstring, props.canFind(pr), item.isWritable!"properties",
                                updateFun(pr), (cast(string)pr).to!dstring);
         }
         main.addChild(propCap);
@@ -173,7 +173,7 @@ class ItemEditDialog: Dialog
         auto itemComboBox = new ComboBox("", (cast(string[])types).to!(dstring[]));
         auto kv = types.enumerate.find!"a[1] == b"(item.type).front;
         itemComboBox.selectedItemIndex = kv[0].to!int;
-        itemComboBox.enabled = item.isOverlaid!"type";
+        itemComboBox.enabled = item.isWritable!"type";
         main.addChild(itemTypeCap);
         itemComboBox.itemClick = (Widget src, int idx) {
             updated.type = types[idx];
@@ -276,7 +276,7 @@ auto addTextElem(dstring prop)(Widget layout, dstring caption, Overlaid!Item ite
 
     with(editLine)
     {
-        enabled = item.isOverlaid!prop;
+        enabled = item.isWritable!prop;
         contentChange = (EditableContent content) {
             auto txt = content.text;
             if (enabled)

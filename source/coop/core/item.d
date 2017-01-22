@@ -474,9 +474,10 @@ alias Grade = ExtendedEnum!(
     UNKNOWN => "不明", Degraded => "劣化", Cursed => "呪い", NG => "NG", HG => "HG", MG => "MG", NG_War => "NG(War)"
     );
 
-alias ExhaustionType = ExtendedEnum!(
-    UNKNOWN => "不明", Points => "耐久値", Times => "使用可能回数",
-    );
+enum ExhaustionType: string
+{
+    UNKNOWN = "不明", Points = "耐久値", Times = "使用可能回数",
+}
 
 /// 消耗品固有の情報
 struct ExpendableInfo

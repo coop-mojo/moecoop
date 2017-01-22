@@ -32,8 +32,8 @@ class Character
             auto configFile = buildPath(dir_, name_, "config.json");
             if (configFile.exists)
             {
-                import std.json;
-                url = configFile.readText.parseJSON["URL"].str.to!string;
+                import vibe.data.json;
+                url = configFile.readText.parseJsonString["URL"].get!string;
             }
         }
     }
@@ -137,17 +137,16 @@ private:
 
     auto writeURLInfo()
     {
-        import std.conv;
-        import std.json;
+        import vibe.data.json;
         import std.path;
         import std.stdio;
 
         auto file = buildPath(dir_, name, "config.json");
-        JSONValue vals = [
-            "URL": url.to!string,
+        auto vals = [
+            "URL": Json(url),
             ];
         auto f = File(file, "w");
-        f.write(vals.toPrettyString);
+        f.write(vals.serializeToPrettyJson);
     }
 
     auto writeBindersInfo()

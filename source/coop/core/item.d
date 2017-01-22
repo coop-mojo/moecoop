@@ -26,7 +26,7 @@ struct Item
 
     @name_("名前") string name;
     @name_("英名") string ename;
-    @name_("重さ") double weight;
+    @name_("重さ") double weight = 0;
     @name_("NPC売却価格") uint price;
     @name_("info") string info;
     @name_("特殊条件") @optional @byName SpecialProperty[] properties;
@@ -247,7 +247,7 @@ struct WeaponInfo
     @name_("名前") string name;
     @name_("攻撃力") double[Grade] damage;
     @name_("攻撃間隔") int duration;
-    @name_("射程") double range;
+    @name_("射程") double range = 0;
     @name_("必要スキル") double[string] skills;
     @name_("両手装備") bool isDoubleHands;
     @name_("装備箇所") WeaponSlot slot;
@@ -322,8 +322,8 @@ struct BulletInfo
 {
     import vibe.data.json: name_ = name, optional;
     @name_("名前") string name;
-    @name_("ダメージ") double damage;
-    @name_("有効レンジ") double range;
+    @name_("ダメージ") double damage = 0;
+    @name_("有効レンジ") double range = 0;
     @name_("角度補正角") int angle;
     @name_("使用可能シップ") @optional ShipRestriction[] restriction = [ShipRestriction.Any];
     @name_("必要スキル") double[string] skills;

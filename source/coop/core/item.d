@@ -449,15 +449,16 @@ enum WeaponSlot: string
     UNKNOWN = "不明", Right = "右手", Left = "左手", Both = "左右",
 }
 
-alias ArmorSlot = ExtendedEnum!(
-    UNKNOWN => "不明",
-    HeadProtector => "頭(防)", BodyProtector => "胴(防)", HandProtector => "手(防)",
-    PantsProtector => "パンツ(防)", ShoesProtector => "靴(防)", ShoulderProtector => "肩(防)",
-    WaistProtector => "腰(防)",
-    HeadOrnament => "頭(装)", FaceOrnament => "顔(装)", EarOrnament => "耳(装)",
-    FingerOrnament => "指(装)", BreastOrnament => "胸(装)", BackOrnament => "背中(装)",
-    WaistOrnament => "腰(装)",
-    );
+enum ArmorSlot: string
+{
+    UNKNOWN = "不明",
+    HeadProtector = "頭(防)", BodyProtector = "胴(防)", HandProtector = "手(防)",
+    PantsProtector = "パンツ(防)", ShoesProtector = "靴(防)", ShoulderProtector = "肩(防)",
+    WaistProtector = "腰(防)",
+    HeadOrnament = "頭(装)", FaceOrnament = "顔(装)", EarOrnament = "耳(装)",
+    FingerOrnament = "指(装)", BreastOrnament = "胸(装)", BackOrnament = "背中(装)",
+    WaistOrnament = "腰(装)",
+}
 
 alias Material = ExtendedEnum!(
     UNKNOWN => "不明", Copper => "銅", Bronze => "青銅", Iron => "鉄", Steel => "鋼鉄",

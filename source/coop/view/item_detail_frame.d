@@ -235,7 +235,7 @@ auto addExtraElem(Str)(Widget layout, Str name, WisdomModel model)
                            .byKeyValue
                            .map!(kv => format("%s (%.1f)", kv.key, kv.value))
                            .join(", "));
-        layout.addElem("装備スロット", format("%s (%s)", info.slot, info.isDoubleHands ? "両手" : "片手"));
+        layout.addElem("装備スロット", format("%s (%s)", cast(string)info.slot, info.isDoubleHands ? "両手" : "片手"));
         layout.addElem("素材", info.material.to!string);
         if (info.restriction.front != ShipRestriction.Any)
         {

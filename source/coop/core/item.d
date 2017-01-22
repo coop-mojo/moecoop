@@ -443,9 +443,11 @@ enum ShipRestriction: string
     Sniper = "スナイパー", Hawkeye = "ホークアイ",
 }
 
-alias WeaponSlot = ExtendedEnum!(
-    UNKNOWN => "不明", Right => "右手", Left => "左手", Both => "左右",
-    );
+
+enum WeaponSlot: string
+{
+    UNKNOWN = "不明", Right = "右手", Left = "左手", Both = "左右",
+}
 
 alias ArmorSlot = ExtendedEnum!(
     UNKNOWN => "不明",

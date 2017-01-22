@@ -236,7 +236,7 @@ auto addExtraElem(Str)(Widget layout, Str name, WisdomModel model)
                            .map!(kv => format("%s (%.1f)", kv.key, kv.value))
                            .join(", "));
         layout.addElem("装備スロット", format("%s (%s)", cast(string)info.slot, info.isDoubleHands ? "両手" : "片手"));
-        layout.addElem("素材", info.material.to!string);
+        layout.addElem("素材", cast(string)info.material);
         if (info.restriction.front != ShipRestriction.Any)
         {
             layout.addElem("装備可能シップ", info.restriction.map!(a => a.to!dstring~"系").join(", "));
@@ -298,7 +298,7 @@ auto addExtraElem(Str)(Widget layout, Str name, WisdomModel model)
                            .map!(kv => format("%s (%.1f)", kv.key, kv.value))
                            .join(", "));
         layout.addElem("装備スロット", cast(string)info.slot);
-        layout.addElem("素材", info.material.to!string);
+        layout.addElem("素材", cast(string)info.material);
         if (info.restriction.front != ShipRestriction.Any)
         {
             layout.addElem("装備可能シップ", info.restriction.map!(a => a.to!string~"系").join(", "));
@@ -393,7 +393,7 @@ auto addExtraElem(Str)(Widget layout, Str name, WisdomModel model)
                            .map!(kv => format("%s (%.1f)", kv.key, kv.value))
                            .join(", "));
         layout.addElem("回避", format("%s%%", info.avoidRatio));
-        layout.addElem("素材", info.material.to!string);
+        layout.addElem("素材", cast(string)info.material);
         if (info.restriction.front != ShipRestriction.Any)
         {
             layout.addElem("装備可能シップ", info.restriction.map!(a => a.to!string~"系").join(", "));

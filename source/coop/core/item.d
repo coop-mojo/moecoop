@@ -460,13 +460,15 @@ enum ArmorSlot: string
     WaistOrnament = "腰(装)",
 }
 
-alias Material = ExtendedEnum!(
-    UNKNOWN => "不明", Copper => "銅", Bronze => "青銅", Iron => "鉄", Steel => "鋼鉄",
-    Silver => "銀", Gold => "金", Mithril => "ミスリル", Orichalcum => "オリハルコン",
-    Cotton => "綿", Silk => "絹", AnimalSkin => "動物の皮", DragonSkin => "竜の皮",
-    Plant => "プラント", Wood => "木", Treant => "トレント", Paper => "紙",
-    Bamboo => "竹筒", BlackBamboo => "黒い竹", Bone => "骨", Stone => "石",
-    Glass => "ガラス", Crystal => "クリスタル", Cobalt => "コバルト", Chaos => "カオス",);
+enum Material: string
+{
+    UNKNOWN = "不明", Copper = "銅", Bronze = "青銅", Iron = "鉄", Steel = "鋼鉄",
+    Silver = "銀", Gold = "金", Mithril = "ミスリル", Orichalcum = "オリハルコン",
+    Cotton = "綿", Silk = "絹", AnimalSkin = "動物の皮", DragonSkin = "竜の皮",
+    Plant = "プラント", Wood = "木", Treant = "トレント", Paper = "紙",
+    Bamboo = "竹筒", BlackBamboo = "黒い竹", Bone = "骨", Stone = "石",
+    Glass = "ガラス", Crystal = "クリスタル", Cobalt = "コバルト", Chaos = "カオス",
+}
 
 alias Grade = ExtendedEnum!(
     UNKNOWN => "不明", Degraded => "劣化", Cursed => "呪い", NG => "NG", HG => "HG", MG => "MG", NG_War => "NG(War)"

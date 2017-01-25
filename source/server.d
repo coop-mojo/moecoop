@@ -22,7 +22,7 @@ void main()
 {
     import coop.core.wisdom;
     import coop.core;
-    import coop.wui.model;
+    import coop.server.model;
     import coop.util;
 
     if (!finalizeCommandLineOptions)

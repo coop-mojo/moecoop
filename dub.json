@@ -28,7 +28,7 @@
             "name": "mui",
             "targetType": "executable",
             "mainSourceFile": "source/mui.d",
-            "excludedSourceFiles": ["source/wui.d", "source/coop/wui/*"],
+            "excludedSourceFiles": ["source/server.d", "source/coop/server/*"],
             "targetName": "fukuro",
             "sourceFiles-windows": ["source/icon.res"],
             "preBuildCommands-windows": ["rc source/icon.rc"],
@@ -39,21 +39,21 @@
         },
 
         {
-            "name": "wui",
+            "name": "server",
             "targetType": "executable",
-            "mainSourceFile": "source/wui.d",
+            "mainSourceFile": "source/server.d",
             "excludedSourceFiles": ["source/mui.d", "source/coop/mui/*"],
             "targetName": "fukurod",
             "dependencies": {
                 "vibe-d": "==0.7.30"
             },
-            "versions": ["UseWUI", "VibeNoSSL"]
+            "versions": ["Server", "VibeNoSSL"]
         },
 
         {
             "name": "library",
             "targetType": "library",
-            "excludedSourceFiles": ["source/mui.d", "source/wui.d"],
+            "excludedSourceFiles": ["source/mui.d", "source/server.d"],
             "dependencies": {
                 "dlangui": "==0.9.46",
                 "vibe-d": "==0.7.30"

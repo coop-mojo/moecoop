@@ -8,7 +8,6 @@
     "authors": ["もじょんぬ <moe.e.coop@gmail.com>"],
 
     "dependencies": {
-        "dlangui": "==0.9.46",
         "derelict-util": "==2.0.6",
         "vibe-d:data": "==0.7.30"
     },
@@ -23,19 +22,39 @@
         "xcopy /iy cmigemo-default-win64\\dict\\utf-8 resource\\dict\\dict",
         "rm -rf migemo.zip cmigemo-default-win64"
     ],
-    "sourceFiles-windows": ["source/icon.res"],
-    "preBuildCommands-windows": ["rc source/icon.rc"],
     "preBuildCommands": ["git describe > views/version"],
     "configurations": [
         {
-            "name": "application",
-            "targetType": "executable"
+            "name": "mui",
+            "targetType": "executable",
+            "mainSourceFile": "source/mui.d",
+            "excludedSourceFiles": ["source/coop/wui"],
+            "targetName": "fukuro",
+            "sourceFiles-windows": ["source/icon.res"],
+            "preBuildCommands-windows": ["rc source/icon.rc"],
+            "dependencies": {
+                "dlangui": "==0.9.46"
+            }
+        },
+
+        {
+            "name": "wui",
+            "targetType": "executable",
+            "mainSourceFile": "source/wui.d",
+            "excludedSourceFiles": ["source/coop/mui"],
+            "targetName": "fukurod",
+            "dependencies": {
+                "vibe-d": "==0.7.30"
+            }
         },
 
         {
             "name": "library",
             "targetType": "library",
-            "excludedSourceFiles": ["source/app.d"]
+            "excludedSourceFiles": ["source/mui.d", "source/wui.d"],
+            "dependencies": {
+                "dlangui": "==0.9.46"
+            }
         },
 
         {

@@ -3,7 +3,7 @@
  * Authors: Mojo
  * License: $(LINK2 https://github.com/coop-mojo/moecoop/blob/master/LICENSE, MIT License)
  */
-module coop.view.main_frame;
+module coop.mui.view.main_frame;
 
 import dlangui;
 
@@ -53,14 +53,14 @@ class MainFrame: AppFrame
     import coop.core.character;
     import coop.core.wisdom;
     import coop.core;
-    import coop.model.custom_info;
-    import coop.model.config;
+    import coop.mui.model.custom_info;
+    import coop.mui.model.config;
 
     this(WisdomModel model, Character[dstring] chars, Config config, CustomInfo cInfo)
     {
-        import coop.controller.binder_tab_frame_controller;
-        import coop.controller.recipe_material_tab_frame_controller;
-        import coop.controller.skill_tab_frame_controller;
+        import coop.mui.controller.binder_tab_frame_controller;
+        import coop.mui.controller.recipe_material_tab_frame_controller;
+        import coop.mui.controller.skill_tab_frame_controller;
 
         super();
         controller_ = new MainFrameController(this, model, chars, config, cInfo);
@@ -138,7 +138,7 @@ protected:
         tabs.tabChanged = (string next, string prev) {
             import std.algorithm;
 
-            import coop.view.tab_frame_base;
+            import coop.mui.view.tab_frame_base;
 
             auto prev_tab = childById!TabFrameBase(prev);
             auto useMetaSearch = prev_tab.useMetaSearch;
@@ -176,11 +176,11 @@ protected:
                 window.close;
                 return true;
             case OPTION:
-                import coop.view.config_window;
+                import coop.mui.view.config_window;
                 showConfigWindow(window, controller.characters);
                 return true;
             case VERSION:
-                import coop.view.version_window;
+                import coop.mui.view.version_window;
                 showVersionWindow(window);
                 return true;
             default:
@@ -189,9 +189,9 @@ protected:
         return false;
     }
 private:
-    import coop.controller.main_frame_controller;
-    import coop.view.recipe_tab_frame;
-    import coop.view.recipe_material_tab_frame;
+    import coop.mui.controller.main_frame_controller;
+    import coop.mui.view.recipe_tab_frame;
+    import coop.mui.view.recipe_material_tab_frame;
 
     MainFrameController controller_;
     RecipeTabFrame binderTab, skillTab;

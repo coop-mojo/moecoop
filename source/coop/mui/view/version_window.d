@@ -3,7 +3,7 @@
  * Authors: Mojo
  * License: $(LINK2 https://github.com/coop-mojo/moecoop/blob/master/LICENSE, MIT License)
  */
-module coop.view.version_window;
+module coop.mui.view.version_window;
 
 import dlangui;
 import dlangui.dialogs.dialog;

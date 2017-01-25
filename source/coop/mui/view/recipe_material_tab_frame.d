@@ -3,19 +3,19 @@
  * Authors: Mojo
  * License: $(LINK2 https://github.com/coop-mojo/moecoop/blob/master/LICENSE, MIT License)
  */
-module coop.view.recipe_material_tab_frame;
+module coop.mui.view.recipe_material_tab_frame;
 
-import coop.view.tab_frame_base;
+import coop.mui.view.tab_frame_base;
 
 class RecipeMaterialTabFrame: TabFrameBase
 {
     import dlangui;
     import std.container;
 
-    import coop.controller.recipe_material_tab_frame_controller;
+    import coop.mui.controller.recipe_material_tab_frame_controller;
     import coop.core.recipe_graph;
     import coop.util;
-    import coop.view.main_frame;
+    import coop.mui.view.main_frame;
 
     mixin TabFrame;
 
@@ -23,8 +23,8 @@ class RecipeMaterialTabFrame: TabFrameBase
 
     this(string id)
     {
-        import coop.view.editors;
-        import coop.view.recipe_tab_frame;
+        import coop.mui.view.editors;
+        import coop.mui.view.recipe_tab_frame;
 
         super(id);
         defaultMessage = "アイテム名";
@@ -116,7 +116,7 @@ class RecipeMaterialTabFrame: TabFrameBase
 
     @property auto recipeDetail()
     {
-        import coop.view.recipe_detail_frame;
+        import coop.mui.view.recipe_detail_frame;
 
         return cast(RecipeDetailFrame)childById!FrameLayout("recipeDetail").child(0);
     }
@@ -172,8 +172,8 @@ class RecipeMaterialTabFrame: TabFrameBase
         scr.maxHeight = 300;
 
         auto mats = chain(toBeMade.keys, candidates.filter!(c => !toBeMade.keys.canFind(c))).map!((c) {
-                import coop.view.controls;
-                import coop.view.editors;
+                import coop.mui.view.controls;
+                import coop.mui.view.editors;
 
                 auto w = new CheckableEntryWidget(c.to!string, c);
                 auto o = new EditIntLine("own");
@@ -195,7 +195,7 @@ class RecipeMaterialTabFrame: TabFrameBase
                 w.detailClicked = {
                     import coop.core.item;
                     import coop.core;
-                    import coop.view.item_detail_frame;
+                    import coop.mui.view.item_detail_frame;
 
                     unhighlightDetailItems;
                     scope(exit) highlightDetailItems;
@@ -296,7 +296,7 @@ class RecipeMaterialTabFrame: TabFrameBase
         import std.algorithm;
         import std.array;
 
-        import coop.view.layouts;
+        import coop.mui.view.layouts;
 
         if (!hasShownResult)
         {
@@ -338,12 +338,12 @@ class RecipeMaterialTabFrame: TabFrameBase
                 import std.format;
                 import std.range;
 
-                import coop.view.controls;
+                import coop.mui.view.controls;
 
                 auto w = new LinkWidget(r.to!string, r.name.to!dstring~": ");
                 auto t = new TextWidget("times", format("%s 回"d, 0));
                 w.click = (Widget _) {
-                    import coop.view.recipe_detail_frame;
+                    import coop.mui.view.recipe_detail_frame;
 
                     unhighlightDetailRecipe;
                     scope(exit) highlightDetailRecipe;
@@ -393,14 +393,14 @@ class RecipeMaterialTabFrame: TabFrameBase
         leftovers.map!"a.name".map!((lo) {
                 import std.format;
 
-                import coop.view.controls;
+                import coop.mui.view.controls;
 
                 auto w = new LinkWidget(lo.to!string, lo.to!dstring~": ");
                 auto n = new TextWidget("num", format("%s 個"d, 0));
                 w.click = (Widget _) {
                     import coop.core.item;
                     import coop.core;
-                    import coop.view.item_detail_frame;
+                    import coop.mui.view.item_detail_frame;
 
                     unhighlightDetailItems;
                     scope(exit) highlightDetailItems;
@@ -438,8 +438,8 @@ class RecipeMaterialTabFrame: TabFrameBase
         materials.map!((mat) {
                 import std.format;
 
-                import coop.view.controls;
-                import coop.view.editors;
+                import coop.mui.view.controls;
+                import coop.mui.view.editors;
 
                 auto w = new CheckableEntryWidget(mat.name.to!string, mat.name.to!dstring~": ");
                 auto o = new EditIntLine("own");
@@ -469,7 +469,7 @@ class RecipeMaterialTabFrame: TabFrameBase
                 w.detailClicked = {
                     import coop.core.item;
                     import coop.core;
-                    import coop.view.item_detail_frame;
+                    import coop.mui.view.item_detail_frame;
 
                     unhighlightDetailItems;
                     scope(exit) highlightDetailItems;
@@ -503,7 +503,7 @@ class RecipeMaterialTabFrame: TabFrameBase
         scr.backgroundColor = "white";
         fr.addChild(scr);
         clearButton.click = (Widget _) {
-            import coop.view.layouts;
+            import coop.mui.view.layouts;
 
             tbl.rows.map!"a[1]".each!(w => w.text = "0");
             return true;
@@ -515,7 +515,7 @@ class RecipeMaterialTabFrame: TabFrameBase
         import std.algorithm;
         import std.exception;
 
-        import coop.view.layouts;
+        import coop.mui.view.layouts;
 
         unhighlightDetailRecipe;
         scope(exit) highlightDetailRecipe;
@@ -559,7 +559,7 @@ class RecipeMaterialTabFrame: TabFrameBase
         import std.exception;
         import std.range;
 
-        import coop.view.layouts;
+        import coop.mui.view.layouts;
 
         unhighlightDetailItems;
         scope(exit) highlightDetailItems;
@@ -589,7 +589,7 @@ class RecipeMaterialTabFrame: TabFrameBase
         import std.algorithm;
         import std.exception;
 
-        import coop.view.layouts;
+        import coop.mui.view.layouts;
 
         unhighlightDetailItems;
         scope(exit) highlightDetailItems;
@@ -622,7 +622,7 @@ class RecipeMaterialTabFrame: TabFrameBase
                     {
                         import std.typecons;
 
-                        import coop.view.controls;
+                        import coop.mui.view.controls;
 
                         auto menu = new MenuItem;
                         if (mat.name.to!dstring in leafMaterials)

@@ -3,7 +3,7 @@
  * Authors: Mojo
  * License: $(LINK2 https://github.com/coop-mojo/moecoop/blob/master/LICENSE, MIT License)
  */
-module coop.view.controls;
+module coop.mui.view.controls;
 
 import dlangui;
 

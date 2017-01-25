@@ -3,7 +3,7 @@
  * Authors: Mojo
  * License: $(LINK2 https://github.com/coop-mojo/moecoop/blob/master/LICENSE, MIT License)
  */
-module coop.view.item_detail_frame;
+module coop.mui.view.item_detail_frame;
 
 import dlangui;
 
@@ -12,7 +12,7 @@ import std.traits;
 import coop.core.item;
 import coop.core.wisdom;
 import coop.core;
-import coop.model.custom_info;
+import coop.mui.model.custom_info;
 
 class ItemDetailFrame: ScrollWidget
 {
@@ -65,7 +65,7 @@ class ItemDetailFrame: ScrollWidget
             auto refPriceWidget = new TextWidget("", format("%s g"d, model.costFor(item.name, customInfo.procurementPriceList)));
             lo.addChild(refPriceWidget);
             lo.addChild(new TextWidget("", "(調達価格: "d));
-            import coop.view.editors;
+            import coop.mui.view.editors;
             auto procurementPriceWidget = new EditIntLine("", name.to!string in customInfo.procurementPriceList ?
                                                                                     customInfo.procurementPriceList[name.to!string].to!dstring : "");
             procurementPriceWidget.maxWidth = 100;

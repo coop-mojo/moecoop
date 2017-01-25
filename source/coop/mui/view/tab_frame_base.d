@@ -3,7 +3,7 @@
  * Authors: Mojo
  * License: $(LINK2 https://github.com/coop-mojo/moecoop/blob/master/LICENSE, MIT License)
  */
-module coop.view.tab_frame_base;
+module coop.mui.view.tab_frame_base;
 
 import dlangui;
 

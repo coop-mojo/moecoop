@@ -3,7 +3,7 @@
  * Authors: Mojo
  * License: $(LINK2 https://github.com/coop-mojo/moecoop/blob/master/LICENSE, MIT License)
  */
-module coop.view.config_window;
+module coop.mui.view.config_window;
 
 import dlangui;
 import dlangui.dialogs.dialog;
@@ -149,7 +149,7 @@ class CharacterSettingDialog: Dialog
     {
         import std.range;
 
-        import coop.view.editors;
+        import coop.mui.view.editors;
 
         auto wLayout = parseML(q{
                 VerticalLayout {

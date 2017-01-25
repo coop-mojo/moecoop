@@ -3,7 +3,7 @@
  * Authors: Mojo
  * License: $(LINK2 https://github.com/coop-mojo/moecoop/blob/master/LICENSE, MIT License)
  */
-module coop.controller.recipe_tab_frame_controller;
+module coop.mui.controller.recipe_tab_frame_controller;
 
 import std.typecons;
 
@@ -11,8 +11,8 @@ alias RecipePair = Tuple!(dstring, "category", dstring[], "recipes");
 
 abstract class RecipeTabFrameController
 {
-    import coop.view.recipe_tab_frame;
-    import coop.controller.main_frame_controller;
+    import coop.mui.view.recipe_tab_frame;
+    import coop.mui.controller.main_frame_controller;
 
     mixin TabController;
 
@@ -23,7 +23,7 @@ abstract class RecipeTabFrameController
         import std.range;
 
         import coop.core.recipe;
-        import coop.view.recipe_detail_frame;
+        import coop.mui.view.recipe_detail_frame;
 
         frame_ = frame;
 

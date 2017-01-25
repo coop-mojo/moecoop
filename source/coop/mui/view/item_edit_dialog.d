@@ -3,7 +3,7 @@
  * Authors: Mojo
  * License: $(LINK2 https://github.com/coop-mojo/moecoop/blob/master/LICENSE, MIT License)
  */
-module coop.view.item_edit_dialog;
+module coop.mui.view.item_edit_dialog;
 
 import dlangui;
 import dlangui.dialogs.dialog;
@@ -12,8 +12,8 @@ import std.traits;
 
 import coop.core.item;
 import coop.core.wisdom;
-import coop.model.custom_info;
-import coop.view.recipe_tab_frame;
+import coop.mui.model.custom_info;
+import coop.mui.view.recipe_tab_frame;
 
 class ItemEditDialog: Dialog
 {
@@ -84,7 +84,7 @@ class ItemEditDialog: Dialog
         {
             import std.format;
 
-            import coop.view.editors;
+            import coop.mui.view.editors;
             import coop.util;
 
             auto petTypes = PetFoodType.svalues.to!(dstring[]);
@@ -218,7 +218,7 @@ private:
 
     auto updateFrame()
     {
-        import coop.view.item_detail_frame;
+        import coop.mui.view.item_detail_frame;
 
         tabFrame.setItemDetail(ItemDetailFrame.create(original.name.to!dstring, idx+1, tabFrame.controller.model, customInfo), idx);
     }
@@ -240,7 +240,7 @@ auto showItemEditDialog(Window parent, RecipeTabFrame frame, Item item, int inde
 auto addTextElem(dstring prop)(Widget layout, dstring caption, Overlaid!Item item)
     if (hasMember!(Item, prop))
 {
-    import coop.view.editors;
+    import coop.mui.view.editors;
 
     mixin("alias PropType = typeof(Item.init."~prop~");");
     auto toPropString(PropType val)

@@ -3,19 +3,19 @@
  * Authors: Mojo
  * License: $(LINK2 https://github.com/coop-mojo/moecoop/blob/master/LICENSE, MIT License)
  */
-module coop.view.recipe_tab_frame;
+module coop.mui.view.recipe_tab_frame;
 
 import dlangui;
 
-import coop.view.tab_frame_base;
+import coop.mui.view.tab_frame_base;
 
 class RecipeTabFrame: TabFrameBase
 {
     import std.range;
 
-    import coop.controller.recipe_tab_frame_controller;
+    import coop.mui.controller.recipe_tab_frame_controller;
     import coop.util;
-    import coop.view.main_frame;
+    import coop.mui.view.main_frame;
 
     mixin TabFrame;
 
@@ -58,7 +58,7 @@ class RecipeTabFrame: TabFrameBase
             };
         }
 
-        import coop.view.editors;
+        import coop.mui.view.editors;
         childById!EditLine("searchQuery").contentChange = (EditableContent content) {
             if (timerID > 0)
             {
@@ -114,16 +114,16 @@ class RecipeTabFrame: TabFrameBase
         };
 
         childById!Button("editItem1").click = (Widget _) {
-            import coop.view.item_edit_dialog;
-            import coop.view.item_detail_frame;
+            import coop.mui.view.item_edit_dialog;
+            import coop.mui.view.item_detail_frame;
 
             showItemEditDialog(root.window, this, childById!ItemDetailFrame("detail1").item, 0, controller.customInfo);
             return true;
         };
 
         childById!Button("editItem2").click = (Widget _) {
-            import coop.view.item_edit_dialog;
-            import coop.view.item_detail_frame;
+            import coop.mui.view.item_edit_dialog;
+            import coop.mui.view.item_detail_frame;
 
             showItemEditDialog(root.window, this, childById!ItemDetailFrame("detail2").item, 1, controller.customInfo);
             return true;
@@ -180,7 +180,7 @@ class RecipeTabFrame: TabFrameBase
                                  : entries.chunks(tableColumnLength(entries.length,
                                                                     numberOfColumns)).array;
         auto cols = chs.map!((rs) {
-                import coop.view.controls;
+                import coop.mui.view.controls;
 
                 Widget col = new VerticalLayout;
                 auto box = new CheckableEntryWidget("markall", "全部所持"d);
@@ -227,7 +227,7 @@ class RecipeTabFrame: TabFrameBase
 
     @property auto recipeDetail()
     {
-        import coop.view.recipe_detail_frame;
+        import coop.mui.view.recipe_detail_frame;
 
         return cast(RecipeDetailFrame)childById!FrameLayout("recipeDetail").child(0);
     }
@@ -243,7 +243,7 @@ class RecipeTabFrame: TabFrameBase
     {
         if (auto detailFrame = recipeDetail)
         {
-            import coop.view.controls;
+            import coop.mui.view.controls;
 
             auto shownRecipe = detailFrame.name;
             if (auto item = childById("recipeList").childById!CheckableEntryWidget(shownRecipe.to!string))
@@ -257,7 +257,7 @@ class RecipeTabFrame: TabFrameBase
     {
         if (auto detailFrame = recipeDetail)
         {
-            import coop.view.controls;
+            import coop.mui.view.controls;
 
             auto shownRecipe = detailFrame.name;
             if (auto item = childById("recipeList").childById!CheckableEntryWidget(shownRecipe.to!string))
@@ -363,7 +363,7 @@ private:
     {
         import std.algorithm;
 
-        import coop.view.controls;
+        import coop.mui.view.controls;
 
         auto ret = new CheckableEntryWidget(recipe.to!string, recipe);
         auto customInfo = controller.customInfo;
@@ -435,7 +435,7 @@ private:
         ret.detailClicked = {
             import std.exception;
 
-            import coop.view.recipe_detail_frame;
+            import coop.mui.view.recipe_detail_frame;
 
             unhighlightDetailRecipe;
             scope(exit) highlightDetailRecipe;
@@ -455,7 +455,7 @@ private:
 
             foreach(idx, name; itemNames.enumerate(0))
             {
-                import coop.view.item_detail_frame;
+                import coop.mui.view.item_detail_frame;
 
                 showItemDetail(idx);
                 setItemDetail(ItemDetailFrame.create(name, idx+1, controller.model, customInfo), idx);

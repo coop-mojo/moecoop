@@ -3,16 +3,16 @@
  * Authors: Mojo
  * License: $(LINK2 https://github.com/coop-mojo/moecoop/blob/master/LICENSE, MIT License)
  */
-module coop.controller.main_frame_controller;
+module coop.mui.controller.main_frame_controller;
 
 class MainFrameController
 {
     import coop.core.character;
     import coop.core;
-    import coop.model.config;
-    import coop.model.custom_info;
+    import coop.mui.model.config;
+    import coop.mui.model.custom_info;
     import coop.core.wisdom;
-    import coop.view.main_frame;
+    import coop.mui.view.main_frame;
 
     this(MainFrame frame, WisdomModel model, Character[dstring] chars, Config config, CustomInfo cInfo)
     {

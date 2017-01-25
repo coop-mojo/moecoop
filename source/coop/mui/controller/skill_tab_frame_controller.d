@@ -3,13 +3,13 @@
  * Authors: Mojo
  * License: $(LINK2 https://github.com/coop-mojo/moecoop/blob/master/LICENSE, MIT License)
  */
-module coop.controller.skill_tab_frame_controller;
+module coop.mui.controller.skill_tab_frame_controller;
 
-import coop.controller.recipe_tab_frame_controller;
+import coop.mui.controller.recipe_tab_frame_controller;
 
 class SkillTabFrameController: RecipeTabFrameController
 {
-    import coop.view.recipe_tab_frame;
+    import coop.mui.view.recipe_tab_frame;
 
     this(RecipeTabFrame frame, dstring[] categories)
     {

@@ -3,7 +3,7 @@
  * Authors: Mojo
  * License: $(LINK2 https://github.com/coop-mojo/moecoop/blob/master/LICENSE, MIT License)
  */
-module coop.view.recipe_detail_frame;
+module coop.mui.view.recipe_detail_frame;
 
 import dlangui;
 import dlangui.widgets.metadata;

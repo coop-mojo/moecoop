@@ -21,7 +21,7 @@ before_install:
   - ./archive.sh
 
 script:
-  - dub test --coverage
+  - dub test --coverage --combined
 
 after_success:
   - dub run doveralls

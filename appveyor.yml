@@ -56,7 +56,7 @@ install:
               mv ldc2-$($version)-win$($env:Dmodel)-msvc ldc2;
               popd;
             }
-            Invoke-WebRequest "https://code.dlang.org/files/dub-1.1.1-windows-x86.zip" -OutFile "c:\dub.zip";
+            Invoke-WebRequest "https://code.dlang.org/files/dub-1.2.0-windows-x86.zip" -OutFile "c:\dub.zip";
             pushd c:\\;
             7z x dub.zip -odub > $null;
             popd;
@@ -66,7 +66,7 @@ install:
 before_build:
   - ps: if($env:platform -eq "x86"){
             $env:compilersetupargs = "x86";
-            $env:Darch = "x86";
+            $env:Darch = "x86_mscoff";
             $env:Dmodel = "32";
         }
         elseif($env:platform -eq "x64"){

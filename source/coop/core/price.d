@@ -11,12 +11,6 @@ import coop.core.item;
 import coop.core.recipe;
 
 /**
-   参考価格 =
-(or 調達価格
-    (min NPC販売価格
-         (max NPC売却価格
-              クエスト価格
-              参考計算価格)))
 調達価格: ユーザーが指定した価格
 NPC販売価格: そのまま
 NPC売却価格: そのまま
@@ -38,7 +32,7 @@ int procurementCostFor(string item,
         return *pr;
     }
 
-    auto vendPrice = vendingPriceMap.get(item, int.max);
+    auto vendPrice = vendingPriceMap.get(item, int.init);
     auto sellingPrice = itemMap.get(item, Item.init).price;
     auto questPrice = questPriceMap.get(item, 0);
 
@@ -68,7 +62,16 @@ int procurementCostFor(string item,
     {
         procRecipeCost = 0;
     }
-    return min(vendPrice, max(sellingPrice, questPrice, procRecipeCost));
+
+    if (procRecipeCost == 0)
+    {
+        return vendPrice == 0 ? sellingPrice*10 : vendPrice;
+    }
+    else
+    {
+        auto tmpPrice = max(sellingPrice, procRecipeCost);
+        return vendPrice == 0 ? tmpPrice : min(vendPrice, tmpPrice);
+    }
 }
 
 // 単純な場合
@@ -83,15 +86,17 @@ unittest
     };
 
     // 単純なケース
+    // ヘビの肉はレシピがないため、売却価格の10倍が参考価格として用いられる
     assert(procurementCostFor("ロースト スネーク ミート",
                               ["ロースト スネーク ミート": roastSnakeMeat,
                                "ヘビの肉": snakeMeat],
                               ["ロースト スネーク ミート": r],
                               ["ロースト スネーク ミート": make!(RedBlackTree!string)("ロースト スネーク ミート")],
                               (int[string]).init, (int[string]).init,
-                              (int[string]).init) == 8);
+                              (int[string]).init) == 50);
 
     // 材料の価格がユーザー定義されているケース
+    // 定義された材料の価格を元に、生成物の価格が決められる
     assert(procurementCostFor("ロースト スネーク ミート",
                               ["ロースト スネーク ミート": roastSnakeMeat,
                                "ヘビの肉": snakeMeat],
@@ -101,6 +106,7 @@ unittest
                               ["ヘビの肉": 10]) == 10);
 
     // 生成物の価格がユーザー定義されているケース
+    // 指定した価格がそのまま参考価格に反映される
     assert(procurementCostFor("ロースト スネーク ミート",
                               ["ロースト スネーク ミート": roastSnakeMeat,
                                "ヘビの肉": snakeMeat],
@@ -162,5 +168,5 @@ unittest
                                                                                 "アイアンインゴット(破片)",
                                                                                 "アイアンインゴット(鉄の棒)")],
                               (int[string]).init, (int[string]).init,
-                              (int[string]).init) == 12);
+                              (int[string]).init) == 40);
 }

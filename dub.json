@@ -34,7 +34,8 @@
             "preBuildCommands-windows": ["rc source/icon.rc"],
             "dependencies": {
                 "dlangui": "==0.9.46"
-            }
+            },
+            "versions": ["UseMUI"]
         },
 
         {
@@ -45,7 +46,8 @@
             "targetName": "fukurod",
             "dependencies": {
                 "vibe-d": "==0.7.30"
-            }
+            },
+            "versions": ["UseWUI"]
         },
 
         {

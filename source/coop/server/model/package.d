@@ -7,16 +7,20 @@ module coop.server.model;
 
 interface ModelAPI
 {
+    import std.typecons;
+
     import vibe.d;
     import coop.core.item;
     import coop.core.recipe;
+
+    @path("/version") @property string getVersion();
     @path("/binders") @property string[] getBinderCategories();
     @path("/binders/:binder/recipes") string[] getBinderRecipes(string _binder);
     @path("/skills") @property string[] getSkillCategories();
     @path("/skills/:skill/recipes") string[] getSkillRecipes(string _skill);
 
     @path("/recipes") @property string[] getAllRecipes();
-    @path("/items") @property string[] getAllItems();
+    @path("/items") @property string[] postItems(string query="", Flag!"useMigemo" migemo=No.useMigemo);
 
     @path("/recipes/:recipe") Recipe getRecipe(string _recipe);
     @path("/items/:item") Item getItem(string _item);
@@ -24,6 +28,8 @@ interface ModelAPI
 
 class WebModel: ModelAPI
 {
+    import std.typecons;
+
     import coop.core;
     import coop.core.item;
     import coop.core.recipe;
@@ -31,6 +37,12 @@ class WebModel: ModelAPI
     this(WisdomModel wm)
     {
         this.wm = wm;
+    }
+
+    @property string getVersion()
+    {
+        import coop.util;
+        return Version;
     }
 
     override @property string[] getBinderCategories() const pure
@@ -80,9 +92,9 @@ class WebModel: ModelAPI
         return wm.wisdom.recipeList.keys;
     }
 
-    override @property string[] getAllItems()
+    override @property string[] postItems(string query, Flag!"useMigemo" useMigemo)
     {
-        return wm.wisdom.itemList.keys;
+        return wm.getItemList(query, useMigemo, No.canBeProduced);
     }
 
     override Recipe getRecipe(string _recipe)

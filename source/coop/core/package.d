@@ -198,7 +198,9 @@ class WisdomModel
     /// Yes.useReverseSearch の場合には、query にヒットするアイテムを材料にするレシピ一覧を返す
     auto getRecipeList(Str)(Str query, Flag!"useMigemo" useMigemo, Flag!"useReverseSearch" useReverseSearch)
     {
-        return getRecipeList(query, Category.init, Yes.useMetaSearch, useMigemo, useReverseSearch, SortOrder.ByName).front.recipes;
+        import std.algorithm;
+        import std.range;
+        return getRecipeList(query, Category.init, Yes.useMetaSearch, useMigemo, useReverseSearch, SortOrder.ByName).map!"a.recipes".joiner.array;
     }
 
     /// query にヒットするアイテム一覧を返す

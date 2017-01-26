@@ -24,7 +24,9 @@ before_install:
   - git fetch --unshallow
   - dub fetch doveralls
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-    sudo apt install libevent-dev;
+    sudo apt update;
+    sudo apt install -qq libevent-dev language-pack-ja;
+    export LANG=ja_JP.UTF-8;
     ./archive.sh;
     docker build -t moecoop/moecoop .;
     fi

@@ -253,7 +253,7 @@ class WisdomModel
         import std.conv;
         import coop.core.price;
 
-        return procurementCostFor(item.to!string,
+        return referenceCostFor(item.to!string,
                                   wisdom.itemList, wisdom.recipeList, wisdom.rrecipeList,
                                   wisdom.vendorPriceList, (int[string]).init,
                                   procs);

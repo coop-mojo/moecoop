@@ -2,5 +2,5 @@
 
 dub build -c server -b release
 strip fukurod
-zip -r moecoop.zip fukurod LICENSE README.md resource docs
+tar cvzf moecoop.tgz fukurod LICENSE README.md resource docs
 rm fukurod

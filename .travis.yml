@@ -23,8 +23,7 @@ env:
 before_install:
   - git fetch --unshallow
   - dub fetch doveralls
-  - sudo apt update
-  - sudo apt install lebevent-dev
+  - sudo apt install libevent-dev
   - ./archive.sh
   - docker build -t moecoop/moecoop .
 

@@ -1,3 +1,8 @@
+sudo: required
+
+services:
+  - docker
+
 language: d
 
 d:
@@ -19,9 +24,15 @@ before_install:
   - git fetch --unshallow
   - dub fetch doveralls
   - ./archive.sh
+  - docker build -t moecoop/moecoop .
 
 script:
   - dub test --coverage --combined
+  - docker images moecoop/moecoop
 
 after_success:
   - dub run doveralls
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then
+    docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+    docker push moecoop/moecoop;
+    fi

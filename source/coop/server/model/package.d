@@ -14,10 +14,14 @@ interface ModelAPI
     import coop.core.recipe;
 
     @path("/version") @property string getVersion();
+
     @path("/binders") @property string[] getBinderCategories();
     @path("/binders/:binder/recipes") string[] getBinderRecipes(string _binder);
+    @path("/binders/:binder/recipes/:recipe") Recipe getBinderRecipe(string _binder, string _recipe);
+
     @path("/skills") @property string[] getSkillCategories();
     @path("/skills/:skill/recipes") string[] getSkillRecipes(string _skill);
+    @path("/skills/:skill/recipes/:recipe") Recipe getSkillRecipe(string _skill, string _recipe);
 
     @path("/recipes") string[] getRecipes(string query="", Flag!"useMigemo" migemo=No.useMigemo,
                                           Flag!"useReverseSearch" rev=No.useReverseSearch);
@@ -67,6 +71,19 @@ class WebModel: ModelAPI
         assert(false);
     }
 
+    Recipe getBinderRecipe(string _binder, string _recipe)
+    {
+        import std.algorithm;
+        if (getBinderRecipes(_binder).canFind(_recipe))
+        {
+            return getRecipe(_recipe);
+        }
+        else
+        {
+            return Recipe.init; // not found
+        }
+    }
+
     override @property string[] getSkillCategories() const pure
     {
         return wm.getSkillCategories;
@@ -86,6 +103,19 @@ class WebModel: ModelAPI
             return []; // not found
         }
         assert(false);
+    }
+
+    Recipe getSkillRecipe(string _skill, string _recipe)
+    {
+        import std.algorithm;
+        if (getSkillRecipes(_skill).canFind(_recipe))
+        {
+            return getRecipe(_recipe);
+        }
+        else
+        {
+            return Recipe.init; // not fonud
+        }
     }
 
     override string[] getRecipes(string query, Flag!"useMigemo" useMigemo, Flag!"useReverseSearch" useReverseSearch)

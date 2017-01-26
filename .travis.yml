@@ -23,7 +23,8 @@ env:
 before_install:
   - git fetch --unshallow
   - dub fetch doveralls
-  - sudo apt-get install lebevent-dev
+  - sudo apt update
+  - sudo apt install lebevent-dev
   - ./archive.sh
   - docker build -t moecoop/moecoop .
 

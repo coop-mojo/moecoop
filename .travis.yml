@@ -23,13 +23,17 @@ env:
 before_install:
   - git fetch --unshallow
   - dub fetch doveralls
-  - sudo apt install libevent-dev
-  - ./archive.sh
-  - docker build -t moecoop/moecoop .
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+    sudo apt install libevent-dev;
+    ./archive.sh;
+    docker build -t moecoop/moecoop .;
+    fi
 
 script:
   - dub test --coverage --combined
-  - docker images moecoop/moecoop
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+    docker images moecoop/moecoop;
+    fi
 
 after_success:
   - dub run doveralls

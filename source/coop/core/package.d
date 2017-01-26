@@ -194,6 +194,13 @@ class WisdomModel
             }).joiner;
     }
 
+    /// query にヒットするレシピ一覧を返す。
+    /// Yes.useReverseSearch の場合には、query にヒットするアイテムを材料にするレシピ一覧を返す
+    auto getRecipeList(Str)(Str query, Flag!"useMigemo" useMigemo, Flag!"useReverseSearch" useReverseSearch)
+    {
+        return getRecipeList(query, Category.init, Yes.useMetaSearch, useMigemo, useReverseSearch, SortOrder.ByName).front.recipes;
+    }
+
     /// query にヒットするアイテム一覧を返す
     auto getItemList(Str)(Str query, Flag!"useMigemo" useMigemo, Flag!"canBeProduced" canBeProduced)
         if (isSomeString!Str)

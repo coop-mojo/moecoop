@@ -19,8 +19,9 @@ interface ModelAPI
     @path("/skills") @property string[] getSkillCategories();
     @path("/skills/:skill/recipes") string[] getSkillRecipes(string _skill);
 
-    @path("/recipes") @property string[] getAllRecipes();
-    @path("/items") @property string[] postItems(string query="", Flag!"useMigemo" migemo=No.useMigemo);
+    @path("/recipes") string[] getRecipes(string query="", Flag!"useMigemo" migemo=No.useMigemo,
+                                          Flag!"useReverseSearch" rev=No.useReverseSearch);
+    @path("/items") string[] getItems(string query="", Flag!"useMigemo" migemo=No.useMigemo);
 
     @path("/recipes/:recipe") Recipe getRecipe(string _recipe);
     @path("/items/:item") Item getItem(string _item);
@@ -87,12 +88,12 @@ class WebModel: ModelAPI
         assert(false);
     }
 
-    override @property string[] getAllRecipes()
+    override string[] getRecipes(string query, Flag!"useMigemo" useMigemo, Flag!"useReverseSearch" useReverseSearch)
     {
-        return wm.wisdom.recipeList.keys;
+        return wm.getRecipeList(query, useMigemo, useReverseSearch);
     }
 
-    override @property string[] postItems(string query, Flag!"useMigemo" useMigemo)
+    override string[] getItems(string query, Flag!"useMigemo" useMigemo)
     {
         return wm.getItemList(query, useMigemo, No.canBeProduced);
     }

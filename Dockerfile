@@ -3,6 +3,10 @@ LABEL maintainer="Mojo"
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+RUN locale-gen ja_JP.UTF-8
+
+ENV LANG ja_JP.UTF-8
+
 RUN apt-get update && \
     apt-get install --no-install-suggests --no-install-recommends -y \
             cmigemo libevent-2.0-5 libssl1.0.0 libevent-pthreads-2.0-5 && \

@@ -254,9 +254,9 @@ class WisdomModel
         import coop.core.price;
 
         return referenceCostFor(item.to!string,
-                                  wisdom.itemList, wisdom.recipeList, wisdom.rrecipeList,
-                                  wisdom.vendorPriceList, (int[string]).init,
-                                  procs);
+                                wisdom.itemList, wisdom.recipeList, wisdom.rrecipeList,
+                                wisdom.vendorPriceList, (int[string]).init,
+                                procs);
     }
 
 private:

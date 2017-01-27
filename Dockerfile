@@ -23,4 +23,4 @@ ENV VIRTUAL_HOST=localhost
 
 EXPOSE 8080
 
-CMD ["./fukurod --host=VIRTUAL_HOST"]
+CMD ["./fukurod --hostname=VIRTUAL_HOST"]

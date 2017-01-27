@@ -38,7 +38,7 @@ script:
 
 after_success:
   - dub run doveralls
-  - if [ "$TRAVIS_BRANCH" == "master" ]; then
+  - if [ "$TRAVIS_BRANCH" == "master" -a "$TRAVIS_OS_NAME" == "linux" ]; then
     docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
     docker push moecoop/moecoop;
     fi

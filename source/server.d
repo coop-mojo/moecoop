@@ -18,14 +18,21 @@ version(linux)
 
 import vibe.d;
 
-void main()
+void main(string[] args)
 {
+    import std.getopt;
+
     import coop.core.wisdom;
     import coop.core;
     import coop.server.model;
     import coop.util;
 
-    if (!finalizeCommandLineOptions)
+    auto host = "localhost";
+    ushort port = 8080;
+
+    args.getopt("hostname", &host, "port", &port);
+
+    if (!finalizeCommandLineOptions(&args))
     {
         return;
     }
@@ -36,7 +43,8 @@ void main()
     auto router = new URLRouter;
     router.registerRestInterface(new WebModel(model));
     auto settings = new HTTPServerSettings;
-    settings.port = 8080;
+    settings.hostName = host;
+    settings.port = port;
     listenHTTP(settings, router);
     lowerPrivileges;
     runEventLoop;

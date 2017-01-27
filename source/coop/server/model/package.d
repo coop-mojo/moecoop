@@ -5,6 +5,8 @@
  */
 module coop.server.model;
 
+import coop.server.model.data;
+
 interface ModelAPI
 {
     import std.typecons;
@@ -15,11 +17,11 @@ interface ModelAPI
 
     @path("/version") @property string getVersion();
 
-    @path("/binders") @property string[] getBinderCategories();
+    @path("/binders") @property BinderLink[][string] getBinderCategories();
     @path("/binders/:binder/recipes") string[] getBinderRecipes(string _binder);
     @path("/binders/:binder/recipes/:recipe") Recipe getBinderRecipe(string _binder, string _recipe);
 
-    @path("/skills") @property string[] getSkillCategories();
+    @path("/skills") @property SkillLink[][string] getSkillCategories();
     @path("/skills/:skill/recipes") string[] getSkillRecipes(string _skill);
     @path("/skills/:skill/recipes/:recipe") Recipe getSkillRecipe(string _skill, string _recipe);
 
@@ -42,9 +44,12 @@ class WebModel: ModelAPI
     import coop.core.item;
     import coop.core.recipe;
 
-    this(WisdomModel wm)
+    import vibe.d;
+
+    this(WisdomModel wm, string url)
     {
         this.wm = wm;
+        this.baseURL = url;
     }
 
     @property string getVersion()
@@ -53,9 +58,12 @@ class WebModel: ModelAPI
         return Version;
     }
 
-    override @property string[] getBinderCategories() const pure
+    override @property BinderLink[][string] getBinderCategories() const
     {
-        return wm.getBinderCategories;
+        import std.algorithm;
+        import std.range;
+
+        return ["バインダー一覧": wm.getBinderCategories.map!(b => BinderLink(b, baseURL)).array];
     }
 
     override string[] getBinderRecipes(string binder)
@@ -65,7 +73,7 @@ class WebModel: ModelAPI
 
         import vibe.http.common;
 
-        enforceHTTP(getBinderCategories.canFind(binder),
+        enforceHTTP(getBinderCategories["バインダー一覧"].map!"a.バインダー名".canFind(binder),
                     HTTPStatus.notFound, "No such binder");
 
         return wm.getRecipeList("", Binder(binder), No.useMetaSearch, No.useMigemo).front.recipes;
@@ -83,9 +91,12 @@ class WebModel: ModelAPI
         return getRecipe(_recipe);
     }
 
-    override @property string[] getSkillCategories() const pure
+    override @property SkillLink[][string] getSkillCategories() const
     {
-        return wm.getSkillCategories;
+        import std.algorithm;
+        import std.range;
+
+        return ["スキル一覧": wm.getSkillCategories.map!(s => SkillLink(s, baseURL)).array];
     }
 
     override string[] getSkillRecipes(string skill)
@@ -95,7 +106,7 @@ class WebModel: ModelAPI
 
         import vibe.http.common;
 
-        enforceHTTP(getSkillCategories.canFind(skill), HTTPStatus.notFound, "No such skill category");
+        enforceHTTP(getSkillCategories["スキル一覧"].map!"a.スキル名".canFind(skill), HTTPStatus.notFound, "No such skill category");
         return wm.getRecipeList("", Category(skill), No.useMetaSearch, No.useMigemo, No.useReverseSearch, SortOrder.ByName).front.recipes;
     }
 
@@ -135,4 +146,5 @@ class WebModel: ModelAPI
     }
 private:
     WisdomModel wm;
+    string baseURL;
 }

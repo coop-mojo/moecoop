@@ -20,6 +20,7 @@ import vibe.d;
 
 void main(string[] args)
 {
+    import std.format;
     import std.getopt;
 
     import coop.core.wisdom;
@@ -41,7 +42,7 @@ void main(string[] args)
     auto model = new WisdomModel(wisdom);
 
     auto router = new URLRouter;
-    router.registerRestInterface(new WebModel(model));
+    router.registerRestInterface(new WebModel(model, format("http://%s:%s", host, port)));
     auto settings = new HTTPServerSettings;
     settings.hostName = host;
     settings.port = port;

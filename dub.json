@@ -33,7 +33,7 @@
             "sourceFiles-windows": ["source/icon.res"],
             "preBuildCommands-windows": ["rc source/icon.rc"],
             "dependencies": {
-                "dlangui": "==0.9.46"
+                "dlangui": "==0.9.47"
             },
             "versions": ["UseMUI"]
         },

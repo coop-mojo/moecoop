@@ -136,6 +136,7 @@ class WebModel: ModelAPI
     {
         import std.algorithm;
         import std.range;
+
         return ["レシピ一覧": wm.getRecipeList(query, useMigemo, useReverseSearch).map!(r => RecipeLink(r, baseURL)).array];
     }
 
@@ -143,6 +144,7 @@ class WebModel: ModelAPI
     {
         import std.algorithm;
         import std.range;
+
         return ["アイテム一覧": wm.getItemList(query, useMigemo, No.canBeProduced).map!(i => ItemLink(i, baseURL)).array];
     }
 

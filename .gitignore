@@ -6,6 +6,7 @@ __test__library__
 libfreetype-*.dll
 ui.log
 moecoop*.zip
+moecoop.tgz
 .fldd.cache
 docs.json
 source/icon.res

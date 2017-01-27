@@ -18,19 +18,19 @@ interface ModelAPI
     @path("/version") @property string getVersion();
 
     @path("/binders") @property BinderLink[][string] getBinderCategories();
-    @path("/binders/:binder/recipes") string[] getBinderRecipes(string _binder);
+    @path("/binders/:binder/recipes") RecipeLink[][string] getBinderRecipes(string _binder);
     @path("/binders/:binder/recipes/:recipe") Recipe getBinderRecipe(string _binder, string _recipe);
 
     @path("/skills") @property SkillLink[][string] getSkillCategories();
-    @path("/skills/:skill/recipes") string[] getSkillRecipes(string _skill);
+    @path("/skills/:skill/recipes") RecipeLink[][string] getSkillRecipes(string _skill);
     @path("/skills/:skill/recipes/:recipe") Recipe getSkillRecipe(string _skill, string _recipe);
 
     @path("/recipes") @queryParam("migemo", "migemo") @queryParam("rev", "rev")
-    string[] getRecipes(string query="", Flag!"useMigemo" migemo=No.useMigemo,
-                        Flag!"useReverseSearch" rev=No.useReverseSearch);
+    RecipeLink[][string] getRecipes(string query="", Flag!"useMigemo" migemo=No.useMigemo,
+                                    Flag!"useReverseSearch" rev=No.useReverseSearch);
 
     @path("/items") @queryParam("migemo", "migemo")
-    string[] getItems(string query="", Flag!"useMigemo" migemo=No.useMigemo);
+    ItemLink[][string] getItems(string query="", Flag!"useMigemo" migemo=No.useMigemo);
 
     @path("/recipes/:recipe") Recipe getRecipe(string _recipe);
     @path("/items/:item") Item getItem(string _item);
@@ -66,9 +66,10 @@ class WebModel: ModelAPI
         return ["バインダー一覧": wm.getBinderCategories.map!(b => BinderLink(b, baseURL)).array];
     }
 
-    override string[] getBinderRecipes(string binder)
+    override RecipeLink[][string] getBinderRecipes(string binder)
     {
         import std.algorithm;
+        import std.range;
         import std.typecons;
 
         import vibe.http.common;
@@ -76,7 +77,11 @@ class WebModel: ModelAPI
         enforceHTTP(getBinderCategories["バインダー一覧"].map!"a.バインダー名".canFind(binder),
                     HTTPStatus.notFound, "No such binder");
 
-        return wm.getRecipeList("", Binder(binder), No.useMetaSearch, No.useMigemo).front.recipes;
+        return ["レシピ一覧": wm.getRecipeList("", Binder(binder), No.useMetaSearch, No.useMigemo)
+                                .front
+                                .recipes
+                                .map!(r => RecipeLink(r, baseURL))
+                                .array];
     }
 
     Recipe getBinderRecipe(string _binder, string _recipe)
@@ -86,7 +91,7 @@ class WebModel: ModelAPI
 
         import vibe.http.common;
 
-        enforceHTTP(getBinderRecipes(_binder).canFind(_recipe),
+        enforceHTTP(getBinderRecipes(_binder)["レシピ一覧"].map!"a.レシピ名".canFind(_recipe),
                     HTTPStatus.notFound, format("No such recipe in binder '%s'", _binder));
         return getRecipe(_recipe);
     }
@@ -99,15 +104,20 @@ class WebModel: ModelAPI
         return ["スキル一覧": wm.getSkillCategories.map!(s => SkillLink(s, baseURL)).array];
     }
 
-    override string[] getSkillRecipes(string skill)
+    override RecipeLink[][string] getSkillRecipes(string skill)
     {
         import std.algorithm;
+        import std.range;
         import std.typecons;
 
         import vibe.http.common;
 
         enforceHTTP(getSkillCategories["スキル一覧"].map!"a.スキル名".canFind(skill), HTTPStatus.notFound, "No such skill category");
-        return wm.getRecipeList("", Category(skill), No.useMetaSearch, No.useMigemo, No.useReverseSearch, SortOrder.ByName).front.recipes;
+        return ["レシピ一覧": wm.getRecipeList("", Category(skill), No.useMetaSearch, No.useMigemo, No.useReverseSearch, SortOrder.ByName)
+                                .front
+                                .recipes
+                                .map!(r => RecipeLink(r, baseURL))
+                                .array];
     }
 
     Recipe getSkillRecipe(string _skill, string _recipe)
@@ -117,18 +127,23 @@ class WebModel: ModelAPI
 
         import vibe.http.common;
 
-        enforceHTTP(getSkillRecipes(_skill).canFind(_recipe), HTTPStatus.notFound, format("No such recipe in skill '%s'", _skill));
+        enforceHTTP(getSkillRecipes(_skill)["レシピ一覧"].map!"a.レシピ名".canFind(_recipe),
+                    HTTPStatus.notFound, format("No such recipe in skill '%s'", _skill));
         return getRecipe(_recipe);
     }
 
-    override string[] getRecipes(string query, Flag!"useMigemo" useMigemo, Flag!"useReverseSearch" useReverseSearch)
+    override RecipeLink[][string] getRecipes(string query, Flag!"useMigemo" useMigemo, Flag!"useReverseSearch" useReverseSearch)
     {
-        return wm.getRecipeList(query, useMigemo, useReverseSearch);
+        import std.algorithm;
+        import std.range;
+        return ["レシピ一覧": wm.getRecipeList(query, useMigemo, useReverseSearch).map!(r => RecipeLink(r, baseURL)).array];
     }
 
-    override string[] getItems(string query, Flag!"useMigemo" useMigemo)
+    override ItemLink[][string] getItems(string query, Flag!"useMigemo" useMigemo)
     {
-        return wm.getItemList(query, useMigemo, No.canBeProduced);
+        import std.algorithm;
+        import std.range;
+        return ["アイテム一覧": wm.getItemList(query, useMigemo, No.canBeProduced).map!(i => ItemLink(i, baseURL)).array];
     }
 
     override Recipe getRecipe(string _recipe)

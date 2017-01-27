@@ -42,3 +42,15 @@ struct ItemLink
     string アイテム名;
     string 詳細;
 }
+
+struct RecipeLink
+{
+    this(string recipe, string host)
+    {
+        import std.path;
+        レシピ名 = recipe;
+        詳細 = buildPath(host, "recipes", recipe);
+    }
+    string レシピ名;
+    string 詳細;
+}

@@ -61,30 +61,26 @@ class WebModel: ModelAPI
     override string[] getBinderRecipes(string binder)
     {
         import std.algorithm;
+        import std.typecons;
 
-        if (getBinderCategories.canFind(binder))
-        {
-            import std.typecons;
-            return wm.getRecipeList("", Binder(binder), No.useMetaSearch, No.useMigemo).front.recipes;
-        }
-        else
-        {
-            return []; // not found
-        }
-        assert(false);
+        import vibe.http.common;
+
+        enforceHTTP(getBinderCategories.canFind(binder),
+                    HTTPStatus.notFound, "No such binder");
+
+        return wm.getRecipeList("", Binder(binder), No.useMetaSearch, No.useMigemo).front.recipes;
     }
 
     Recipe getBinderRecipe(string _binder, string _recipe)
     {
         import std.algorithm;
-        if (getBinderRecipes(_binder).canFind(_recipe))
-        {
-            return getRecipe(_recipe);
-        }
-        else
-        {
-            return Recipe.init; // not found
-        }
+        import std.format;
+
+        import vibe.http.common;
+
+        enforceHTTP(getBinderRecipes(_binder).canFind(_recipe),
+                    HTTPStatus.notFound, format("No such recipe in binder '%s'", _binder));
+        return getRecipe(_recipe);
     }
 
     override @property string[] getSkillCategories() const pure
@@ -95,30 +91,23 @@ class WebModel: ModelAPI
     override string[] getSkillRecipes(string skill)
     {
         import std.algorithm;
+        import std.typecons;
 
-        if (getSkillCategories.canFind(skill))
-        {
-            import std.typecons;
-            return wm.getRecipeList("", Category(skill), No.useMetaSearch, No.useMigemo, No.useReverseSearch, SortOrder.ByName).front.recipes;
-        }
-        else
-        {
-            return []; // not found
-        }
-        assert(false);
+        import vibe.http.common;
+
+        enforceHTTP(getSkillCategories.canFind(skill), HTTPStatus.notFound, "No such skill category");
+        return wm.getRecipeList("", Category(skill), No.useMetaSearch, No.useMigemo, No.useReverseSearch, SortOrder.ByName).front.recipes;
     }
 
     Recipe getSkillRecipe(string _skill, string _recipe)
     {
         import std.algorithm;
-        if (getSkillRecipes(_skill).canFind(_recipe))
-        {
-            return getRecipe(_recipe);
-        }
-        else
-        {
-            return Recipe.init; // not fonud
-        }
+        import std.format;
+
+        import vibe.http.common;
+
+        enforceHTTP(getSkillRecipes(_skill).canFind(_recipe), HTTPStatus.notFound, format("No such recipe in skill '%s'", _skill));
+        return getRecipe(_recipe);
     }
 
     override string[] getRecipes(string query, Flag!"useMigemo" useMigemo, Flag!"useReverseSearch" useReverseSearch)
@@ -133,12 +122,16 @@ class WebModel: ModelAPI
 
     override Recipe getRecipe(string _recipe)
     {
-        return wm.getRecipe(_recipe);
+        import vibe.http.common;
+
+        return enforceHTTP(wm.getRecipe(_recipe), HTTPStatus.notFound, "No such recipe");
     }
 
     override Item getItem(string _item)
     {
-        return wm.getItem(_item);
+        import vibe.http.common;
+
+        return enforceHTTP(wm.getItem(_item), HTTPStatus.notFound, "No such item");
     }
 private:
     WisdomModel wm;

@@ -23,9 +23,12 @@ interface ModelAPI
     @path("/skills/:skill/recipes") string[] getSkillRecipes(string _skill);
     @path("/skills/:skill/recipes/:recipe") Recipe getSkillRecipe(string _skill, string _recipe);
 
-    @path("/recipes") string[] getRecipes(string query="", Flag!"useMigemo" migemo=No.useMigemo,
-                                          Flag!"useReverseSearch" rev=No.useReverseSearch);
-    @path("/items") string[] getItems(string query="", Flag!"useMigemo" migemo=No.useMigemo);
+    @path("/recipes") @queryParam("migemo", "migemo") @queryParam("rev", "rev")
+    string[] getRecipes(string query="", Flag!"useMigemo" migemo=No.useMigemo,
+                        Flag!"useReverseSearch" rev=No.useReverseSearch);
+
+    @path("/items") @queryParam("migemo", "migemo")
+    string[] getItems(string query="", Flag!"useMigemo" migemo=No.useMigemo);
 
     @path("/recipes/:recipe") Recipe getRecipe(string _recipe);
     @path("/items/:item") Item getItem(string _item);

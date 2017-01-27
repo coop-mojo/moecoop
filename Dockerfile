@@ -19,4 +19,8 @@ ADD moecoop.tgz /moecoop
 
 WORKDIR /moecoop
 
-CMD ["./fukurod"]
+ENV VIRTUAL_HOST=localhost
+
+EXPOSE 8080
+
+CMD ["./fukurod --host=VIRTUAL_HOST"]

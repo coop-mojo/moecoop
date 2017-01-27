@@ -6,7 +6,7 @@ services:
 language: d
 
 d:
-  - dmd-2.071.2
+  - dmd-2.073.0
   - ldc-1.0.0
 
 matrix:

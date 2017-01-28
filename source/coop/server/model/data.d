@@ -178,8 +178,11 @@ struct ItemInfo
             武器情報 = WeaponInfo(*ex.extra.peek!WInfo, wm, host);
             break;
         }
-        case Armor:
+        case Armor: {
+            import coop.core.item: AInfo = ArmorInfo;
+            防具情報 = ArmorInfo(*ex.extra.peek!AInfo, wm, host);
             break;
+        }
         case Bullet:
             break;
         case Shield:
@@ -205,7 +208,7 @@ struct ItemInfo
 
     Nullable!FoodInfo 飲食物情報;
     Nullable!WeaponInfo 武器情報;
-    // Nullable!ArmorInfo 防具情報;
+    Nullable!ArmorInfo 防具情報;
     // Nullable!BulletInfo 弾情報;
     // Nullable!ShieldInfo 盾情報;
     // Nullable!ExpendableInfo 消耗品情報;
@@ -322,6 +325,54 @@ struct WeaponInfo
     int 耐久;
     double[string] 追加効果;
     int[string] 付加効果;
+    string[] 効果アップ;
+    bool 魔法チャージ;
+    bool 属性チャージ;
+}
+
+struct ArmorInfo
+{
+    import coop.core;
+    import coop.core.item: AInfo = ArmorInfo, Grade;
+
+    this(AInfo info, WisdomModel wm, string host)
+    {
+        import std.algorithm;
+        import std.conv;
+        import std.range;
+
+        アーマークラス = Grade.values
+                              .filter!(g => info.AC.keys.canFind(g))
+                              .map!(g => DamageInfo(g.to!Grade.to!string, info.AC[g.to!Grade]))
+                              .array;
+        必要スキル = info.skills
+                         .byKeyValue
+                         .map!(kv => SkillNumberLink(kv.key, kv.value, host))
+                         .array;
+        装備箇所 = cast(string)info.slot;
+        装備可能シップ = info.restriction
+                             .map!(s => ShipLink(cast(string)s, host))
+                             .array;
+        素材 = cast(string)info.material;
+        消耗タイプ = cast(string)info.type;
+        耐久 = info.exhaustion;
+        追加効果 = info.effects;
+        付加効果 = info.additionalEffect;
+        効果アップ = info.specials;
+        魔法チャージ = info.canMagicCharged;
+        属性チャージ = info.canElementCharged;
+
+    }
+
+    DamageInfo[] アーマークラス;
+    SkillNumberLink[] 必要スキル;
+    string 装備箇所;
+    ShipLink[] 装備可能シップ;
+    string 素材;
+    string 消耗タイプ;
+    int 耐久;
+    double[string] 追加効果;
+    string 付加効果; //
     string[] 効果アップ;
     bool 魔法チャージ;
     bool 属性チャージ;

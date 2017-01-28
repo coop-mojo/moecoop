@@ -9,7 +9,7 @@ import vibe.data.json;
 
 struct BinderLink
 {
-    this(string binder, string host)
+    this(string binder, string host) @safe pure nothrow
     {
         import std.array;
         import std.path;
@@ -22,7 +22,7 @@ struct BinderLink
 
 struct SkillLink
 {
-    this(string skill, string host)
+    this(string skill, string host) @safe pure nothrow
     {
         import std.path;
         スキル名 = skill;
@@ -34,7 +34,7 @@ struct SkillLink
 
 struct SkillNumberLink
 {
-    this(string skill, double val, string host)
+    this(string skill, double val, string host) @safe pure nothrow
     {
         import std.path;
         スキル名 = skill;
@@ -48,7 +48,7 @@ struct SkillNumberLink
 
 struct ItemLink
 {
-    this(string item, string host)
+    this(string item, string host) @safe pure nothrow
     {
         import std.path;
         アイテム名 = item;
@@ -60,7 +60,7 @@ struct ItemLink
 
 struct RecipeLink
 {
-    this(string recipe, string host)
+    this(string recipe, string host) @safe pure nothrow
     {
         import std.path;
         レシピ名 = recipe;
@@ -72,7 +72,7 @@ struct RecipeLink
 
 struct ItemNumberLink
 {
-    this(string item, int num, string host)
+    this(string item, int num, string host) @safe pure nothrow
     {
         import std.path;
         アイテム名 = item;
@@ -89,7 +89,7 @@ struct RecipeInfo
     import coop.core;
     import coop.core.recipe;
 
-    this(Recipe r, WisdomModel wm, string host)
+    this(Recipe r, WisdomModel wm, string host) pure nothrow
     {
         import std.algorithm;
         import std.range;
@@ -228,7 +228,7 @@ struct FoodInfo
     import coop.core;
     import coop.core.item: FInfo = FoodInfo, AdditionalEffect;
 
-    this(FInfo info, WisdomModel wm, string host)
+    this(FInfo info, WisdomModel wm, string host) @safe pure
     {
         効果 = info.effect;
         if (auto eff = info.additionalEffect)
@@ -245,7 +245,7 @@ struct FoodBufferInfo
 {
     import coop.core;
 
-    this(string eff, WisdomModel wm, string host)
+    this(string eff, WisdomModel wm, string host) @safe pure
     {
         バフ名 = eff;
         if (auto einfo = wm.getFoodEffect(eff))
@@ -275,7 +275,7 @@ struct DamageInfo
 
 struct ShipLink
 {
-    this(string ship, string host)
+    this(string ship, string host) @safe pure nothrow
     {
         シップ名 = ship;
     }
@@ -390,7 +390,7 @@ struct BulletInfo
     import coop.core;
     import coop.core.item: BInfo = BulletInfo;
 
-    this(BInfo info, WisdomModel wm, string host)
+    this(BInfo info, WisdomModel wm, string host) pure nothrow
     {
         import std.algorithm;
         import std.range;
@@ -422,6 +422,7 @@ struct ShieldInfo
 {
     import coop.core;
     import coop.core.item: SInfo = ShieldInfo, Grade;
+
     this(SInfo info, WisdomModel wm, string host)
     {
         import std.algorithm;

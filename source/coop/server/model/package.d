@@ -17,7 +17,6 @@ interface ModelAPI
 
     @path("/version") @property string[string] getVersion();
 
-    @contentType("application/json")
     @path("/binders") @property BinderLink[][string] getBinderCategories();
     @path("/binders/:binder/recipes") RecipeLink[][string] getBinderRecipes(string _binder);
     @path("/binders/:binder/recipes/:recipe") RecipeInfoLink getBinderRecipe(string _binder, string _recipe);

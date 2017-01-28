@@ -183,8 +183,11 @@ struct ItemInfo
             防具情報 = ArmorInfo(*ex.extra.peek!AInfo, wm, host);
             break;
         }
-        case Bullet:
+        case Bullet: {
+            import coop.core.item: BInfo = BulletInfo;
+            弾情報 = BulletInfo(*ex.extra.peek!BInfo, wm, host);
             break;
+        }
         case Shield:
             break;
         case Expendable:
@@ -209,7 +212,7 @@ struct ItemInfo
     Nullable!FoodInfo 飲食物情報;
     Nullable!WeaponInfo 武器情報;
     Nullable!ArmorInfo 防具情報;
-    // Nullable!BulletInfo 弾情報;
+    Nullable!BulletInfo 弾情報;
     // Nullable!ShieldInfo 盾情報;
     // Nullable!ExpendableInfo 消耗品情報;
 }
@@ -373,7 +376,40 @@ struct ArmorInfo
     int 耐久;
     double[string] 追加効果;
     string 付加効果; //
-    string[] 効果アップ;
+    string[] 効果アップ; //
     bool 魔法チャージ;
     bool 属性チャージ;
+}
+
+struct BulletInfo
+{
+    import coop.core;
+    import coop.core.item: BInfo = BulletInfo;
+
+    this(BInfo info, WisdomModel wm, string host)
+    {
+        import std.algorithm;
+        import std.range;
+
+        ダメージ = info.damage;
+        有効レンジ = info.range;
+        角度補正角 = info.angle;
+        使用可能シップ = info.restriction
+                             .map!(s => ShipLink(cast(string)s, host))
+                             .array;
+        必要スキル = info.skills
+                         .byKeyValue
+                         .map!(kv => SkillNumberLink(kv.key, kv.value, host))
+                         .array;
+        追加効果 = info.effects;
+        付与効果 = info.additionalEffect; //
+    }
+
+    double ダメージ;
+    double 有効レンジ;
+    int 角度補正角;
+    ShipLink[] 使用可能シップ;
+    SkillNumberLink[] 必要スキル;
+    double[string] 追加効果;
+    string 付与効果;
 }

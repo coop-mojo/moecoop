@@ -41,24 +41,20 @@ class WebModel: ModelAPI
     import std.typecons;
 
     import coop.core;
-    import coop.core.item;
-    import coop.core.recipe;
 
-    import vibe.d;
-
-    this(WisdomModel wm, string url)
+    this(WisdomModel wm, string url) @safe pure nothrow
     {
         this.wm = wm;
         this.baseURL = url;
     }
 
-    @property string[string] getVersion()
+    @property string[string] getVersion() @safe const pure nothrow
     {
         import coop.util;
         return ["version": Version];
     }
 
-    override @property BinderLink[][string] getBinderCategories() const
+    override @property BinderLink[][string] getBinderCategories() const pure nothrow
     {
         import std.algorithm;
         import std.range;
@@ -99,7 +95,7 @@ class WebModel: ModelAPI
         return getRecipe(_recipe);
     }
 
-    override @property SkillLink[][string] getSkillCategories() const
+    override @property SkillLink[][string] getSkillCategories() const pure nothrow
     {
         import std.algorithm;
         import std.range;

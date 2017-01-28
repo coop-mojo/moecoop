@@ -15,7 +15,7 @@ interface ModelAPI
     import coop.core.item;
     import coop.core.recipe;
 
-    @path("/version") @property string getVersion();
+    @path("/version") @property string[string] getVersion();
 
     @contentType("application/json")
     @path("/binders") @property BinderLink[][string] getBinderCategories();
@@ -53,10 +53,10 @@ class WebModel: ModelAPI
         this.baseURL = url;
     }
 
-    @property string getVersion()
+    @property string[string] getVersion()
     {
         import coop.util;
-        return Version;
+        return ["version": Version];
     }
 
     override @property BinderLink[][string] getBinderCategories() const

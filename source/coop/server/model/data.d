@@ -31,6 +31,20 @@ struct SkillLink
     string レシピ一覧;
 }
 
+struct SkillNumberLink
+{
+    this(string skill, double val, string host)
+    {
+        import std.path;
+        スキル名 = skill;
+        レシピ一覧 = buildPath(host, "skills", skill, "recipes");
+        スキル値 = val;
+    }
+    string スキル名;
+    string レシピ一覧;
+    double スキル値;
+}
+
 struct ItemLink
 {
     this(string item, string host)
@@ -69,7 +83,7 @@ struct ItemNumberLink
     int 個数;
 }
 
-struct RecipeInfoLink
+struct RecipeInfo
 {
     import coop.core;
     import coop.core.recipe;
@@ -96,6 +110,7 @@ struct RecipeInfoLink
         収録バインダー = wm.getBindersFor(レシピ名).map!(b => BinderLink(b, host)).array;
         備考 = r.remarks;
     }
+
     string レシピ名;
     ItemNumberLink[] 材料;
     ItemNumberLink[] 生成物;
@@ -106,4 +121,208 @@ struct RecipeInfoLink
     bool ペナルティ型;
     BinderLink[] 収録バインダー;
     string 備考;
+}
+
+struct SpecialPropertyInfo
+{
+    string 略称;
+    string 詳細;
+}
+
+struct PetFoodInfo
+{
+    string 種別;
+    double 効果;
+}
+
+struct ItemInfo
+{
+    import std.typecons;
+
+    import coop.core;
+    import coop.core.item;
+
+    this(Item item, WisdomModel wm, string host)
+    {
+        import std.algorithm;
+        import std.range;
+
+        アイテム名 = item.name;
+        英名 = item.ename;
+        重さ = item.weight;
+        NPC売却価格 = item.price;
+        info = item.info;
+        特殊条件 = item.properties.map!(p => SpecialPropertyInfo(p.to!string, cast(string)p)).array;
+        転送可 = item.transferable;
+        スタック可 = item.stackable;
+        ペットアイテム = item.petFoodInfo.byKeyValue.map!(kv => PetFoodInfo(kv.key.to!PetFoodType.to!string, kv.value)).front;
+        備考 = item.remarks;
+        アイテム種別 = cast(string)item.type;
+        auto ex = wm.getExtraInfo(アイテム名);
+        if (ex.extra == ExtraInfo.init)
+        {
+            return;
+        }
+
+        final switch(item.type) with(typeof(item.type))
+        {
+        case UNKNOWN, Others:
+            break;
+        case Food, Drink, Liquor: {
+            import coop.core.item: FInfo = FoodInfo;
+            飲食物情報 = FoodInfo(*ex.extra.peek!FInfo, wm, host);
+            break;
+        }
+        case Weapon: {
+            import coop.core.item: WInfo = WeaponInfo;
+            武器情報 = WeaponInfo(*ex.extra.peek!WInfo, wm, host);
+            break;
+        }
+        case Armor:
+            break;
+        case Bullet:
+            break;
+        case Shield:
+            break;
+        case Expendable:
+            break;
+        case Asset:
+            break;
+        }
+    }
+
+    string アイテム名;
+    string 英名;
+    double 重さ;
+    uint NPC売却価格;
+    string info;
+    SpecialPropertyInfo[] 特殊条件;
+    bool 転送可;
+    bool スタック可;
+    PetFoodInfo ペットアイテム;
+    string 備考;
+    string アイテム種別;
+
+    Nullable!FoodInfo 飲食物情報;
+    Nullable!WeaponInfo 武器情報;
+    // Nullable!ArmorInfo 防具情報;
+    // Nullable!BulletInfo 弾情報;
+    // Nullable!ShieldInfo 盾情報;
+    // Nullable!ExpendableInfo 消耗品情報;
+}
+
+struct FoodInfo
+{
+    import std.typecons;
+
+    import coop.core;
+    import coop.core.item: FInfo = FoodInfo, AdditionalEffect;
+
+    this(FInfo info, WisdomModel wm, string host)
+    {
+        効果 = info.effect;
+        if (auto eff = info.additionalEffect)
+        {
+            付加効果 = FoodBufferInfo(eff, wm, host);
+        }
+    }
+
+    double 効果;
+    Nullable!FoodBufferInfo 付加効果;
+}
+
+struct FoodBufferInfo
+{
+    import coop.core;
+
+    this(string eff, WisdomModel wm, string host)
+    {
+        バフ名 = eff;
+        if (auto einfo = wm.getFoodEffect(eff))
+        {
+            import std.conv;
+            バフグループ = einfo.group.to!string;
+            効果 = einfo.effects;
+            その他効果 = einfo.otherEffects;
+            効果時間 = einfo.duration;
+            備考 = einfo.remarks;
+        }
+    }
+
+    string バフ名;
+    string バフグループ;
+    int[string] 効果;
+    string その他効果;
+    uint 効果時間;
+    string 備考;
+}
+
+struct DamageInfo
+{
+    string 状態;
+    double 効果;
+}
+
+struct ShipLink
+{
+    this(string ship, string host)
+    {
+        シップ名 = ship;
+    }
+
+    string シップ名;
+    string 詳細;
+}
+
+struct WeaponInfo
+{
+    import coop.core;
+    import coop.core.item: WInfo = WeaponInfo, Grade;
+
+    this(WInfo info, WisdomModel wm, string host)
+    {
+        import std.algorithm;
+        import std.conv;
+        import std.range;
+
+        攻撃力 = Grade.values
+                      .filter!(g => info.damage.keys.canFind(g))
+                      .map!(g => DamageInfo(g.to!Grade.to!string, info.damage[g.to!Grade]))
+                      .array;
+        攻撃間隔 = info.duration;
+        有効レンジ = info.range;
+        必要スキル = info.skills
+                         .byKeyValue
+                         .map!(kv => SkillNumberLink(kv.key, kv.value, host))
+                         .array;
+        両手装備 = info.isDoubleHands;
+        装備箇所 = cast(string)info.slot;
+        装備可能シップ = info.restriction
+                             .map!(s => ShipLink(cast(string)s, host))
+                             .array;
+        素材 = cast(string)info.material;
+        消耗タイプ = cast(string)info.type;
+        耐久 = info.exhaustion;
+        追加効果 = info.effects;
+        付加効果 = info.additionalEffect; //
+        効果アップ = info.specials; //
+        魔法チャージ = info.canMagicCharged;
+        属性チャージ = info.canElementCharged;
+    }
+
+    DamageInfo[] 攻撃力;
+    int 攻撃間隔;
+    double 有効レンジ;
+    SkillNumberLink[] 必要スキル;
+    bool 両手装備;
+    string 装備箇所;
+    ShipLink[] 装備可能シップ;
+    string 素材;
+    string 消耗タイプ;
+    int 耐久;
+    double[string] 追加効果;
+    int[string] 付加効果;
+    string[] 効果アップ;
+    bool 魔法チャージ;
+    bool 属性チャージ;
 }

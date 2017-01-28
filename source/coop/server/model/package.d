@@ -19,11 +19,11 @@ interface ModelAPI
 
     @path("/binders") @property BinderLink[][string] getBinderCategories();
     @path("/binders/:binder/recipes") RecipeLink[][string] getBinderRecipes(string _binder);
-    @path("/binders/:binder/recipes/:recipe") RecipeInfoLink getBinderRecipe(string _binder, string _recipe);
+    @path("/binders/:binder/recipes/:recipe") RecipeInfo getBinderRecipe(string _binder, string _recipe);
 
     @path("/skills") @property SkillLink[][string] getSkillCategories();
     @path("/skills/:skill/recipes") RecipeLink[][string] getSkillRecipes(string _skill);
-    @path("/skills/:skill/recipes/:recipe") RecipeInfoLink getSkillRecipe(string _skill, string _recipe);
+    @path("/skills/:skill/recipes/:recipe") RecipeInfo getSkillRecipe(string _skill, string _recipe);
 
     @path("/recipes") @queryParam("migemo", "migemo") @queryParam("rev", "rev")
     RecipeLink[][string] getRecipes(string query="", Flag!"useMigemo" migemo=No.useMigemo,
@@ -32,8 +32,8 @@ interface ModelAPI
     @path("/items") @queryParam("migemo", "migemo")
     ItemLink[][string] getItems(string query="", Flag!"useMigemo" migemo=No.useMigemo);
 
-    @path("/recipes/:recipe") RecipeInfoLink getRecipe(string _recipe);
-    @path("/items/:item") Item getItem(string _item);
+    @path("/recipes/:recipe") RecipeInfo getRecipe(string _recipe);
+    @path("/items/:item") ItemInfo getItem(string _item);
 }
 
 class WebModel: ModelAPI
@@ -84,7 +84,7 @@ class WebModel: ModelAPI
                                 .array];
     }
 
-    RecipeInfoLink getBinderRecipe(string _binder, string _recipe)
+    RecipeInfo getBinderRecipe(string _binder, string _recipe)
     {
         import std.algorithm;
         import std.format;
@@ -120,7 +120,7 @@ class WebModel: ModelAPI
                                 .array];
     }
 
-    RecipeInfoLink getSkillRecipe(string _skill, string _recipe)
+    RecipeInfo getSkillRecipe(string _skill, string _recipe)
     {
         import std.algorithm;
         import std.format;
@@ -148,19 +148,20 @@ class WebModel: ModelAPI
         return ["アイテム一覧": wm.getItemList(query, useMigemo, No.canBeProduced).map!(i => ItemLink(i, baseURL)).array];
     }
 
-    override RecipeInfoLink getRecipe(string _recipe)
+    override RecipeInfo getRecipe(string _recipe)
     {
         import vibe.http.common;
 
-        return RecipeInfoLink(enforceHTTP(wm.getRecipe(_recipe), HTTPStatus.notFound, "No such recipe"),
-                              wm, baseURL);
+        return RecipeInfo(enforceHTTP(wm.getRecipe(_recipe), HTTPStatus.notFound, "No such recipe"),
+                          wm, baseURL);
     }
 
-    override Item getItem(string _item)
+    override ItemInfo getItem(string _item)
     {
         import vibe.http.common;
 
-        return enforceHTTP(wm.getItem(_item), HTTPStatus.notFound, "No such item");
+        return ItemInfo(enforceHTTP(wm.getItem(_item), HTTPStatus.notFound, "No such item"),
+                        wm, baseURL);
     }
 private:
     WisdomModel wm;

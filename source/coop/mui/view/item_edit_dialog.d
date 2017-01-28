@@ -176,7 +176,7 @@ class ItemEditDialog: Dialog
         itemComboBox.enabled = item.isWritable!"type";
         main.addChild(itemTypeCap);
         itemComboBox.itemClick = (Widget src, int idx) {
-            updated.type = cast(ItemType)types[idx];
+            updated.type = types[idx];
             return true;
         };
 

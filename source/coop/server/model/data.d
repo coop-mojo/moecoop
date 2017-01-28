@@ -11,9 +11,10 @@ struct BinderLink
 {
     this(string binder, string host)
     {
+        import std.array;
         import std.path;
         バインダー名 = binder;
-        レシピ一覧 = buildPath(host, "binders", binder, "recipes");
+        レシピ一覧 = buildPath(host, "binders", binder.replace("/", "_"), "recipes");
     }
     string バインダー名;
     string レシピ一覧;

@@ -69,11 +69,13 @@ class WebModel: ModelAPI
     override RecipeLink[][string] getBinderRecipes(string binder)
     {
         import std.algorithm;
+        import std.array;
         import std.range;
         import std.typecons;
 
         import vibe.http.common;
 
+        binder = binder.replace("_", "/");
         enforceHTTP(getBinderCategories["バインダー一覧"].map!"a.バインダー名".canFind(binder),
                     HTTPStatus.notFound, "No such binder");
 
@@ -87,12 +89,13 @@ class WebModel: ModelAPI
     RecipeInfo getBinderRecipe(string _binder, string _recipe)
     {
         import std.algorithm;
+        import std.array;
         import std.format;
 
         import vibe.http.common;
 
         enforceHTTP(getBinderRecipes(_binder)["レシピ一覧"].map!"a.レシピ名".canFind(_recipe),
-                    HTTPStatus.notFound, format("No such recipe in binder '%s'", _binder));
+                    HTTPStatus.notFound, format("No such recipe in binder '%s'", _binder.replace("_", "/")));
         return getRecipe(_recipe);
     }
 

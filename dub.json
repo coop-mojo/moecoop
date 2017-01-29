@@ -8,8 +8,8 @@
     "authors": ["もじょんぬ <moe.e.coop@gmail.com>"],
 
     "dependencies": {
-        "derelict-util": "==2.0.6",
-        "vibe-d:data": "==0.7.30"
+        "derelict-util": ">=2.0.6",
+        "vibe-d:data": ">=0.7.30"
     },
 
     "stringImportPaths": ["views", "views/res"],
@@ -33,7 +33,7 @@
             "sourceFiles-windows": ["source/icon.res"],
             "preBuildCommands-windows": ["rc source/icon.rc"],
             "dependencies": {
-                "dlangui": "==0.9.46"
+                "dlangui": ">=0.9.47"
             },
             "versions": ["UseMUI"]
         },
@@ -45,7 +45,7 @@
             "excludedSourceFiles": ["source/mui.d", "source/coop/mui/*"],
             "targetName": "fukurod",
             "dependencies": {
-                "vibe-d": "==0.7.30"
+                "vibe-d": ">=0.7.30"
             },
             "versions": ["Server", "VibeNoSSL"]
         },
@@ -55,8 +55,8 @@
             "targetType": "library",
             "excludedSourceFiles": ["source/mui.d", "source/server.d"],
             "dependencies": {
-                "dlangui": "==0.9.46",
-                "vibe-d": "==0.7.30"
+                "dlangui": ">=0.9.47",
+                "vibe-d": ">=0.7.30"
             },
             "versions": ["VibeNoSSL"]
         },

@@ -170,9 +170,8 @@ struct ItemInfo
         case UNKNOWN, Others:
             break;
         case Food, Drink, Liquor: {
-            static import coop.core.item;
-            飲食物情報 = FoodInfo(*ex.extra.peek!(coop.core.item.FoodInfo),
-                                  wm, host);
+            import coop.core.item: FInfo = FoodInfo;
+            飲食物情報 = FoodInfo(*ex.extra.peek!FInfo, wm, host);
             break;
         }
         case Weapon: {

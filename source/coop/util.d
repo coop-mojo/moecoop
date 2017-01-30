@@ -303,7 +303,7 @@ auto checkedAssocArray(Range)(Range r) if (isInputRange!Range)
  * 入力文字列の全角カタカナを半角カタカナに変換した文字列を返す
  * Note: std.string.tarnslate は濁点を含む全角カタカナを処理できない
  */
-@property auto toHankaku(Str)(Str str) @safe
+@property auto toHankaku(Str)(Str str) @safe pure
 {
     static Str trans(ElementType!Str c)
     {
@@ -339,7 +339,7 @@ auto checkedAssocArray(Range)(Range r) if (isInputRange!Range)
 }
 
 ///
-@safe unittest
+@safe pure unittest
 {
     assert("アカサタナハマヤラワ".toHankaku == "ｱｶｻﾀﾅﾊﾏﾔﾗﾜ");
     assert("ァャガザダバパ".toHankaku == "ｧｬｶﾞｻﾞﾀﾞﾊﾞﾊﾟ");

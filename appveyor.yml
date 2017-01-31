@@ -2,6 +2,12 @@ platform:
   - x86
   - x64
 
+notifications:
+  - provider: Email
+    on_build_success: false
+    on_build_faiilure: false
+    on_build_status_changed: false
+
 environment:
   matrix:
     - DC: dmd

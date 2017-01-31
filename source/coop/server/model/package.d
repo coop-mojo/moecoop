@@ -33,7 +33,11 @@ interface ModelAPI
     ItemLink[][string] getItems(string query="", Flag!"useMigemo" migemo=No.useMigemo);
 
     @path("/recipes/:recipe") RecipeInfo getRecipe(string _recipe);
+
+    // 調達価格なしの場合
     @path("/items/:item") ItemInfo getItem(string _item);
+    // 調達価格ありの場合
+    @path("/items/:item") ItemInfo postItem(string _item, int[string] prices = null);
 }
 
 class WebModel: ModelAPI
@@ -157,10 +161,16 @@ class WebModel: ModelAPI
 
     override ItemInfo getItem(string _item)
     {
-        import vibe.http.common;
+        return postItem(_item, (int[string]).init);
+    }
 
-        return ItemInfo(enforceHTTP(wm.getItem(_item), HTTPStatus.notFound, "No such item"),
-                        wm, baseURL);
+    override ItemInfo postItem(string _item, int[string] prices)
+    {
+        import vibe.http.common;
+        auto info = ItemInfo(enforceHTTP(wm.getItem(_item), HTTPStatus.notFound, "No such item"),
+                             wm, baseURL);
+        info.参考価格 = wm.costFor(_item, prices);
+        return info;
     }
 private:
     WisdomModel wm;

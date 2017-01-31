@@ -152,6 +152,7 @@ struct ItemInfo
         英名 = item.ename;
         重さ = item.weight;
         NPC売却価格 = item.price;
+        参考価格 = wm.costFor(item.name, (int[string]).init);
         info = item.info;
         特殊条件 = item.properties.map!(p => SpecialPropertyInfo(p.to!string, cast(string)p)).array;
         転送可 = item.transferable;
@@ -205,6 +206,7 @@ struct ItemInfo
     string 英名;
     double 重さ;
     uint NPC売却価格;
+    uint 参考価格;
     string info;
     SpecialPropertyInfo[] 特殊条件;
     bool 転送可;

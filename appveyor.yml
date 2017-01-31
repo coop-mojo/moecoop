@@ -5,7 +5,7 @@ platform:
 notifications:
   - provider: Email
     on_build_success: false
-    on_build_faiilure: false
+    on_build_failure: false
     on_build_status_changed: false
 
 environment:

@@ -106,7 +106,7 @@ class Character
         import std.file;
         import std.path;
 
-        auto dir = buildPath(dir_, name);
+        auto dir = buildPath(dir_, name_);
         if (!dir.exists)
         {
             mkdirRecurse(dir.to!string);
@@ -141,7 +141,7 @@ private:
         import std.path;
         import std.stdio;
 
-        auto file = buildPath(dir_, name, "config.json");
+        auto file = buildPath(dir_, name_, "config.json");
         auto vals = [
             "URL": Json(url),
             ];

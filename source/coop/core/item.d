@@ -260,6 +260,7 @@ struct WeaponInfo
     @name_("効果アップ") @optional string[] specials;
     @name_("魔法チャージ") bool canMagicCharged;
     @name_("属性チャージ") bool canElementCharged;
+    @name_("備考") @optional string[] remarks;
 
     /// デバッグ用。このアイテム情報が収録されているファイル名
     @ignore string file;

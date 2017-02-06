@@ -42,7 +42,7 @@ void main(string[] args)
     auto model = new WisdomModel(wisdom);
 
     auto router = new URLRouter;
-    router.registerRestInterface(new WebModel(model, format("http://%s:%s", host, port)));
+    router.registerRestInterface(new WebModel(model, format("https://%s:%s", host, port)));
     auto settings = new HTTPServerSettings;
     settings.hostName = host;
     settings.port = port;

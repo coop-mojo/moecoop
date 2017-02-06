@@ -21,6 +21,6 @@ WORKDIR /moecoop
 
 ENV VIRTUAL_HOST=localhost
 
-EXPOSE 8080
+EXPOSE 80
 
 CMD ./fukurod --hostname=$VIRTUAL_HOST

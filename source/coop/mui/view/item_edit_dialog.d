@@ -87,25 +87,25 @@ class ItemEditDialog: Dialog
             import coop.mui.view.editors;
             import coop.util;
 
-            auto petTypes = PetFoodType.svalues.to!(dstring[]);
+            auto petTypes = [EnumMembers!PetFoodType].map!"cast(string)a".array;
 
-            auto petComboBox = new ComboBox("", petTypes);
+            auto petComboBox = new ComboBox("", petTypes.to!(dstring[]));
             auto textBox = new EditRealLine("");
 
-            petComboBox.selectedItemIndex = PetFoodType.values.indexOf(item.petFoodInfo.keys[0]).to!int;
+            petComboBox.selectedItemIndex = [EnumMembers!PetFoodType].indexOf(item.petFoodInfo.keys[0]).to!int;
             petComboBox.itemClick = (Widget src, int idx) {
                 updated.petFoodInfo = typeof(updated.petFoodInfo).init;
                 if (idx == 0 || idx == petTypes.length-1)
                 {
                     textBox.text = "";
                     textBox.enabled = false;
-                    item.petFoodInfo[idx.to!PetFoodType] = 0;
+                    item.petFoodInfo[[EnumMembers!PetFoodType][idx]] = 0;
                 }
                 else
                 {
                     textBox.enabled = true;
                     auto txt = textBox.text;
-                    item.petFoodInfo[idx.to!PetFoodType] = txt.empty ? 0 : txt.to!real;
+                    item.petFoodInfo[[EnumMembers!PetFoodType][idx]] = txt.empty ? 0 : txt.to!real;
                 }
                 return true;
             };
@@ -123,7 +123,7 @@ class ItemEditDialog: Dialog
                 if (!txt.empty)
                 {
                     updated.petFoodInfo = typeof(updated.petFoodInfo).init;
-                    updated.petFoodInfo[idx.to!PetFoodType] = txt.to!real;
+                    updated.petFoodInfo[[EnumMembers!PetFoodType][idx]] = txt.to!real;
                 }
             };
 

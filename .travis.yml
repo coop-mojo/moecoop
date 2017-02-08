@@ -26,7 +26,9 @@ env:
 before_install:
   - git fetch --unshallow
   - dub fetch doveralls
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+  - if [ "$TRAVIS_BRANCH" == "master" -a \
+         "$TRAVIS_OS_NAME" == "linux" -a \
+         "$DC" == "dmd" ]; then
     sudo apt update;
     sudo apt install -qq libevent-dev;
     ./archive.sh;
@@ -35,13 +37,17 @@ before_install:
 
 script:
   - dub test --coverage --combined
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+  - if [ "$TRAVIS_BRANCH" == "master" -a \
+         "$TRAVIS_OS_NAME" == "linux" -a \
+         "$DC" == "dmd" ]; then
     docker images moecoop/moecoop;
     fi
 
 after_success:
   - dub run doveralls
-  - if [ "$TRAVIS_BRANCH" == "master" -a "$TRAVIS_OS_NAME" == "linux" ]; then
+  - if [ "$TRAVIS_BRANCH" == "master" -a \
+         "$TRAVIS_OS_NAME" == "linux" -a \
+         "$DC" == "dmd" ]; then
     docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
     docker push moecoop/moecoop;
     fi

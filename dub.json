@@ -9,7 +9,7 @@
 
     "dependencies": {
         "derelict-util": ">=2.0.6",
-        "vibe-d:data": ">=0.7.30"
+        "vibe-d:data": "~>0.8.0-beta.2"
     },
 
     "stringImportPaths": ["views", "views/res"],
@@ -45,7 +45,7 @@
             "excludedSourceFiles": ["source/mui.d", "source/coop/mui/*"],
             "targetName": "fukurod",
             "dependencies": {
-                "vibe-d": ">=0.7.30"
+                "vibe-d": "~>0.8.0-beta.2"
             },
             "versions": ["Server", "VibeNoSSL"]
         },
@@ -56,7 +56,7 @@
             "excludedSourceFiles": ["source/mui.d", "source/server.d"],
             "dependencies": {
                 "dlangui": ">=0.9.47",
-                "vibe-d": ">=0.7.30"
+                "vibe-d": "~>0.8.0-beta.2"
             },
             "versions": ["VibeNoSSL"]
         },

@@ -221,10 +221,10 @@ auto addExtraElem(Str)(Widget layout, Str name, WisdomModel model)
 
         auto info = ex.extra.peek!WeaponInfo;
 
-        auto damageStr = [EnumMembers!Grade]
-                         .filter!(g => info.damage.keys.canFind(g))
-                         .map!(g => format("%s: %.1f", cast(string)g, info.damage[g]))
-                         .join(", ");
+        auto damageStr = Grade.values
+                              .filter!(g => info.damage.keys.canFind(g))
+                              .map!(g => format("%s: %.1f", g.to!Grade, info.damage[g.to!Grade]))
+                              .join(", ");
         layout.addElem("ダメージ", damageStr);
         layout.addElem("攻撃間隔", info.duration.to!string);
         layout.addElem("有効レンジ", format("%.1f", info.range));
@@ -284,10 +284,10 @@ auto addExtraElem(Str)(Widget layout, Str name, WisdomModel model)
 
         auto info = ex.extra.peek!ArmorInfo;
 
-        auto ACStr = [EnumMembers!Grade]
-                     .filter!(g => info.AC.keys.canFind(g))
-                     .map!(g => format("%s: %.1f", cast(string)g, info.AC[g]))
-                     .join(", ");
+        auto ACStr = Grade.values
+                          .filter!(g => info.AC.keys.canFind(g))
+                          .map!(g => format("%s: %.1f"d, g.to!Grade, info.AC[g.to!Grade]))
+                          .join(", ");
         layout.addElem("アーマークラス", ACStr);
         layout.addElem(cast(string)info.type, info.exhaustion.to!string);
         layout.addElem("必要スキル",
@@ -378,10 +378,10 @@ auto addExtraElem(Str)(Widget layout, Str name, WisdomModel model)
 
         auto info = ex.extra.peek!ShieldInfo;
 
-        auto ACStr = [EnumMembers!Grade]
-                     .filter!(g => info.AC.keys.canFind(g))
-                     .map!(g => format("%s: %.1f", cast(string)g, info.AC[g]))
-                     .join(", ");
+        auto ACStr = Grade.values
+                          .filter!(g => info.AC.keys.canFind(g))
+                          .map!(g => format("%s: %.1f", g.to!Grade, info.AC[g.to!Grade]))
+                          .join(", ");
         layout.addElem("アーマークラス", ACStr);
         layout.addElem(cast(string)info.type, info.exhaustion.to!string);
         layout.addElem("必要スキル",

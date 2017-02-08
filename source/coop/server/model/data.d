@@ -84,6 +84,20 @@ struct ItemNumberLink
     int 個数;
 }
 
+struct RecipeNumberLink
+{
+    this(string recipe, int num, string host) @safe pure nothrow
+    {
+        import std.path;
+        レシピ名 = recipe;
+        詳細 = buildPath(host, "recipes", recipe);
+        コンバイン回数 = num;
+    }
+    string レシピ名;
+    string 詳細;
+    int コンバイン回数;
+}
+
 struct RecipeInfo
 {
     import coop.core;
@@ -296,11 +310,12 @@ struct WeaponInfo
         import std.algorithm;
         import std.conv;
         import std.range;
+        import std.traits;
 
-        攻撃力 = Grade.values
-                      .filter!(g => info.damage.keys.canFind(g))
-                      .map!(g => DamageInfo(g.to!Grade.to!string, info.damage[g.to!Grade]))
-                      .array;
+        攻撃力 = [EnumMembers!Grade]
+                 .filter!(g => info.damage.keys.canFind(g))
+                 .map!(g => DamageInfo(cast(string)g, info.damage[g]))
+                 .array;
         攻撃間隔 = info.duration;
         有効レンジ = info.range;
         必要スキル = info.skills
@@ -349,11 +364,12 @@ struct ArmorInfo
         import std.algorithm;
         import std.conv;
         import std.range;
+        import std.traits;
 
-        アーマークラス = Grade.values
-                              .filter!(g => info.AC.keys.canFind(g))
-                              .map!(g => DamageInfo(g.to!Grade.to!string, info.AC[g.to!Grade]))
-                              .array;
+        アーマークラス = [EnumMembers!Grade]
+                         .filter!(g => info.AC.keys.canFind(g))
+                         .map!(g => DamageInfo(cast(string)g, info.AC[g]))
+                         .array;
         必要スキル = info.skills
                          .byKeyValue
                          .map!(kv => SkillNumberLink(kv.key, kv.value, host))
@@ -430,11 +446,12 @@ struct ShieldInfo
         import std.algorithm;
         import std.conv;
         import std.range;
+        import std.traits;
 
-        アーマークラス = Grade.values
-                              .filter!(g => info.AC.keys.canFind(g))
-                              .map!(g => DamageInfo(g.to!Grade.to!string, info.AC[g.to!Grade]))
-                              .array;
+        アーマークラス = [EnumMembers!Grade]
+                         .filter!(g => info.AC.keys.canFind(g))
+                         .map!(g => DamageInfo(cast(string)g, info.AC[g]))
+                         .array;
         必要スキル = info.skills
                          .byKeyValue
                          .map!(kv => SkillNumberLink(kv.key, kv.value, host))

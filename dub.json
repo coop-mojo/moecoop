@@ -14,7 +14,6 @@
 
     "stringImportPaths": ["views", "views/res"],
 
-    "dflags-windows-x86-dmd": ["-m32mscoff"],
     "postBuildCommands-windows-x86_64": [
         "powershell -Command \"wget http://files.kaoriya.net/cmigemo/cmigemo-default-win64-20110227.zip -OutFile migemo.zip;\"",
         "powershell -Command \"unzip migemo.zip;\"",

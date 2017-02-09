@@ -26,9 +26,7 @@ env:
 before_install:
   - git fetch --unshallow
   - dub fetch doveralls
-  - if [ "$TRAVIS_BRANCH" == "master" -a \
-         "$TRAVIS_OS_NAME" == "linux" -a \
-         "$DC" == "dmd" ]; then
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
     sudo apt update;
     sudo apt install -qq libevent-dev;
     ./archive.sh;

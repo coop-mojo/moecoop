@@ -9,8 +9,6 @@ import std.range;
 import std.string;
 import std.traits;
 
-import coop.fallback;
-
 /// 各種データファイルが置いてあるディレクトリ
 immutable SystemResourceBase = "resource";
 

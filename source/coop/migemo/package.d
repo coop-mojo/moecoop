@@ -9,7 +9,6 @@ import std.exception;
 
 class MigemoException: Exception
 {
-    import coop.fallback;
     mixin basicExceptionCtors;
 }
 

@@ -25,7 +25,6 @@ int referenceCostFor(string item,
                      RedBlackTree!string visited = new RedBlackTree!string)
 {
     import std.algorithm;
-    import coop.fallback;
 
     if (auto pr = item in procurementMap)
     {

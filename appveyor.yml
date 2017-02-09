@@ -13,7 +13,7 @@ environment:
     - DC: dmd
       DVersion: 2.071.2
     - DC: ldc
-      DVersion: 1.0.0
+      DVersion: 1.1.0
 
 matrix:
   allow_failures:

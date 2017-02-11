@@ -30,26 +30,20 @@ before_install:
         sudo apt update;
         sudo apt install -qq libevent-dev;
     fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ] && \
-       [ "$TRAVIS_BRANCH" = "master" ] && \
-       [ "$DC" = "dmd" ]; then
+  - if [ "$TRAVIS_OS_NAME" = "linux" -a "$TRAVIS_BRANCH" = "master" -a "$DC" = "dmd" ]; then
         ./archive.sh;
         docker build -t moecoop/moecoop .;
     fi
 
 script:
   - dub test --coverage --combined
-  - if [ "$TRAVIS_OS_NAME" = "linux" ] && \
-       [ "$TRAVIS_BRANCH" = "master" ] && \
-       [ "$DC" = "dmd" ]; then
+  - if [ "$TRAVIS_OS_NAME" = "linux" -a "$TRAVIS_BRANCH" = "master" -a "$DC" = "dmd" ]; then
         docker images moecoop/moecoop;
     fi
 
 after_success:
   - dub run doveralls
-  - if [ "$TRAVIS_OS_NAME" = "linux" ] && \
-       [ "$TRAVIS_BRANCH" = "master" ] && \
-       [ "$DC" = "dmd" ]; then
+  - if [ "$TRAVIS_OS_NAME" = "linux" -a "$TRAVIS_BRANCH" = "master" -a "$DC" = "dmd" ]; then
         echo "uploading docker image...";
         docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
         docker push moecoop/moecoop;

@@ -46,4 +46,5 @@ after_success:
         docker tag moecoop/moecoop moecoop/moecoop:$(cat views/version);
         docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
         docker push moecoop/moecoop:$(cat views/version);
+        docker push moecoop/moecoop:latest;
     fi

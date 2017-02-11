@@ -25,6 +25,8 @@ interface ModelAPI
     @path("/skills/:skill/recipes") RecipeLink[][string] getSkillRecipes(string _skill);
     @path("/skills/:skill/recipes/:recipe") RecipeInfo getSkillRecipe(string _skill, string _recipe);
 
+    @path("/buffers") @property BufferLink[][string] getBuffers();
+
     @path("/recipes") @queryParam("migemo", "migemo") @queryParam("rev", "rev")
     RecipeLink[][string] getRecipes(string query="", Flag!"useMigemo" migemo=No.useMigemo,
                                     Flag!"useReverseSearch" rev=No.useReverseSearch);
@@ -144,6 +146,14 @@ class WebModel: ModelAPI
         enforceHTTP(getSkillRecipes(_skill)["レシピ一覧"].map!"a.レシピ名".canFind(_recipe),
                     HTTPStatus.notFound, format("No such recipe in skill '%s'", _skill));
         return getRecipe(_recipe);
+    }
+
+    override BufferLink[][string] getBuffers()
+    {
+        import std.algorithm;
+        import std.range;
+
+        return ["バフ一覧": wm.wisdom.foodEffectList.keys.map!(k => BufferLink(k, baseURL)).array];
     }
 
     override RecipeLink[][string] getRecipes(string query, Flag!"useMigemo" useMigemo, Flag!"useReverseSearch" useReverseSearch)

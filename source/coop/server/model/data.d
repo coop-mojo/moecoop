@@ -70,6 +70,18 @@ struct RecipeLink
     string 詳細;
 }
 
+struct BufferLink
+{
+    this(string buff, string host) @safe pure nothrow
+    {
+        import std.path;
+        バフ名 = buff;
+        詳細 = buildPath(host, "buffers", buff);
+    }
+    string バフ名;
+    string 詳細;
+}
+
 struct ItemNumberLink
 {
     this(string item, int num, string host) @safe pure nothrow

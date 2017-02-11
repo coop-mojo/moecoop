@@ -42,6 +42,7 @@ script:
 
 after_success:
   - dub run doveralls
+  - echo "DC: $DC"
   - if [ "$TRAVIS_BRANCH" == "master" -a \
          "$TRAVIS_OS_NAME" == "linux" -a \
          "$DC" == "dmd" ]; then

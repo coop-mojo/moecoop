@@ -30,14 +30,12 @@ before_install:
         sudo apt update;
         sudo apt install -qq libevent-dev;
     fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" -a "$TRAVIS_BRANCH" = "master" -a "$DC" = "dmd" ]; then
-        ./archive.sh;
-        docker build -t moecoop/moecoop .;
-    fi
 
 script:
   - dub test --coverage --combined
   - if [ "$TRAVIS_OS_NAME" = "linux" -a "$TRAVIS_BRANCH" = "master" -a "$DC" = "dmd" ]; then
+        ./archive.sh;
+        docker build -t moecoop/moecoop .;
         docker images moecoop/moecoop;
     fi
 

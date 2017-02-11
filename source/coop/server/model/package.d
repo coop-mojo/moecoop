@@ -39,18 +39,18 @@ interface ModelAPI
     // 調達価格なしの場合
     @path("/items/:item") ItemInfo getItem(string _item);
     // 調達価格ありの場合
-    @path("/items/:item") ItemInfo postItem(string _item, int[string] prices = null);
+    @path("/items/:item") ItemInfo postItem(string _item, int[string] 調達価格 = null);
 
     @path("/menu-recipes/options") Tuple!(ItemLink, "生産アイテム", RecipeLink[], "レシピ候補")[][string] getMenuRecipeOptions();
     @path("/menu-recipes/preparation")
     Tuple!(RecipeLink[], "必要レシピ",
            Tuple!(ItemLink, "素材名",
                   bool, "中間素材")[], "必要素材") postMenuRecipePreparation(string[] targets);
-    @path("/menu-recipes/")
+    @path("/menu-recipes")
     Tuple!(Tuple!(RecipeLink, "レシピ名", int, "コンバイン数")[], "必要レシピ",
            Tuple!(ItemLink, "素材名", int, "素材数", bool, "中間素材")[], "必要素材",
            Tuple!(ItemLink, "素材名", int, "余剰数")[], "余り物")
-    postMenuRecipe(int[string] targets, int[string] owned, string[string] pref, string[] terminals);
+    postMenuRecipe(int[string] 作成アイテム, int[string] 所持アイテム, string[string] 使用レシピ, string[] 直接調達アイテム);
 }
 
 class WebModel: ModelAPI
@@ -183,11 +183,11 @@ class WebModel: ModelAPI
         return postItem(_item, (int[string]).init);
     }
 
-    override ItemInfo postItem(string _item, int[string] prices)
+    override ItemInfo postItem(string _item, int[string] 調達価格)
     {
         import vibe.http.common;
         auto info = ItemInfo(enforceHTTP(wm.getItem(_item), HTTPStatus.notFound, "No such item"), wm);
-        info.参考価格 = wm.costFor(_item, prices);
+        info.参考価格 = wm.costFor(_item, 調達価格);
         return info;
     }
 
@@ -230,7 +230,8 @@ class WebModel: ModelAPI
 
     override Tuple!(Tuple!(RecipeLink, "レシピ名", int, "コンバイン数")[], "必要レシピ",
                     Tuple!(ItemLink, "素材名", int, "素材数", bool, "中間素材")[], "必要素材",
-                    Tuple!(ItemLink, "素材名", int, "余剰数")[], "余り物") postMenuRecipe(int[string] targets, int[string] owned, string[string] pref, string[] terminals)
+                    Tuple!(ItemLink, "素材名", int, "余剰数")[], "余り物")
+        postMenuRecipe(int[string] 作成アイテム, int[string] 所持アイテム, string[string] 使用レシピ, string[] 直接調達アイテム)
     {
         import std.algorithm;
         import std.conv;
@@ -241,7 +242,7 @@ class WebModel: ModelAPI
         alias MatElem = Tuple!(ItemLink, "素材名", int, "素材数", bool, "中間素材");
         alias LOElem = Tuple!(ItemLink, "素材名", int, "余剰数");
 
-        auto ret = wm.getMenuRecipeResult(targets.to!(int[dstring]), owned.to!(int[dstring]), pref.to!(dstring[dstring]), new RedBlackTree!string(terminals));
+        auto ret = wm.getMenuRecipeResult(作成アイテム.to!(int[dstring]), 所持アイテム.to!(int[dstring]), 使用レシピ.to!(dstring[dstring]), new RedBlackTree!string(直接調達アイテム));
         return typeof(return)(ret.recipes.byKeyValue.map!(kv => RecipeElem(RecipeLink(kv.key), kv.value)).array,
                               ret.materials.byKeyValue.map!(kv => MatElem(ItemLink(kv.key), kv.value.num, kv.value.isIntermediate)).array,
                               ret.leftovers.byKeyValue.map!(kv => LOElem(ItemLink(kv.key), kv.value)).array);

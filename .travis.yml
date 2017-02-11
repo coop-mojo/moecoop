@@ -27,17 +27,17 @@ before_install:
   - git fetch --unshallow
   - dub fetch doveralls
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-    sudo apt update;
-    sudo apt install -qq libevent-dev;
-    ./archive.sh;
-    docker build -t moecoop/moecoop .;
+        sudo apt update;
+        sudo apt install -qq libevent-dev;
+        ./archive.sh;
+        docker build -t moecoop/moecoop .;
     fi
 
 script:
   - dub test --coverage --combined
   - if [ "$TRAVIS_BRANCH" == "master" -a \
          "$TRAVIS_OS_NAME" == "linux" ]; then
-    docker images moecoop/moecoop;
+        docker images moecoop/moecoop;
     fi
 
 after_success:
@@ -45,6 +45,7 @@ after_success:
   - if [ "$TRAVIS_BRANCH" == "master" -a \
          "$TRAVIS_OS_NAME" == "linux" -a \
          "$DC" == "dmd" ]; then
-    docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-    docker push moecoop/moecoop;
+        echo "uploading docker image...";
+        docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+        docker push moecoop/moecoop;
     fi

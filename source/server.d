@@ -28,10 +28,9 @@ void main(string[] args)
     import coop.server.model;
     import coop.util;
 
-    auto host = "localhost";
     ushort port = 8080;
 
-    args.getopt("hostname", &host, "port", &port);
+    args.getopt("port", &port);
 
     if (!finalizeCommandLineOptions(&args))
     {
@@ -42,9 +41,8 @@ void main(string[] args)
     auto model = new WisdomModel(wisdom);
 
     auto router = new URLRouter;
-    router.registerRestInterface(new WebModel(model, format("https://%s", host)));
+    router.registerRestInterface(new WebModel(model));
     auto settings = new HTTPServerSettings;
-    settings.hostName = host;
     settings.port = port;
     listenHTTP(settings, router);
     lowerPrivileges;

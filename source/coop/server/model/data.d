@@ -9,12 +9,11 @@ import vibe.data.json;
 
 struct BinderLink
 {
-    this(string binder, string host) @safe pure nothrow
+    this(string binder) @safe pure nothrow
     {
         import std.array;
-        import std.path;
         バインダー名 = binder;
-        レシピ一覧 = buildPath(host, "binders", binder.replace("/", "_"), "recipes");
+        レシピ一覧 = "/binders/"~binder.replace("/", "_")~"/recipes";
     }
     string バインダー名;
     string レシピ一覧;
@@ -22,11 +21,10 @@ struct BinderLink
 
 struct SkillLink
 {
-    this(string skill, string host) @safe pure nothrow
+    this(string skill) @safe pure nothrow
     {
-        import std.path;
         スキル名 = skill;
-        レシピ一覧 = buildPath(host, "skills", skill, "recipes");
+        レシピ一覧 = "/skills/"~skill~"/recipes";
     }
     string スキル名;
     string レシピ一覧;
@@ -34,11 +32,10 @@ struct SkillLink
 
 struct SkillNumberLink
 {
-    this(string skill, double val, string host) @safe pure nothrow
+    this(string skill, double val) @safe pure nothrow
     {
-        import std.path;
         スキル名 = skill;
-        レシピ一覧 = buildPath(host, "skills", skill, "recipes");
+        レシピ一覧 = "/skills/"~skill~"/recipes";
         スキル値 = val;
     }
     string スキル名;
@@ -48,11 +45,10 @@ struct SkillNumberLink
 
 struct ItemLink
 {
-    this(string item, string host) @safe pure nothrow
+    this(string item) @safe pure nothrow
     {
-        import std.path;
         アイテム名 = item;
-        詳細 = buildPath(host, "items", item);
+        詳細 = "/items/"~item;
     }
     string アイテム名;
     string 詳細;
@@ -60,11 +56,10 @@ struct ItemLink
 
 struct RecipeLink
 {
-    this(string recipe, string host) @safe pure nothrow
+    this(string recipe) @safe pure nothrow
     {
-        import std.path;
         レシピ名 = recipe;
-        詳細 = buildPath(host, "recipes", recipe);
+        詳細 = "/recipes/"~recipe;
     }
     string レシピ名;
     string 詳細;
@@ -72,11 +67,10 @@ struct RecipeLink
 
 struct BufferLink
 {
-    this(string buff, string host) @safe pure nothrow
+    this(string buff) @safe pure nothrow
     {
-        import std.path;
         バフ名 = buff;
-        詳細 = buildPath(host, "buffers", buff);
+        詳細 = "/buffers/"~buff;
     }
     string バフ名;
     string 詳細;
@@ -84,11 +78,10 @@ struct BufferLink
 
 struct ItemNumberLink
 {
-    this(string item, int num, string host) @safe pure nothrow
+    this(string item, int num) @safe pure nothrow
     {
-        import std.path;
         アイテム名 = item;
-        詳細 = buildPath(host, "items", item);
+        詳細 = "/items/"~item;
         個数 = num;
     }
     string アイテム名;
@@ -101,7 +94,7 @@ struct RecipeInfo
     import coop.core;
     import coop.core.recipe;
 
-    this(Recipe r, WisdomModel wm, string host) pure nothrow
+    this(Recipe r, WisdomModel wm) pure nothrow
     {
         import std.algorithm;
         import std.range;
@@ -109,18 +102,18 @@ struct RecipeInfo
         レシピ名 = r.name;
         材料 = r.ingredients
                 .byKeyValue
-                .map!(kv => ItemNumberLink(kv.key, kv.value, host))
+                .map!(kv => ItemNumberLink(kv.key, kv.value))
                 .array;
         生成物 = r.products
                   .byKeyValue
-                  .map!(kv => ItemNumberLink(kv.key, kv.value, host))
+                  .map!(kv => ItemNumberLink(kv.key, kv.value))
                   .array;
         テクニック = r.techniques;
         必要スキル = r.requiredSkills;
         レシピ必須 = r.requiresRecipe;
         ギャンブル型 = r.isGambledRoulette;
         ペナルティ型 = r.isPenaltyRoulette;
-        収録バインダー = wm.getBindersFor(レシピ名).map!(b => BinderLink(b, host)).array;
+        収録バインダー = wm.getBindersFor(レシピ名).map!(b => BinderLink(b)).array;
         備考 = r.remarks;
     }
 
@@ -155,7 +148,7 @@ struct ItemInfo
     import coop.core;
     import coop.core.item;
 
-    this(Item item, WisdomModel wm, string host)
+    this(Item item, WisdomModel wm)
     {
         import std.algorithm;
         import std.range;
@@ -184,27 +177,27 @@ struct ItemInfo
             break;
         case Food, Drink, Liquor: {
             import coop.core.item: FInfo = FoodInfo;
-            飲食物情報 = FoodInfo(*ex.extra.peek!FInfo, wm, host);
+            飲食物情報 = FoodInfo(*ex.extra.peek!FInfo, wm);
             break;
         }
         case Weapon: {
             import coop.core.item: WInfo = WeaponInfo;
-            武器情報 = WeaponInfo(*ex.extra.peek!WInfo, wm, host);
+            武器情報 = WeaponInfo(*ex.extra.peek!WInfo, wm);
             break;
         }
         case Armor: {
             import coop.core.item: AInfo = ArmorInfo;
-            防具情報 = ArmorInfo(*ex.extra.peek!AInfo, wm, host);
+            防具情報 = ArmorInfo(*ex.extra.peek!AInfo, wm);
             break;
         }
         case Bullet: {
             import coop.core.item: BInfo = BulletInfo;
-            弾情報 = BulletInfo(*ex.extra.peek!BInfo, wm, host);
+            弾情報 = BulletInfo(*ex.extra.peek!BInfo, wm);
             break;
         }
         case Shield: {
             import coop.core.item: SInfo = ShieldInfo;
-            盾情報 = ShieldInfo(*ex.extra.peek!SInfo, wm, host);
+            盾情報 = ShieldInfo(*ex.extra.peek!SInfo, wm);
             break;
         }
         case Expendable:
@@ -242,12 +235,12 @@ struct FoodInfo
     import coop.core;
     import coop.core.item: FInfo = FoodInfo, AdditionalEffect;
 
-    this(FInfo info, WisdomModel wm, string host) @safe pure
+    this(FInfo info, WisdomModel wm) @safe pure
     {
         効果 = info.effect;
         if (auto eff = info.additionalEffect)
         {
-            付加効果 = FoodBufferInfo(eff, wm, host);
+            付加効果 = FoodBufferInfo(eff, wm);
         }
     }
 
@@ -259,7 +252,7 @@ struct FoodBufferInfo
 {
     import coop.core;
 
-    this(string eff, WisdomModel wm, string host) @safe pure
+    this(string eff, WisdomModel wm) @safe pure
     {
         バフ名 = eff;
         if (auto einfo = wm.getFoodEffect(eff))
@@ -289,7 +282,7 @@ struct DamageInfo
 
 struct ShipLink
 {
-    this(string ship, string host) @safe pure nothrow
+    this(string ship) @safe pure nothrow
     {
         シップ名 = ship;
     }
@@ -303,7 +296,7 @@ struct WeaponInfo
     import coop.core;
     import coop.core.item: WInfo = WeaponInfo, Grade;
 
-    this(WInfo info, WisdomModel wm, string host)
+    this(WInfo info, WisdomModel wm)
     {
         import std.algorithm;
         import std.conv;
@@ -317,12 +310,12 @@ struct WeaponInfo
         有効レンジ = info.range;
         必要スキル = info.skills
                          .byKeyValue
-                         .map!(kv => SkillNumberLink(kv.key, kv.value, host))
+                         .map!(kv => SkillNumberLink(kv.key, kv.value))
                          .array;
         両手装備 = info.isDoubleHands;
         装備箇所 = cast(string)info.slot;
         装備可能シップ = info.restriction
-                             .map!(s => ShipLink(cast(string)s, host))
+                             .map!(s => ShipLink(cast(string)s))
                              .array;
         素材 = cast(string)info.material;
         消耗タイプ = cast(string)info.type;
@@ -356,7 +349,7 @@ struct ArmorInfo
     import coop.core;
     import coop.core.item: AInfo = ArmorInfo, Grade;
 
-    this(AInfo info, WisdomModel wm, string host)
+    this(AInfo info, WisdomModel wm)
     {
         import std.algorithm;
         import std.conv;
@@ -368,11 +361,11 @@ struct ArmorInfo
                               .array;
         必要スキル = info.skills
                          .byKeyValue
-                         .map!(kv => SkillNumberLink(kv.key, kv.value, host))
+                         .map!(kv => SkillNumberLink(kv.key, kv.value))
                          .array;
         装備箇所 = cast(string)info.slot;
         装備可能シップ = info.restriction
-                             .map!(s => ShipLink(cast(string)s, host))
+                             .map!(s => ShipLink(cast(string)s))
                              .array;
         素材 = cast(string)info.material;
         消耗タイプ = cast(string)info.type;
@@ -404,7 +397,7 @@ struct BulletInfo
     import coop.core;
     import coop.core.item: BInfo = BulletInfo;
 
-    this(BInfo info, WisdomModel wm, string host) pure nothrow
+    this(BInfo info, WisdomModel wm) pure nothrow
     {
         import std.algorithm;
         import std.range;
@@ -413,11 +406,11 @@ struct BulletInfo
         有効レンジ = info.range;
         角度補正角 = info.angle;
         使用可能シップ = info.restriction
-                             .map!(s => ShipLink(cast(string)s, host))
+                             .map!(s => ShipLink(cast(string)s))
                              .array;
         必要スキル = info.skills
                          .byKeyValue
-                         .map!(kv => SkillNumberLink(kv.key, kv.value, host))
+                         .map!(kv => SkillNumberLink(kv.key, kv.value))
                          .array;
         追加効果 = info.effects;
         付与効果 = info.additionalEffect; //
@@ -437,7 +430,7 @@ struct ShieldInfo
     import coop.core;
     import coop.core.item: SInfo = ShieldInfo, Grade;
 
-    this(SInfo info, WisdomModel wm, string host)
+    this(SInfo info, WisdomModel wm)
     {
         import std.algorithm;
         import std.conv;
@@ -449,11 +442,11 @@ struct ShieldInfo
                               .array;
         必要スキル = info.skills
                          .byKeyValue
-                         .map!(kv => SkillNumberLink(kv.key, kv.value, host))
+                         .map!(kv => SkillNumberLink(kv.key, kv.value))
                          .array;
         回避 = info.avoidRatio;
         使用可能シップ = info.restriction
-                             .map!(s => ShipLink(cast(string)s, host))
+                             .map!(s => ShipLink(cast(string)s))
                              .array;
         素材 = cast(string)info.material;
         消耗タイプ = cast(string)info.type;

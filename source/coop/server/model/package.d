@@ -59,10 +59,9 @@ class WebModel: ModelAPI
 
     import coop.core;
 
-    this(WisdomModel wm, string url) @safe pure nothrow
+    this(WisdomModel wm) @safe pure nothrow
     {
         this.wm = wm;
-        this.baseURL = url;
     }
 
     @property string[string] getVersion() @safe const pure nothrow
@@ -76,7 +75,7 @@ class WebModel: ModelAPI
         import std.algorithm;
         import std.range;
 
-        return ["バインダー一覧": wm.getBinderCategories.map!(b => BinderLink(b, baseURL)).array];
+        return ["バインダー一覧": wm.getBinderCategories.map!(b => BinderLink(b)).array];
     }
 
     override RecipeLink[][string] getBinderRecipes(string binder)
@@ -95,7 +94,7 @@ class WebModel: ModelAPI
         return ["レシピ一覧": wm.getRecipeList("", Binder(binder), No.useMetaSearch, No.useMigemo)
                                 .front
                                 .recipes
-                                .map!(r => RecipeLink(r, baseURL))
+                                .map!(r => RecipeLink(r))
                                 .array];
     }
 
@@ -117,7 +116,7 @@ class WebModel: ModelAPI
         import std.algorithm;
         import std.range;
 
-        return ["スキル一覧": wm.getSkillCategories.map!(s => SkillLink(s, baseURL)).array];
+        return ["スキル一覧": wm.getSkillCategories.map!(s => SkillLink(s)).array];
     }
 
     override RecipeLink[][string] getSkillRecipes(string skill)
@@ -132,7 +131,7 @@ class WebModel: ModelAPI
         return ["レシピ一覧": wm.getRecipeList("", Category(skill), No.useMetaSearch, No.useMigemo, No.useReverseSearch, SortOrder.ByName)
                                 .front
                                 .recipes
-                                .map!(r => RecipeLink(r, baseURL))
+                                .map!(r => RecipeLink(r))
                                 .array];
     }
 
@@ -153,7 +152,7 @@ class WebModel: ModelAPI
         import std.algorithm;
         import std.range;
 
-        return ["バフ一覧": wm.wisdom.foodEffectList.keys.map!(k => BufferLink(k, baseURL)).array];
+        return ["バフ一覧": wm.wisdom.foodEffectList.keys.map!(k => BufferLink(k)).array];
     }
 
     override RecipeLink[][string] getRecipes(string query, Flag!"useMigemo" useMigemo, Flag!"useReverseSearch" useReverseSearch)
@@ -161,7 +160,7 @@ class WebModel: ModelAPI
         import std.algorithm;
         import std.range;
 
-        return ["レシピ一覧": wm.getRecipeList(query, useMigemo, useReverseSearch).map!(r => RecipeLink(r, baseURL)).array];
+        return ["レシピ一覧": wm.getRecipeList(query, useMigemo, useReverseSearch).map!(r => RecipeLink(r)).array];
     }
 
     override ItemLink[][string] getItems(string query, Flag!"useMigemo" useMigemo)
@@ -169,15 +168,14 @@ class WebModel: ModelAPI
         import std.algorithm;
         import std.range;
 
-        return ["アイテム一覧": wm.getItemList(query, useMigemo, No.canBeProduced).map!(i => ItemLink(i, baseURL)).array];
+        return ["アイテム一覧": wm.getItemList(query, useMigemo, No.canBeProduced).map!(i => ItemLink(i)).array];
     }
 
     override RecipeInfo getRecipe(string _recipe)
     {
         import vibe.http.common;
 
-        return RecipeInfo(enforceHTTP(wm.getRecipe(_recipe), HTTPStatus.notFound, "No such recipe"),
-                          wm, baseURL);
+        return RecipeInfo(enforceHTTP(wm.getRecipe(_recipe), HTTPStatus.notFound, "No such recipe"), wm);
     }
 
     override ItemInfo getItem(string _item)
@@ -188,8 +186,7 @@ class WebModel: ModelAPI
     override ItemInfo postItem(string _item, int[string] prices)
     {
         import vibe.http.common;
-        auto info = ItemInfo(enforceHTTP(wm.getItem(_item), HTTPStatus.notFound, "No such item"),
-                             wm, baseURL);
+        auto info = ItemInfo(enforceHTTP(wm.getItem(_item), HTTPStatus.notFound, "No such item"), wm);
         info.参考価格 = wm.costFor(_item, prices);
         return info;
     }
@@ -208,10 +205,10 @@ class WebModel: ModelAPI
         return ["選択可能レシピ":
                 wm.getDefaultPreference
                   .keys
-                  .map!(k => RetElem(ItemLink(k, baseURL),
+                  .map!(k => RetElem(ItemLink(k),
                                      wm.wisdom
                                        .rrecipeList[k][]
-                                       .map!(r => RecipeLink(r, baseURL))
+                                       .map!(r => RecipeLink(r))
                                        .array))
                   .array];
     }
@@ -226,8 +223,8 @@ class WebModel: ModelAPI
         alias MatElem = Tuple!(ItemLink, "素材名", bool, "中間素材");
 
         auto ret = wm.getMenuRecipeResult(targets);
-        return typeof(return)(ret.recipes.map!(r => RecipeLink(r.name, baseURL)).array,
-                              ret.materials.map!(m => MatElem(ItemLink(m.name, baseURL),
+        return typeof(return)(ret.recipes.map!(r => RecipeLink(r.name)).array,
+                              ret.materials.map!(m => MatElem(ItemLink(m.name),
                                                               !m.isLeaf)).array);
     }
 
@@ -245,11 +242,10 @@ class WebModel: ModelAPI
         alias LOElem = Tuple!(ItemLink, "素材名", int, "余剰数");
 
         auto ret = wm.getMenuRecipeResult(targets.to!(int[dstring]), owned.to!(int[dstring]), pref.to!(dstring[dstring]), new RedBlackTree!string(terminals));
-        return typeof(return)(ret.recipes.byKeyValue.map!(kv => RecipeElem(RecipeLink(kv.key, baseURL), kv.value)).array,
-                              ret.materials.byKeyValue.map!(kv => MatElem(ItemLink(kv.key, baseURL), kv.value.num, kv.value.isIntermediate)).array,
-                              ret.leftovers.byKeyValue.map!(kv => LOElem(ItemLink(kv.key, baseURL), kv.value)).array);
+        return typeof(return)(ret.recipes.byKeyValue.map!(kv => RecipeElem(RecipeLink(kv.key), kv.value)).array,
+                              ret.materials.byKeyValue.map!(kv => MatElem(ItemLink(kv.key), kv.value.num, kv.value.isIntermediate)).array,
+                              ret.leftovers.byKeyValue.map!(kv => LOElem(ItemLink(kv.key), kv.value)).array);
     }
 private:
     WisdomModel wm;
-    string baseURL;
 }

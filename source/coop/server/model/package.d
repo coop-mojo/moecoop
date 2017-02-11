@@ -38,6 +38,17 @@ interface ModelAPI
     @path("/items/:item") ItemInfo getItem(string _item);
     // 調達価格ありの場合
     @path("/items/:item") ItemInfo postItem(string _item, int[string] prices = null);
+
+    @path("/menu-recipes/options") Tuple!(ItemLink, "生産アイテム", RecipeLink[], "レシピ候補")[][string] getMenuRecipeOptions();
+    @path("/menu-recipes/preparation")
+    Tuple!(RecipeLink[], "必要レシピ",
+           Tuple!(ItemLink, "素材名",
+                  bool, "中間素材")[], "必要素材") postMenuRecipePreparation(string[] targets);
+    @path("/menu-recipes/")
+    Tuple!(Tuple!(RecipeLink, "レシピ名", int, "コンバイン数")[], "必要レシピ",
+           Tuple!(ItemLink, "素材名", int, "素材数", bool, "中間素材")[], "必要素材",
+           Tuple!(ItemLink, "素材名", int, "余剰数")[], "余り物")
+    postMenuRecipe(int[string] targets, int[string] owned, string[string] pref, string[] terminals);
 }
 
 class WebModel: ModelAPI
@@ -123,7 +134,7 @@ class WebModel: ModelAPI
                                 .array];
     }
 
-    RecipeInfo getSkillRecipe(string _skill, string _recipe)
+    override RecipeInfo getSkillRecipe(string _skill, string _recipe)
     {
         import std.algorithm;
         import std.format;
@@ -171,6 +182,62 @@ class WebModel: ModelAPI
                              wm, baseURL);
         info.参考価格 = wm.costFor(_item, prices);
         return info;
+    }
+
+    /*
+     * 2種類以上レシピがあるアイテムに関して、レシピ候補の一覧を返す
+     */
+    override Tuple!(ItemLink, "生産アイテム", RecipeLink[], "レシピ候補")[][string] getMenuRecipeOptions()
+    {
+        import std.algorithm;
+        import std.range;
+        import std.typecons;
+
+        alias RetElem = Tuple!(ItemLink, "生産アイテム", RecipeLink[], "レシピ候補");
+
+        return ["選択可能レシピ":
+                wm.getDefaultPreference
+                  .keys
+                  .map!(k => RetElem(ItemLink(k, baseURL),
+                                     wm.wisdom
+                                       .rrecipeList[k][]
+                                       .map!(r => RecipeLink(r, baseURL))
+                                       .array))
+                  .array];
+    }
+
+    override Tuple!(RecipeLink[], "必要レシピ",
+                    Tuple!(ItemLink, "素材名",
+                           bool, "中間素材")[], "必要素材") postMenuRecipePreparation(string[] targets)
+    {
+        import std.algorithm;
+        import std.range;
+
+        alias MatElem = Tuple!(ItemLink, "素材名", bool, "中間素材");
+
+        auto ret = wm.getMenuRecipeResult(targets);
+        return typeof(return)(ret.recipes.map!(r => RecipeLink(r.name, baseURL)).array,
+                              ret.materials.map!(m => MatElem(ItemLink(m.name, baseURL),
+                                                              !m.isLeaf)).array);
+    }
+
+    override Tuple!(Tuple!(RecipeLink, "レシピ名", int, "コンバイン数")[], "必要レシピ",
+                    Tuple!(ItemLink, "素材名", int, "素材数", bool, "中間素材")[], "必要素材",
+                    Tuple!(ItemLink, "素材名", int, "余剰数")[], "余り物") postMenuRecipe(int[string] targets, int[string] owned, string[string] pref, string[] terminals)
+    {
+        import std.algorithm;
+        import std.conv;
+        import std.range;
+        import std.container.rbtree;
+
+        alias RecipeElem = Tuple!(RecipeLink, "レシピ名", int, "コンバイン数");
+        alias MatElem = Tuple!(ItemLink, "素材名", int, "素材数", bool, "中間素材");
+        alias LOElem = Tuple!(ItemLink, "素材名", int, "余剰数");
+
+        auto ret = wm.getMenuRecipeResult(targets.to!(int[dstring]), owned.to!(int[dstring]), pref.to!(dstring[dstring]), new RedBlackTree!string(terminals));
+        return typeof(return)(ret.recipes.byKeyValue.map!(kv => RecipeElem(RecipeLink(kv.key, baseURL), kv.value)).array,
+                              ret.materials.byKeyValue.map!(kv => MatElem(ItemLink(kv.key, baseURL), kv.value.num, kv.value.isIntermediate)).array,
+                              ret.leftovers.byKeyValue.map!(kv => LOElem(ItemLink(kv.key, baseURL), kv.value)).array);
     }
 private:
     WisdomModel wm;

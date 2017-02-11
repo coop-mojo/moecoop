@@ -43,7 +43,7 @@ after_success:
   - dub run doveralls
   - if [ "$TRAVIS_OS_NAME" = "linux" -a "$TRAVIS_BRANCH" = "master" -a "$DC" = "dmd" ]; then
         echo "uploading docker image...";
-        docker tag moecoop/moecoop:$(cat views/version);
+        docker tag moecoop/moecoop moecoop/moecoop:$(cat views/version);
         docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-        docker push moecoop/moecoop;
+        docker push moecoop/moecoop:$(cat views/version);
     fi

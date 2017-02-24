@@ -19,11 +19,9 @@ interface ModelAPI
 
     @path("/binders") @property BinderLink[][string] getBinderCategories();
     @path("/binders/:binder/recipes") RecipeLink[][string] getBinderRecipes(string _binder);
-    @path("/binders/:binder/recipes/:recipe") RecipeInfo getBinderRecipe(string _binder, string _recipe);
 
     @path("/skills") @property SkillLink[][string] getSkillCategories();
     @path("/skills/:skill/recipes") RecipeLink[][string] getSkillRecipes(string _skill);
-    @path("/skills/:skill/recipes/:recipe") RecipeInfo getSkillRecipe(string _skill, string _recipe);
 
     @path("/buffers") @property BufferLink[][string] getBuffers();
 
@@ -94,19 +92,6 @@ class WebModel: ModelAPI
                                 .array];
     }
 
-    RecipeInfo getBinderRecipe(string _binder, string _recipe)
-    {
-        import std.algorithm;
-        import std.array;
-        import std.format;
-
-        import vibe.http.common;
-
-        enforceHTTP(getBinderRecipes(_binder)["レシピ一覧"].map!"a.レシピ名".canFind(_recipe),
-                    HTTPStatus.notFound, format("No such recipe in binder '%s'", _binder.replace("_", "/")));
-        return getRecipe(_recipe);
-    }
-
     override @property SkillLink[][string] getSkillCategories() const pure nothrow
     {
         import std.algorithm;
@@ -129,18 +114,6 @@ class WebModel: ModelAPI
                                 .recipes
                                 .map!(r => RecipeLink(r))
                                 .array];
-    }
-
-    override RecipeInfo getSkillRecipe(string _skill, string _recipe)
-    {
-        import std.algorithm;
-        import std.format;
-
-        import vibe.http.common;
-
-        enforceHTTP(getSkillRecipes(_skill)["レシピ一覧"].map!"a.レシピ名".canFind(_recipe),
-                    HTTPStatus.notFound, format("No such recipe in skill '%s'", _skill));
-        return getRecipe(_recipe);
     }
 
     override BufferLink[][string] getBuffers()

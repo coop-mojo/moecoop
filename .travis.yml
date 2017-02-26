@@ -44,7 +44,7 @@ after_success:
   - if [ "$TRAVIS_OS_NAME" = "linux" -a "$TRAVIS_BRANCH" = "master" -a "$DC" = "dmd" ]; then
         echo "uploading docker image...";
         docker tag moecoop/moecoop moecoop/moecoop:$(cat views/version);
-        docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+        docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
         docker push moecoop/moecoop:$(cat views/version);
         docker push moecoop/moecoop:latest;
     fi

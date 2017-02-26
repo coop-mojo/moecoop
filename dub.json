@@ -12,7 +12,7 @@
         "vibe-d:data": ">=0.7.30"
     },
 
-    "stringImportPaths": ["views", "views/res", "views/site"],
+    "stringImportPaths": ["views", "views/res"],
 
     "dflags-windows-x86-dmd": ["-m32mscoff"],
     "postBuildCommands-windows-x86_64": [
@@ -47,6 +47,7 @@
             "dependencies": {
                 "vibe-d": ">=0.7.30"
             },
+            "stringImportPaths": ["views/site"],
             "versions": ["Server", "VibeNoSSL"]
         },
 

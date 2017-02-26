@@ -317,7 +317,7 @@ paths:
   /menu-recipes/options:
     get:
       summary: レシピ候補一覧
-      description: 塩や鉄鉱石など、生産する方法が複数あるアイテムに関して、レシピ候補の一覧を返します。
+      description: 塩やインゴットなど、生産する方法が複数あるアイテムに関して、レシピ候補の一覧を返します。
       tags:
         - アイテム
         - レシピ
@@ -364,7 +364,7 @@ paths:
                   description: 作成したいアイテムです。
       responses:
         200:
-          description: 必要アイテム及びレシピ一覧
+          description: 必要アイテムおよびレシピ一覧
           schema:
             type: object
             properties:
@@ -384,6 +384,86 @@ paths:
                     中間素材:
                       type: boolean
                       description: このアイテムが他の素材から作られる中間素材の場合には true になります。
+
+  /menu-recipes:
+    post:
+      summary: アイテム作成に必要な素材・レシピおよび作成時の余りを返す
+      description: 指定したアイテム作成に必要な素材の種類や数・各種レシピの適用回数および、余る素材の種類と数を返します。
+      tags:
+        - アイテム
+        - レシピ
+        - メニューレシピ
+      parameters:
+        - name: body
+          in: body
+          description: 必要な素材やレシピを調べるのに必要な情報です。
+          required: true
+          schema:
+            type: object
+            properties:
+              作成アイテム:
+                type: object
+                description: 作成したいアイテムとその個数です。キーがアイテム名、値が作成個数を表します。
+              所持アイテム:
+                type: object
+                description: 手元に持っているアイテムとその個数です。この値が {} でない場合、所持アイテムを考慮して素材やレシピを返します。キーがアイテム名、値が所持数を表します。
+              使用レシピ:
+                type: object
+                description: 特定アイテムを作成するレシピが複数ある場合に、利用するレシピを指定します。特に指定しない場合、知恵袋のデフォルトが使用されます。キーはアイテム名、値はアイテムを作成できるレシピ名を表します。作成方法が複数あるアイテムと、選択可能なレシピ一覧については /menu-recipes/options を参照してください。
+              直接調達アイテム:
+                type: array
+                description: 素材から用意せず、直接用意するアイテムを指定します。例えば直接調達アイテムに塩を指定した場合、「塩(岩塩)」レシピは使用しなくなります。
+                items:
+                  type: string
+                  description: 直接調達するアイテム名です。
+      responses:
+        200:
+          description: 必要アイテム、レシピ、余り物一覧
+          schema:
+            type: object
+            description: 作成に必要なアイテム・レシピ・余るアイテムです。
+            properties:
+              必要レシピ:
+                type: array
+                description: 必要レシピとその適用回数です。
+                # TODO: ソート順についても追記する
+                items:
+                  type: object
+                  properties:
+                    レシピ名:
+                      $ref: '#/definitions/レシピ情報'
+                    コンバイン数:
+                      type: integer
+                      description: コンバインが必要な回数です。
+                      minimum: 1
+              必要素材:
+                type: array
+                description: 必要アイテムとその個数です。
+                # TODO: ソート順についても追記する
+                items:
+                  type: object
+                  properties:
+                    素材名:
+                      $ref: '#/definitions/アイテム情報'
+                    素材数:
+                      type: integer
+                      description: 必要な素材数です。
+                      minimum: 1
+                    中間素材:
+                      type: boolean
+                      description: このアイテムが他の素材から作られる中間素材の場合には true になります。
+              余り物:
+                type: array
+                description: 目的のアイテム作成後に残る素材とその個数です。
+                items:
+                  type: object
+                  properties:
+                    素材名:
+                      $ref: '#/definitions/アイテム情報'
+                    余剰数:
+                      type: integer
+                      description: アイテムが余った数です。
+                      minimum: 1
 
 definitions:
   バインダー情報:

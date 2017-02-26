@@ -41,6 +41,7 @@ void main(string[] args)
     auto model = new WisdomModel(wisdom);
 
     auto router = new URLRouter;
+    router.get("/", staticTemplate!"index.dt");
     router.registerRestInterface(new WebModel(model));
     auto settings = new HTTPServerSettings;
     settings.port = port;

@@ -9,7 +9,6 @@ moecoop*.zip
 moecoop.tgz
 .fldd.cache
 docs.json
-source/icon.res
 *.lst
-views/version
-site/
+/views/version
+/site/

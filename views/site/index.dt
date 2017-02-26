@@ -30,12 +30,15 @@ html(lang="ja")
 				p(class="lead") 生協の知恵袋のデータや機能を提供する API サーバーです。
 				h2 使い方
 				p(class="lead")
-					|利用できる機能については 
-					a(href="http://petstore.swagger.io/?url=https://raw.githubusercontent.com/coop-mojo/moecoop/master/api/swagger.yml") swagger.io
+					|利用可能な API については 
+					a(href="http://petstore.swagger.io/?url=https://raw.githubusercontent.com/coop-mojo/moecoop/master/api/swagger.yml") swagger-ui
 					| をご覧ください。
+				p(class="lead")
+					a(href="http://editor.swagger.io/?url=https://raw.githubusercontent.com/coop-mojo/moecoop/master/api/swagger.yml") swagger-editor の出力
+					| の方が、細かいコメントも見ることができていいかもしれません。
 				h2 各種リンク
 				ul
-					li: a(href="http://docs.fukuro.coop.moe/ja/latest/") 生協の知恵袋
-					li: a(href="https://github.com/coop-mojo/moecoop") 生協の知恵袋 リポジトリ
+					li: a(href="http://docs.fukuro.coop.moe/ja/latest/") 生協の知恵袋 ドキュメント
+					li: a(href="https://github.com/coop-mojo/moecoop") 生協の知恵袋 リポジトリ (GitHub)
 		script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js")
 		script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js", integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa", crossorigin="anonymous")

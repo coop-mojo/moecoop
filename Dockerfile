@@ -21,4 +21,4 @@ WORKDIR /moecoop
 
 EXPOSE 8080
 
-CMD ./fukurod
+ENTRYPOINT ["./fukurod"]

@@ -29,6 +29,7 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then
         sudo apt update;
         sudo apt install -qq libevent-dev _zlib1g-dev;
+        sudo apt purge -qq zlib1g-dev;
     fi
 
 script:

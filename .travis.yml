@@ -36,6 +36,7 @@ script:
   - if [ "$TRAVIS_OS_NAME" = "linux" -a "$TRAVIS_BRANCH" = "master" -a "$DC" = "dmd" ]; then
         ./archive.sh || exit 1;
         docker build -t moecoop/moecoop .;
+        docker run moecoop/moecoop -h || exit 1;
         docker images moecoop/moecoop;
     fi
 

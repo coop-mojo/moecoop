@@ -30,10 +30,11 @@ void main(string[] args)
 
     ushort port = 8080;
 
-    args.getopt("port", &port);
+    auto hinfo = args.getopt("port", &port);
 
-    if (!finalizeCommandLineOptions(&args))
+    if (hinfo.helpWanted)
     {
+        defaultGetoptPrinter("moecoop server.", hinfo.options);
         return;
     }
 

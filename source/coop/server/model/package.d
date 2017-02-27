@@ -15,7 +15,7 @@ interface ModelAPI
     import coop.core.item;
     import coop.core.recipe;
 
-    @path("/version") @property string[string] getVersion();
+    @path("/version") @property Json[string] getVersion();
 
     @path("/binders") @property BinderLink[][string] getBinderCategories();
     @path("/binders/:binder/recipes") RecipeLink[][string] getBinderRecipes(string _binder);
@@ -58,10 +58,10 @@ class WebModel: ModelAPI
         this.wm = wm;
     }
 
-    @property string[string] getVersion() @safe const pure nothrow
+    @property Json[string] getVersion() const
     {
         import coop.util;
-        return ["version": Version];
+        return ["version": Version.serializeToJson, "migemo": wm.migemoAvailable.serializeToJson];
     }
 
     override @property BinderLink[][string] getBinderCategories() const pure nothrow

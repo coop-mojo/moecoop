@@ -44,7 +44,35 @@ paths:
           description: バインダー名
           required: true
           type: string
-          # 検索できるようにしたい
+        - name: query
+          in: query
+          description: レシピ名検索用のクエリです。
+          required: false
+          type: string
+        - name: migemo
+          in: query
+          description: yes を指定すると、Migemo 検索を使用します。デフォルトは no です。
+          required: false
+          type: string
+          enum:
+            - yes
+            - no
+        - name: rev
+          in: query
+          description: yes を指定すると、レシピの結果生成できるアイテム名を検索します。デフォルトは no です。
+          required: false
+          type: string
+          enum:
+            - yes
+            - no
+        - name: sort
+          in: query
+          description: name を指定するとレシピ名でソートされた結果が、skill でソートすると生産に必要なスキル値でソートされた結果が返ります。
+          required: false
+          type: string
+          enum:
+            - name
+            - skill
       responses:
         200:
           description: バインダーに収録されているレシピ情報の配列
@@ -96,7 +124,35 @@ paths:
           description: スキルカテゴリ名
           required: true
           type: string
-          # 検索できるようにしたい
+        - name: query
+          in: query
+          description: レシピ名検索用のクエリです。
+          required: false
+          type: string
+        - name: migemo
+          in: query
+          description: yes を指定すると、Migemo 検索を使用します。デフォルトは no です。
+          required: false
+          type: string
+          enum:
+            - yes
+            - no
+        - name: rev
+          in: query
+          description: yes を指定すると、レシピの結果生成できるアイテム名を検索します。デフォルトは no です。
+          required: false
+          type: string
+          enum:
+            - yes
+            - no
+        - name: sort
+          in: query
+          description: name を指定するとレシピ名でソートされた結果が、skill でソートすると生産に必要なスキル値でソートされた結果が返ります。
+          required: false
+          type: string
+          enum:
+            - name
+            - skill
       responses:
         200:
           description: スキルカテゴリに分類されているレシピ情報の配列

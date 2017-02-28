@@ -18,16 +18,22 @@ interface ModelAPI
     @path("/version") @property Json[string] getVersion();
 
     @path("/binders") @property BinderLink[][string] getBinderCategories();
-    @path("/binders/:binder/recipes") RecipeLink[][string] getBinderRecipes(string _binder);
+    @path("/binders/:binder/recipes")
+    @queryParam("query", "query") @queryParam("migemo", "migemo") @queryParam("rev", "rev") @queryParam("key", "sort")
+    RecipeLink[][string] getBinderRecipes(string _binder, string query="", Flag!"useMigemo" migemo=No.useMigemo,
+                                          Flag!"useReverseSearch" rev=No.useReverseSearch, string key = "skill");
 
     @path("/skills") @property SkillLink[][string] getSkillCategories();
-    @path("/skills/:skill/recipes") RecipeLink[][string] getSkillRecipes(string _skill);
+    @path("/skills/:skill/recipes")
+    @queryParam("query", "query") @queryParam("migemo", "migemo") @queryParam("rev", "rev") @queryParam("key", "sort")
+    RecipeLink[][string] getSkillRecipes(string _skill, string query="", Flag!"useMigemo" migemo=No.useMigemo,
+                                         Flag!"useReverseSearch" rev=No.useReverseSearch, string key = "skill");
 
     @path("/buffers") @property BufferLink[][string] getBuffers();
 
-    @path("/recipes") @queryParam("migemo", "migemo") @queryParam("rev", "rev") @queryParam("s", "sort")
+    @path("/recipes") @queryParam("migemo", "migemo") @queryParam("rev", "rev") @queryParam("key", "sort")
     RecipeLink[][string] getRecipes(string query="", Flag!"useMigemo" migemo=No.useMigemo,
-                                    Flag!"useReverseSearch" rev=No.useReverseSearch, string s = "skill");
+                                    Flag!"useReverseSearch" rev=No.useReverseSearch, string key = "skill");
 
     @path("/items") @queryParam("migemo", "migemo")
     ItemLink[][string] getItems(string query="", Flag!"useMigemo" migemo=No.useMigemo);
@@ -72,7 +78,8 @@ class WebModel: ModelAPI
         return ["バインダー一覧": wm.getBinderCategories.map!(b => BinderLink(b)).array];
     }
 
-    override RecipeLink[][string] getBinderRecipes(string binder)
+    override RecipeLink[][string] getBinderRecipes(string binder, string query, Flag!"useMigemo" migemo,
+                                                   Flag!"useReverseSearch" rev, string key)
     {
         import std.algorithm;
         import std.array;
@@ -85,11 +92,12 @@ class WebModel: ModelAPI
         enforceHTTP(getBinderCategories["バインダー一覧"].map!"a.バインダー名".canFind(binder),
                     HTTPStatus.notFound, "No such binder");
 
-        return ["レシピ一覧": wm.getRecipeList("", Binder(binder), No.useMetaSearch, No.useMigemo)
+        auto lst = recipeSort(wm.getRecipeList(query, Binder(binder), No.useMetaSearch, migemo, rev)
                                 .front
-                                .recipes
-                                .map!(r => RecipeLink(r))
-                                .array];
+                                .recipes,
+                              key);
+
+        return ["レシピ一覧": lst.map!(r => RecipeLink(r)).array];
     }
 
     override @property SkillLink[][string] getSkillCategories() const pure nothrow
@@ -100,7 +108,8 @@ class WebModel: ModelAPI
         return ["スキル一覧": wm.getSkillCategories.map!(s => SkillLink(s)).array];
     }
 
-    override RecipeLink[][string] getSkillRecipes(string skill)
+    override RecipeLink[][string] getSkillRecipes(string skill, string query, Flag!"useMigemo" migemo,
+                                                  Flag!"useReverseSearch" rev, string key)
     {
         import std.algorithm;
         import std.range;
@@ -109,11 +118,12 @@ class WebModel: ModelAPI
         import vibe.http.common;
 
         enforceHTTP(getSkillCategories["スキル一覧"].map!"a.スキル名".canFind(skill), HTTPStatus.notFound, "No such skill category");
-        return ["レシピ一覧": wm.getRecipeList("", Category(skill), No.useMetaSearch, No.useMigemo, No.useReverseSearch, SortOrder.ByName)
-                                .front
-                                .recipes
-                                .map!(r => RecipeLink(r))
-                                .array];
+
+        auto lst = recipeSort(wm.getRecipeList(query, Category(skill), No.useMetaSearch, migemo, rev, SortOrder.ByName)
+                                 .front
+                                 .recipes,
+                              key);
+        return ["レシピ一覧": lst.map!(r => RecipeLink(r)).array];
     }
 
     override BufferLink[][string] getBuffers()
@@ -125,34 +135,14 @@ class WebModel: ModelAPI
     }
 
     override RecipeLink[][string] getRecipes(string query, Flag!"useMigemo" useMigemo, Flag!"useReverseSearch" useReverseSearch,
-                                             string s)
+                                             string key)
     {
         import std.algorithm;
         import std.range;
 
         import vibe.http.common;
 
-        auto lst = wm.getRecipeList(query, useMigemo, useReverseSearch);
-        switch(s)
-        {
-        case "skill":{
-            auto levels(string s) {
-                auto arr = wm.getRecipe(s).requiredSkills.byKeyValue.map!(a => tuple(a.key, a.value)).array;
-                arr.multiSort!("a[0] < b[0]", "a[1] < b[1]");
-                return arr;
-            }
-            auto arr = lst.map!(a => tuple(a, levels(a))).array;
-            arr.multiSort!("a[1] < b[1]", "a[0] < b[0]");
-            lst = arr.map!"a[0]".array;
-            break;
-        }
-        case "name":
-            lst = lst.sort().array;
-            break;
-        default:
-            enforceHTTP(false, HTTPStatus.BadRequest, "No such key for 'sort'");
-        }
-
+        auto lst = recipeSort(wm.getRecipeList(query, useMigemo, useReverseSearch), key);
         return ["レシピ一覧": lst.map!(r => RecipeLink(r)).array];
     }
 
@@ -254,5 +244,31 @@ class WebModel: ModelAPI
                 "余り物": ret.leftovers.byKeyValue.map!(kv => LOElem(ItemLink(kv.key), kv.value)).array.serializeToJson].serializeToJson;
     }
 private:
+    auto recipeSort(string[] rs, string key)
+    {
+        import std.algorithm;
+        import std.array;
+
+        import vibe.http.common;
+
+        switch(key)
+        {
+        case "skill":{
+            auto levels(string s) {
+                auto arr = wm.getRecipe(s).requiredSkills.byKeyValue.map!(a => tuple(a.key, a.value)).array;
+                arr.multiSort!("a[0] < b[0]", "a[1] < b[1]");
+                return arr;
+            }
+            auto arr = rs.map!(a => tuple(a, levels(a))).array;
+            arr.multiSort!("a[1] < b[1]", "a[0] < b[0]");
+            return arr.map!"a[0]".array;
+        }
+        case "name":
+            return rs.sort().array;
+        default:
+            enforceHTTP(false, HTTPStatus.BadRequest, "No such key for 'sort'");
+        }
+        assert(false);
+    }
     WisdomModel wm;
 }

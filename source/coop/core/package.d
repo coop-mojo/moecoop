@@ -122,7 +122,7 @@ class WisdomModel
 
     /// binder に収録されているレシピ一覧を返す
     auto getRecipeList(Str)(Str query, Binder binder,
-                            Flag!"useMetaSearch" useMetaSearch, Flag!"useMigemo" useMigemo)
+                            Flag!"useMetaSearch" useMetaSearch, Flag!"useMigemo" useMigemo, Flag!"useReverseSearch" useReverseSearch = No.useReverseSearch)
         if (isSomeString!Str)
     {
         import std.algorithm;
@@ -135,7 +135,7 @@ class WisdomModel
         auto allRecipes = useMetaSearch ?
                           wisdom.binderList :
                           [tuple(cast(string)binder, wisdom.recipesIn(binder))].assocArray;
-        auto queryResult = getQueryResultBase(query.to!string, allRecipes, useMetaSearch, useMigemo);
+        auto queryResult = getQueryResultBase(query.to!string, allRecipes, useMetaSearch, useMigemo, useReverseSearch);
         return queryResult.byKeyValue.map!((kv) {
                 return [RecipePair(kv.key, kv.value.array)];
             }).joiner;

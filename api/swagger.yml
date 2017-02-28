@@ -145,6 +145,14 @@ paths:
           enum:
             - yes
             - no
+        - name: sort
+          in: query
+          description: name を指定するとレシピ名でソートされた結果が、skill でソートすると生産に必要なスキル値でソートされた結果が返ります。
+          required: false
+          type: string
+          enum:
+            - name
+            - skill
       responses:
         200:
           description: レシピ情報の配列

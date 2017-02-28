@@ -25,9 +25,9 @@ interface ModelAPI
 
     @path("/buffers") @property BufferLink[][string] getBuffers();
 
-    @path("/recipes") @queryParam("migemo", "migemo") @queryParam("rev", "rev")
+    @path("/recipes") @queryParam("migemo", "migemo") @queryParam("rev", "rev") @queryParam("s", "sort")
     RecipeLink[][string] getRecipes(string query="", Flag!"useMigemo" migemo=No.useMigemo,
-                                    Flag!"useReverseSearch" rev=No.useReverseSearch);
+                                    Flag!"useReverseSearch" rev=No.useReverseSearch, string s = "skill");
 
     @path("/items") @queryParam("migemo", "migemo")
     ItemLink[][string] getItems(string query="", Flag!"useMigemo" migemo=No.useMigemo);
@@ -124,12 +124,36 @@ class WebModel: ModelAPI
         return ["バフ一覧": wm.wisdom.foodEffectList.keys.map!(k => BufferLink(k)).array];
     }
 
-    override RecipeLink[][string] getRecipes(string query, Flag!"useMigemo" useMigemo, Flag!"useReverseSearch" useReverseSearch)
+    override RecipeLink[][string] getRecipes(string query, Flag!"useMigemo" useMigemo, Flag!"useReverseSearch" useReverseSearch,
+                                             string s)
     {
         import std.algorithm;
         import std.range;
 
-        return ["レシピ一覧": wm.getRecipeList(query, useMigemo, useReverseSearch).map!(r => RecipeLink(r)).array];
+        import vibe.http.common;
+
+        auto lst = wm.getRecipeList(query, useMigemo, useReverseSearch);
+        switch(s)
+        {
+        case "skill":{
+            auto levels(string s) {
+                auto arr = wm.getRecipe(s).requiredSkills.byKeyValue.map!(a => tuple(a.key, a.value)).array;
+                arr.multiSort!("a[0] < b[0]", "a[1] < b[1]");
+                return arr;
+            }
+            auto arr = lst.map!(a => tuple(a, levels(a))).array;
+            arr.multiSort!("a[1] < b[1]", "a[0] < b[0]");
+            lst = arr.map!"a[0]".array;
+            break;
+        }
+        case "name":
+            lst = lst.sort().array;
+            break;
+        default:
+            enforceHTTP(false, HTTPStatus.BadRequest, "No such key for 'sort'");
+        }
+
+        return ["レシピ一覧": lst.map!(r => RecipeLink(r)).array];
     }
 
     override ItemLink[][string] getItems(string query, Flag!"useMigemo" useMigemo)

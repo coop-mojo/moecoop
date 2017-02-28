@@ -1,19 +1,23 @@
-FROM ubuntu:latest
+FROM frolvlad/alpine-glibc:latest
 LABEL maintainer="Mojo"
 
-ENV DEBIAN_FRONTEND=noninteractive
-
-RUN locale-gen ja_JP.UTF-8
-
-ENV LANG ja_JP.UTF-8
-
-RUN apt-get update && \
-    apt-get install --no-install-suggests --no-install-recommends -y \
-            cmigemo libevent-2.0-5 libssl1.0.0 libevent-pthreads-2.0-5 && \
-    apt-get autoremove -y && \
-    apt-get clean && \
-    rm -rf /tmp/* /var/tmp/* /var/lib/apt/lists/* && \
-    mkdir moecoop
+RUN apk add --no-cache --virtual devtools perl alpine-sdk && \
+    touch /usr/local/bin/nkf && \
+    chmod +x /usr/local/bin/nkf && \
+    curl -o cmigemo.zip http://files.kaoriya.net/cmigemo/cmigemo-default-win64-20110227.zip && \
+    unzip cmigemo.zip && \
+    install -d /usr/share/migemo/utf-8 && \
+    install -c -D -m 644 cmigemo-default-win64/dict/utf-8/* /usr/share/migemo/utf-8 && \
+    rm -rf cmigemo.zip cmigemo-default-win64 && \
+    git clone https://github.com/koron/cmigemo.git && \
+    cd cmigemo && \
+    ./configure --prefix=/usr && \
+    make gcc && \
+    make -f compile/Make_gcc.mak install-lib && \
+    cd / && \
+    rm -rf cmigemo /usr/local/bin/nkf && \
+    apk del devtools && \
+    apk add --no-cache libevent
 
 ADD moecoop.tgz /moecoop
 

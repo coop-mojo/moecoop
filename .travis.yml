@@ -33,7 +33,7 @@ before_install:
 
 script:
   - dub test --coverage --combined
-  - if [ "$TRAVIS_OS_NAME" = "linux" -a "$TRAVIS_BRANCH" = "master" -a "$DC" = "dmd" ]; then
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then
         ./archive.sh || exit 1;
         docker build -t moecoop/moecoop .;
         docker run moecoop/moecoop -h || exit 1;

@@ -7,6 +7,14 @@ module coop.server.model.data;
 
 import vibe.data.json;
 
+struct GetVersionResult
+{
+    @name("version") string version_;
+    bool migemo;
+}
+
+
+
 struct BinderLink
 {
     this(string binder) @safe pure nothrow

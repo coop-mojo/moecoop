@@ -5,7 +5,8 @@ arukas_container_update()
     local img=$1
     local ver=$2
     local dom=$3
-    local cid=$(curl -sn https://app.arukas.io/api/containers -H "Content-Type: application/vnd.api+json" -H "Accept: application/vnd.api+json" | jq ".data[] | select(.attributes.arukas_domain == \"$dom\") | .id" | sed 's/"//g')
+    local str=$(curl -sn https://app.arukas.io/api/containers -H "Content-Type: application/vnd.api+json" -H "Accept: application/vnd.api+json")
+    local cid=$(echo $str | jq ".data[] | select(.attributes.arukas_domain == \"$dom\") | .id" | sed 's/"//g')
 
     curl -sn -X PATCH https://app.arukas.io/api/containers/$cid \
   -d "{

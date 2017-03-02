@@ -50,5 +50,6 @@ after_success:
         docker push $MOECOOP_IMAGE:$version;
         docker push $MOECOOP_IMAGE:latest;
         echo "machine app.arukas.io\n    login $ARUKAS_API_TOKEN\n    password $ARUKAS_API_SECRET" >> ~/.netrc;
+        chmod 600 ~/.netrc;
         ./arukas-update.sh $MOECOOP_IMAGE $version $MOECOOP_DOMAIN || exit 1;
     fi

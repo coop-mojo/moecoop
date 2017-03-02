@@ -13,7 +13,44 @@ struct GetVersionResult
     bool migemo;
 }
 
+struct GetMenuRecipeOptionsResult
+{
+    static struct RetElem{
+        ItemLink 生産アイテム;
+        RecipeLink[] レシピ候補;
+    }
+    RetElem[] 選択可能レシピ;
+}
 
+struct PostMenuRecipePreparationResult
+{
+    static struct MatElem{
+        ItemLink 素材名;
+        bool 中間素材;
+    }
+    RecipeLink[] 必要レシピ;
+    MatElem[] 必要素材;
+}
+
+struct PostMenuRecipeResult
+{
+    static struct RecipeElem{
+        RecipeLink レシピ名;
+        int コンバイン数;
+    }
+    static struct MatElem{
+        ItemLink 素材名;
+        int 素材数;
+        bool 中間素材;
+    }
+    static struct LOElem{
+        ItemLink 素材名;
+        int 余剰数;
+    }
+    RecipeElem[] 必要レシピ;
+    MatElem[] 必要素材;
+    LOElem[] 余り物;
+}
 
 struct BinderLink
 {

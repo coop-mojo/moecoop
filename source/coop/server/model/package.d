@@ -45,11 +45,11 @@ interface ModelAPI
     // 調達価格ありの場合
     @path("/items/:item") ItemInfo postItem(string _item, int[string] 調達価格 = null);
 
-    @path("/menu-recipes/options") Json getMenuRecipeOptions();
+    @path("/menu-recipes/options") GetMenuRecipeOptionsResult getMenuRecipeOptions();
 
-    @path("/menu-recipes/preparation") Json postMenuRecipePreparation(string[] 作成アイテム);
+    @path("/menu-recipes/preparation") PostMenuRecipePreparationResult postMenuRecipePreparation(string[] 作成アイテム);
     @path("/menu-recipes")
-    Json postMenuRecipe(int[string] 作成アイテム, int[string] 所持アイテム, string[string] 使用レシピ, string[] 直接調達アイテム);
+    PostMenuRecipeResult postMenuRecipe(int[string] 作成アイテム, int[string] 所持アイテム, string[string] 使用レシピ, string[] 直接調達アイテム);
 }
 
 class WebModel: ModelAPI
@@ -177,7 +177,7 @@ class WebModel: ModelAPI
     /*
      * 2種類以上レシピがあるアイテムに関して、レシピ候補の一覧を返す
      */
-    override Json getMenuRecipeOptions()
+    override GetMenuRecipeOptionsResult getMenuRecipeOptions()
     {
         import std.algorithm;
         import std.range;
@@ -185,63 +185,48 @@ class WebModel: ModelAPI
 
         import vibe.data.json;
 
-        struct RetElem{
-            ItemLink 生産アイテム;
-            RecipeLink[] レシピ候補;
+        with(typeof(return))
+        {
+            return typeof(return)(wm.getDefaultPreference
+                                    .keys
+                                    .map!(k => RetElem(ItemLink(k),
+                                                       wm.wisdom
+                                                         .rrecipeList[k][]
+                                                         .map!(r => RecipeLink(r))
+                                                         .array))
+                                    .array);
         }
-
-        return ["選択可能レシピ":
-                wm.getDefaultPreference
-                  .keys
-                  .map!(k => RetElem(ItemLink(k),
-                                     wm.wisdom
-                                       .rrecipeList[k][]
-                                       .map!(r => RecipeLink(r))
-                                       .array))
-                  .array].serializeToJson;
     }
 
-    override Json postMenuRecipePreparation(string[] 作成アイテム)
+    override PostMenuRecipePreparationResult postMenuRecipePreparation(string[] 作成アイテム)
     {
         import std.algorithm;
         import std.range;
 
-        struct MatElem{
-            ItemLink 素材名;
-            bool 中間素材;
-        }
-
         auto ret = wm.getMenuRecipeResult(作成アイテム);
-        return ["必要レシピ": ret.recipes.map!(r => RecipeLink(r.name)).array.serializeToJson,
-                "必要素材": ret.materials.map!(m => MatElem(ItemLink(m.name),
-                                                            !m.isLeaf)).array.serializeToJson].serializeToJson;
+        with(typeof(return))
+        {
+            return typeof(return)(ret.recipes.map!(r => RecipeLink(r.name)).array,
+                                  ret.materials
+                                     .map!(m => MatElem(ItemLink(m.name),
+                                                        !m.isLeaf)).array);
+        }
     }
 
-    override Json postMenuRecipe(int[string] 作成アイテム, int[string] 所持アイテム, string[string] 使用レシピ, string[] 直接調達アイテム)
+    override PostMenuRecipeResult postMenuRecipe(int[string] 作成アイテム, int[string] 所持アイテム, string[string] 使用レシピ, string[] 直接調達アイテム)
     {
         import std.algorithm;
         import std.conv;
         import std.range;
         import std.container.rbtree;
 
-        struct RecipeElem{
-            RecipeLink レシピ名;
-            int コンバイン数;
-        }
-        struct MatElem{
-            ItemLink 素材名;
-            int 素材数;
-            bool 中間素材;
-        }
-        struct LOElem{
-            ItemLink 素材名;
-            int 余剰数;
-        }
-
         auto ret = wm.getMenuRecipeResult(作成アイテム.to!(int[dstring]), 所持アイテム.to!(int[dstring]), 使用レシピ.to!(dstring[dstring]), new RedBlackTree!string(直接調達アイテム));
-        return ["必要レシピ": ret.recipes.byKeyValue.map!(kv => RecipeElem(RecipeLink(kv.key), kv.value)).array.serializeToJson,
-                "必要素材": ret.materials.byKeyValue.map!(kv => MatElem(ItemLink(kv.key), kv.value.num, kv.value.isIntermediate)).array.serializeToJson,
-                "余り物": ret.leftovers.byKeyValue.map!(kv => LOElem(ItemLink(kv.key), kv.value)).array.serializeToJson].serializeToJson;
+        with(typeof(return))
+        {
+            return typeof(return)(ret.recipes.byKeyValue.map!(kv => RecipeElem(RecipeLink(kv.key), kv.value)).array,
+                                  ret.materials.byKeyValue.map!(kv => MatElem(ItemLink(kv.key), kv.value.num, kv.value.isIntermediate)).array,
+                                  ret.leftovers.byKeyValue.map!(kv => LOElem(ItemLink(kv.key), kv.value)).array);
+        }
     }
 private:
     auto recipeSort(string[] rs, string key)

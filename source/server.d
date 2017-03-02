@@ -26,6 +26,7 @@ void main(string[] args)
     import coop.core.wisdom;
     import coop.core;
     import coop.server.model;
+    import coop.server.model.internal;
     import coop.util;
 
     ushort port = 8080;

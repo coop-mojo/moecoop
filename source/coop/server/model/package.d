@@ -5,7 +5,7 @@
  */
 module coop.server.model;
 
-// import coop.server.model.data;
+import vibe.data.json;
 
 interface ModelAPI
 {
@@ -52,10 +52,9 @@ interface ModelAPI
     PostMenuRecipeResult postMenuRecipe(int[string] 作成アイテム, int[string] 所持アイテム, string[string] 使用レシピ, string[] 直接調達アイテム);
 }
 
-import vibe.data.json;
-
 struct GetVersionResult
 {
+
     @name("version") string version_;
     bool migemo;
 }

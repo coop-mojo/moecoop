@@ -35,17 +35,20 @@ script:
   - dub test --coverage --combined
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then
         ./archive.sh || exit 1;
-        docker build -t moecoop/moecoop .;
-        docker run moecoop/moecoop -h || exit 1;
-        docker images moecoop/moecoop;
+        docker build -t $MOECOOP_IMAGE .;
+        docker run $MOECOOP_IMAGE -h || exit 1;
+        docker images $MOECOOP_IMAGE;
     fi
 
 after_success:
   - dub run doveralls
   - if [ "$TRAVIS_OS_NAME" = "linux" -a "$TRAVIS_BRANCH" = "master" -a "$DC" = "dmd" ]; then
+        version=$(cat views/version)
         echo "uploading docker image...";
-        docker tag moecoop/moecoop moecoop/moecoop:$(cat views/version);
+        docker tag $MOECOOP_IMAGE $MOECOOP_IMAGE:$version;
         docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-        docker push moecoop/moecoop:$(cat views/version);
-        docker push moecoop/moecoop:latest;
+        docker push $MOECOOP_IMAGE:$version;
+        docker push $MOECOOP_IMAGE:latest;
+        echo "machine app.arukas.io\n    login $ARUKAS_API_TOKEN\n    password $ARUKAS_API_SECRET" >> ~/.netrc;
+        ./arukas-update.sh $MOECOOP_IMAGE $version $MOECOOP_DOMAIN || exit 1;
     fi

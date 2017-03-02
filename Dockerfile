@@ -1,7 +1,7 @@
 FROM frolvlad/alpine-glibc:latest
 LABEL maintainer="Mojo"
 
-RUN apk add --no-cache --virtual devtools perl alpine-sdk && \
+RUN apk add --no-cache --virtual devtools perl curl git gcc make libc-dev && \
     touch /usr/local/bin/nkf && \
     chmod +x /usr/local/bin/nkf && \
     curl -o cmigemo.zip http://files.kaoriya.net/cmigemo/cmigemo-default-win64-20110227.zip && \

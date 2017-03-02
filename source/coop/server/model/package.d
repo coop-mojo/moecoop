@@ -17,26 +17,26 @@ interface ModelAPI
 
     @path("/version") @property GetVersionResult getVersion();
 
-    @path("/binders") @property BinderLink[][string] getBinderCategories();
+    @path("/binders") @property GetBinderCategoriesResult getBinderCategories();
     @path("/binders/:binder/recipes")
     @queryParam("query", "query") @queryParam("migemo", "migemo") @queryParam("rev", "rev") @queryParam("key", "sort")
-    RecipeLink[][string] getBinderRecipes(string _binder, string query="", Flag!"useMigemo" migemo=No.useMigemo,
-                                          Flag!"useReverseSearch" rev=No.useReverseSearch, string key = "skill");
+    GetRecipesResult getBinderRecipes(string _binder, string query="", Flag!"useMigemo" migemo=No.useMigemo,
+                                      Flag!"useReverseSearch" rev=No.useReverseSearch, string key = "skill");
 
-    @path("/skills") @property SkillLink[][string] getSkillCategories();
+    @path("/skills") @property GetSkillCategoriesResult getSkillCategories();
     @path("/skills/:skill/recipes")
     @queryParam("query", "query") @queryParam("migemo", "migemo") @queryParam("rev", "rev") @queryParam("key", "sort")
-    RecipeLink[][string] getSkillRecipes(string _skill, string query="", Flag!"useMigemo" migemo=No.useMigemo,
-                                         Flag!"useReverseSearch" rev=No.useReverseSearch, string key = "skill");
+    GetRecipesResult getSkillRecipes(string _skill, string query="", Flag!"useMigemo" migemo=No.useMigemo,
+                                     Flag!"useReverseSearch" rev=No.useReverseSearch, string key = "skill");
 
     @path("/buffers") @property BufferLink[][string] getBuffers();
 
     @path("/recipes") @queryParam("migemo", "migemo") @queryParam("rev", "rev") @queryParam("key", "sort")
-    RecipeLink[][string] getRecipes(string query="", Flag!"useMigemo" migemo=No.useMigemo,
-                                    Flag!"useReverseSearch" rev=No.useReverseSearch, string key = "skill");
+    GetRecipesResult getRecipes(string query="", Flag!"useMigemo" migemo=No.useMigemo,
+                                Flag!"useReverseSearch" rev=No.useReverseSearch, string key = "skill");
 
     @path("/items") @queryParam("migemo", "migemo")
-    ItemLink[][string] getItems(string query="", Flag!"useMigemo" migemo=No.useMigemo);
+    GetItemsResult getItems(string query="", Flag!"useMigemo" migemo=No.useMigemo);
 
     @path("/recipes/:recipe") RecipeInfo getRecipe(string _recipe);
 
@@ -57,6 +57,26 @@ struct GetVersionResult
 
     @name("version") string version_;
     bool migemo;
+}
+
+struct GetBinderCategoriesResult
+{
+    BinderLink[] バインダー一覧;
+}
+
+struct GetRecipesResult
+{
+    RecipeLink[] レシピ一覧;
+}
+
+struct GetSkillCategoriesResult
+{
+    SkillLink[] スキル一覧;
+}
+
+struct GetItemsResult
+{
+    ItemLink[] アイテム一覧;
 }
 
 struct GetMenuRecipeOptionsResult

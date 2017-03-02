@@ -25,15 +25,15 @@ class WebModel: ModelAPI
         return GetVersionResult(Version, wm.migemoAvailable);
     }
 
-    override @property BinderLink[][string] getBinderCategories() const pure nothrow
+    override @property GetBinderCategoriesResult getBinderCategories() const pure nothrow
     {
         import std.algorithm;
         import std.range;
 
-        return ["バインダー一覧": wm.getBinderCategories.map!(b => BinderLink(b)).array];
+        return typeof(return)(wm.getBinderCategories.map!(b => BinderLink(b)).array);
     }
 
-    override RecipeLink[][string] getBinderRecipes(string binder, string query, Flag!"useMigemo" migemo,
+    override GetRecipesResult getBinderRecipes(string binder, string query, Flag!"useMigemo" migemo,
                                                    Flag!"useReverseSearch" rev, string key)
     {
         import std.algorithm;
@@ -44,7 +44,7 @@ class WebModel: ModelAPI
         import vibe.http.common;
 
         binder = binder.replace("_", "/");
-        enforceHTTP(getBinderCategories["バインダー一覧"].map!"a.バインダー名".canFind(binder),
+        enforceHTTP(getBinderCategories.バインダー一覧.map!"a.バインダー名".canFind(binder),
                     HTTPStatus.notFound, "No such binder");
 
         auto lst = recipeSort(wm.getRecipeList(query, Binder(binder), No.useMetaSearch, migemo, rev)
@@ -52,18 +52,18 @@ class WebModel: ModelAPI
                                 .recipes,
                               key);
 
-        return ["レシピ一覧": lst.map!(r => RecipeLink(r)).array];
+        return typeof(return)(lst.map!(r => RecipeLink(r)).array);
     }
 
-    override @property SkillLink[][string] getSkillCategories() const pure nothrow
+    override @property GetSkillCategoriesResult getSkillCategories() const pure nothrow
     {
         import std.algorithm;
         import std.range;
 
-        return ["スキル一覧": wm.getSkillCategories.map!(s => SkillLink(s)).array];
+        return typeof(return)(wm.getSkillCategories.map!(s => SkillLink(s)).array);
     }
 
-    override RecipeLink[][string] getSkillRecipes(string skill, string query, Flag!"useMigemo" migemo,
+    override GetRecipesResult getSkillRecipes(string skill, string query, Flag!"useMigemo" migemo,
                                                   Flag!"useReverseSearch" rev, string key)
     {
         import std.algorithm;
@@ -72,13 +72,13 @@ class WebModel: ModelAPI
 
         import vibe.http.common;
 
-        enforceHTTP(getSkillCategories["スキル一覧"].map!"a.スキル名".canFind(skill), HTTPStatus.notFound, "No such skill category");
+        enforceHTTP(getSkillCategories.スキル一覧.map!"a.スキル名".canFind(skill), HTTPStatus.notFound, "No such skill category");
 
         auto lst = recipeSort(wm.getRecipeList(query, Category(skill), No.useMetaSearch, migemo, rev, SortOrder.ByName)
-                                 .front
-                                 .recipes,
+                                .front
+                                .recipes,
                               key);
-        return ["レシピ一覧": lst.map!(r => RecipeLink(r)).array];
+        return typeof(return)(lst.map!(r => RecipeLink(r)).array);
     }
 
     override BufferLink[][string] getBuffers()
@@ -89,7 +89,7 @@ class WebModel: ModelAPI
         return ["バフ一覧": wm.wisdom.foodEffectList.keys.map!(k => BufferLink(k)).array];
     }
 
-    override RecipeLink[][string] getRecipes(string query, Flag!"useMigemo" useMigemo, Flag!"useReverseSearch" useReverseSearch,
+    override GetRecipesResult getRecipes(string query, Flag!"useMigemo" useMigemo, Flag!"useReverseSearch" useReverseSearch,
                                              string key)
     {
         import std.algorithm;
@@ -98,15 +98,15 @@ class WebModel: ModelAPI
         import vibe.http.common;
 
         auto lst = recipeSort(wm.getRecipeList(query, useMigemo, useReverseSearch), key);
-        return ["レシピ一覧": lst.map!(r => RecipeLink(r)).array];
+        return typeof(return)(lst.map!(r => RecipeLink(r)).array);
     }
 
-    override ItemLink[][string] getItems(string query, Flag!"useMigemo" useMigemo)
+    override GetItemsResult getItems(string query, Flag!"useMigemo" useMigemo)
     {
         import std.algorithm;
         import std.range;
 
-        return ["アイテム一覧": wm.getItemList(query, useMigemo, No.canBeProduced).map!(i => ItemLink(i)).array];
+        return typeof(return)(wm.getItemList(query, useMigemo, No.canBeProduced).map!(i => ItemLink(i)).array);
     }
 
     override RecipeInfo getRecipe(string _recipe)

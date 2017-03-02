@@ -43,7 +43,7 @@ script:
 after_success:
   - dub run doveralls
   - if [ "$TRAVIS_OS_NAME" = "linux" -a "$TRAVIS_BRANCH" = "master" -a "$DC" = "dmd" ]; then
-        version=$(cat views/version)
+        export version=$(cat views/version);
         echo "uploading docker image...";
         docker tag $MOECOOP_IMAGE $MOECOOP_IMAGE:$version;
         docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";

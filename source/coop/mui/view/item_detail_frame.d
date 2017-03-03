@@ -38,6 +38,8 @@ class ItemDetailFrame: ScrollWidget
     {
         import std.conv;
 
+        import coop.util;
+
         auto orig = model.getItem(name);
         auto ret = new typeof(this)("detail"~idx.to!string);
         auto item = Overlaid!Item(orig, name.to!string in customInfo.itemList);

@@ -14,6 +14,7 @@ import coop.core.item;
 import coop.core.wisdom;
 import coop.mui.model.custom_info;
 import coop.mui.view.recipe_tab_frame;
+import coop.util;
 
 class ItemEditDialog: Dialog
 {

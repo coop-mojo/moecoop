@@ -11,7 +11,7 @@ interface ModelAPI
 {
     import std.typecons;
 
-    import vibe.d;
+    import vibe.web.common;
     import coop.core.item;
     import coop.core.recipe;
 

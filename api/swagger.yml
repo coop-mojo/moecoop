@@ -304,6 +304,14 @@ paths:
           enum:
             - yes
             - no
+        - name: only-products
+          in: query
+          description: yes を指定すると、生産スキルで作成できるアイテムのみを検索します。デフォルトは no です。
+          required: false
+          type: string
+          enum:
+            - yes
+            - no
       responses:
         200:
           description: アイテム情報の配列

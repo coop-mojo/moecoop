@@ -35,8 +35,8 @@ interface ModelAPI
     GetRecipesResult getRecipes(string query="", Flag!"useMigemo" migemo=No.useMigemo,
                                 Flag!"useReverseSearch" rev=No.useReverseSearch, string key = "skill");
 
-    @path("/items") @queryParam("migemo", "migemo")
-    GetItemsResult getItems(string query="", Flag!"useMigemo" migemo=No.useMigemo);
+    @path("/items") @queryParam("migemo", "migemo") @queryParam("onlyProducts", "only-products")
+    GetItemsResult getItems(string query="", Flag!"useMigemo" migemo=No.useMigemo, Flag!"onlyProducts" onlyProducts=No.onlyProducts);
 
     @path("/recipes/:recipe") RecipeInfo getRecipe(string _recipe);
 

@@ -101,12 +101,12 @@ class WebModel: ModelAPI
         return typeof(return)(lst.map!(r => RecipeLink(r)).array);
     }
 
-    override GetItemsResult getItems(string query, Flag!"useMigemo" useMigemo)
+    override GetItemsResult getItems(string query, Flag!"useMigemo" useMigemo, Flag!"onlyProducts" onlyProducts)
     {
         import std.algorithm;
         import std.range;
 
-        return typeof(return)(wm.getItemList(query, useMigemo, No.canBeProduced).map!(i => ItemLink(i)).array);
+        return typeof(return)(wm.getItemList(query, useMigemo, cast(Flag!"canBeProduced")onlyProducts).map!(i => ItemLink(i)).array);
     }
 
     override RecipeInfo getRecipe(string _recipe)

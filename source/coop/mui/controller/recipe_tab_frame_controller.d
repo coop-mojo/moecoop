@@ -42,7 +42,7 @@ abstract class RecipeTabFrameController
             }
         };
 
-        frame_.recipeDetail = RecipeDetailFrame.create(""d, model__, characters);
+        frame_.recipeDetail = RecipeDetailFrame.create(""d, model, characters);
 
         frame_.charactersBox.items = characters.keys.sort().array;
         frame_.charactersBox.selectedItemIndex = 0;
@@ -50,14 +50,7 @@ abstract class RecipeTabFrameController
         frame_.hideItemDetail(0);
         frame_.hideItemDetail(1);
 
-        if (model.migemoAvailable)
-        {
-            frame_.enableMigemoBox;
-        }
-        else
-        {
-            frame_.disableMigemoBox;
-        }
+        frame_.enableMigemoBox;
         frame_.categories = cats;
     }
 

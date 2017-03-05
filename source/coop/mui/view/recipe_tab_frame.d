@@ -358,9 +358,9 @@ private:
         auto binders = relatedBindersFor(recipe, category);
 
         import std.exception;
-        import coop.mui.model.wisdom_adapter;
         import vibe.http.common;
-        auto r = model__.getRecipe(recipe.to!string).ifThrown!HTTPStatusException(RecipeInfo.init);
+        import coop.mui.model.wisdom_adapter: RecipeInfo;
+        auto r = controller.model.getRecipe(recipe.to!string).ifThrown!HTTPStatusException(RecipeInfo.init);
 
         ret.checkStateChanged = (bool marked) {
             auto c = characters[charactersBox.selectedItem];
@@ -405,7 +405,7 @@ private:
                 import std.exception;
 
                 auto prods = r.生成物.map!"a.アイテム名".array;
-                if (prods.any!(p => collectException(model__.getItem(p))))
+                if (prods.any!(p => collectException(controller.model.getItem(p))))
                 {
                     ret.textColor = "blue";
                 }
@@ -413,7 +413,7 @@ private:
                 {
                     if (prods.any!((p) {
                                 import coop.core.item: ItemType;
-                                auto it = model__.getItem(p);
+                                auto it = controller.model.getItem(p);
                                 return it.アイテム種別 != ItemType.Others &&
                                     (it.飲食物情報.isNull && it.武器情報.isNull && it.防具情報.isNull && &it.弾情報.isNull && it.盾情報.isNull);
                             }))
@@ -433,9 +433,9 @@ private:
             scope(exit) highlightDetailRecipe;
 
 
-            recipeDetail = RecipeDetailFrame.create(recipe, model__, characters);
+            recipeDetail = RecipeDetailFrame.create(recipe, controller.model, characters);
 
-            auto itemNames = model__.getRecipe(recipe.to!string).生成物.map!"a.アイテム名".array.to!(dstring[]);
+            auto itemNames = controller.model.getRecipe(recipe.to!string).生成物.map!"a.アイテム名".array.to!(dstring[]);
             enforce(itemNames.length <= 2);
             if (itemNames.empty)
             {
@@ -450,7 +450,7 @@ private:
                 import coop.mui.view.item_detail_frame;
 
                 showItemDetail(idx);
-                setItemDetail(ItemDetailFrame.create(name, idx+1, model__, customInfo), idx);
+                setItemDetail(ItemDetailFrame.create(name, idx+1, controller.model, customInfo), idx);
             }
         };
 

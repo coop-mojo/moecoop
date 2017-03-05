@@ -10,8 +10,6 @@ import coop.server.model.internal;
 
 alias WisdomAdapter = WebModel;
 
-WisdomAdapter model__;
-
 // class WisdomAdapter
 // {
 //     this(string endpoint)

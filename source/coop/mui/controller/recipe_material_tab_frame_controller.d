@@ -29,19 +29,12 @@ class RecipeMaterialTabFrameController
         frame_.charactersBox.items = characters.keys.sort().array;
         frame_.charactersBox.selectedItemIndex = 0;
 
-        frame_.recipeDetail = RecipeDetailFrame.create(""d, model__, characters);
+        frame_.recipeDetail = RecipeDetailFrame.create(""d, model, characters);
 
         frame_.hideItemDetail(0);
         frame_.hideItemDetail(1);
 
-        if (model.migemoAvailable)
-        {
-            frame_.enableMigemoBox;
-        }
-        else
-        {
-            frame_.disableMigemoBox;
-        }
+        frame_.enableMigemoBox;
         frame_.migemoOptionChanged =
             frame_.queryChanged = {
             auto txt = frame_.childById("itemQuery").text;
@@ -51,6 +44,8 @@ class RecipeMaterialTabFrameController
 
     auto showProductCandidate(dstring query)
     {
+        import std.algorithm;
+        import std.array;
         import std.conv;
         import std.regex;
 
@@ -58,8 +53,10 @@ class RecipeMaterialTabFrameController
         {
             return;
         }
-        auto candidates = model.getItemList(query.to!string, cast(Flag!"useMigemo")frame_.useMigemo, Yes.canBeProduced);
-
+        auto candidates = model.getItems(query.to!string, cast(Flag!"useMigemo")frame_.useMigemo, Yes.onlyProducts)
+                               .アイテム一覧
+                               .map!"a.アイテム名.to!dstring"
+                               .array;
         frame_.showCandidates(candidates.to!(dstring[]));
     }
 }

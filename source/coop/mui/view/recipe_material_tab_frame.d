@@ -193,14 +193,13 @@ class RecipeMaterialTabFrame: TabFrameBase
                 }
 
                 w.detailClicked = {
-                    import coop.mui.model.wisdom_adapter;
                     import coop.mui.view.item_detail_frame;
 
                     unhighlightDetailItems;
                     scope(exit) highlightDetailItems;
 
                     showItemDetail(0);
-                    setItemDetail(ItemDetailFrame.create(c, 1, model__, controller.customInfo), 0);
+                    setItemDetail(ItemDetailFrame.create(c, 1, controller.model, controller.customInfo), 0);
                 };
                 w.checkStateChanged = (bool checked) {
                     if (checked)
@@ -342,12 +341,11 @@ class RecipeMaterialTabFrame: TabFrameBase
                 auto w = new LinkWidget(r.to!string, r.name.to!dstring~": ");
                 auto t = new TextWidget("times", format("%s 回"d, 0));
                 w.click = (Widget _) {
-                    import coop.mui.model.wisdom_adapter;
                     import coop.mui.view.recipe_detail_frame;
 
                     unhighlightDetailRecipe;
                     scope(exit) highlightDetailRecipe;
-                    recipeDetail = RecipeDetailFrame.create(r.name.to!dstring, model__, controller.characters);
+                    recipeDetail = RecipeDetailFrame.create(r.name.to!dstring, controller.model, controller.characters);
                     return true;
                 };
                 if (!r.parentGroup.empty)
@@ -399,13 +397,12 @@ class RecipeMaterialTabFrame: TabFrameBase
                 auto n = new TextWidget("num", format("%s 個"d, 0));
                 w.click = (Widget _) {
                     import coop.mui.view.item_detail_frame;
-                    import coop.mui.model.wisdom_adapter;
 
                     unhighlightDetailItems;
                     scope(exit) highlightDetailItems;
 
                     showItemDetail(0);
-                    setItemDetail(ItemDetailFrame.create(lo.to!dstring, 1, model__, controller.customInfo), 0);
+                    setItemDetail(ItemDetailFrame.create(lo.to!dstring, 1, controller.model, controller.customInfo), 0);
                     return true;
                 };
                 return cast(Widget[])[w, n];
@@ -467,13 +464,12 @@ class RecipeMaterialTabFrame: TabFrameBase
                 };
                 w.detailClicked = {
                     import coop.mui.view.item_detail_frame;
-                    import coop.mui.model.wisdom_adapter;
 
                     unhighlightDetailItems;
                     scope(exit) highlightDetailItems;
 
                     showItemDetail(0);
-                    setItemDetail(ItemDetailFrame.create(mat.name.to!dstring, 1, model__, controller.customInfo), 0);
+                    setItemDetail(ItemDetailFrame.create(mat.name.to!dstring, 1, controller.model, controller.customInfo), 0);
                 };
                 if (!mat.isLeaf)
                 {
@@ -529,8 +525,7 @@ class RecipeMaterialTabFrame: TabFrameBase
 
                 rs.each!(w => w.visibility = Visibility.Visible);
                 rs[1].text = format("%s 回"d, *n);
-                import coop.mui.model.wisdom_adapter;
-                auto detail = model__.getRecipe(r.to!string);
+                auto detail = controller.model.getRecipe(r.to!string);
                 auto c = controller.characters[charactersBox.selectedItem];
                 if (!c.hasSkillFor(detail) || (detail.レシピ必須 && !c.hasRecipe(r.to!string)))
                 {
@@ -663,13 +658,11 @@ class RecipeMaterialTabFrame: TabFrameBase
         import std.range;
         import std.typecons;
 
-        import coop.mui.model.wisdom_adapter;
-
-        auto elems = model__.postMenuRecipePreparation(items.to!(string[]));
+        auto elems = controller.model.postMenuRecipePreparation(items.to!(string[]));
         fullMaterialInfo = elems.必要素材.map!(a => MaterialInfo(a.素材情報.アイテム名, !a.中間素材)).array;
         auto parentWithBros(string recipe)
         {
-            auto ret = model__.getMenuRecipeOptions.選択可能レシピ.find!(e => e.レシピ候補.canFind!(a => a.レシピ名 == recipe)).array;
+            auto ret = controller.model.getMenuRecipeOptions.選択可能レシピ.find!(e => e.レシピ候補.canFind!(a => a.レシピ名 == recipe)).array;
             return ret.empty ? "" : ret.front.生産アイテム.アイテム名;
         }
         auto recipes = elems.必要レシピ.map!(a => RecipeInfo(a.レシピ名,
@@ -687,19 +680,17 @@ class RecipeMaterialTabFrame: TabFrameBase
         import std.conv;
         import std.typecons;
 
-        import coop.mui.model.wisdom_adapter;
-
         if (preference.keys.empty)
         {
-            preference = model__
+            preference = controller.model
                          .getMenuRecipeOptions
                          .選択可能レシピ
                          .map!(a => tuple(a.生産アイテム.アイテム名.to!dstring,
                                           a.レシピ候補.front.レシピ名.to!dstring))
                          .assocArray;
         }
-        auto elems = model__.postMenuRecipe(targets.to!(int[string]), owned.to!(int[string]),
-                                            preference.to!(string[string]), leafMaterials[].array.to!(string[]));
+        auto elems = controller.model.postMenuRecipe(targets.to!(int[string]), owned.to!(int[string]),
+                                                     preference.to!(string[string]), leafMaterials[].array.to!(string[]));
         updateMaterialTable(elems.必要素材
                                  .filter!(mat => mat.素材情報.アイテム名.to!dstring !in targets)
                                  .map!(mat => tuple(mat.素材情報.アイテム名.to!dstring,

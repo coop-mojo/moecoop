@@ -29,10 +29,10 @@ class BinderTabFrameController: RecipeTabFrameController
     override void showRecipeNames()
     {
         import std.algorithm;
+        import std.array;
         import std.conv;
         import std.regex;
         import std.typecons;
-        import coop.core.wisdom: Binder;
 
         auto query = frame_.queryBox.text == frame_.defaultMessage ? ""d : frame_.queryBox.text;
         if (frame_.useMetaSearch && query.matchFirst(ctRegex!r"^\s*$"d))
@@ -40,11 +40,18 @@ class BinderTabFrameController: RecipeTabFrameController
             return;
         }
 
-        auto recipes = model.getRecipeList(query, Binder(frame_.selectedCategory.to!string),
-                                           cast(Flag!"useMetaSearch")frame_.useMetaSearch, cast(Flag!"useMigemo")frame_.useMigemo);
-        frame_.showRecipeList(recipes.map!(r => Tuple!(dstring, "category",
-                                                       dstring[], "recipes")(r.category.to!dstring,
-                                                                             r.recipes.to!(dstring[]))));
+        auto binders = frame_.useMetaSearch ? model.getBinderCategories.バインダー一覧.map!"a.バインダー名.to!dstring".array
+                       : [frame_.selectedCategory];
+
+        alias RecipePair = Tuple!(dstring, "category", dstring[], "recipes");
+
+        auto recipes = binders.map!(b => RecipePair(b, model.getBinderRecipes(b.to!string, query.to!string,
+                                                                              cast(Flag!"useMigemo")frame_.useMigemo,
+                                                                              No.useReverseSearch, "default")
+                                                            .レシピ一覧
+                                                            .map!"a.レシピ名.to!dstring"
+                                                            .array)).array;
+        frame_.showRecipeList(recipes);
     }
 private:
     enum MaxNumberOfBinderPages = 128;

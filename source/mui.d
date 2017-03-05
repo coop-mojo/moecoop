@@ -95,8 +95,7 @@ extern(C) int UIAppMain(string[] args)
                                                  config.windowWidth,
                                                  config.windowHeight);
 
-    auto model = new WisdomModel(wisdom);
-    model__ = new WisdomAdapter(model);
+    auto model = new WisdomAdapter(new WisdomModel(wisdom));
     window.mainWidget = new MainFrame(model, chars, config, customInfo);
     window.windowIcon = drawableCache.getImage("coop-icon");
     window.show;

@@ -8,12 +8,12 @@ module coop.mui.controller.main_frame_controller;
 class MainFrameController
 {
     import coop.core.character;
-    import coop.core: WisdomModel;
+    import coop.mui.model.wisdom_adapter;
     import coop.mui.model.config;
     import coop.mui.model.custom_info;
     import coop.mui.view.main_frame;
 
-    this(MainFrame frame, WisdomModel model, Character[dstring] chars, Config config, CustomInfo cInfo)
+    this(MainFrame frame, WisdomAdapter model, Character[dstring] chars, Config config, CustomInfo cInfo)
     {
         frame_ = frame;
         model_ = model;
@@ -31,7 +31,7 @@ class MainFrameController
     Config config_;
     Character[dstring] chars_;
     CustomInfo cInfo_;
-    WisdomModel model_;
+    WisdomAdapter model_;
     MainFrame frame_;
 }
 

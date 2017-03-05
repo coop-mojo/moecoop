@@ -47,10 +47,9 @@ class WebModel: ModelAPI
         enforceHTTP(getBinderCategories.バインダー一覧.map!"a.バインダー名".canFind(binder),
                     HTTPStatus.notFound, "No such binder");
 
-        auto lst = recipeSort(wm.getRecipeList(query, Binder(binder), No.useMetaSearch, migemo, rev)
-                                .front
-                                .recipes,
-                              key);
+        auto tmp = wm.getRecipeList(query, Binder(binder), No.useMetaSearch, migemo, rev).array;
+        auto rs = tmp.empty ? [tuple!("category", "recipes")(binder, (string[]).init)] : tmp;
+        auto lst = recipeSort(rs.front.recipes, key);
 
         return typeof(return)(lst.map!(r => RecipeLink(r)).array);
     }
@@ -74,10 +73,9 @@ class WebModel: ModelAPI
 
         enforceHTTP(getSkillCategories.スキル一覧.map!"a.スキル名".canFind(skill), HTTPStatus.notFound, "No such skill category");
 
-        auto lst = recipeSort(wm.getRecipeList(query, Category(skill), No.useMetaSearch, migemo, rev, SortOrder.ByName)
-                                .front
-                                .recipes,
-                              key);
+        auto tmp = wm.getRecipeList(query, Category(skill), No.useMetaSearch, migemo, rev, SortOrder.ByName).array;
+        auto rs = tmp.empty ? [tuple!("category", "recipes")(skill, (string[]).init)] : tmp;
+        auto lst = recipeSort(rs.front.recipes, key);
         return typeof(return)(lst.map!(r => RecipeLink(r)).array);
     }
 
@@ -205,6 +203,8 @@ private:
         }
         case "name":
             return rs.sort().array;
+        case "default":
+            return rs;
         default:
             enforceHTTP(false, HTTPStatus.BadRequest, "No such key for 'sort'");
         }

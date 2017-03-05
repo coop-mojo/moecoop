@@ -51,20 +51,33 @@ public:
 class MainFrame: AppFrame
 {
     import coop.core.character;
-    import coop.core: WisdomModel;
     import coop.mui.model.custom_info;
     import coop.mui.model.config;
+    import coop.mui.model.wisdom_adapter;
 
-    this(WisdomModel model, Character[dstring] chars, Config config, CustomInfo cInfo)
+    this(WisdomAdapter model, Character[dstring] chars, Config config, CustomInfo cInfo)
     {
+        import std.array;
+        import std.algorithm;
+
         import coop.mui.controller.binder_tab_frame_controller;
         import coop.mui.controller.recipe_material_tab_frame_controller;
         import coop.mui.controller.skill_tab_frame_controller;
 
         super();
         controller_ = new MainFrameController(this, model, chars, config, cInfo);
-        binderTab.controller = new BinderTabFrameController(binderTab, model.getBinderCategories.to!(dstring[]));
-        skillTab.controller = new SkillTabFrameController(skillTab, model.getSkillCategories.to!(dstring[]));
+        binderTab.controller = new BinderTabFrameController(binderTab,
+                                                            model.getBinderCategories
+                                                                 .バインダー一覧
+                                                                 .map!"a.バインダー名"
+                                                                 .array
+                                                                 .to!(dstring[]));
+        skillTab.controller = new SkillTabFrameController(skillTab,
+                                                          model.getSkillCategories
+                                                               .スキル一覧
+                                                               .map!"a.スキル名"
+                                                               .array
+                                                               .to!(dstring[]));
         materialTab.controller = new RecipeMaterialTabFrameController(materialTab);
 
         binderTab.controller.showRecipeNames;

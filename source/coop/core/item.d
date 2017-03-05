@@ -80,6 +80,7 @@ auto readItems(string fname)
 
     if (json.type == Json.Type.array)
     {
+        // v1.1.9
         return json.deserialize!(JsonSerializer, Item[])
                    .map!((a) {
                            import std.conv;
@@ -96,6 +97,7 @@ auto readItems(string fname)
     }
     else
     {
+        // v1.1.8 未満
         assert(json.type == Json.Type.object);
         return json.get!(Json[string])
                    .byKeyValue
@@ -107,6 +109,7 @@ auto readItems(string fname)
 
 /**
  * アイテム s の情報を、ファイル fname に書かれている json から読み込む
+ * v1.1.9 未満の設定ファイル用フォールバック
  */
 auto toItem_fallback(string s, Json json, string fname)
 in {
@@ -513,7 +516,7 @@ auto readItemList(string sysBase)
     import std.path;
 
     import coop.core.item;
-    import coop.util;
+    import coop.util: checkedAssocArray;
 
     enforce(sysBase.exists);
     enforce(sysBase.isDir);
@@ -538,7 +541,7 @@ auto readFoodList(string sysBase)
     import std.path;
 
     import coop.core.item;
-    import coop.util;
+    import coop.util: checkedAssocArray;
 
     enforce(sysBase.exists);
     enforce(sysBase.isDir);
@@ -560,7 +563,7 @@ auto readDrinkList(string sysBase)
     import std.file;
     import std.path;
 
-    import coop.util;
+    import coop.util: checkedAssocArray;
     import coop.core.item;
 
     enforce(sysBase.exists);
@@ -581,7 +584,7 @@ auto readLiquorList(string sysBase)
     import std.path;
 
     import coop.core.item;
-    import coop.util;
+    import coop.util: checkedAssocArray;
 
     enforce(sysBase.exists);
     enforce(sysBase.isDir);
@@ -602,7 +605,7 @@ auto readWeaponList(string sysBase)
     import std.path;
 
     import coop.core.item;
-    import coop.util;
+    import coop.util: checkedAssocArray;
 
     enforce(sysBase.exists);
     enforce(sysBase.isDir);
@@ -626,7 +629,7 @@ auto readArmorList(string sysBase)
     import std.path;
 
     import coop.core.item;
-    import coop.util;
+    import coop.util: checkedAssocArray;
 
     enforce(sysBase.exists);
     enforce(sysBase.isDir);
@@ -650,7 +653,7 @@ auto readBulletList(string sysBase)
     import std.path;
 
     import coop.core.item;
-    import coop.util;
+    import coop.util: checkedAssocArray;
 
     enforce(sysBase.exists);
     enforce(sysBase.isDir);
@@ -674,7 +677,7 @@ auto readShieldList(string sysBase)
     import std.path;
 
     import coop.core.item;
-    import coop.util;
+    import coop.util: checkedAssocArray;
 
     enforce(sysBase.exists);
     enforce(sysBase.isDir);

@@ -422,7 +422,7 @@ struct WeaponInfo
                          .map!(kv => SkillNumberLink(kv.key, kv.value))
                          .array;
         両手装備 = info.isDoubleHands;
-        装備箇所 = cast(string)info.slot;
+        装備スロット = cast(string)info.slot;
         装備可能シップ = info.restriction
                              .map!(s => ShipLink(cast(string)s))
                              .array;
@@ -441,7 +441,7 @@ struct WeaponInfo
     double 有効レンジ;
     SkillNumberLink[] 必要スキル;
     bool 両手装備;
-    string 装備箇所;
+    string 装備スロット;
     ShipLink[] 装備可能シップ;
     string 素材;
     string 消耗タイプ;
@@ -472,7 +472,7 @@ struct ArmorInfo
                          .byKeyValue
                          .map!(kv => SkillNumberLink(kv.key, kv.value))
                          .array;
-        装備箇所 = cast(string)info.slot;
+        装備スロット = cast(string)info.slot;
         装備可能シップ = info.restriction
                              .map!(s => ShipLink(cast(string)s))
                              .array;
@@ -489,7 +489,7 @@ struct ArmorInfo
 
     DamageInfo[] アーマークラス;
     SkillNumberLink[] 必要スキル;
-    string 装備箇所;
+    string 装備スロット;
     ShipLink[] 装備可能シップ;
     string 素材;
     string 消耗タイプ;

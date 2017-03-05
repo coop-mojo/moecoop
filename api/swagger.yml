@@ -794,8 +794,8 @@ definitions:
       両手装備:
         type: boolean
         description: 両手武器の場合には true になります。
-      装備箇所:
-        $ref: '#/definitions/装備箇所'
+      装備スロット:
+        $ref: '#/definitions/装備スロット'
       装備可能シップ:
         type: array
         description: 装備可能なシップです。
@@ -858,7 +858,7 @@ definitions:
         description: 必要スキル値です。
         format: double
         minimum: 0
-  装備箇所:
+  装備スロット:
     type: string
     description: アイテムの装備可能部位です。
     enum:
@@ -943,8 +943,8 @@ definitions:
         description: 使いこなすのに必要なスキル値です。
         items:
           $ref: '#/definitions/スキル値'
-      装備箇所:
-        $ref: '#/definitions/装備箇所'
+      装備スロット:
+        $ref: '#/definitions/装備スロット'
       装備可能シップ:
         type: array
         description: 装備可能なシップです。

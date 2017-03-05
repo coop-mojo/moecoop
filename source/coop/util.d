@@ -347,11 +347,11 @@ auto checkedAssocArray(Range)(Range r) if (isInputRange!Range)
     assert("ソート後の表".toHankaku != "ｿ-ﾄ後の表");
 }
 
-struct Overlaid(T)
+struct Overlaid(T, U = T)
 {
     import std.traits: hasMember;
 
-    this(T orig, T* ol)
+    this(T orig, U* ol)
     {
         original = orig;
         overlaid = ol;
@@ -373,7 +373,8 @@ struct Overlaid(T)
     @property auto isOverlaid(string field)() const pure nothrow
         if (hasMember!(T, field))
     {
-        return overlaid !is null &&
+        return hasMember!(U, field) &&
+            overlaid !is null &&
             !isDefaultValue(mixin("overlaid."~field)) &&
             mixin("original."~field~" != "~"overlaid."~field);
     }
@@ -381,7 +382,7 @@ struct Overlaid(T)
     @property auto isWritable(string field)() const pure nothrow
         if (hasMember!(T, field))
     {
-        return overlaid !is null && (isOverlaid!field || isDefaultValue(mixin("original."~field)));
+        return hasMember!(U, field) && overlaid !is null && (isOverlaid!field || isDefaultValue(mixin("original."~field)));
     }
 private:
     static auto isDefaultValue(T)(const T val) pure nothrow
@@ -394,14 +395,14 @@ private:
     }
 
     T original;
-    T* overlaid;
+    U* overlaid;
 }
 
 nothrow unittest
 {
     import std.traits: FieldNameTuple;
 
-    import coop.core.item;
+    import coop.core.item: Item, PetFoodType;
 
     Item orig;
     with(orig)
@@ -428,7 +429,7 @@ nothrow unittest
 {
     import std.conv;
 
-    import coop.core.item;
+    import coop.core.item: Item, PetFoodType;
 
     Item orig;
     orig.name = "テスト";

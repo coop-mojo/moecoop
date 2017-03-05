@@ -44,26 +44,22 @@ extern(C) int UIAppMain(string[] args)
     CustomInfo customInfo;
     auto customInfoFile = buildPath(UserResourceBase, "custom-info.json");
 
-    if (buildPath(UserResourceBase, "wisdom").exists)
+    if (customInfoFile.exists)
+    {
+        import vibe.data.json;
+        customInfo = customInfoFile
+                     .readText
+                     .parseJsonString
+                     .deserialize!(JsonSerializer, CustomInfo);
+    }
+    else if (buildPath(UserResourceBase, "wisdom").exists)
     {
         auto cInfoDir = buildPath(UserResourceBase, "wisdom");
         customInfo = new CustomInfo(cInfoDir);
     }
     else
     {
-        if (customInfoFile.exists)
-        {
-            import vibe.data.json;
-            customInfo = customInfoFile
-                         .readText
-                         .parseJsonString
-                         .deserialize!(JsonSerializer, CustomInfo);
-        }
-        else
-        {
-            customInfo = new CustomInfo;
-            customInfo.ver = Version;
-        }
+        customInfo = new CustomInfo;
     }
     scope(success)
     {

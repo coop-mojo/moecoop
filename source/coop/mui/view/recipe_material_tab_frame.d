@@ -37,7 +37,6 @@ class RecipeMaterialTabFrame: TabFrameBase
         layout.addChild(recipeDetailsLayout);
         layout.layoutHeight(FILL_PARENT);
         layout.layoutWidth(FILL_PARENT);
-        leafMaterials = new RedBlackTree!dstring;
 
         hideResult;
         childById!CheckBox("migemo").checkChange = (Widget src, bool checked) {
@@ -359,7 +358,7 @@ class RecipeMaterialTabFrame: TabFrameBase
                             auto a = new Action(idx++, format("%s を使う"d, b.name));
                             auto it = new MenuItem(a);
                             it.menuItemClick = (MenuItem _) {
-                                preference[b.parentGroup.to!dstring] = b.name.to!dstring;
+                                controller.customInfo.recipePreference[b.parentGroup] = b.name;
                                 reload;
                                 return false;
                             };
@@ -619,12 +618,12 @@ class RecipeMaterialTabFrame: TabFrameBase
                         import coop.mui.view.controls;
 
                         auto menu = new MenuItem;
-                        if (mat.name.to!dstring in leafMaterials)
+                        if (controller.customInfo.leafMaterials.canFind(mat.name))
                         {
                             auto a = new Action(25000, "材料から用意する"d);
                             auto it = new MenuItem(a);
                             it.menuItemClick = (MenuItem _) {
-                                leafMaterials.removeKey(mat.name.to!dstring);
+                                controller.customInfo.leafMaterials = controller.customInfo.leafMaterials.filter!(a => a != mat.name).array;
                                 reload;
                                 return false;
                             };
@@ -635,7 +634,7 @@ class RecipeMaterialTabFrame: TabFrameBase
                             auto a = new Action(25001, "直接用意する"d);
                             auto it = new MenuItem(a);
                             it.menuItemClick = (MenuItem _) {
-                                leafMaterials.insert(mat.name.to!dstring);
+                                controller.customInfo.leafMaterials ~= mat.name;
                                 reload;
                                 return false;
                             };
@@ -680,17 +679,9 @@ class RecipeMaterialTabFrame: TabFrameBase
         import std.conv;
         import std.typecons;
 
-        if (preference.keys.empty)
-        {
-            preference = controller.model
-                         .getMenuRecipeOptions
-                         .選択可能レシピ
-                         .map!(a => tuple(a.生産アイテム.アイテム名.to!dstring,
-                                          a.レシピ候補.front.レシピ名.to!dstring))
-                         .assocArray;
-        }
         auto elems = controller.model.postMenuRecipe(targets.to!(int[string]), owned.to!(int[string]),
-                                                     preference.to!(string[string]), leafMaterials[].array.to!(string[]));
+                                                     controller.customInfo.recipePreference,
+                                                     controller.customInfo.leafMaterials);
         updateMaterialTable(elems.必要素材
                                  .filter!(mat => mat.素材情報.アイテム名.to!dstring !in targets)
                                  .map!(mat => tuple(mat.素材情報.アイテム名.to!dstring,
@@ -775,8 +766,6 @@ class RecipeMaterialTabFrame: TabFrameBase
     EventHandler!() queryChanged;
     EventHandler!() characterChanged;
     MaterialInfo[] fullMaterialInfo;
-    dstring[dstring] preference;
-    RedBlackTree!dstring leafMaterials;
     ulong timerID;
 }
 

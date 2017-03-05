@@ -30,8 +30,9 @@ void main(string[] args)
     import coop.util;
 
     ushort port = 8080;
+    string msg;
 
-    auto hinfo = args.getopt("port", &port);
+    auto hinfo = args.getopt("port|p", &port, "message|m", &msg);
 
     if (hinfo.helpWanted)
     {
@@ -44,7 +45,7 @@ void main(string[] args)
 
     auto router = new URLRouter;
     router.get("/", staticTemplate!"index.dt");
-    router.registerRestInterface(new WebModel(model));
+    router.registerRestInterface(new WebModel(model, msg));
     auto settings = new HTTPServerSettings;
     settings.port = port;
     listenHTTP(settings, router);

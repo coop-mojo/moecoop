@@ -16,6 +16,7 @@ interface ModelAPI
     import coop.core.recipe;
 
     @path("/version") @property GetVersionResult getVersion();
+    @path("/information") @property GetInformationResult getInformation();
 
     @path("/binders") @property GetBinderCategoriesResult getBinderCategories();
     @path("/binders/:binder/recipes")
@@ -55,6 +56,10 @@ interface ModelAPI
 struct GetVersionResult
 {
     @name("version") string version_;
+}
+struct GetInformationResult
+{
+    string message;
 }
 
 struct GetBinderCategoriesResult

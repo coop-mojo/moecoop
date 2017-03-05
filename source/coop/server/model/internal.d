@@ -14,15 +14,21 @@ class WebModel: ModelAPI
 
     import coop.core;
 
-    this(WisdomModel wm) @safe pure nothrow
+    this(WisdomModel wm, string msg = "") @safe pure nothrow
     {
         this.wm = wm;
+        this.message = msg;
     }
 
-    @property GetVersionResult getVersion() const
+    override @property GetVersionResult getVersion() const
     {
         import coop.util;
         return GetVersionResult(Version);
+    }
+
+    override @property GetInformationResult getInformation() const pure nothrow
+    {
+        return GetInformationResult(message);
     }
 
     override @property GetBinderCategoriesResult getBinderCategories() const pure nothrow
@@ -211,4 +217,5 @@ private:
         assert(false);
     }
     WisdomModel wm;
+    string message;
 }

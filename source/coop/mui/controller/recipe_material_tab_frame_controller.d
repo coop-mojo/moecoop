@@ -22,14 +22,14 @@ class RecipeMaterialTabFrameController
         import std.container;
         import std.range;
 
-        import coop.core.recipe;
+        import coop.mui.model.wisdom_adapter;
         import coop.mui.view.recipe_detail_frame;
 
         frame_ = frame;
         frame_.charactersBox.items = characters.keys.sort().array;
         frame_.charactersBox.selectedItemIndex = 0;
 
-        frame_.recipeDetail = RecipeDetailFrame.create(""d, model, characters);
+        frame_.recipeDetail = RecipeDetailFrame.create(""d, model__, characters);
 
         frame_.hideItemDetail(0);
         frame_.hideItemDetail(1);

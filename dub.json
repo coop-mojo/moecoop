@@ -28,14 +28,16 @@
             "name": "mui",
             "targetType": "executable",
             "mainSourceFile": "source/mui.d",
-            "excludedSourceFiles": ["source/server.d", "source/coop/server/*"],
+            "excludedSourceFiles": ["source/server.d"],
             "targetName": "fukuro",
             "sourceFiles-windows": ["source/icon.res"],
             "preBuildCommands-windows": ["rc source/icon.rc"],
             "dependencies": {
-                "dlangui": ">=0.9.47"
+                "dlangui": ">=0.9.47",
+                "vibe-d:http": ">=0.7.30",
+                "vibe-d:web": ">=0.7.30"
             },
-            "versions": ["UseMUI"]
+            "versions": ["UseMUI", "VibeNoSSL"]
         },
 
         {

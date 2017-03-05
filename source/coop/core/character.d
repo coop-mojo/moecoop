@@ -38,11 +38,11 @@ class Character
         }
     }
 
-    import coop.core.recipe;
-    auto hasSkillFor(Recipe recipe)
+    import coop.server.model: RecipeInfo;
+    auto hasSkillFor(RecipeInfo recipe)
     {
         import std.algorithm;
-        return recipe.requiredSkills.byKeyValue.all!(kv => (kv.key in skills) && skills[kv.key] >= kv.value);
+        return recipe.必要スキル.byKeyValue.all!(kv => (kv.key in skills) && skills[kv.key] >= kv.value);
     }
 
     auto hasRecipe(string recipe, string binder = "")

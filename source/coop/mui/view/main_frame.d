@@ -51,8 +51,7 @@ public:
 class MainFrame: AppFrame
 {
     import coop.core.character;
-    import coop.core.wisdom;
-    import coop.core;
+    import coop.core: WisdomModel;
     import coop.mui.model.custom_info;
     import coop.mui.model.config;
 

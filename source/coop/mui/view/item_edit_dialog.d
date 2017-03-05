@@ -4,22 +4,23 @@
  * License: $(LINK2 https://github.com/coop-mojo/moecoop/blob/master/LICENSE, MIT License)
  */
 module coop.mui.view.item_edit_dialog;
-
+/+
 import dlangui;
 import dlangui.dialogs.dialog;
 
 import std.traits;
 
-import coop.core.item;
-import coop.core.wisdom;
+import coop.core.item: overlaid;
+// import coop.core.wisdom;
 import coop.mui.model.custom_info;
+import coop.mui.model.wisdom_adapter;
 import coop.mui.view.recipe_tab_frame;
 import coop.util;
 
 class ItemEditDialog: Dialog
 {
 
-    this(Window parent, RecipeTabFrame fr, Item orig, int index, CustomInfo ci)
+    this(Window parent, RecipeTabFrame fr, ItemInfo orig, int index, CustomInfo ci)
     {
         super(UIString("アイテム情報編集"d), parent, DialogFlag.Popup);
         tabFrame = fr;
@@ -60,21 +61,21 @@ class ItemEditDialog: Dialog
             });
         addChild(root);
 
-        auto item = Overlaid!Item(original, &updated);
+        auto item = overlaid(original, &updated);
         auto main = root.childById("main");
 
-        main.addTextElem!"name"("名前", item);
-        main.addTextElem!"ename"("英名", item);
-        main.addTextElem!"weight"("重さ", item);
-        main.addTextElem!"price"("NPC売却価格", item);
+        main.addTextElem!"アイテム名"("名前", item);
+        main.addTextElem!"英名"("英名", item);
+        main.addTextElem!"重さ"("重さ", item);
+        main.addTextElem!"NPC売却価格"("NPC売却価格", item);
 
         auto tr = new HorizontalLayout;
-        tr.addCheckElem("転送可", item.transferable, item.isWritable!"transferable",
-                        (b) { item.transferable = b; return; });
+        tr.addCheckElem("転送可", item.転送可, item.isWritable!"転送可",
+                        (b) { item.転送可 = b; return; });
 
         auto st = new HorizontalLayout;
-        st.addCheckElem("スタック可", item.stackable, item.isWritable!"stackable",
-                        (b) { item.stackable = b; return; });
+        st.addCheckElem("スタック可", item.スタック可, item.isWritable!"スタック可",
+                        (b) { item.スタック可 = b; return; });
 
         main.addChild(tr);
         main.addChild(st);
@@ -95,18 +96,18 @@ class ItemEditDialog: Dialog
 
             petComboBox.selectedItemIndex = PetFoodType.values.indexOf(item.petFoodInfo.keys[0]).to!int;
             petComboBox.itemClick = (Widget src, int idx) {
-                updated.petFoodInfo = typeof(updated.petFoodInfo).init;
+                item.ペットアイテム.種別 = petTypes[idx];
                 if (idx == 0 || idx == petTypes.length-1)
                 {
                     textBox.text = "";
                     textBox.enabled = false;
-                    item.petFoodInfo[idx.to!PetFoodType] = 0;
+                    item.ペットアイテム.効果 = 0;
                 }
                 else
                 {
                     textBox.enabled = true;
                     auto txt = textBox.text;
-                    item.petFoodInfo[idx.to!PetFoodType] = txt.empty ? 0 : txt.to!real;
+                    item.ペットアイテム.効果 = txt.empty ? 0 : txt.to!real;
                 }
                 return true;
             };
@@ -123,18 +124,17 @@ class ItemEditDialog: Dialog
                     return;
                 if (!txt.empty)
                 {
-                    updated.petFoodInfo = typeof(updated.petFoodInfo).init;
-                    updated.petFoodInfo[idx.to!PetFoodType] = txt.to!real;
+                    updated.ペットアイテム.効果 = text.to!real;
                 }
             };
 
-            auto key = item.petFoodInfo.keys[0];
-            textBox.enabled = key != PetFoodType.UNKNOWN &&
-                              key != PetFoodType.NoEatable &&
-                              item.isWritable!"petFoodInfo";
-            petComboBox.enabled = item.isWritable!"petFoodInfo";
-            textBox.text = (key == PetFoodType.UNKNOWN || key == PetFoodType.NoEatable) ?
-                           ""d : format("%.1f"d, item.petFoodInfo[key]);
+            auto type = item.ペットアイテム.種別;
+            textBox.enabled = type != PetFoodType.UNKNOWN &&
+                              type != PetFoodType.NoEatable &&
+                              item.isWritable!"ペットアイテム";
+            petComboBox.enabled = item.isWritable!"ペットアイテム";
+            textBox.text = (type == PetFoodType.UNKNOWN || type == PetFoodType.NoEatable) ?
+                           ""d : format("%.1f"d, item.ペットアイテム.効果);
             addChild(petComboBox);
             addChild(textBox);
         }
@@ -145,7 +145,7 @@ class ItemEditDialog: Dialog
         auto propCap = new TextWidget("", "特殊条件"d);
         auto table = new TableLayout;
         table.colCount = 14;
-        auto props = item.properties;
+        auto props = item.特殊条件;
         foreach(pr; [EnumMembers!SpecialProperty])
         {
             import std.array;
@@ -224,14 +224,14 @@ private:
         tabFrame.setItemDetail(ItemDetailFrame.create(original.name.to!dstring, idx+1, tabFrame.controller.model, customInfo), idx);
     }
 
-    Item original;
-    Item updated;
+    ItemInfo original;
+    ItemInfo updated;
     CustomInfo customInfo;
     RecipeTabFrame tabFrame;
     int idx;
 }
 
-auto showItemEditDialog(Window parent, RecipeTabFrame frame, Item item, int index, CustomInfo ci)
+auto showItemEditDialog(Window parent, RecipeTabFrame frame, ItemInfo item, int index, CustomInfo ci)
 {
     auto dlg = new ItemEditDialog(parent, frame, item, index, ci);
     dlg.show;
@@ -320,3 +320,5 @@ auto addCheckElem(Widget layout, dstring caption, bool checked, bool enabled, vo
         return true;
     };
 }
++/
+

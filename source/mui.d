@@ -31,8 +31,9 @@ extern(C) int UIAppMain(string[] args)
     import coop.core.character;
     import coop.mui.model.config;
     import coop.mui.model.custom_info;
-    import coop.core;
-    import coop.core.wisdom;
+    import coop.core: WisdomModel;
+    import coop.core.wisdom: Wisdom;
+    import coop.mui.model.wisdom_adapter;
     import coop.mui.view.main_frame;
     import coop.util;
 
@@ -40,10 +41,36 @@ extern(C) int UIAppMain(string[] args)
 
     auto wisdom = new Wisdom(SystemResourceBase);
 
-    auto cInfoDir = buildPath(UserResourceBase, "wisdom");
-    mkdirRecurse(cInfoDir);
-    auto customInfo = new CustomInfo(cInfoDir);
-    scope(success) customInfo.save;
+    CustomInfo customInfo;
+    auto customInfoFile = buildPath(UserResourceBase, "custom-info.json");
+
+    if (buildPath(UserResourceBase, "wisdom").exists)
+    {
+        auto cInfoDir = buildPath(UserResourceBase, "wisdom");
+        customInfo = new CustomInfo(cInfoDir);
+    }
+    else
+    {
+        if (customInfoFile.exists)
+        {
+            import vibe.data.json;
+            customInfo = customInfoFile
+                         .readText
+                         .parseJsonString
+                         .deserialize!(JsonSerializer, CustomInfo);
+        }
+        else
+        {
+            customInfo = new CustomInfo;
+            customInfo.ver = Version;
+        }
+    }
+    scope(success)
+    {
+        import std.stdio;
+        import vibe.data.json;
+        File(customInfoFile, "w").write(customInfo.serializeToPrettyJson);
+    }
 
     auto config = new Config(buildPath(UserResourceBase, "config.json"));
     scope(success) config.save;
@@ -69,6 +96,7 @@ extern(C) int UIAppMain(string[] args)
                                                  config.windowHeight);
 
     auto model = new WisdomModel(wisdom);
+    model__ = new WisdomAdapter(model);
     window.mainWidget = new MainFrame(model, chars, config, customInfo);
     window.windowIcon = drawableCache.getImage("coop-icon");
     window.show;

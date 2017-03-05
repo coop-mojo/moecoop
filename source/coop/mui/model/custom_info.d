@@ -7,53 +7,38 @@ module coop.mui.model.custom_info;
 
 class CustomInfo
 {
-    import coop.core.item;
+    /// バージョン情報
+    @name("version") string ver;
 
     /// アイテム一覧
-    Item[string] itemList;
-
-    /// アイテム種別ごとの固有情報一覧
-    ExtraInfo[string][ItemType] extraInfoList;
+    UserItemInfo[string] items;
 
     /// アイテムごとの調達価格
-    int[string] procurementPriceList;
+    int[string] prices;
 
-    this(string baseDir)
+    this()
     {
-        baseDir_ = baseDir;
-        with(ItemType)
-        {
-            import std.conv;
-
-            extraInfoList[Food.to!ItemType] = readFoodList(baseDir_).to!(ExtraInfo[string]);
-            extraInfoList[Drink.to!ItemType] = readDrinkList(baseDir_).to!(ExtraInfo[string]);
-            extraInfoList[Liquor.to!ItemType] = readLiquorList(baseDir_).to!(ExtraInfo[string]);
-            extraInfoList[Weapon.to!ItemType] = readWeaponList(baseDir_).to!(ExtraInfo[string]);
-            extraInfoList[Armor.to!ItemType] = readArmorList(baseDir_).to!(ExtraInfo[string]);
-            extraInfoList[Bullet.to!ItemType] = readBulletList(baseDir_).to!(ExtraInfo[string]);
-            extraInfoList[Shield.to!ItemType] = readShieldList(baseDir_).to!(ExtraInfo[string]);
-        }
-        itemList = readItemList(baseDir_);
-        procurementPriceList = readProcPriceList(baseDir_);
+        ver = Version;
     }
 
-    auto save()
+    this(string baseDir) // 1.1.9 以下
     {
-        import std.file;
-        import std.path;
-        import std.stdio;
-        import vibe.data.json;
+        import std.array;
+        import std.algorithm;
+        import std.typecons;
 
-        auto itemDir = buildPath(baseDir_, "アイテム");
-        mkdirRecurse(itemDir);
-        auto items = File(buildPath(itemDir, "アイテム.json"), "w");
-        items.writeln(itemList.values.serializeToPrettyJson);
+        import coop.core.item: readItemList;
 
-        auto prices = File(buildPath(baseDir_, "調達価格.json"), "w");
-        prices.writeln(procurementPriceList.serializeToPrettyJson);
+        auto alist = readItemList(baseDir);
+        items = alist.byKeyValue.map!(kv => tuple(kv.key, UserItemInfo(kv.value))).assocArray;
+        prices = readProcPriceList(baseDir);
+
+        ver = Version;
     }
 private:
-    string baseDir_;
+    import vibe.data.json;
+
+    import coop.util;
 }
 
 auto readProcPriceList(string sysBase)
@@ -74,4 +59,41 @@ auto readProcPriceList(string sysBase)
     return file.readText
                .parseJsonString
                .deserialize!(JsonSerializer, int[string]);
+}
+
+struct UserItemInfo
+{
+    import coop.core.item: Item, PetFoodType;
+    import coop.server.model;
+
+    this(Item item)
+    {
+        import std.algorithm;
+        import std.conv;
+        import std.range;
+
+        アイテム名 = item.name;
+        英名 = item.ename;
+        重さ = item.weight;
+        NPC売却価格 = item.price;
+        info = item.info;
+        特殊条件 = item.properties.map!(p => SpecialPropertyInfo(p.to!string, cast(string)p)).array;
+        転送可 = item.transferable;
+        スタック可 = item.stackable;
+        ペットアイテム = item.petFoodInfo.byKeyValue.map!(kv => PetFoodInfo(kv.key.to!PetFoodType.to!string, kv.value)).front;
+        備考 = item.remarks;
+        アイテム種別 = cast(string)item.type;
+    }
+
+    string アイテム名;
+    string 英名;
+    double 重さ;
+    uint NPC売却価格;
+    string info;
+    SpecialPropertyInfo[] 特殊条件;
+    bool 転送可;
+    bool スタック可;
+    PetFoodInfo ペットアイテム;
+    string 備考;
+    string アイテム種別;
 }

@@ -48,7 +48,7 @@ class RecipeTabFrame: TabFrameBase
         {
             import std.traits;
 
-            import coop.core;
+            import coop.core: SortOrder;
 
             items = [EnumMembers!SortOrder].to!(dstring[]);
             selectedItemIndex = 0;
@@ -113,21 +113,8 @@ class RecipeTabFrame: TabFrameBase
             return true;
         };
 
-        childById!Button("editItem1").click = (Widget _) {
-            import coop.mui.view.item_edit_dialog;
-            import coop.mui.view.item_detail_frame;
-
-            showItemEditDialog(root.window, this, childById!ItemDetailFrame("detail1").item, 0, controller.customInfo);
-            return true;
-        };
-
-        childById!Button("editItem2").click = (Widget _) {
-            import coop.mui.view.item_edit_dialog;
-            import coop.mui.view.item_detail_frame;
-
-            showItemEditDialog(root.window, this, childById!ItemDetailFrame("detail2").item, 1, controller.customInfo);
-            return true;
-        };
+        childById!Button("editItem1").enabled = false;
+        childById!Button("editItem2").enabled = false;
     }
 
     override @property EditLine queryBox()
@@ -209,7 +196,7 @@ class RecipeTabFrame: TabFrameBase
         import std.algorithm;
 
         return pairs.map!((pair) {
-                import coop.core;
+                import coop.core: SortOrder;
 
                 auto category = pair.category.to!dstring;
                 auto recipes = pair.recipes.to!(dstring[]);
@@ -370,7 +357,8 @@ private:
         auto characters = controller.characters;
         auto binders = relatedBindersFor(recipe, category);
 
-        auto r = controller.model.getRecipe(recipe);
+        import coop.mui.model.wisdom_adapter;
+        auto r = model__.getRecipe(recipe.to!string);
 
         ret.checkStateChanged = (bool marked) {
             auto c = characters[charactersBox.selectedItem];
@@ -385,7 +373,7 @@ private:
             else
             {
                 binders.each!(b => c.unmarkFiledRecipe(recipe.to!string, b.to!string));
-                if (!c.hasSkillFor(r) || r.requiresRecipe)
+                if (!c.hasSkillFor(r) || r.レシピ必須)
                 {
                     ret.textColor = "gray";
                 }
@@ -393,7 +381,7 @@ private:
         };
         ret.checked = binders.canFind!(b => characters[charactersBox.selectedItem].hasRecipe(recipe.to!string, b.to!string));
         ret.enabled = binders.length == 1;
-        if (r.requiresRecipe)
+        if (r.レシピ必須)
         {
             ret.textColor = (ret.checked && characters[charactersBox.selectedItem].hasSkillFor(r)) ? "black" : "gray";
         }
@@ -405,25 +393,27 @@ private:
         {
             import std.range;
 
-            if (r.name.empty)
+            if (r.レシピ名.empty)
             {
                 ret.textColor = "red";
             }
             else
             {
                 import std.algorithm;
+                import std.exception;
 
-                auto prods = r.products.keys;
-                if (!prods.all!(p => controller.model.getItem(p)))
+                auto prods = r.生成物.map!"a.アイテム名".array;
+                if (prods.any!(p => collectException(model__.getItem(p))))
                 {
                     ret.textColor = "blue";
                 }
                 else
                 {
                     if (prods.any!((p) {
-                                import coop.core.item;
-                                auto ex = controller.model.getExtraInfo(p);
-                                return ex.type != ItemType.Others && !ex.extra.hasValue;
+                                import coop.core.item: ItemType;
+                                auto it = model__.getItem(p);
+                                return it.アイテム種別 != ItemType.Others &&
+                                    (!it.飲食物情報.isNull || !it.武器情報.isNull || !it.防具情報.isNull || !it.弾情報.isNull || !it.盾情報.isNull);
                             }))
                     {
                         ret.textFlags = TextFlag.Underline;
@@ -441,7 +431,7 @@ private:
             scope(exit) highlightDetailRecipe;
 
 
-            recipeDetail = RecipeDetailFrame.create(recipe, controller.model, characters);
+            recipeDetail = RecipeDetailFrame.create(recipe, model__, characters);
 
             auto itemNames = controller.model.getRecipe(recipe).products.keys.to!(dstring[]);
             enforce(itemNames.length <= 2);
@@ -466,7 +456,15 @@ private:
         auto a = new Action(25000, "このレシピをコピー"d); // 25000 自体に意味はない
         auto it = new MenuItem(a);
         it.menuItemClick = (MenuItem _) {
-            platform.setClipboardText(r.toShortString.to!dstring);
+            import std.format;
+            import std.string;
+
+            auto str = format("%s (%s%s) = %s"d,
+                              r.生成物.map!(pr => format("%sx%s", pr.アイテム名.toHankaku.removechars(" "), pr.個数)).join(","),
+                              r.必要スキル.byKeyValue.map!(kv => format("%s%.1f", kv.key.toHankaku.removechars(" "), kv.value)).join(","),
+                              r.レシピ必須 ? ": ﾚｼﾋﾟ必須" : "",
+                              r.材料.map!(ing => format("%sx%s", ing.アイテム名.toHankaku.removechars(" "), ing.個数)).join(" "));
+            platform.setClipboardText(str);
             return false;
         };
         menu.add(it);

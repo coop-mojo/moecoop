@@ -9,9 +9,9 @@ import dlangui;
 
 import std.traits;
 
-import coop.core.item;
-import coop.core.wisdom;
-import coop.core;
+// import coop.core.item;
+// import coop.core.wisdom;
+import coop.core: WisdomModel;
 import coop.mui.model.custom_info;
 
 class ItemDetailFrame: ScrollWidget
@@ -34,15 +34,20 @@ class ItemDetailFrame: ScrollWidget
         backgroundColor = "white";
     }
 
-    static auto create(dstring name, int idx, WisdomModel model, CustomInfo customInfo)
+    static auto create(dstring name, int idx, WisdomModel __, CustomInfo customInfo)
     {
         import std.conv;
+        import std.exception;
+
+        import vibe.http.common;
 
         import coop.util;
+        import coop.mui.model.wisdom_adapter;
+        import coop.core.item: overlaid;
 
-        auto orig = model.getItem(name);
+        auto orig = model__.getItem(name.to!string).ifThrown!HTTPStatusException(ItemInfo.init); // 参考価格がふくまれていない！
         auto ret = new typeof(this)("detail"~idx.to!string);
-        auto item = Overlaid!Item(orig, name.to!string in customInfo.itemList);
+        auto item = overlaid(orig, name.to!string in customInfo.items);
         ret.item_ = orig;
 
         auto table = ret.childById("table");
@@ -54,59 +59,58 @@ class ItemDetailFrame: ScrollWidget
 
             table.addElem("名前", name);
 
-            table.addElem("英名", item.ename.empty ? "わからん（´・ω・｀）" : item.ename, item.isOverlaid!"ename");
-            table.addElem("重さ", item.weight.isNaN ? "そこそこの重さ" : format("%.2f", item.weight), item.isOverlaid!"weight");
+            table.addElem("英名", item.英名.empty ? "わからん（´・ω・｀）" : item.英名, item.isOverlaid!"英名");
+            table.addElem("重さ", item.重さ.isNaN ? "そこそこの重さ" : format("%.2f", item.重さ), item.isOverlaid!"重さ");
 
-            string extraRemarks = table.addExtraElem(name, model);
+            string extraRemarks = table.addExtraElem(item);
 
-            table.addElem("NPC売却価格", format("%s g", item.price), item.isOverlaid!"price");
+            table.addElem("NPC売却価格", format("%s g", item.NPC売却価格), item.isOverlaid!"NPC売却価格");
 
             import coop.core.price;
             table.addChild(new TextWidget("", "参考価格: "d));
             auto lo = new HorizontalLayout;
-            auto refPriceWidget = new TextWidget("", format("%s g"d, model.costFor(item.name, customInfo.procurementPriceList)));
+            auto refPriceWidget = new TextWidget("", format("%s g"d, __.costFor(item.アイテム名, customInfo.prices)));
             lo.addChild(refPriceWidget);
             lo.addChild(new TextWidget("", "(調達価格: "d));
             import coop.mui.view.editors;
-            auto procurementPriceWidget = new EditIntLine("", name.to!string in customInfo.procurementPriceList ?
-                                                                                    customInfo.procurementPriceList[name.to!string].to!dstring : "");
+            auto procurementPriceWidget = new EditIntLine("", name.to!string in customInfo.prices ?
+                                                                                    customInfo.prices[name.to!string].to!dstring : "");
             procurementPriceWidget.maxWidth = 100;
             procurementPriceWidget.contentChange = (EditableContent content) {
                 if (content.text.empty)
                 {
-                    customInfo.procurementPriceList.remove(item.name);
+                    customInfo.prices.remove(item.アイテム名);
                 }
                 else
                 {
-                    customInfo.procurementPriceList[item.name] = content.text.to!int;
+                    customInfo.prices[item.アイテム名] = content.text.to!int;
                 }
-                refPriceWidget.text = format("%s g"d, model.costFor(item.name, customInfo.procurementPriceList));
+                refPriceWidget.text = format("%s g"d, __.costFor(item.アイテム名, customInfo.prices));
             };
             lo.addChild(procurementPriceWidget);
             lo.addChild(new TextWidget("", " g)"d));
             table.addChild(lo);
 
-            table.addElem("転送可", item.transferable ? "はい" : "いいえ", item.isOverlaid!"transferable");
-            table.addElem("スタック可", item.stackable ? "はい": "いいえ", item.isOverlaid!"stackable");
+            table.addElem("転送可", item.転送可 ? "はい" : "いいえ", item.isOverlaid!"転送可");
+            table.addElem("スタック可", item.スタック可 ? "はい": "いいえ", item.isOverlaid!"スタック可");
 
-            if (!item.properties.empty)
+            if (!item.特殊条件.empty)
             {
                 import std.algorithm;
                 import std.conv;
-                table.addElem("特殊条件", (cast(string[])item.properties).join(", ").to!dstring, item.isOverlaid!"properties");
+                table.addElem("特殊条件", item.特殊条件.map!"a.詳細".join(", ").to!dstring, item.isOverlaid!"特殊条件");
             }
 
-            if (item.petFoodInfo.keys[0] != PetFoodType.NoEatable)
+            import coop.core.item: PetFoodType;
+            if (item.ペットアイテム.種別 != PetFoodType.NoEatable.to!string)
             {
                 import std.algorithm;
 
                 table.addElem("ペットアイテム",
-                              item.petFoodInfo
-                                  .byKeyValue
-                                  .map!(kv => format("%s (%.1f)",
-                                                     kv.key,
-                                                     kv.value)).join,
-                              item.isOverlaid!"petFoodInfo");
+                              format("%s (%.1f)",
+                                     item.ペットアイテム.種別,
+                                     item.ペットアイテム.効果),
+                              item.isOverlaid!"ペットアイテム");
             }
 
             if (!item.info.empty)
@@ -114,7 +118,7 @@ class ItemDetailFrame: ScrollWidget
                 table.addElem("info", item.info, item.isOverlaid!"info");
             }
 
-            auto rem = orig ? item.remarks : "細かいことはわかりません（´・ω・｀）";
+            auto rem = orig.アイテム名 ? item.備考 : "細かいことはわかりません（´・ω・｀）";
             if (!rem.empty || !extraRemarks.empty)
             {
                 import std.algorithm;
@@ -131,7 +135,8 @@ class ItemDetailFrame: ScrollWidget
         return item_;
     }
 private:
-    Item item_;
+    import coop.mui.model.wisdom_adapter: ItemInfo;
+    ItemInfo item_;
 }
 
 
@@ -147,72 +152,68 @@ auto addElem(dstring delim = ": ", Str1, Str2)(Widget layout, Str1 caption, Str2
     }
 }
 
-auto addExtraElem(Str)(Widget layout, Str name, WisdomModel model)
-    if (isSomeString!Str)
+auto addExtraElem(Item)(Widget layout, Item item)
 {
-    auto ex = model.getExtraInfo(name.to!string);
-    if (ex.type == ItemType.UNKNOWN || ex.extra == ExtraInfo.init)
-    {
-        return "";
-    }
-
-    final switch(ex.type) with(ItemType)
+    import coop.core.item: ItemType;
+    final switch(item.アイテム種別) with(ItemType)
     {
     case Food, Drink, Liquor:{
         import std.format;
 
-        auto info = ex.extra.peek!FoodInfo;
-        layout.addElem("効果", format("%.1f", info.effect));
+        auto info = item.飲食物情報;
+        layout.addElem("効果", format("%.1f", info.効果));
 
-        if (auto effectName = info.additionalEffect)
+        if (!info.付加効果.isNull) with(info.付加効果)
         {
-            layout.addElem("付加効果", effectName);
-            if (auto einfo = model.getFoodEffect(effectName))
+            import std.range;
+
+            layout.addElem("付加効果", バフ名);
+            if (!バフグループ.empty)
             {
                 import std.algorithm;
                 import std.array;
 
-                auto effectStr = einfo
-                                 .effects
+                auto effectStr = 効果
                                  .byKeyValue
                                  .map!(kv => format("%s: %s%s",
                                                     kv.key,
                                                     kv.value > 0 ? "+" : "",
                                                     kv.value))
                                  .join(", ");
-                if (einfo.otherEffects)
+                if (その他効果)
                 {
                     if (effectStr)
                         effectStr ~= ", ";
-                    effectStr ~= einfo.otherEffects;
+                    effectStr ~= その他効果;
                 }
+                import coop.core.item: AdditionalEffectGroup;
                 layout.addElem!""("", effectStr);
                 layout.addElem("バフグループ",
-                               einfo.group == AdditionalEffectGroup.Others ? "その他"
-                                                                           : einfo.group.to!string);
-                layout.addElem("効果時間", format("%s 秒", einfo.duration));
+                               バフグループ == AdditionalEffectGroup.Others.to!string ? "その他"
+                               : バフグループ.to!string);
+                layout.addElem("効果時間", format("%s 秒", 効果時間));
 
-                return einfo.remarks;
+                return 備考;
             }
         }
         break;
     }
     case Expendable:{
-        import std.range;
+        // import std.range;
 
-        auto info = ex.extra.peek!ExpendableInfo;
-        if (!info.skill.keys.empty)
-        {
-            import std.algorithm;
-            import std.format;
+        // auto info = ex.extra.peek!ExpendableInfo;
+        // if (!info.skill.keys.empty)
+        // {
+        //     import std.algorithm;
+        //     import std.format;
 
-            layout.addElem("必要スキル",
-                           info.skill
-                               .byKeyValue
-                               .map!(kv => format("%s (%.1f)", kv.key, kv.value))
-                               .join(", "));
-        }
-        layout.addElem("効果", info.effect);
+        //     layout.addElem("必要スキル",
+        //                    info.skill
+        //                        .byKeyValue
+        //                        .map!(kv => format("%s (%.1f)", kv.key, kv.value))
+        //                        .join(", "));
+        // }
+        // layout.addElem("効果", info.effect);
         // TODO: 具体的な効果を wisdom に問い合わせて表示
         break;
     }
@@ -221,41 +222,40 @@ auto addExtraElem(Str)(Widget layout, Str name, WisdomModel model)
         import std.array;
         import std.format;
 
-        auto info = ex.extra.peek!WeaponInfo;
+        auto info = item.武器情報;
 
-        auto damageStr = Grade.values
-                              .filter!(g => info.damage.keys.canFind(g))
-                              .map!(g => format("%s: %.1f", g.to!Grade, info.damage[g.to!Grade]))
-                              .join(", ");
+        auto damageStr = info.攻撃力
+                             .map!(g => format("%s: %.1f", g.状態, g.効果))
+                             .join(", ");
         layout.addElem("ダメージ", damageStr);
-        layout.addElem("攻撃間隔", info.duration.to!string);
-        layout.addElem("有効レンジ", format("%.1f", info.range));
-        layout.addElem(cast(string)info.type, info.exhaustion.to!dstring);
+        layout.addElem("攻撃間隔", info.攻撃間隔.to!string);
+        layout.addElem("有効レンジ", format("%.1f", info.有効レンジ));
+        layout.addElem(info.消耗タイプ, info.耐久.to!dstring);
         layout.addElem("必要スキル",
-                       info.skills
-                           .byKeyValue
-                           .map!(kv => format("%s (%.1f)", kv.key, kv.value))
+                       info.必要スキル
+                           .map!(sk => format("%s (%.1f)", sk.スキル名, sk.スキル値))
                            .join(", "));
-        layout.addElem("装備スロット", format("%s (%s)", cast(string)info.slot, info.isDoubleHands ? "両手" : "片手"));
-        layout.addElem("素材", cast(string)info.material);
-        if (info.restriction.front != ShipRestriction.Any)
+        layout.addElem("装備スロット", format("%s (%s)", info.装備スロット, info.両手装備 ? "両手" : "片手"));
+        layout.addElem("素材", info.素材);
+        import coop.core.item: ShipRestriction;
+        if (info.装備可能シップ.front.シップ名 != ShipRestriction.Any)
         {
-            layout.addElem("装備可能シップ", info.restriction.map!(a => a.to!dstring~"系").join(", "));
+            layout.addElem("装備可能シップ", info.装備可能シップ.map!(a => a.シップ名.to!dstring~"系").join(", "));
         }
 
-        if (!info.additionalEffect.keys.empty)
+        if (!info.付加効果.keys.empty)
         {
-            layout.addElem("付与効果",
-                           info.additionalEffect
+            layout.addElem("付加効果",
+                           info.付加効果
                                .byKeyValue
                                .map!(kv => format("%s: %s%%"d, kv.key, kv.value))
                                .join(", "));
         }
 
-        if (!info.effects.keys.empty)
+        if (!info.追加効果.keys.empty)
         {
             layout.addElem("追加効果",
-                           info.effects
+                           info.追加効果
                                .byKeyValue
                                .map!(kv => format("%s: %s%.1f"d,
                                                   kv.key,
@@ -264,16 +264,16 @@ auto addExtraElem(Str)(Widget layout, Str name, WisdomModel model)
                                .join(", "));
         }
 
-        if (!info.specials.empty)
+        if (!info.効果アップ.empty)
         {
-            layout.addElem("効果アップ", info.specials[].join(", "));
+            layout.addElem("効果アップ", info.効果アップ.join(", "));
         }
 
-        if (info.canMagicCharged)
+        if (info.魔法チャージ)
         {
             layout.addElem("魔法チャージ", "可能");
         }
-        if (info.canElementCharged)
+        if (info.属性チャージ)
         {
             layout.addElem("属性チャージ", "可能");
         }
@@ -284,35 +284,34 @@ auto addExtraElem(Str)(Widget layout, Str name, WisdomModel model)
         import std.array;
         import std.format;
 
-        auto info = ex.extra.peek!ArmorInfo;
+        auto info = item.防具情報;
 
-        auto ACStr = Grade.values
-                          .filter!(g => info.AC.keys.canFind(g))
-                          .map!(g => format("%s: %.1f"d, g.to!Grade, info.AC[g.to!Grade]))
-                          .join(", ");
+        auto ACStr = info.アーマークラス
+                         .map!(g => format("%s: %.1f"d, g.状態, g.効果))
+                         .join(", ");
         layout.addElem("アーマークラス", ACStr);
-        layout.addElem(cast(string)info.type, info.exhaustion.to!string);
+        layout.addElem(info.消耗タイプ, info.耐久.to!string);
         layout.addElem("必要スキル",
-                       info.skills
-                           .byKeyValue
-                           .map!(kv => format("%s (%.1f)", kv.key, kv.value))
+                       info.必要スキル
+                           .map!(sk => format("%s (%.1f)", sk.スキル名, sk.スキル値))
                            .join(", "));
-        layout.addElem("装備スロット", cast(string)info.slot);
-        layout.addElem("素材", cast(string)info.material);
-        if (info.restriction.front != ShipRestriction.Any)
+        layout.addElem("装備スロット", info.装備スロット);
+        layout.addElem("素材", info.素材);
+        import coop.core.item: ShipRestriction;
+        if (info.装備可能シップ.front.シップ名 != ShipRestriction.Any)
         {
-            layout.addElem("装備可能シップ", info.restriction.map!(a => a.to!string~"系").join(", "));
+            layout.addElem("装備可能シップ", info.装備可能シップ.map!(a => a.シップ名.to!string~"系").join(", "));
         }
 
-        if (!info.additionalEffect.empty)
+        if (!info.付加効果.empty)
         {
-            layout.addElem("付加効果", info.additionalEffect);
+            layout.addElem("付加効果", info.付加効果);
         }
 
-        if (!info.effects.keys.empty)
+        if (!info.追加効果.keys.empty)
         {
             layout.addElem("追加効果",
-                           info.effects
+                           info.追加効果
                                .byKeyValue
                                .map!(kv => format("%s: %s%.1f",
                                                   kv.key,
@@ -321,16 +320,16 @@ auto addExtraElem(Str)(Widget layout, Str name, WisdomModel model)
                                .join(", "));
         }
 
-        if (!info.specials.empty)
+        if (!info.効果アップ.empty)
         {
-            layout.addElem("効果アップ", info.specials[].join(", "));
+            layout.addElem("効果アップ", info.効果アップ.join(", "));
         }
 
-        if (info.canMagicCharged)
+        if (info.魔法チャージ)
         {
             layout.addElem("魔法チャージ", "可能");
         }
-        if (info.canElementCharged)
+        if (info.魔法チャージ)
         {
             layout.addElem("属性チャージ", "可能");
         }
@@ -341,25 +340,25 @@ auto addExtraElem(Str)(Widget layout, Str name, WisdomModel model)
         import std.array;
         import std.format;
 
-        auto info = ex.extra.peek!BulletInfo;
+        auto info = item.弾情報;
 
-        layout.addElem("ダメージ", format("%.1f", info.damage));
-        layout.addElem("有効レンジ", format("%.1f", info.range));
-        layout.addElem("角度補正角", info.angle.to!string);
+        layout.addElem("ダメージ", format("%.1f", info.ダメージ));
+        layout.addElem("有効レンジ", format("%.1f", info.有効レンジ));
+        layout.addElem("角度補正角", info.角度補正角.to!string);
         layout.addElem("必要スキル",
-                       info.skills
-                           .byKeyValue
-                           .map!(kv => format("%s (%.1f)", kv.key, kv.value))
+                       info.必要スキル
+                           .map!(sk => format("%s (%.1f)", sk.スキル名, sk.スキル値))
                            .join(", "));
         layout.addElem("装備スロット", "矢/弾");
-        if (info.restriction.front != ShipRestriction.Any)
+        import coop.core.item: ShipRestriction;
+        if (info.使用可能シップ.front.シップ名 != ShipRestriction.Any)
         {
-            layout.addElem("装備可能シップ", info.restriction.map!(a => a.to!string~"系").join(", "));
+            layout.addElem("使用可能シップ", info.使用可能シップ.map!(a => a.シップ名.to!string~"系").join(", "));
         }
-        if (!info.effects.keys.empty)
+        if (!info.追加効果.keys.empty)
         {
             layout.addElem("追加効果",
-                           info.effects
+                           info.追加効果
                                .byKeyValue
                                .map!(kv => format("%s: %s%s",
                                                   kv.key,
@@ -367,9 +366,9 @@ auto addExtraElem(Str)(Widget layout, Str name, WisdomModel model)
                                                   kv.value))
                                .join(", "));
         }
-        if (!info.additionalEffect.empty)
+        if (!info.付与効果.empty)
         {
-            layout.addElem("付与効果", info.additionalEffect);
+            layout.addElem("付与効果", info.付与効果);
         }
         break;
     }
@@ -378,35 +377,34 @@ auto addExtraElem(Str)(Widget layout, Str name, WisdomModel model)
         import std.array;
         import std.format;
 
-        auto info = ex.extra.peek!ShieldInfo;
+        auto info = item.盾情報;
 
-        auto ACStr = Grade.values
-                          .filter!(g => info.AC.keys.canFind(g))
-                          .map!(g => format("%s: %.1f", g.to!Grade, info.AC[g.to!Grade]))
-                          .join(", ");
+        auto ACStr = info.アーマークラス
+                         .map!(g => format("%s: %.1f", g.状態, g.効果))
+                         .join(", ");
         layout.addElem("アーマークラス", ACStr);
-        layout.addElem(cast(string)info.type, info.exhaustion.to!string);
+        layout.addElem(info.消耗タイプ, info.耐久.to!string);
         layout.addElem("必要スキル",
-                       info.skills
-                           .byKeyValue
-                           .map!(kv => format("%s (%.1f)", kv.key, kv.value))
+                       info.必要スキル
+                           .map!(sk => format("%s (%.1f)", sk.スキル名, sk.スキル値))
                            .join(", "));
-        layout.addElem("回避", format("%s%%", info.avoidRatio));
-        layout.addElem("素材", cast(string)info.material);
-        if (info.restriction.front != ShipRestriction.Any)
+        layout.addElem("回避", format("%s%%", info.回避));
+        layout.addElem("素材", info.素材);
+        import coop.core.item: ShipRestriction;
+        if (info.使用可能シップ.front.シップ名 != ShipRestriction.Any)
         {
-            layout.addElem("装備可能シップ", info.restriction.map!(a => a.to!string~"系").join(", "));
+            layout.addElem("使用可能シップ", info.使用可能シップ.map!(a => a.シップ名.to!string~"系").join(", "));
         }
 
-        if (!info.additionalEffect.empty)
+        if (!info.付加効果.empty)
         {
-            layout.addElem("付加効果", info.additionalEffect);
+            layout.addElem("付加効果", info.付加効果);
         }
 
-        if (!info.effects.keys.empty)
+        if (!info.追加効果.keys.empty)
         {
             layout.addElem("追加効果",
-                           info.effects
+                           info.追加効果
                                .byKeyValue
                                .map!(kv => format("%s: %s%.1f",
                                                   kv.key,
@@ -415,16 +413,16 @@ auto addExtraElem(Str)(Widget layout, Str name, WisdomModel model)
                                .join(", "));
         }
 
-        if (!info.specials.empty)
+        if (!info.効果アップ.empty)
         {
-            layout.addElem("効果アップ", info.specials[].join(", "));
+            layout.addElem("効果アップ", info.効果アップ.join(", "));
         }
 
-        if (info.canMagicCharged)
+        if (info.魔法チャージ)
         {
             layout.addElem("魔法チャージ", "可能");
         }
-        if (info.canElementCharged)
+        if (info.属性チャージ)
         {
             layout.addElem("属性チャージ", "可能");
         }
@@ -437,7 +435,7 @@ auto addExtraElem(Str)(Widget layout, Str name, WisdomModel model)
         break;
     }
     case UNKNOWN:
-        assert(false);
+        break;
     }
     return "";
 }

@@ -13,7 +13,7 @@ class RecipeMaterialTabFrame: TabFrameBase
     import std.container;
 
     import coop.mui.controller.recipe_material_tab_frame_controller;
-    import coop.core.recipe_graph;
+    import coop.core.recipe_graph: RecipeInfo, MaterialInfo, MatTuple;
     import coop.util;
     import coop.mui.view.main_frame;
 
@@ -193,8 +193,9 @@ class RecipeMaterialTabFrame: TabFrameBase
                 }
 
                 w.detailClicked = {
-                    import coop.core.item;
-                    import coop.core;
+                    // import coop.core.item;
+                    // import coop.core;
+                    import coop.mui.model.wisdom_adapter;
                     import coop.mui.view.item_detail_frame;
 
                     unhighlightDetailItems;
@@ -343,11 +344,12 @@ class RecipeMaterialTabFrame: TabFrameBase
                 auto w = new LinkWidget(r.to!string, r.name.to!dstring~": ");
                 auto t = new TextWidget("times", format("%s 回"d, 0));
                 w.click = (Widget _) {
+                    import coop.mui.model.wisdom_adapter;
                     import coop.mui.view.recipe_detail_frame;
 
                     unhighlightDetailRecipe;
                     scope(exit) highlightDetailRecipe;
-                    recipeDetail = RecipeDetailFrame.create(r.name.to!dstring, controller.model, controller.characters);
+                    recipeDetail = RecipeDetailFrame.create(r.name.to!dstring, model__, controller.characters);
                     return true;
                 };
                 if (!r.parentGroup.empty)
@@ -398,8 +400,8 @@ class RecipeMaterialTabFrame: TabFrameBase
                 auto w = new LinkWidget(lo.to!string, lo.to!dstring~": ");
                 auto n = new TextWidget("num", format("%s 個"d, 0));
                 w.click = (Widget _) {
-                    import coop.core.item;
-                    import coop.core;
+                    // import coop.core.item;
+                    // import coop.core;
                     import coop.mui.view.item_detail_frame;
 
                     unhighlightDetailItems;
@@ -467,8 +469,8 @@ class RecipeMaterialTabFrame: TabFrameBase
                     }
                 };
                 w.detailClicked = {
-                    import coop.core.item;
-                    import coop.core;
+                    // import coop.core.item;
+                    // import coop.core;
                     import coop.mui.view.item_detail_frame;
 
                     unhighlightDetailItems;
@@ -531,13 +533,15 @@ class RecipeMaterialTabFrame: TabFrameBase
 
                 rs.each!(w => w.visibility = Visibility.Visible);
                 rs[1].text = format("%s 回"d, *n);
-                auto detail = controller.model.getRecipe(r);
+                // auto detail = controller.model.getRecipe(r);
+                import coop.mui.model.wisdom_adapter;
+                auto detail = model__.getRecipe(r.to!string);
                 auto c = controller.characters[charactersBox.selectedItem];
-                if (!c.hasSkillFor(detail) || (detail.requiresRecipe && !c.hasRecipe(r.to!string)))
+                if (!c.hasSkillFor(detail) || (detail.レシピ必須 && !c.hasRecipe(r.to!string)))
                 {
                     rs[0].textColor = "gray";
                 }
-                else if (detail.ingredients.keys.all!(ing => childById!TableLayout("materials").row(ing.to!string)[0].checked))
+                else if (detail.材料.all!(ing => childById!TableLayout("materials").row(ing.アイテム名)[0].checked))
                 {
                     rs[0].textColor = "red";
                 }
@@ -674,10 +678,10 @@ class RecipeMaterialTabFrame: TabFrameBase
         import std.array;
         import std.conv;
 
-        if (preference.keys.empty)
-        {
-            preference = controller.model.getDefaultPreference.to!(dstring[dstring]);
-        }
+        // if (preference.keys.empty)
+        // {
+        //     preference = controller.model.getDefaultPreference.to!(dstring[dstring]);
+        // }
         auto elems = controller.model.getMenuRecipeResult(targets, owned, preference, leafMaterials);
         updateMaterialTable(elems.materials
                                  .byKeyValue

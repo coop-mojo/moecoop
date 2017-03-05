@@ -14,9 +14,7 @@ class RecipeDetailFrame: ScrollWidget, MenuItemActionHandler
     import std.range;
 
     import coop.core.character;
-    import coop.core.recipe;
-    import coop.core.wisdom;
-    import coop.core;
+    import coop.mui.model.wisdom_adapter;
 
     this() { super(); }
 
@@ -69,60 +67,62 @@ class RecipeDetailFrame: ScrollWidget, MenuItemActionHandler
         backgroundColor = "white";
     }
 
-    static auto create(dstring n, WisdomModel model, Character[dstring] chars)
+    static auto create(dstring n, WisdomAdapter model, Character[dstring] chars)
     {
-        auto r = model.getRecipe(n);
+        import std.algorithm;
+        import std.exception;
+
+        import vibe.http.common;
+
+        auto r = model.getRecipe(n.to!string).ifThrown!HTTPStatusException(RecipeInfo.init);
         auto ret = new typeof(this)(n.to!string);
         ret.recipe_ = r;
         with(ret)
         {
-            import std.algorithm;
             import std.array;
             import std.conv;
             import std.format;
 
             childById("recipe").text = n;
-            childById("tech").text = r.techniques[].array.to!(dstring[]).join(" or ");
-            childById("skills").text = r.requiredSkills
-                                       .byKeyValue
-                                       .map!(kv => format("%s (%.1f)"d,
-                                                          kv.key, kv.value))
-                                       .join(", ");
+            childById("tech").text = r.テクニック.to!(dstring[]).join(" or ");
+            childById("skills").text = r.必要スキル
+                                        .byKeyValue
+                                        .map!(kv => format("%s (%.1f)"d,
+                                                           kv.key, kv.value))
+                                        .join(", ");
 
             auto pLayout = childById("products");
-            r.products.byKeyValue
-                .map!(kv => format("%s x %s"d, kv.key, kv.value))
-                .map!(s => new TextWidget("product", s))
-                .each!(w => pLayout.addChild(w));
+            r.生成物.map!(pr => format("%s x %s"d, pr.アイテム名, pr.個数))
+                    .map!(s => new TextWidget("product", s))
+                    .each!(w => pLayout.addChild(w));
 
             auto ingLayout = childById("ingredients");
-            r.ingredients.byKeyValue
-                .map!(kv => format("%s x %s"d, kv.key, kv.value))
-                .map!(s => new TextWidget(null, s))
-                .each!(w => ingLayout.addChild(w));
+            r.材料.map!(ing => format("%s x %s"d, ing.アイテム名, ing.個数))
+                  .map!(s => new TextWidget(null, s))
+                  .each!(w => ingLayout.addChild(w));
 
             childById("requireRecipe").text =
-                r.requiresRecipe ? "はい" : "いいえ";
+                r.レシピ必須 ? "はい" : "いいえ";
 
             dstring rouletteText;
-            if (!r.isGambledRoulette && !r.isPenaltyRoulette)
+            if (!r.ギャンブル型 && !r.ペナルティ型)
             {
                 rouletteText = "通常"d;
             }
             else
             {
                 dstring[] attrs;
-                if (r.isGambledRoulette) attrs ~= "ギャンブル";
-                if (r.isPenaltyRoulette) attrs ~= "ペナルティ";
+                if (r.ギャンブル型) attrs ~= "ギャンブル";
+                if (r.ペナルティ型) attrs ~= "ペナルティ";
                 rouletteText = attrs.join(", ");
             }
             childById("roulette").text = rouletteText;
-            auto rem = r ? r.remarks.to!dstring : "作り方がわかりません（´・ω・｀）";
+            auto rem = r.レシピ名.empty ? r.備考.to!dstring : "作り方がわかりません（´・ω・｀）";
             childById("remarksInfo").visibility =
                 rem.empty ? Visibility.Gone : Visibility.Visible;
             childById("remarks").text = rem;
         }
-        ret.binders = model.getBindersFor(n).to!(dstring[]);
+        ret.binders = r.収録バインダー.map!"a.バインダー名".array.to!(dstring[]);
         if (!chars.keys.empty)
         {
             import std.algorithm;
@@ -156,7 +156,7 @@ class RecipeDetailFrame: ScrollWidget, MenuItemActionHandler
 
     @property auto name()
     {
-        return recipe_.name;
+        return recipe_.レシピ名;
     }
 
     // @property auto techniques()
@@ -194,12 +194,12 @@ class RecipeDetailFrame: ScrollWidget, MenuItemActionHandler
     //     return recipe_.requiresRecipe;
     // }
 
-    @property auto binders()
+    private @property auto binders()
     {
         return filedBinders_;
     }
 
-    @property auto binders(R)(R bs)
+    private @property auto binders(R)(R bs)
         if (isInputRange!R && is(ElementType!R == dstring))
     {
         filedBinders_ = bs;
@@ -211,7 +211,7 @@ class RecipeDetailFrame: ScrollWidget, MenuItemActionHandler
         return owners_;
     }
 
-    @property auto owners(RedBlackTree!dstring[dstring] os)
+    private @property auto owners(RedBlackTree!dstring[dstring] os)
     {
         import std.algorithm;
 
@@ -251,7 +251,7 @@ class RecipeDetailFrame: ScrollWidget, MenuItemActionHandler
         {
                 return false;
         }
-        else if (recipe_.products.keys.empty)
+        else if (recipe_.レシピ名.empty)
         {
             return false;
         }
@@ -283,7 +283,18 @@ class RecipeDetailFrame: ScrollWidget, MenuItemActionHandler
         {
             if (a.id == EditorActions.Copy)
             {
-                platform.setClipboardText(recipe_.toShortString.to!dstring);
+                import std.algorithm;
+                import std.format;
+                import std.string;
+
+                import coop.util;
+
+                auto str = format("%s (%s%s) = %s"d,
+                                  recipe_.生成物.map!(pr => format("%sx%s", pr.アイテム名.toHankaku.removechars(" "), pr.個数)).join(","),
+                                  recipe_.必要スキル.byKeyValue.map!(kv => format("%s%.1f", kv.key.toHankaku.removechars(" "), kv.value)).join(","),
+                                  recipe_.レシピ必須 ? ": ﾚｼﾋﾟ必須" : "",
+                                  recipe_.材料.map!(ing => format("%sx%s", ing.アイテム名.toHankaku.removechars(" "), ing.個数)).join(" "));
+                platform.setClipboardText(str);
                 return true;
             }
         }
@@ -292,7 +303,7 @@ class RecipeDetailFrame: ScrollWidget, MenuItemActionHandler
 
 private:
     MenuItem _popupMenu;
-    Recipe recipe_;
+    RecipeInfo recipe_;
     dstring[] filedBinders_;
     RedBlackTree!dstring[dstring] owners_;
 }

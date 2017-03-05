@@ -728,7 +728,7 @@ struct Overlaid(T, U = T)
         }
     }
 
-    @property auto isOverlaid(string field)() const pure nothrow
+    @property auto isOverlaid(string field)() const
         if (hasMember!(T, field) && hasMember!(U, field))
     {
         return overlaid !is null &&
@@ -736,17 +736,19 @@ struct Overlaid(T, U = T)
             mixin("original."~field~" != "~"overlaid."~field);
     }
 
-    @property auto isWritable(string field)() const pure nothrow
+    @property auto isWritable(string field)() const
         if (hasMember!(T, field) && hasMember!(U, field))
     {
         return overlaid !is null && (isOverlaid!field || isDefaultValue(mixin("original."~field)));
     }
 private:
-    static auto isDefaultValue(T)(const T val) pure nothrow
+    static auto isDefaultValue(T)(const T val)
     {
+        import std.conv;
+        import std.range;
         import coop.server.model: PetFoodInfo;
         static if (is(T == PetFoodInfo))
-            return val.種別 == "不明";
+            return val.種別.empty || val.種別 == PetFoodType.UNKNOWN.to!PetFoodType.to!string;
         else
             return val == T.init;
     }

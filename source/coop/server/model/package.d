@@ -89,7 +89,7 @@ struct GetMenuRecipeOptionsResult
 struct PostMenuRecipePreparationResult
 {
     static struct MatElem{
-        ItemLink 素材名;
+        ItemLink 素材情報;
         bool 中間素材;
     }
     RecipeLink[] 必要レシピ;
@@ -99,16 +99,16 @@ struct PostMenuRecipePreparationResult
 struct PostMenuRecipeResult
 {
     static struct RecipeElem{
-        RecipeLink レシピ名;
+        RecipeLink レシピ情報;
         int コンバイン数;
     }
     static struct MatElem{
-        ItemLink 素材名;
+        ItemLink 素材情報;
         int 素材数;
         bool 中間素材;
     }
     static struct LOElem{
-        ItemLink 素材名;
+        ItemLink 素材情報;
         int 余剰数;
     }
     RecipeElem[] 必要レシピ;

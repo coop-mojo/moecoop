@@ -659,12 +659,25 @@ class RecipeMaterialTabFrame: TabFrameBase
 
     auto initializeTables(dstring[] items)
     {
-        auto elems = controller.model.getMenuRecipeResult(items);
-        fullMaterialInfo = elems.materials;
+        import std.algorithm;
+        import std.range;
+        import std.typecons;
 
-        initRecipeTable(elems.recipes);
-        initLeftoverTable(elems.materials);
-        initMaterialTable(elems.materials);
+        import coop.mui.model.wisdom_adapter;
+
+        auto elems = model__.postMenuRecipePreparation(items.to!(string[]));
+        fullMaterialInfo = elems.必要素材.map!(a => MaterialInfo(a.素材情報.アイテム名, !a.中間素材)).array;
+        auto parentWithBros(string recipe)
+        {
+            auto ret = model__.getMenuRecipeOptions.選択可能レシピ.find!(e => e.レシピ候補.canFind!(a => a.レシピ名 == recipe)).array;
+            return ret.empty ? "" : ret.front.生産アイテム.アイテム名;
+        }
+        auto recipes = elems.必要レシピ.map!(a => RecipeInfo(a.レシピ名,
+                                                        parentWithBros(a.レシピ名))).array;
+
+        initRecipeTable(recipes);
+        initLeftoverTable(fullMaterialInfo);
+        initMaterialTable(fullMaterialInfo);
     }
 
     auto updateTables(int[dstring] targets, int[dstring] owned = null)
@@ -672,19 +685,28 @@ class RecipeMaterialTabFrame: TabFrameBase
         import std.algorithm;
         import std.array;
         import std.conv;
+        import std.typecons;
 
-        // if (preference.keys.empty)
-        // {
-        //     preference = controller.model.getDefaultPreference.to!(dstring[dstring]);
-        // }
-        auto elems = controller.model.getMenuRecipeResult(targets, owned, preference, leafMaterials);
-        updateMaterialTable(elems.materials
-                                 .byKeyValue
-                                 .filter!(kv => kv.key.to!dstring !in targets)
-                                 .map!"tuple(a.key.to!dstring, a.value)"
+        import coop.mui.model.wisdom_adapter;
+
+        if (preference.keys.empty)
+        {
+            preference = model__
+                         .getMenuRecipeOptions
+                         .選択可能レシピ
+                         .map!(a => tuple(a.生産アイテム.アイテム名.to!dstring,
+                                          a.レシピ候補.front.レシピ名.to!dstring))
+                         .assocArray;
+        }
+        auto elems = model__.postMenuRecipe(targets.to!(int[string]), owned.to!(int[string]),
+                                            preference.to!(string[string]), leafMaterials[].array.to!(string[]));
+        updateMaterialTable(elems.必要素材
+                                 .filter!(mat => mat.素材情報.アイテム名.to!dstring !in targets)
+                                 .map!(mat => tuple(mat.素材情報.アイテム名.to!dstring,
+                                                    MatTuple(mat.素材数, mat.中間素材)))
                                  .assocArray); // 最初にすること！
-        updateRecipeTable(elems.recipes.to!(int[dstring]));
-        updateLeftoverTable(elems.leftovers.to!(int[dstring]));
+        updateRecipeTable(elems.必要レシピ.map!"tuple(a.レシピ情報.レシピ名.to!dstring, a.コンバイン数)".assocArray);
+        updateLeftoverTable(elems.余り物.map!"tuple(a.素材情報.アイテム名.to!dstring, a.余剰数)".assocArray);
         showResult;
     }
 

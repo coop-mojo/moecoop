@@ -13,6 +13,34 @@ basePath: /
 produces:
   - application/json
 paths:
+  /version:
+    get:
+      summary: サーバーバージョン情報
+      description: 生協の知恵袋 API サーバーのバージョンを返します。デバッグ用です。
+      tags: 
+        - その他
+      responses:
+        200:
+          description: バージョン情報
+          schema:
+            type: object
+            properties:
+              version:
+                type: string
+  /information:
+    get:
+      summary: FS 生協からのお知らせなど
+      description: 生協の知恵袋の新バージョンのお知らせや、生協からの広告を返します。
+      tags: 
+        - その他
+      responses:
+        200:
+          description: 生協からのお知らせ
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
   /binders:
     get:
       summary: バインダー情報
@@ -451,7 +479,7 @@ paths:
                 items:
                   type: object
                   properties:
-                    素材名:
+                    素材情報:
                       $ref: '#/definitions/アイテム情報'
                     中間素材:
                       type: boolean
@@ -502,7 +530,7 @@ paths:
                 items:
                   type: object
                   properties:
-                    レシピ名:
+                    レシピ情報:
                       $ref: '#/definitions/レシピ情報'
                     コンバイン数:
                       type: integer
@@ -515,7 +543,7 @@ paths:
                 items:
                   type: object
                   properties:
-                    素材名:
+                    素材情報:
                       $ref: '#/definitions/アイテム情報'
                     素材数:
                       type: integer
@@ -530,7 +558,7 @@ paths:
                 items:
                   type: object
                   properties:
-                    素材名:
+                    素材情報:
                       $ref: '#/definitions/アイテム情報'
                     余剰数:
                       type: integer

@@ -468,7 +468,7 @@ enum Material: string
     Silver = "銀", Gold = "金", Mithril = "ミスリル", Orichalcum = "オリハルコン",
     Cotton = "綿", Silk = "絹", AnimalSkin = "動物の皮", DragonSkin = "竜の皮",
     Plant = "プラント", Wood = "木", Treant = "トレント", Paper = "紙",
-    Bamboo = "竹筒", BlackBamboo = "黒い竹", Bone = "骨", Stone = "石",
+    Bamboo = "竹筒", BlackBamboo = "黒い竹", Bone = "骨", Stone = "リペア ストーン",
     Glass = "ガラス", Crystal = "クリスタル", Cobalt = "コバルト", Chaos = "カオス",
 }
 

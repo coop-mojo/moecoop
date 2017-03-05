@@ -22,6 +22,7 @@ void main(string[] args)
 {
     import std.format;
     import std.getopt;
+    import std.process;
 
     import coop.core.wisdom;
     import coop.core;
@@ -32,7 +33,7 @@ void main(string[] args)
     ushort port = 8080;
     string msg;
 
-    auto hinfo = args.getopt("port|p", &port, "message|m", &msg);
+    auto hinfo = args.getopt("port|p", &port);
 
     if (hinfo.helpWanted)
     {
@@ -45,7 +46,7 @@ void main(string[] args)
 
     auto router = new URLRouter;
     router.get("/", staticTemplate!"index.dt");
-    router.registerRestInterface(new WebModel(model, msg));
+    router.registerRestInterface(new WebModel(model, environment.get("MOECOOP_MESSAGE", "")));
     auto settings = new HTTPServerSettings;
     settings.port = port;
     listenHTTP(settings, router);

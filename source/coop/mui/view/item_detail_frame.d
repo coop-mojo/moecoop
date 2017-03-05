@@ -106,7 +106,7 @@ class ItemDetailFrame: ScrollWidget
             {
                 import std.algorithm;
 
-                if (item.ペットアイテム.種別.empty || item.ペットアイテム.種別 == PetFoodType.UNKNOWN.to!PetFoodType.to!string)
+                if (item.ペットアイテム.種別 == PetFoodType.UNKNOWN.to!PetFoodType.to!string)
                 {
                     table.addElem("ペットアイテム", "不明", item.isOverlaid!"ペットアイテム");
                 }

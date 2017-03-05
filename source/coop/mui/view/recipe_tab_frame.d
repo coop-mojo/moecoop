@@ -357,8 +357,10 @@ private:
         auto characters = controller.characters;
         auto binders = relatedBindersFor(recipe, category);
 
+        import std.exception;
         import coop.mui.model.wisdom_adapter;
-        auto r = model__.getRecipe(recipe.to!string);
+        import vibe.http.common;
+        auto r = model__.getRecipe(recipe.to!string).ifThrown!HTTPStatusException(RecipeInfo.init);
 
         ret.checkStateChanged = (bool marked) {
             auto c = characters[charactersBox.selectedItem];
@@ -413,7 +415,7 @@ private:
                                 import coop.core.item: ItemType;
                                 auto it = model__.getItem(p);
                                 return it.アイテム種別 != ItemType.Others &&
-                                    (!it.飲食物情報.isNull || !it.武器情報.isNull || !it.防具情報.isNull || !it.弾情報.isNull || !it.盾情報.isNull);
+                                    (it.飲食物情報.isNull && it.武器情報.isNull && it.防具情報.isNull && &it.弾情報.isNull && it.盾情報.isNull);
                             }))
                     {
                         ret.textFlags = TextFlag.Underline;
@@ -433,7 +435,7 @@ private:
 
             recipeDetail = RecipeDetailFrame.create(recipe, model__, characters);
 
-            auto itemNames = controller.model.getRecipe(recipe).products.keys.to!(dstring[]);
+            auto itemNames = model__.getRecipe(recipe.to!string).生成物.map!"a.アイテム名".array.to!(dstring[]);
             enforce(itemNames.length <= 2);
             if (itemNames.empty)
             {

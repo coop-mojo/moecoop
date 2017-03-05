@@ -246,7 +246,7 @@ struct SpecialPropertyInfo
 
 struct PetFoodInfo
 {
-    string 種別;
+    string 種別 = "不明";
     double 効果;
 }
 
@@ -327,7 +327,7 @@ struct ItemInfo
     bool スタック可;
     PetFoodInfo ペットアイテム;
     string 備考;
-    string アイテム種別;
+    string アイテム種別 = "不明";
 
     Nullable!FoodInfo 飲食物情報;
     Nullable!WeaponInfo 武器情報;

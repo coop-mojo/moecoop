@@ -448,7 +448,7 @@ private:
                 import coop.mui.view.item_detail_frame;
 
                 showItemDetail(idx);
-                setItemDetail(ItemDetailFrame.create(name, idx+1, controller.model, customInfo), idx);
+                setItemDetail(ItemDetailFrame.create(name, idx+1, model__, customInfo), idx);
             }
         };
 

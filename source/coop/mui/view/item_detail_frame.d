@@ -9,10 +9,8 @@ import dlangui;
 
 import std.traits;
 
-// import coop.core.item;
-// import coop.core.wisdom;
-import coop.core: WisdomModel;
 import coop.mui.model.custom_info;
+import coop.mui.model.wisdom_adapter;
 
 class ItemDetailFrame: ScrollWidget
 {
@@ -34,7 +32,7 @@ class ItemDetailFrame: ScrollWidget
         backgroundColor = "white";
     }
 
-    static auto create(dstring name, int idx, WisdomModel __, CustomInfo customInfo)
+    static auto create(dstring name, int idx, WisdomAdapter model, CustomInfo customInfo)
     {
         import std.conv;
         import std.exception;
@@ -45,7 +43,7 @@ class ItemDetailFrame: ScrollWidget
         import coop.mui.model.wisdom_adapter;
         import coop.core.item: overlaid;
 
-        auto orig = model__.getItem(name.to!string).ifThrown!HTTPStatusException(ItemInfo.init); // 参考価格がふくまれていない！
+        auto orig = model.postItem(name.to!string, customInfo.prices).ifThrown!HTTPStatusException(ItemInfo.init);
         auto ret = new typeof(this)("detail"~idx.to!string);
         auto item = overlaid(orig, name.to!string in customInfo.items);
         ret.item_ = orig;
@@ -69,7 +67,7 @@ class ItemDetailFrame: ScrollWidget
             import coop.core.price;
             table.addChild(new TextWidget("", "参考価格: "d));
             auto lo = new HorizontalLayout;
-            auto refPriceWidget = new TextWidget("", format("%s g"d, __.costFor(item.アイテム名, customInfo.prices)));
+            auto refPriceWidget = new TextWidget("", format("%s g"d, item.参考価格));
             lo.addChild(refPriceWidget);
             lo.addChild(new TextWidget("", "(調達価格: "d));
             import coop.mui.view.editors;
@@ -77,15 +75,17 @@ class ItemDetailFrame: ScrollWidget
                                                                                     customInfo.prices[name.to!string].to!dstring : "");
             procurementPriceWidget.maxWidth = 100;
             procurementPriceWidget.contentChange = (EditableContent content) {
+                int modifiedPrice;
                 if (content.text.empty)
                 {
                     customInfo.prices.remove(item.アイテム名);
+                    modifiedPrice = item.アイテム名.empty ? 0 : model.postItem(name.to!string, customInfo.prices).参考価格;
                 }
                 else
                 {
-                    customInfo.prices[item.アイテム名] = content.text.to!int;
+                    customInfo.prices[item.アイテム名] = modifiedPrice = content.text.to!int;
                 }
-                refPriceWidget.text = format("%s g"d, __.costFor(item.アイテム名, customInfo.prices));
+                refPriceWidget.text = format("%s g"d, modifiedPrice);
             };
             lo.addChild(procurementPriceWidget);
             lo.addChild(new TextWidget("", " g)"d));
@@ -102,15 +102,22 @@ class ItemDetailFrame: ScrollWidget
             }
 
             import coop.core.item: PetFoodType;
-            if (item.ペットアイテム.種別 != PetFoodType.NoEatable.to!string)
+            if (item.ペットアイテム.種別 != PetFoodType.NoEatable.to!PetFoodType.to!string)
             {
                 import std.algorithm;
 
-                table.addElem("ペットアイテム",
-                              format("%s (%.1f)",
-                                     item.ペットアイテム.種別,
-                                     item.ペットアイテム.効果),
-                              item.isOverlaid!"ペットアイテム");
+                if (item.ペットアイテム.種別.empty || item.ペットアイテム.種別 == PetFoodType.UNKNOWN.to!PetFoodType.to!string)
+                {
+                    table.addElem("ペットアイテム", "不明", item.isOverlaid!"ペットアイテム");
+                }
+                else
+                {
+                    table.addElem("ペットアイテム",
+                                  format("%s (%.1f)",
+                                         item.ペットアイテム.種別,
+                                         item.ペットアイテム.効果),
+                                  item.isOverlaid!"ペットアイテム");
+                }
             }
 
             if (!item.info.empty)
@@ -154,7 +161,14 @@ auto addElem(dstring delim = ": ", Str1, Str2)(Widget layout, Str1 caption, Str2
 
 auto addExtraElem(Item)(Widget layout, Item item)
 {
+    import std.range;
     import coop.core.item: ItemType;
+
+    if (item.アイテム種別.empty)
+    {
+        return "";
+    }
+
     final switch(item.アイテム種別) with(ItemType)
     {
     case Food, Drink, Liquor:{

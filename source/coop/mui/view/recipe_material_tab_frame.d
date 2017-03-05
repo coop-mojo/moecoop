@@ -193,8 +193,6 @@ class RecipeMaterialTabFrame: TabFrameBase
                 }
 
                 w.detailClicked = {
-                    // import coop.core.item;
-                    // import coop.core;
                     import coop.mui.model.wisdom_adapter;
                     import coop.mui.view.item_detail_frame;
 
@@ -202,7 +200,7 @@ class RecipeMaterialTabFrame: TabFrameBase
                     scope(exit) highlightDetailItems;
 
                     showItemDetail(0);
-                    setItemDetail(ItemDetailFrame.create(c, 1, controller.model, controller.customInfo), 0);
+                    setItemDetail(ItemDetailFrame.create(c, 1, model__, controller.customInfo), 0);
                 };
                 w.checkStateChanged = (bool checked) {
                     if (checked)
@@ -400,15 +398,14 @@ class RecipeMaterialTabFrame: TabFrameBase
                 auto w = new LinkWidget(lo.to!string, lo.to!dstring~": ");
                 auto n = new TextWidget("num", format("%s 個"d, 0));
                 w.click = (Widget _) {
-                    // import coop.core.item;
-                    // import coop.core;
                     import coop.mui.view.item_detail_frame;
+                    import coop.mui.model.wisdom_adapter;
 
                     unhighlightDetailItems;
                     scope(exit) highlightDetailItems;
 
                     showItemDetail(0);
-                    setItemDetail(ItemDetailFrame.create(lo.to!dstring, 1, controller.model, controller.customInfo), 0);
+                    setItemDetail(ItemDetailFrame.create(lo.to!dstring, 1, model__, controller.customInfo), 0);
                     return true;
                 };
                 return cast(Widget[])[w, n];
@@ -469,15 +466,14 @@ class RecipeMaterialTabFrame: TabFrameBase
                     }
                 };
                 w.detailClicked = {
-                    // import coop.core.item;
-                    // import coop.core;
                     import coop.mui.view.item_detail_frame;
+                    import coop.mui.model.wisdom_adapter;
 
                     unhighlightDetailItems;
                     scope(exit) highlightDetailItems;
 
                     showItemDetail(0);
-                    setItemDetail(ItemDetailFrame.create(mat.name.to!dstring, 1, controller.model, controller.customInfo), 0);
+                    setItemDetail(ItemDetailFrame.create(mat.name.to!dstring, 1, model__, controller.customInfo), 0);
                 };
                 if (!mat.isLeaf)
                 {
@@ -533,7 +529,6 @@ class RecipeMaterialTabFrame: TabFrameBase
 
                 rs.each!(w => w.visibility = Visibility.Visible);
                 rs[1].text = format("%s 回"d, *n);
-                // auto detail = controller.model.getRecipe(r);
                 import coop.mui.model.wisdom_adapter;
                 auto detail = model__.getRecipe(r.to!string);
                 auto c = controller.characters[charactersBox.selectedItem];

@@ -54,9 +54,7 @@ interface ModelAPI
 
 struct GetVersionResult
 {
-
     @name("version") string version_;
-    bool migemo;
 }
 
 struct GetBinderCategoriesResult

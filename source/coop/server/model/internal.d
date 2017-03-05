@@ -22,7 +22,7 @@ class WebModel: ModelAPI
     @property GetVersionResult getVersion() const
     {
         import coop.util;
-        return GetVersionResult(Version, wm.migemoAvailable);
+        return GetVersionResult(Version);
     }
 
     override @property GetBinderCategoriesResult getBinderCategories() const pure nothrow

@@ -8,7 +8,6 @@ module coop.core.item;
 import std.variant: Algebraic;
 
 import vibe.data.json;
-import coop.util: ExtendedEnum;
 
 /// アイテムの追加情報
 alias ExtraInfo = Algebraic!(FoodInfo, WeaponInfo, ArmorInfo, BulletInfo, ShieldInfo, ExpendableInfo);

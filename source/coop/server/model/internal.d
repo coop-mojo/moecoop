@@ -40,7 +40,7 @@ class WebModel: ModelAPI
     }
 
     override GetRecipesResult getBinderRecipes(string binder, string query, Flag!"useMigemo" migemo,
-                                                   Flag!"useReverseSearch" rev, string key)
+                                               Flag!"useReverseSearch" rev, string key)
     {
         import std.algorithm;
         import std.array;
@@ -66,7 +66,7 @@ class WebModel: ModelAPI
     }
 
     override GetRecipesResult getSkillRecipes(string skill, string query, Flag!"useMigemo" migemo,
-                                                  Flag!"useReverseSearch" rev, string key)
+                                              Flag!"useReverseSearch" rev, string key)
     {
         import std.algorithm;
         import std.array;
@@ -89,7 +89,7 @@ class WebModel: ModelAPI
     }
 
     override GetRecipesResult getRecipes(string query, Flag!"useMigemo" useMigemo, Flag!"useReverseSearch" useReverseSearch,
-                                             string key)
+                                         string key)
     {
         import std.algorithm;
         import std.range;

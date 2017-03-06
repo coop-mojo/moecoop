@@ -128,17 +128,11 @@ class WisdomModel
         import std.algorithm;
         import std.array;
         import std.conv;
-        import std.typecons;
-
-        alias RecipePair = Tuple!(string, "category", string[], "recipes");
 
         auto allRecipes = useMetaSearch ?
-                          wisdom.binderList :
-                          [tuple(cast(string)binder, wisdom.recipesIn(binder))].assocArray;
-        auto queryResult = getQueryResultBase(query.to!string, allRecipes, useMetaSearch, useMigemo, useReverseSearch);
-        return queryResult.byKeyValue.map!((kv) {
-                return [RecipePair(kv.key, kv.value.array)];
-            }).joiner;
+                          wisdom.binderList.values.joiner.array :
+                          wisdom.binderList[cast(string)binder];
+        return getQueryResultBase(query.to!string, allRecipes, useMetaSearch, useMigemo, useReverseSearch);
     }
 
     /// スキルカテゴリ category に分類されているレシピ一覧を返す
@@ -150,57 +144,34 @@ class WisdomModel
         import std.algorithm;
         import std.array;
         import std.conv;
-        import std.typecons;
-
-        alias RecipePair = Tuple!(string, "category", string[], "recipes");
 
         auto allRecipes = useMetaSearch ?
-                          wisdom.skillList.byKeyValue.map!(kv => tuple(kv.key, kv.value.array)).assocArray :
-                          [tuple(cast(string)category, wisdom.recipesIn(category).array)].assocArray;
+                          wisdom.skillList.values.map!"a[].array".joiner.array :
+                          wisdom.skillList[cast(string)category][].array;
         auto queryResult = getQueryResultBase(query.to!string, allRecipes, useMetaSearch, useMigemo, useReverseSearch);
-        return queryResult.byKeyValue.map!((kv) {
-                import std.range;
-                auto category = kv.key;
-                auto rs = kv.value;
-
-                if (rs.empty)
-                {
-                    return [RecipePair(category, rs.array)];
-                }
-
-                final switch(order) with(SortOrder)
-                {
-                case BySkill:
-                    auto levels(string s) {
-                        auto arr = wisdom.recipeFor(s).requiredSkills.byKeyValue.map!(a => tuple(a.key, a.value)).array;
-                        arr.multiSort!("a[0] < b[0]", "a[1] < b[1]");
-                        return arr;
-                    }
-                    auto lvToStr(Tuple!(string, double)[] tpls)
-                    {
-                        import std.format;
-                        return tpls.map!(t => format("%s (%.1f)", t.tupleof)).join(", ");
-                    }
-                    auto arr = rs.map!(a => tuple(a, levels(a))).array;
-                    arr.multiSort!("a[1] < b[1]", "a[0] < b[0]");
-                    return arr.chunkBy!"a[1]"
-                              .map!(a => RecipePair(lvToStr(a[0]), a[1].map!"a[0]".array))
-                              .array;
-                case ByName:
-                    return [RecipePair(category, rs.sort().array)];
-                case ByBinderOrder:
-                    assert(false);
-                }
-            }).joiner;
+        final switch(order) with(SortOrder)
+        {
+        case BySkill:
+            auto levels(string s) {
+                auto arr = wisdom.recipeFor(s).requiredSkills.byKeyValue.map!(a => tuple(a.key, a.value)).array;
+                arr.multiSort!("a[0] < b[0]", "a[1] < b[1]");
+                return arr;
+            }
+            auto arr = queryResult.map!(a => tuple(a, levels(a))).array;
+            arr.multiSort!("a[1] < b[1]", "a[0] < b[0]");
+            return arr.map!"a[0]".array;
+        case ByName:
+            return queryResult.sort().array;
+        case ByBinderOrder:
+            assert(false);
+        }
     }
 
     /// query にヒットするレシピ一覧を返す。
     /// Yes.useReverseSearch の場合には、query にヒットするアイテムを材料にするレシピ一覧を返す
     auto getRecipeList(Str)(Str query, Flag!"useMigemo" useMigemo, Flag!"useReverseSearch" useReverseSearch)
     {
-        import std.algorithm;
-        import std.range;
-        return getRecipeList(query, Category.init, Yes.useMetaSearch, useMigemo, useReverseSearch, SortOrder.ByName).map!"a.recipes".joiner.array;
+        return getRecipeList(query, Category.init, Yes.useMetaSearch, useMigemo, useReverseSearch, SortOrder.ByName);
     }
 
     /// query にヒットするアイテム一覧を返す
@@ -266,25 +237,18 @@ private:
     import coop.core.wisdom;
     import coop.migemo;
 
-    auto getQueryResultBase(string query, string[][string] allRecipes,
+    auto getQueryResultBase(string query, string[] allRecipes,
                             Flag!"useMetaSearch" useMetaSearch, Flag!"useMigemo" useMigemo,
                             Flag!"useReverseSearch" useReverseSearch = No.useReverseSearch)
     {
         import std.algorithm;
-        import std.range;
+        import std.array;
         import std.string;
 
         auto input = query.removechars(r"/[ 　]/");
         auto queryFun = matchFunFor(query, useMigemo, useReverseSearch);
 
-        return input.empty ?
-            allRecipes :
-            allRecipes.byKeyValue
-                      .map!(kv =>
-                            tuple(kv.key,
-                                  kv.value.filter!queryFun.array))
-                      .filter!"!a[1].empty"
-                      .assocArray;
+        return allRecipes.filter!queryFun.array;
     }
 
     auto matchFunFor(string query, Flag!"useMigemo" useMigemo, Flag!"useReverseSearch" useReverseSearch = No.useReverseSearch)

@@ -44,7 +44,6 @@ class WebModel: ModelAPI
     {
         import std.algorithm;
         import std.array;
-        import std.range;
         import std.typecons;
 
         import vibe.http.common;
@@ -53,9 +52,7 @@ class WebModel: ModelAPI
         enforceHTTP(getBinderCategories.バインダー一覧.map!"a.バインダー名".canFind(binder),
                     HTTPStatus.notFound, "No such binder");
 
-        auto tmp = wm.getRecipeList(query, Binder(binder), No.useMetaSearch, migemo, rev).array;
-        auto rs = tmp.empty ? [tuple!("category", "recipes")(binder, (string[]).init)] : tmp;
-        auto lst = recipeSort(rs.front.recipes, key);
+        auto lst = recipeSort(wm.getRecipeList(query, Binder(binder), No.useMetaSearch, migemo, rev), key);
 
         return typeof(return)(lst.map!(r => RecipeLink(r)).array);
     }
@@ -72,16 +69,14 @@ class WebModel: ModelAPI
                                                   Flag!"useReverseSearch" rev, string key)
     {
         import std.algorithm;
-        import std.range;
+        import std.array;
         import std.typecons;
 
         import vibe.http.common;
 
         enforceHTTP(getSkillCategories.スキル一覧.map!"a.スキル名".canFind(skill), HTTPStatus.notFound, "No such skill category");
 
-        auto tmp = wm.getRecipeList(query, Category(skill), No.useMetaSearch, migemo, rev, SortOrder.ByName).array;
-        auto rs = tmp.empty ? [tuple!("category", "recipes")(skill, (string[]).init)] : tmp;
-        auto lst = recipeSort(rs.front.recipes, key);
+        auto lst = recipeSort(wm.getRecipeList(query, Category(skill), No.useMetaSearch, migemo, rev, SortOrder.ByName), key);
         return typeof(return)(lst.map!(r => RecipeLink(r)).array);
     }
 

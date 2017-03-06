@@ -9,7 +9,7 @@
 
     "dependencies": {
         "derelict-util": "==2.0.6",
-        "vibe-d:data": ">=0.7.30"
+        "vibe-d:data": ">=0.8.0-beta.3"
     },
 
     "stringImportPaths": ["views", "views/res"],
@@ -34,8 +34,8 @@
             "preBuildCommands-windows": ["rc source/icon.rc"],
             "dependencies": {
                 "dlangui": ">=0.9.47",
-                "vibe-d:http": ">=0.7.30",
-                "vibe-d:web": ">=0.7.30"
+                "vibe-d:http": ">=0.8.0-beta.3",
+                "vibe-d:web": ">=0.8.0-beta.3"
             },
             "versions": ["UseMUI", "VibeNoSSL"]
         },
@@ -47,7 +47,7 @@
             "excludedSourceFiles": ["source/mui.d", "source/coop/mui/*"],
             "targetName": "fukurod",
             "dependencies": {
-                "vibe-d": ">=0.7.30"
+                "vibe-d": ">=0.8.0-beta.3"
             },
             "stringImportPaths": ["views/site"],
             "versions": ["Server", "VibeNoSSL"]
@@ -59,7 +59,7 @@
             "excludedSourceFiles": ["source/mui.d", "source/server.d"],
             "dependencies": {
                 "dlangui": ">=0.9.47",
-                "vibe-d": ">=0.7.30"
+                "vibe-d": ">=0.8.0-beta.3"
             },
             "versions": ["VibeNoSSL"]
         },

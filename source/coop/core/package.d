@@ -41,19 +41,17 @@ class WisdomModel
     }
 
     /// レシピ情報を返す
-    auto getRecipe(Str)(Str name) if (isSomeString!Str)
+    auto getRecipe(string name)
     {
-        import std.conv;
-        return wisdom.recipeFor(name.to!string);
+        return wisdom.recipeFor(name);
     }
 
     /// アイテム情報を返す
-    auto getItem(Str)(Str name) if (isSomeString!Str)
+    auto getItem(string name)
     {
-        import std.conv;
         import coop.core.item;
 
-        if (auto i = name.to!string in wisdom.itemList)
+        if (auto i = name in wisdom.itemList)
         {
             return *i;
         }
@@ -67,22 +65,20 @@ class WisdomModel
     }
 
     /// レシピが収録されているバインダーを返す
-    auto getBindersFor(Str)(Str name) if (isSomeString!Str)
+    auto getBindersFor(string name)
     {
-        import std.conv;
-        return wisdom.bindersFor(name.to!string);
+        return wisdom.bindersFor(name);
     }
 
     /// アイテムの固有情報を返す
-    auto getExtraInfo(Str)(Str name) if (isSomeString!Str)
+    auto getExtraInfo(string name)
     {
-        import std.conv;
         import std.typecons;
         import coop.core.item;
 
         alias RetType = Tuple!(ItemType, "type", ExtraInfo, "extra");
 
-        if (auto i = name.to!string in wisdom.itemList)
+        if (auto i = name in wisdom.itemList)
         {
             if ((*i).type == ItemType.Others)
             {
@@ -105,10 +101,9 @@ class WisdomModel
     }
 
     /// 飲食物のバフ効果を返す
-    auto getFoodEffect(Str)(Str name) if (isSomeString!Str)
+    auto getFoodEffect(string name)
     {
-        import std.conv;
-        if (auto einfo = name.to!string in wisdom.foodEffectList)
+        if (auto einfo = name in wisdom.foodEffectList)
         {
             return *einfo;
         }
@@ -121,34 +116,30 @@ class WisdomModel
     }
 
     /// binder に収録されているレシピ一覧を返す
-    auto getRecipeList(Str)(Str query, Binder binder,
-                            Flag!"useMetaSearch" useMetaSearch, Flag!"useMigemo" useMigemo, Flag!"useReverseSearch" useReverseSearch = No.useReverseSearch)
-        if (isSomeString!Str)
+    auto getRecipeList(string query, Binder binder,
+                       Flag!"useMetaSearch" useMetaSearch, Flag!"useMigemo" useMigemo, Flag!"useReverseSearch" useReverseSearch = No.useReverseSearch)
     {
         import std.algorithm;
         import std.array;
-        import std.conv;
 
         auto allRecipes = useMetaSearch ?
                           wisdom.binderList.values.joiner.array :
                           wisdom.binderList[cast(string)binder];
-        return getQueryResultBase(query.to!string, allRecipes, useMetaSearch, useMigemo, useReverseSearch);
+        return getQueryResultBase(query, allRecipes, useMetaSearch, useMigemo, useReverseSearch);
     }
 
     /// スキルカテゴリ category に分類されているレシピ一覧を返す
-    auto getRecipeList(Str)(Str query, Category category,
-                            Flag!"useMetaSearch" useMetaSearch, Flag!"useMigemo" useMigemo, Flag!"useReverseSearch" useReverseSearch,
-                            SortOrder order)
-        if (isSomeString!Str)
+    auto getRecipeList(string query, Category category,
+                       Flag!"useMetaSearch" useMetaSearch, Flag!"useMigemo" useMigemo, Flag!"useReverseSearch" useReverseSearch,
+                       SortOrder order)
     {
         import std.algorithm;
         import std.array;
-        import std.conv;
 
         auto allRecipes = useMetaSearch ?
                           wisdom.skillList.values.map!"a[].array".joiner.array :
                           wisdom.skillList[cast(string)category][].array;
-        auto queryResult = getQueryResultBase(query.to!string, allRecipes, useMetaSearch, useMigemo, useReverseSearch);
+        auto queryResult = getQueryResultBase(query, allRecipes, useMetaSearch, useMigemo, useReverseSearch);
         final switch(order) with(SortOrder)
         {
         case BySkill:
@@ -169,14 +160,13 @@ class WisdomModel
 
     /// query にヒットするレシピ一覧を返す。
     /// Yes.useReverseSearch の場合には、query にヒットするアイテムを材料にするレシピ一覧を返す
-    auto getRecipeList(Str)(Str query, Flag!"useMigemo" useMigemo, Flag!"useReverseSearch" useReverseSearch)
+    auto getRecipeList(string query, Flag!"useMigemo" useMigemo, Flag!"useReverseSearch" useReverseSearch)
     {
         return getRecipeList(query, Category.init, Yes.useMetaSearch, useMigemo, useReverseSearch, SortOrder.ByName);
     }
 
     /// query にヒットするアイテム一覧を返す
-    auto getItemList(Str)(Str query, Flag!"useMigemo" useMigemo, Flag!"canBeProduced" canBeProduced)
-        if (isSomeString!Str)
+    auto getItemList(string query, Flag!"useMigemo" useMigemo, Flag!"canBeProduced" canBeProduced)
     {
         import std.algorithm;
         import std.array;
@@ -196,35 +186,29 @@ class WisdomModel
     }
 
     /// 
-    auto getMenuRecipeResult(Str)(Str[] targets)
-        if (isSomeString!Str)
+    auto getMenuRecipeResult(string[] targets)
     {
-        import std.conv;
         import coop.core.recipe_graph;
-        auto graph = new RecipeGraph(targets.to!(string[]), wisdom, null);
+        auto graph = new RecipeGraph(targets, wisdom, null);
         return graph.elements;
     }
 
     /// 
-    auto getMenuRecipeResult(Str1, Str2, Str3, Str4)(int[Str1] targets, int[Str2] owned, Str3[Str3] preference, RedBlackTree!Str4 terminals)
-        if (isSomeString!Str1 && isSomeString!Str2 &&
-            isSomeString!Str3 && isSomeString!Str4)
+    auto getMenuRecipeResult(int[string] targets, int[string] owned, string[string] preference, RedBlackTree!string terminals)
     {
         import std.conv;
         import std.range;
         import coop.core.recipe_graph;
-        auto graph = new RecipeGraph(targets.keys.to!(string[]), wisdom, preference.to!(string[string]));
-        return graph.elements(targets.to!(int[string]), owned.to!(int[string]), new RedBlackTree!string(terminals[].array.to!(string[])));
+        auto graph = new RecipeGraph(targets.keys.to!(string[]), wisdom, preference);
+        return graph.elements(targets, owned, terminals);
     }
 
     ///
-    auto costFor(Str)(Str item, int[string] procs)
-        if (isSomeString!Str)
+    auto costFor(string item, int[string] procs)
     {
-        import std.conv;
         import coop.core.price;
 
-        return referenceCostFor(item.to!string,
+        return referenceCostFor(item,
                                 wisdom.itemList, wisdom.recipeList, wisdom.rrecipeList,
                                 wisdom.vendorPriceList, (int[string]).init,
                                 procs);

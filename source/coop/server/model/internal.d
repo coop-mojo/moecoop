@@ -174,7 +174,7 @@ class WebModel: ModelAPI
         import std.range;
         import std.container.rbtree;
 
-        auto ret = wm.getMenuRecipeResult(作成アイテム.to!(int[dstring]), 所持アイテム.to!(int[dstring]), 使用レシピ.to!(dstring[dstring]), new RedBlackTree!string(直接調達アイテム));
+        auto ret = wm.getMenuRecipeResult(作成アイテム, 所持アイテム, 使用レシピ, new RedBlackTree!string(直接調達アイテム));
         with(typeof(return))
         {
             return typeof(return)(ret.recipes.byKeyValue.map!(kv => RecipeElem(RecipeLink(kv.key), kv.value)).array,

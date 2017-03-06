@@ -415,10 +415,11 @@ struct WeaponInfo
         import std.algorithm;
         import std.conv;
         import std.range;
+        import std.traits;
 
-        攻撃力 = Grade.values
+        攻撃力 = [EnumMembers!Grade]
                       .filter!(g => info.damage.keys.canFind(g))
-                      .map!(g => DamageInfo(g.to!Grade.to!string, info.damage[g.to!Grade]))
+                      .map!(g => DamageInfo(cast(string)g, info.damage[g]))
                       .array;
         攻撃間隔 = info.duration;
         有効レンジ = info.range;
@@ -468,10 +469,11 @@ struct ArmorInfo
         import std.algorithm;
         import std.conv;
         import std.range;
+        import std.traits;
 
-        アーマークラス = Grade.values
+        アーマークラス = [EnumMembers!Grade]
                               .filter!(g => info.AC.keys.canFind(g))
-                              .map!(g => DamageInfo(g.to!Grade.to!string, info.AC[g.to!Grade]))
+                              .map!(g => DamageInfo(cast(string)g, info.AC[g]))
                               .array;
         必要スキル = info.skills
                          .byKeyValue
@@ -549,10 +551,11 @@ struct ShieldInfo
         import std.algorithm;
         import std.conv;
         import std.range;
+        import std.traits;
 
-        アーマークラス = Grade.values
+        アーマークラス = [EnumMembers!Grade]
                               .filter!(g => info.AC.keys.canFind(g))
-                              .map!(g => DamageInfo(g.to!Grade.to!string, info.AC[g.to!Grade]))
+                              .map!(g => DamageInfo(cast(string)g, info.AC[g]))
                               .array;
         必要スキル = info.skills
                          .byKeyValue

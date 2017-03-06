@@ -474,9 +474,10 @@ enum Material: string
     Glass = "ガラス", Crystal = "クリスタル", Cobalt = "コバルト", Chaos = "カオス",
 }
 
-alias Grade = ExtendedEnum!(
-    UNKNOWN => "不明", Degraded => "劣化", Cursed => "呪い", NG => "NG", HG => "HG", MG => "MG", NG_War => "NG(War)"
-    );
+enum Grade: string
+{
+    UNKNOWN = "不明", Degraded = "劣化", Cursed = "呪い", NG = "NG", HG = "HG", MG = "MG", NG_War = "NG(War)",
+}
 
 enum ExhaustionType: string
 {

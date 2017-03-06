@@ -102,11 +102,11 @@ class ItemDetailFrame: ScrollWidget
             }
 
             import coop.core.item: PetFoodType;
-            if (item.ペットアイテム.種別 != PetFoodType.NoEatable.to!PetFoodType.to!string)
+            if (item.ペットアイテム.種別 != cast(string)PetFoodType.NoEatable)
             {
                 import std.algorithm;
 
-                if (item.ペットアイテム.種別 == PetFoodType.UNKNOWN.to!PetFoodType.to!string)
+                if (item.ペットアイテム.種別 == cast(string)PetFoodType.UNKNOWN)
                 {
                     table.addElem("ペットアイテム", "不明", item.isOverlaid!"ペットアイテム");
                 }

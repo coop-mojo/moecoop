@@ -60,7 +60,7 @@ class WisdomModel
         else
         {
             Item item;
-            item.petFoodInfo = [PetFoodType.UNKNOWN.to!PetFoodType: 0];
+            item.petFoodInfo = [PetFoodType.UNKNOWN: 0];
             return item;
         }
         assert(false);

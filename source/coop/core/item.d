@@ -87,7 +87,7 @@ auto readItems(string fname)
                            import std.range;
                            if (a.petFoodInfo.keys.empty)
                            {
-                               a.petFoodInfo[PetFoodType.NoEatable.to!PetFoodType] = 0;
+                               a.petFoodInfo[PetFoodType.NoEatable] = 0;
                            }
                            a.file = fname;
                            return a;
@@ -134,7 +134,7 @@ in {
         }
         else
         {
-            petFoodInfo = [PetFoodType.NoEatable.to!PetFoodType: 0];
+            petFoodInfo = [PetFoodType.NoEatable: 0];
         }
 
         if (auto props = "特殊条件" in json)
@@ -150,12 +150,14 @@ in {
     return item;
 }
 
-alias PetFoodType = ExtendedEnum!(
-    UNKNOWN => "不明", Food => "食べ物", Meat => "肉食物", Weed => "草食物",
-    Drink => "飲み物", Liquor => "酒", Medicine => "薬", Metal => "金属",
-    Stone => "石", Bone => "骨", Crystal => "クリスタル", Wood => "木",
-    Leather => "皮", Paper => "紙", Cloth => "布", Others => "その他",
-    NoEatable => "犬も喰わない",);
+enum PetFoodType: string
+{
+    UNKNOWN = "不明", Food = "食べ物", Meat = "肉食物", Weed = "草食物",
+    Drink = "飲み物", Liquor = "酒", Medicine = "薬", Metal = "金属",
+    Stone = "石", Bone = "骨", Crystal = "クリスタル", Wood = "木",
+    Leather = "皮", Paper = "紙", Cloth = "布", Others = "その他",
+    NoEatable = "犬も喰わない",
+}
 
 enum SpecialProperty: string
 {
@@ -748,7 +750,7 @@ private:
         import std.range;
         import coop.server.model: PetFoodInfo;
         static if (is(T == PetFoodInfo))
-            return val.種別.empty || val.種別 == PetFoodType.UNKNOWN.to!PetFoodType.to!string;
+            return val.種別.empty || val.種別 == cast(string)PetFoodType.UNKNOWN;
         else
             return val == T.init;
     }
@@ -773,7 +775,7 @@ nothrow unittest
         weight = 0.3;
         price = 100;
         info = "Info";
-        petFoodInfo[PetFoodType.UNKNOWN.to!PetFoodType] = 0;
+        petFoodInfo[PetFoodType.UNKNOWN] = 0;
     }
 
     auto overlaid = Overlaid!Item(orig, null);
@@ -792,13 +794,13 @@ nothrow unittest
 
     Item orig;
     orig.name = "テスト";
-    orig.petFoodInfo[PetFoodType.UNKNOWN.to!PetFoodType] = 0;
+    orig.petFoodInfo[PetFoodType.UNKNOWN] = 0;
 
     Item item;
     item.name = "テスト";
     item.ename = "test";
     item.weight = 1.4;
-    item.petFoodInfo[PetFoodType.UNKNOWN.to!PetFoodType] = 0;
+    item.petFoodInfo[PetFoodType.UNKNOWN] = 0;
 
     auto overlaid = Overlaid!Item(orig, &item);
     assert(!overlaid.isOverlaid!"name");
@@ -819,5 +821,5 @@ nothrow unittest
 
     // assert(!overlaid.isOverlaid!"petFoodInfo");
     // assert(overlaid.isWritable!"petFoodInfo");
-    // assert(overlaid.petFoodInfo == [PetFoodType.UNKNOWN.to!PetFoodType: 0.0]);
+    // assert(overlaid.petFoodInfo == [PetFoodType.UNKNOWN: 0.0]);
 }

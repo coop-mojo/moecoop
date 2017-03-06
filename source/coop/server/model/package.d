@@ -276,7 +276,7 @@ struct ItemInfo
         特殊条件 = item.properties.map!(p => SpecialPropertyInfo(p.to!string, cast(string)p)).array;
         転送可 = item.transferable;
         スタック可 = item.stackable;
-        ペットアイテム = item.petFoodInfo.byKeyValue.map!(kv => PetFoodInfo(kv.key.to!PetFoodType.to!string, kv.value)).front;
+        ペットアイテム = item.petFoodInfo.byKeyValue.map!(kv => PetFoodInfo(cast(string)kv.key, kv.value)).front;
         備考 = item.remarks;
         アイテム種別 = cast(string)item.type;
         auto ex = wm.getExtraInfo(アイテム名);

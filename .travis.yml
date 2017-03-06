@@ -33,6 +33,7 @@ before_install:
   - dub fetch doveralls
 
 script:
+  - dub upgrade
   - dub test --coverage --combined
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then
         ./archive.sh || exit 1;

@@ -102,6 +102,7 @@ test_script:
   - echo %PATH%
   - '%DC% --version'
   - dub --version
+  - dub upgrade
   - dub test --arch=%Darch% --compiler=%DC%
 
 artifacts:

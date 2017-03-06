@@ -95,12 +95,13 @@ paths:
             - no
         - name: sort
           in: query
-          description: name を指定するとレシピ名でソートされた結果が、skill でソートすると生産に必要なスキル値でソートされた結果が返ります。
+          description: name を指定するとレシピ名でソートされた結果が、skill でソートすると生産に必要なスキル値でソートされた結果が返ります。 default ではバインダーの登録順で結果が返ります。デフォルトは default です。
           required: false
           type: string
           enum:
             - name
             - skill
+            - default
       responses:
         200:
           description: バインダーに収録されているレシピ情報の配列
@@ -175,12 +176,13 @@ paths:
             - no
         - name: sort
           in: query
-          description: name を指定するとレシピ名でソートされた結果が、skill でソートすると生産に必要なスキル値でソートされた結果が返ります。
+          description: name を指定するとレシピ名でソートされた結果が、skill でソートすると生産に必要なスキル値でソートされた結果が返ります。デフォルトを指定した場合の結果の順序は定義されていません。デフォルトは defalut です。
           required: false
           type: string
           enum:
             - name
             - skill
+            - default
       responses:
         200:
           description: スキルカテゴリに分類されているレシピ情報の配列
@@ -231,12 +233,13 @@ paths:
             - no
         - name: sort
           in: query
-          description: name を指定するとレシピ名でソートされた結果が、skill でソートすると生産に必要なスキル値でソートされた結果が返ります。
+          description: name を指定するとレシピ名でソートされた結果が、skill でソートすると生産に必要なスキル値でソートされた結果が返ります。 default を指定した場合の順序は定義されていません。デフォルトは defalut です。
           required: false
           type: string
           enum:
             - name
             - skill
+            - defalut
       responses:
         200:
           description: レシピ情報の配列
@@ -942,7 +945,7 @@ definitions:
       - 竹筒
       - 黒い竹
       - 骨
-      - 石
+      - リペア ストーン
       - ガラス
       - クリスタル
       - コバルト

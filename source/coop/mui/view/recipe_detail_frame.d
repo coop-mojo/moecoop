@@ -117,7 +117,7 @@ class RecipeDetailFrame: ScrollWidget, MenuItemActionHandler
                 rouletteText = attrs.join(", ");
             }
             childById("roulette").text = rouletteText;
-            auto rem = r.レシピ名.empty ? r.備考.to!dstring : "作り方がわかりません（´・ω・｀）";
+            auto rem = r.レシピ名.empty ? "作り方がわかりません（´・ω・｀）" : r.備考.to!dstring;
             childById("remarksInfo").visibility =
                 rem.empty ? Visibility.Gone : Visibility.Visible;
             childById("remarks").text = rem;

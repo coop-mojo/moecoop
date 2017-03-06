@@ -1,4 +1,6 @@
 @echo off
+
+dub upgrade
 dub build -c mui -a %1 -b %2
 
 powershell -Command Compress-Archive -Path fukuro.exe, LICENSE, README.md, resource, docs -DestinationPath moecoop-%1.zip

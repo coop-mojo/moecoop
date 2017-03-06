@@ -66,16 +66,16 @@ class SkillTabFrameController: RecipeTabFrameController
         auto skill = frame_.selectedCategory;
         auto rs = frame_.useMetaSearch
                   ? model.getRecipes(query.to!string, cast(Flag!"useMigemo")frame_.useMigemo,
-                                     cast(Flag!"useReverseSearch")frame_.useReverseSearch, key).レシピ一覧.map!"a.レシピ名.to!dstring".array
+                                     cast(Flag!"useReverseSearch")frame_.useReverseSearch, key).レシピ一覧.map!"a.レシピ名".array
                   : model.getSkillRecipes(skill.to!string, query.to!string, cast(Flag!"useMigemo")frame_.useMigemo,
-                                          cast(Flag!"useReverseSearch")frame_.useReverseSearch, key).レシピ一覧.map!"a.レシピ名.to!dstring".array;
+                                          cast(Flag!"useReverseSearch")frame_.useReverseSearch, key).レシピ一覧.map!"a.レシピ名".array;
 
         alias RecipePair = Tuple!(dstring, "category", dstring[], "recipes");
         RecipePair[] recipes;
 
         if (rs.empty || key == "name")
         {
-            recipes = [RecipePair(skill, rs)];
+            recipes = [RecipePair(skill, rs.to!(dstring[]))];
         }
         else
         {
@@ -99,11 +99,11 @@ class SkillTabFrameController: RecipeTabFrameController
                 import std.format;
                 return tpls.map!(t => format("%s (%.1f)"d, t.tupleof)).join(", ");
             }
-            auto arr = rs.map!(a => tuple(a, levels(a.to!string))).array;
-            arr.multiSort!("a[1] < b[1]", "a[0] < b[0]");
-            recipes = arr.chunkBy!"a[1]"
-                         .map!(a => RecipePair(lvToStr(a[0]), a[1].map!"a[0]".array))
-                         .array;
+            recipes = rs.map!(a => tuple(a, levels(a)))
+                        .chunkBy!"a[1]"
+                        .map!(a => RecipePair(lvToStr(a[0]),
+                                              a[1].map!"a[0]".array.to!(dstring[])))
+                        .array;
         }
         frame_.showRecipeList(recipes);
     }

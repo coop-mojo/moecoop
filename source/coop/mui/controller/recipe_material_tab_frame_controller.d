@@ -53,7 +53,7 @@ class RecipeMaterialTabFrameController
         {
             return;
         }
-        auto candidates = model.getItems(query.to!string, cast(Flag!"useMigemo")frame_.useMigemo, Yes.onlyProducts)
+        auto candidates = model.getItems(query.to!string, frame_.useMigemo, true)
                                .アイテム一覧
                                .map!"a.アイテム名.to!dstring"
                                .array;

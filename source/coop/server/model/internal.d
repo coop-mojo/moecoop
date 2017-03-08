@@ -39,8 +39,7 @@ class WebModel: ModelAPI
         return typeof(return)(wm.getBinderCategories.map!(b => BinderLink(b)).array);
     }
 
-    override GetRecipesResult getBinderRecipes(string binder, string query, Flag!"useMigemo" migemo,
-                                               Flag!"useReverseSearch" rev, string key)
+    override GetRecipesResult getBinderRecipes(string binder, string query, bool migemo, bool rev, string key)
     {
         import std.algorithm;
         import std.array;
@@ -52,7 +51,8 @@ class WebModel: ModelAPI
         enforceHTTP(getBinderCategories.バインダー一覧.map!"a.バインダー名".canFind(binder),
                     HTTPStatus.notFound, "No such binder");
 
-        auto lst = recipeSort(wm.getRecipeList(query, Binder(binder), No.useMetaSearch, migemo, rev), key);
+        auto lst = recipeSort(wm.getRecipeList(query, Binder(binder), No.useMetaSearch,
+                                               cast(Flag!"useMigemo")migemo, cast(Flag!"useReverseSearch")rev), key);
 
         return typeof(return)(lst.map!(r => RecipeLink(r)).array);
     }
@@ -65,8 +65,7 @@ class WebModel: ModelAPI
         return typeof(return)(wm.getSkillCategories.map!(s => SkillLink(s)).array);
     }
 
-    override GetRecipesResult getSkillRecipes(string skill, string query, Flag!"useMigemo" migemo,
-                                              Flag!"useReverseSearch" rev, string key)
+    override GetRecipesResult getSkillRecipes(string skill, string query, bool migemo, bool rev, string key)
     {
         import std.algorithm;
         import std.array;
@@ -76,7 +75,8 @@ class WebModel: ModelAPI
 
         enforceHTTP(getSkillCategories.スキル一覧.map!"a.スキル名".canFind(skill), HTTPStatus.notFound, "No such skill category");
 
-        auto lst = recipeSort(wm.getRecipeList(query, Category(skill), No.useMetaSearch, migemo, rev, SortOrder.ByName), key);
+        auto lst = recipeSort(wm.getRecipeList(query, Category(skill), No.useMetaSearch, cast(Flag!"useMigemo")migemo,
+                                               cast(Flag!"useReverseSearch")rev, SortOrder.ByName), key);
         return typeof(return)(lst.map!(r => RecipeLink(r)).array);
     }
 
@@ -88,7 +88,7 @@ class WebModel: ModelAPI
         return ["バフ一覧": wm.wisdom.foodEffectList.keys.map!(k => BufferLink(k)).array];
     }
 
-    override GetRecipesResult getRecipes(string query, Flag!"useMigemo" useMigemo, Flag!"useReverseSearch" useReverseSearch,
+    override GetRecipesResult getRecipes(string query, bool useMigemo, bool useReverseSearch,
                                          string key)
     {
         import std.algorithm;
@@ -96,16 +96,17 @@ class WebModel: ModelAPI
 
         import vibe.http.common;
 
-        auto lst = recipeSort(wm.getRecipeList(query, useMigemo, useReverseSearch), key);
+        auto lst = recipeSort(wm.getRecipeList(query, cast(Flag!"useMigemo")useMigemo, cast(Flag!"useReverseSearch")useReverseSearch), key);
         return typeof(return)(lst.map!(r => RecipeLink(r)).array);
     }
 
-    override GetItemsResult getItems(string query, Flag!"useMigemo" useMigemo, Flag!"onlyProducts" onlyProducts)
+    override GetItemsResult getItems(string query, bool useMigemo, bool onlyProducts)
     {
         import std.algorithm;
         import std.range;
 
-        return typeof(return)(wm.getItemList(query, useMigemo, cast(Flag!"canBeProduced")onlyProducts).map!(i => ItemLink(i)).array);
+        return typeof(return)(wm.getItemList(query, cast(Flag!"useMigemo")useMigemo, cast(Flag!"canBeProduced")onlyProducts)
+                                .map!(i => ItemLink(i)).array);
     }
 
     override RecipeInfo getRecipe(string _recipe)

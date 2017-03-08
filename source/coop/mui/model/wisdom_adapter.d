@@ -6,23 +6,30 @@
 module coop.mui.model.wisdom_adapter;
 
 public import coop.server.model;
-import coop.server.model.internal;
+// import coop.server.model.internal;
 
-alias WisdomAdapter = WebModel;
+// alias WisdomAdapter = WebModel;
 
-// class WisdomAdapter
-// {
-//     this(string endpoint)
-//     {
-//         this.api = new typeof(api)(endpoint);
-//         this.endpoint = endpoint;
-//     }
+class WisdomAdapter
+{
+    this(string endpoint)
+    {
+        this.api = new typeof(api)(endpoint);
+        this.endpoint = endpoint;
+    }
 
-//     alias api this;
+    alias api this;
 
-//     RestInterfaceClient!ModelAPI api;
-// private:
-//     import vibe.web.rest;
+    RestInterfaceClient!ModelAPI api;
+private:
+    import vibe.web.rest;
 
-//     string endpoint;
-// }
+    string endpoint;
+}
+
+shared static this()
+{
+    import vibe.core.log;
+    auto logger = cast(shared)new FileLogger("/dev/stdout");
+    registerLogger(logger);
+}

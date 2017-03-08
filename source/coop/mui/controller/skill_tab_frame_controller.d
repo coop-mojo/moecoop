@@ -65,10 +65,9 @@ class SkillTabFrameController: RecipeTabFrameController
         }
         auto skill = frame_.selectedCategory;
         auto rs = frame_.useMetaSearch
-                  ? model.getRecipes(query.to!string, cast(Flag!"useMigemo")frame_.useMigemo,
-                                     cast(Flag!"useReverseSearch")frame_.useReverseSearch, key).レシピ一覧.map!"a.レシピ名".array
-                  : model.getSkillRecipes(skill.to!string, query.to!string, cast(Flag!"useMigemo")frame_.useMigemo,
-                                          cast(Flag!"useReverseSearch")frame_.useReverseSearch, key).レシピ一覧.map!"a.レシピ名".array;
+                  ? model.getRecipes(query.to!string, frame_.useMigemo, frame_.useReverseSearch, key).レシピ一覧.map!"a.レシピ名".array
+                  : model.getSkillRecipes(skill.to!string, query.to!string, frame_.useMigemo, frame_.useReverseSearch, key)
+                         .レシピ一覧.map!"a.レシピ名".array;
 
         alias RecipePair = Tuple!(dstring, "category", dstring[], "recipes");
         RecipePair[] recipes;

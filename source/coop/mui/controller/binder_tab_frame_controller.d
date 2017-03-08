@@ -45,9 +45,7 @@ class BinderTabFrameController: RecipeTabFrameController
 
         alias RecipePair = Tuple!(dstring, "category", dstring[], "recipes");
 
-        auto recipes = binders.map!(b => RecipePair(b, model.getBinderRecipes(b.to!string, query.to!string,
-                                                                              cast(Flag!"useMigemo")frame_.useMigemo,
-                                                                              No.useReverseSearch, "default")
+        auto recipes = binders.map!(b => RecipePair(b, model.getBinderRecipes(b.to!string, query.to!string, frame_.useMigemo, false, "default")
                                                             .レシピ一覧
                                                             .map!"a.レシピ名.to!dstring"
                                                             .array)).array;

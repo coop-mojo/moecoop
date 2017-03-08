@@ -21,23 +21,20 @@ interface ModelAPI
     @path("/binders") @property GetBinderCategoriesResult getBinderCategories();
     @path("/binders/:binder/recipes")
     @queryParam("query", "query") @queryParam("migemo", "migemo") @queryParam("rev", "rev") @queryParam("key", "sort")
-    GetRecipesResult getBinderRecipes(string _binder, string query="", Flag!"useMigemo" migemo=No.useMigemo,
-                                      Flag!"useReverseSearch" rev=No.useReverseSearch, string key = "skill");
+    GetRecipesResult getBinderRecipes(string _binder, string query="", bool migemo=false, bool rev=false, string key = "defalut");
 
     @path("/skills") @property GetSkillCategoriesResult getSkillCategories();
     @path("/skills/:skill/recipes")
     @queryParam("query", "query") @queryParam("migemo", "migemo") @queryParam("rev", "rev") @queryParam("key", "sort")
-    GetRecipesResult getSkillRecipes(string _skill, string query="", Flag!"useMigemo" migemo=No.useMigemo,
-                                     Flag!"useReverseSearch" rev=No.useReverseSearch, string key = "skill");
+    GetRecipesResult getSkillRecipes(string _skill, string query="", bool migemo=false, bool rev=false, string key = "default");
 
     @path("/buffers") @property BufferLink[][string] getBuffers();
 
     @path("/recipes") @queryParam("migemo", "migemo") @queryParam("rev", "rev") @queryParam("key", "sort")
-    GetRecipesResult getRecipes(string query="", Flag!"useMigemo" migemo=No.useMigemo,
-                                Flag!"useReverseSearch" rev=No.useReverseSearch, string key = "skill");
+    GetRecipesResult getRecipes(string query="", bool migemo=false, bool rev=false, string key = "default");
 
     @path("/items") @queryParam("migemo", "migemo") @queryParam("onlyProducts", "only-products")
-    GetItemsResult getItems(string query="", Flag!"useMigemo" migemo=No.useMigemo, Flag!"onlyProducts" onlyProducts=No.onlyProducts);
+    GetItemsResult getItems(string query="", bool migemo=false, bool onlyProducts=false);
 
     @path("/recipes/:recipe") RecipeInfo getRecipe(string _recipe);
 

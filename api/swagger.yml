@@ -79,20 +79,14 @@ paths:
           type: string
         - name: migemo
           in: query
-          description: yes を指定すると、Migemo 検索を使用します。デフォルトは no です。
+          description: true を指定すると、Migemo 検索を使用します。デフォルトは false です。
           required: false
-          type: string
-          enum:
-            - yes
-            - no
+          type: boolean
         - name: rev
           in: query
-          description: yes を指定すると、レシピの結果生成できるアイテム名を検索します。デフォルトは no です。
+          description: true を指定すると、レシピの結果生成できるアイテム名を検索します。デフォルトは false です。
           required: false
-          type: string
-          enum:
-            - yes
-            - no
+          type: boolean
         - name: sort
           in: query
           description: name を指定するとレシピ名でソートされた結果が、skill でソートすると生産に必要なスキル値でソートされた結果が返ります。 default ではバインダーの登録順で結果が返ります。デフォルトは default です。
@@ -160,23 +154,17 @@ paths:
           type: string
         - name: migemo
           in: query
-          description: yes を指定すると、Migemo 検索を使用します。デフォルトは no です。
+          description: true を指定すると、Migemo 検索を使用します。デフォルトは false です。
           required: false
-          type: string
-          enum:
-            - yes
-            - no
+          type: boolean
         - name: rev
           in: query
-          description: yes を指定すると、レシピの結果生成できるアイテム名を検索します。デフォルトは no です。
+          description: true を指定すると、レシピの結果生成できるアイテム名を検索します。デフォルトは false です。
           required: false
-          type: string
-          enum:
-            - yes
-            - no
+          type: boolean
         - name: sort
           in: query
-          description: name を指定するとレシピ名でソートされた結果が、skill でソートすると生産に必要なスキル値でソートされた結果が返ります。デフォルトを指定した場合の結果の順序は定義されていません。デフォルトは defalut です。
+          description: name を指定するとレシピ名でソートされた結果が、skill でソートすると生産に必要なスキル値でソートされた結果が返ります。デフォルトを指定した場合の結果の順序は定義されていません。デフォルトは default です。
           required: false
           type: string
           enum:
@@ -217,29 +205,23 @@ paths:
           type: string
         - name: migemo
           in: query
-          description: yes を指定すると、Migemo 検索を使用します。デフォルトは no です。
+          description: true を指定すると、Migemo 検索を使用します。デフォルトは false です。
           required: false
-          type: string
-          enum:
-            - yes
-            - no
+          type: boolean
         - name: rev
           in: query
-          description: yes を指定すると、レシピの結果生成できるアイテム名を検索します。デフォルトは no です。
+          description: true を指定すると、レシピの結果生成できるアイテム名を検索します。デフォルトは false です。
           required: false
-          type: string
-          enum:
-            - yes
-            - no
+          type: boolean
         - name: sort
           in: query
-          description: name を指定するとレシピ名でソートされた結果が、skill でソートすると生産に必要なスキル値でソートされた結果が返ります。 default を指定した場合の順序は定義されていません。デフォルトは defalut です。
+          description: name を指定するとレシピ名でソートされた結果が、skill でソートすると生産に必要なスキル値でソートされた結果が返ります。 default を指定した場合の順序は定義されていません。デフォルトは default です。
           required: false
           type: string
           enum:
             - name
             - skill
-            - defalut
+            - default
       responses:
         200:
           description: レシピ情報の配列
@@ -329,20 +311,14 @@ paths:
           type: string
         - name: migemo
           in: query
-          description: yes を指定すると、Migemo 検索を使用します。デフォルトは no です。
+          description: true を指定すると、Migemo 検索を使用します。デフォルトは false です。
           required: false
-          type: string
-          enum:
-            - yes
-            - no
+          type: boolean
         - name: only-products
           in: query
-          description: yes を指定すると、生産スキルで作成できるアイテムのみを検索します。デフォルトは no です。
+          description: true を指定すると、生産スキルで作成できるアイテムのみを検索します。デフォルトは false です。
           required: false
-          type: string
-          enum:
-            - yes
-            - no
+          type: boolean
       responses:
         200:
           description: アイテム情報の配列

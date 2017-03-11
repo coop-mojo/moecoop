@@ -110,10 +110,3 @@ private:
 
     string endpoint;
 }
-
-shared static this()
-{
-    import vibe.core.log;
-    auto logger = cast(shared)new FileLogger("/dev/stdout");
-    registerLogger(logger);
-}

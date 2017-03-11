@@ -82,15 +82,8 @@ class MainFrame: AppFrame
 
         binderTab.controller.showRecipeNames;
 
-        debug
-        {
-            enum defaultMsg = "デバッグ凡例: 赤 = レシピ情報なし、青 = アイテム情報なし、下線 = アイテム個別情報なし";
-        }
-        else
-        {
-            enum defaultMsg = " "d;
-        }
-        statusLine.setStatusText(defaultMsg);
+        import std.format;
+        statusLine.setStatusText = format("%s (%s)"d, model.getInformation.message, defaultMessage);
     }
 
     @property auto controller()
@@ -201,6 +194,20 @@ protected:
         return false;
     }
 private:
+
+    auto defaultMessage()
+    {
+        debug
+        {
+            return "デバッグ凡例: 赤 = レシピ情報なし、青 = アイテム情報なし、下線 = アイテム個別情報なし"d;
+        }
+        else
+        {
+            import std.format;
+            return format("状態: %s"d, cast(WebModel)controller_.model ? "オフライン" : "オンライン");
+        }
+    }
+
     import coop.mui.controller.main_frame_controller;
     import coop.mui.view.recipe_tab_frame;
     import coop.mui.view.recipe_material_tab_frame;

@@ -67,14 +67,13 @@ class RecipeDetailFrame: ScrollWidget, MenuItemActionHandler
         backgroundColor = "white";
     }
 
-    static auto create(dstring n, WisdomAdapter model, Character[dstring] chars)
+    static auto create(dstring n, ModelAPI model, Character[dstring] chars)
     {
         import std.algorithm;
         import std.exception;
 
         import vibe.http.common;
-
-        auto r = model.getRecipe(n.to!string).ifThrown!HTTPStatusException(RecipeInfo.init);
+        auto r = n.empty ? RecipeInfo.init : model.getRecipe(n.to!string).ifThrown!HTTPStatusException(RecipeInfo.init);
         auto ret = new typeof(this)(n.to!string);
         ret.recipe_ = r;
         with(ret)

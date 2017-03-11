@@ -15,11 +15,18 @@ class SkillTabFrameController: RecipeTabFrameController
     {
         import dlangui;
         import std.conv;
+        import std.exception;
         import std.math: ceil;
         import std.traits;
 
+        import vibe.http.common;
+
+        import coop.mui.model.wisdom_adapter;
+
         super(frame, categories);
-        frame.relatedBindersFor = (recipe, _) => model.getRecipe(recipe.to!string).収録バインダー.to!(dstring[]);
+        frame.relatedBindersFor = (recipe, _) => model.getRecipe(recipe.to!string)
+                                                      .ifThrown!HTTPStatusException(RecipeInfo.init)
+                                                      .収録バインダー.to!(dstring[]);
         frame.tableColumnLength = (nRecipes, nColumns) => (nRecipes.to!real/nColumns).ceil.to!int;
         with(frame.childById!ComboBox("sortBy"))
         {
@@ -84,12 +91,14 @@ class SkillTabFrameController: RecipeTabFrameController
                 import vibe.http.common;
 
                 import coop.mui.model.wisdom_adapter: RecipeInfo;
-                auto arr = model.getRecipe(s)
-                                .ifThrown!HTTPStatusException(RecipeInfo.init)
-                                .必要スキル
-                                .byKeyValue
-                                .map!"tuple(a.key, a.value)"
-                                .array;
+                auto arr = (s.empty
+                            ? RecipeInfo.init
+                            : model.getRecipe(s)
+                                   .ifThrown!HTTPStatusException(RecipeInfo.init))
+                           .必要スキル
+                           .byKeyValue
+                           .map!"tuple(a.key, a.value)"
+                           .array;
                 arr.multiSort!("a[0] < b[0]", "a[1] < b[1]");
                 return arr;
             }

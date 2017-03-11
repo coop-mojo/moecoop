@@ -32,8 +32,9 @@ class ItemDetailFrame: ScrollWidget
         backgroundColor = "white";
     }
 
-    static auto create(dstring name, int idx, WisdomAdapter model, CustomInfo customInfo)
+    static auto create(dstring name, int idx, ModelAPI model, CustomInfo customInfo)
     {
+        import std.array;
         import std.conv;
         import std.exception;
 
@@ -43,7 +44,7 @@ class ItemDetailFrame: ScrollWidget
         import coop.mui.model.wisdom_adapter;
         import coop.core.item: overlaid;
 
-        auto orig = model.postItem(name.to!string, customInfo.prices).ifThrown!HTTPStatusException(ItemInfo.init);
+        auto orig = name.empty ? ItemInfo.init : model.postItem(name.to!string, customInfo.prices).ifThrown!HTTPStatusException(ItemInfo.init);
         auto ret = new typeof(this)("detail"~idx.to!string);
         auto item = overlaid(orig, name.to!string in customInfo.items);
         ret.item_ = orig;

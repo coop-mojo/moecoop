@@ -13,7 +13,7 @@ class MainFrameController
     import coop.mui.model.custom_info;
     import coop.mui.view.main_frame;
 
-    this(MainFrame frame, WisdomAdapter model, Character[dstring] chars, Config config, CustomInfo cInfo)
+    this(MainFrame frame, ModelAPI model, Character[dstring] chars, Config config, CustomInfo cInfo)
     {
         frame_ = frame;
         model_ = model;
@@ -31,7 +31,7 @@ class MainFrameController
     Config config_;
     Character[dstring] chars_;
     CustomInfo cInfo_;
-    WisdomAdapter model_;
+    ModelAPI model_;
     MainFrame frame_;
 }
 

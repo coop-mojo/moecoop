@@ -54,6 +54,7 @@ struct GetVersionResult
 {
     @name("version") string version_;
 }
+
 struct GetInformationResult
 {
     string message;
@@ -169,8 +170,9 @@ struct RecipeLink
 {
     this(string recipe) @safe pure nothrow
     {
+        import std.array;
         レシピ名 = recipe;
-        詳細 = "/recipes/"~recipe;
+        詳細 = "/recipes/"~recipe.replace("/", "_");
     }
     string レシピ名;
     string 詳細;

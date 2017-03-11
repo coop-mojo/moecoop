@@ -55,7 +55,7 @@ class MainFrame: AppFrame
     import coop.mui.model.config;
     import coop.mui.model.wisdom_adapter;
 
-    this(WisdomAdapter model, Character[dstring] chars, Config config, CustomInfo cInfo)
+    this(ModelAPI model, Character[dstring] chars, Config config, CustomInfo cInfo)
     {
         import std.array;
         import std.algorithm;

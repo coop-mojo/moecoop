@@ -9,14 +9,14 @@ import coop.server.model;
 
 class WebModel: ModelAPI
 {
-    import std.typecons;
     import vibe.data.json;
 
-    import coop.core;
+    import coop.core: WisdomModel;
 
-    this(WisdomModel wm, string msg = "") @safe pure nothrow
+    this(string path, string msg = "")
     {
-        this.wm = wm;
+        import coop.core.wisdom;
+        this.wm = new WisdomModel(new Wisdom(path));
         this.message = msg;
     }
 
@@ -47,6 +47,8 @@ class WebModel: ModelAPI
 
         import vibe.http.common;
 
+        import coop.core;
+
         binder = binder.replace("_", "/");
         enforceHTTP(getBinderCategories.バインダー一覧.map!"a.バインダー名".canFind(binder),
                     HTTPStatus.notFound, "No such binder");
@@ -72,6 +74,8 @@ class WebModel: ModelAPI
         import std.typecons;
 
         import vibe.http.common;
+
+        import coop.core;
 
         enforceHTTP(getSkillCategories.スキル一覧.map!"a.スキル名".canFind(skill), HTTPStatus.notFound, "No such skill category");
 
@@ -111,8 +115,10 @@ class WebModel: ModelAPI
 
     override RecipeInfo getRecipe(string _recipe)
     {
+        import std.array;
         import vibe.http.common;
 
+        _recipe = _recipe.replace("_", "/");
         return RecipeInfo(enforceHTTP(wm.getRecipe(_recipe), HTTPStatus.notFound, "No such recipe"), wm);
     }
 
@@ -194,6 +200,7 @@ private:
         switch(key)
         {
         case "skill":{
+            import std.typecons;
             auto levels(string s) {
                 auto arr = wm.getRecipe(s).requiredSkills.byKeyValue.map!(a => tuple(a.key, a.value)).array;
                 arr.multiSort!("a[0] < b[0]", "a[1] < b[1]");

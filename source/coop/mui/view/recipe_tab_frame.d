@@ -360,7 +360,7 @@ private:
         import std.exception;
         import vibe.http.common;
         import coop.mui.model.wisdom_adapter: RecipeInfo;
-        auto r = controller.model.getRecipe(recipe.to!string).ifThrown!HTTPStatusException(RecipeInfo.init);
+        auto r = recipe.empty ? RecipeInfo.init : controller.model.getRecipe(recipe.to!string).ifThrown!HTTPStatusException(RecipeInfo.init);
 
         ret.checkStateChanged = (bool marked) {
             auto c = characters[charactersBox.selectedItem];
@@ -413,7 +413,8 @@ private:
                 {
                     if (prods.any!((p) {
                                 import coop.core.item: ItemType;
-                                auto it = controller.model.getItem(p);
+                                import coop.mui.model.wisdom_adapter;
+                                auto it = controller.model.getItem(p).ifThrown!HTTPStatusException(ItemInfo.init);
                                 return it.アイテム種別 != ItemType.Others &&
                                     (it.飲食物情報.isNull && it.武器情報.isNull && it.防具情報.isNull && &it.弾情報.isNull && it.盾情報.isNull);
                             }))
@@ -435,7 +436,9 @@ private:
 
             recipeDetail = RecipeDetailFrame.create(recipe, controller.model, characters);
 
-            auto itemNames = controller.model.getRecipe(recipe.to!string).生成物.map!"a.アイテム名".array.to!(dstring[]);
+            auto itemNames = controller.model.getRecipe(recipe.to!string)
+                                       .ifThrown!HTTPStatusException(RecipeInfo.init)
+                                       .生成物.map!"a.アイテム名".array.to!(dstring[]);
             enforce(itemNames.length <= 2);
             if (itemNames.empty)
             {

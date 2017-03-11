@@ -25,21 +25,29 @@ extern(C) int UIAppMain(string[] args)
     import std.array;
     import std.conv;
     import std.file;
+    import std.getopt;
     import std.path;
     import std.typecons;
 
     import coop.core.character;
     import coop.mui.model.config;
     import coop.mui.model.custom_info;
-    import coop.core: WisdomModel;
-    import coop.core.wisdom: Wisdom;
     import coop.mui.model.wisdom_adapter;
     import coop.mui.view.main_frame;
     import coop.util;
 
     embeddedResourceList.addResources(embedResourcesFromList!"resources.list"());
 
-    auto wisdom = new Wisdom(SystemResourceBase);
+    string endpoint = "https://moecoop-api.arukascloud.io/";
+    bool offline;
+    auto helpInfo = args.getopt("endpoint", "知恵袋サーバーのエンドポイントを指定します。", &endpoint,
+                                "offline", "オフラインモードで起動します。", &offline);
+    if (helpInfo.helpWanted)
+    {
+        defaultGetoptPrinter("生協の知恵袋クライアントです。",
+                             helpInfo.options);
+        return 0;
+    }
 
     CustomInfo customInfo;
     auto customInfoFile = buildPath(UserResourceBase, "custom-info.json");
@@ -83,7 +91,7 @@ extern(C) int UIAppMain(string[] args)
     auto chars = userNames
                  .map!(name => tuple(name, new Character(name.to!string, userDir)))
                  .assocArray;
-    scope(exit) chars.values.each!(c => c.save);
+    scope(success) chars.values.each!(c => c.save);
 
     Platform.instance.uiLanguage = "ja";
     Platform.instance.uiTheme = "theme_default";
@@ -91,7 +99,9 @@ extern(C) int UIAppMain(string[] args)
                                                  config.windowWidth,
                                                  config.windowHeight);
 
-    auto model = new WisdomAdapter(new WisdomModel(wisdom));
+    ModelAPI model = offline
+                     ? cast(ModelAPI)new WebModel(SystemResourceBase)
+                     : new WisdomAdapter(endpoint).wrap!ModelAPI;
     window.mainWidget = new MainFrame(model, chars, config, customInfo);
     window.windowIcon = drawableCache.getImage("coop-icon");
     window.show;

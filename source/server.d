@@ -20,13 +20,9 @@ import vibe.d;
 
 void main(string[] args)
 {
-    import std.format;
     import std.getopt;
     import std.process;
 
-    import coop.core.wisdom;
-    import coop.core;
-    import coop.server.model;
     import coop.server.model.internal;
     import coop.util;
 
@@ -37,16 +33,13 @@ void main(string[] args)
 
     if (hinfo.helpWanted)
     {
-        defaultGetoptPrinter("moecoop server.", hinfo.options);
+        defaultGetoptPrinter("生協の知恵袋サーバーです。", hinfo.options);
         return;
     }
 
-    auto wisdom = new Wisdom(SystemResourceBase);
-    auto model = new WisdomModel(wisdom);
-
     auto router = new URLRouter;
     router.get("/", staticTemplate!"index.dt");
-    router.registerRestInterface(new WebModel(model, environment.get("MOECOOP_MESSAGE", "")));
+    router.registerRestInterface(new WebModel(SystemResourceBase, environment.get("MOECOOP_MESSAGE", "")));
     auto settings = new HTTPServerSettings;
     settings.port = port;
     listenHTTP(settings, router);

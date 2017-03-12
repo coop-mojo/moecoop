@@ -39,10 +39,10 @@ class Character
     }
 
     import coop.server.model: RecipeInfo;
-    auto hasSkillFor(RecipeInfo recipe)
+    auto hasSkillFor(double[string] skill)
     {
         import std.algorithm;
-        return recipe.必要スキル.byKeyValue.all!(kv => (kv.key in skills) && skills[kv.key] >= kv.value);
+        return skill.byKeyValue.all!(kv => (kv.key in skills) && skills[kv.key] >= kv.value);
     }
 
     auto hasRecipe(string recipe, string binder = "")

@@ -39,7 +39,7 @@ class WebModel: ModelAPI
         return typeof(return)(wm.getBinderCategories.map!(b => BinderLink(b)).array);
     }
 
-    override GetRecipesResult getBinderRecipes(string binder, string query, bool migemo, bool rev, string key)
+    override GetRecipesResult getBinderRecipes(string binder, string query, bool migemo, bool rev, string key, string fs)
     {
         import std.algorithm;
         import std.array;
@@ -49,6 +49,8 @@ class WebModel: ModelAPI
 
         import coop.core;
 
+        auto fields = fs.split(",");
+
         binder = binder.replace("_", "/");
         enforceHTTP(getBinderCategories.バインダー一覧.map!"a.バインダー名".canFind(binder),
                     HTTPStatus.notFound, "No such binder");
@@ -56,7 +58,15 @@ class WebModel: ModelAPI
         auto lst = recipeSort(wm.getRecipeList(query, Binder(binder), No.useMetaSearch,
                                                cast(Flag!"useMigemo")migemo, cast(Flag!"useReverseSearch")rev), key);
 
-        return typeof(return)(lst.map!(r => RecipeLink(r)).array);
+        auto toRecipeLink(string r)
+        {
+            import std.exception;
+            auto ret = RecipeLink(r);
+            auto detail = getRecipe(r).ifThrown!HTTPStatusException(RecipeInfo.init).toAssocArray;
+            ret.追加情報 = getDetails(detail, fields);
+            return ret;
+        }
+        return typeof(return)(lst.map!toRecipeLink.array);
     }
 
     override @property GetSkillCategoriesResult getSkillCategories() const pure nothrow
@@ -67,7 +77,7 @@ class WebModel: ModelAPI
         return typeof(return)(wm.getSkillCategories.map!(s => SkillLink(s)).array);
     }
 
-    override GetRecipesResult getSkillRecipes(string skill, string query, bool migemo, bool rev, string key)
+    override GetRecipesResult getSkillRecipes(string skill, string query, bool migemo, bool rev, string key, string fs)
     {
         import std.algorithm;
         import std.array;
@@ -77,11 +87,21 @@ class WebModel: ModelAPI
 
         import coop.core;
 
+        auto fields = fs.split(",");
+
         enforceHTTP(getSkillCategories.スキル一覧.map!"a.スキル名".canFind(skill), HTTPStatus.notFound, "No such skill category");
 
         auto lst = recipeSort(wm.getRecipeList(query, Category(skill), No.useMetaSearch, cast(Flag!"useMigemo")migemo,
                                                cast(Flag!"useReverseSearch")rev, SortOrder.ByName), key);
-        return typeof(return)(lst.map!(r => RecipeLink(r)).array);
+        auto toRecipeLink(string r)
+        {
+            import std.exception;
+            auto ret = RecipeLink(r);
+            auto detail = getRecipe(r).ifThrown!HTTPStatusException(RecipeInfo.init).toAssocArray;
+            ret.追加情報 = getDetails(detail, fields);
+            return ret;
+        }
+        return typeof(return)(lst.map!toRecipeLink.array);
     }
 
     override BufferLink[][string] getBuffers()
@@ -92,16 +112,25 @@ class WebModel: ModelAPI
         return ["バフ一覧": wm.wisdom.foodEffectList.keys.map!(k => BufferLink(k)).array];
     }
 
-    override GetRecipesResult getRecipes(string query, bool useMigemo, bool useReverseSearch,
-                                         string key)
+    override GetRecipesResult getRecipes(string query, bool useMigemo, bool useReverseSearch, string key, string fs)
     {
         import std.algorithm;
         import std.range;
 
         import vibe.http.common;
+        auto fields = fs.split(",");
 
         auto lst = recipeSort(wm.getRecipeList(query, cast(Flag!"useMigemo")useMigemo, cast(Flag!"useReverseSearch")useReverseSearch), key);
-        return typeof(return)(lst.map!(r => RecipeLink(r)).array);
+
+        auto toRecipeLink(string r)
+        {
+            import std.exception;
+            auto ret = RecipeLink(r);
+            auto detail = getRecipe(r).ifThrown!HTTPStatusException(RecipeInfo.init).toAssocArray;
+            ret.追加情報 = getDetails(detail, fields);
+            return ret;
+        }
+        return typeof(return)(lst.map!toRecipeLink.array);
     }
 
     override GetItemsResult getItems(string query, bool useMigemo, bool onlyProducts)
@@ -190,6 +219,26 @@ class WebModel: ModelAPI
         }
     }
 private:
+    auto getDetails(Json[string] info, string[] fields)
+    {
+        typeof(info) ret;
+
+        foreach(f; fields)
+        {
+            if (auto val = f in info)
+            {
+                ret[f] = *val;
+            }
+            else
+            {
+                import vibe.http.common;
+                /// 404 は適切？
+                enforceHTTP(false, HTTPStatus.notFound, "No such field '"~f~"'");
+            }
+        }
+        return ret;
+    }
+
     auto recipeSort(string[] rs, string key)
     {
         import std.algorithm;
@@ -221,4 +270,19 @@ private:
     }
     WisdomModel wm;
     string message;
+}
+
+private:
+
+auto toAssocArray(T)(T info) if (is(T == struct))
+{
+    import std.traits;
+    import vibe.data.json;
+    Json[string] ret;
+
+    foreach(fname; FieldNameTuple!T)
+    {
+        ret[fname] = mixin("info."~fname).serialize!JsonSerializer;
+    }
+    return ret;
 }

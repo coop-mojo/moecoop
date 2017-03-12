@@ -6,8 +6,9 @@
 module coop.mui.controller.recipe_tab_frame_controller;
 
 import std.typecons;
+import coop.mui.model.wisdom_adapter;
 
-alias RecipePair = Tuple!(dstring, "category", dstring[], "recipes");
+alias RecipePair = Tuple!(dstring, "category", RecipeLink[], "recipes");
 
 abstract class RecipeTabFrameController
 {

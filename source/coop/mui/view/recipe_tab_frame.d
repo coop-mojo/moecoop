@@ -147,8 +147,7 @@ class RecipeTabFrame: TabFrameBase
         return childById!ComboBox("characters");
     }
 
-    auto showRecipeList(Pairs)(Pairs pairs)
-        if (isInputRange!Pairs && is(ElementType!Pairs == RecipePair))
+    auto showRecipeList(RecipePair[] pairs)
     {
         import std.algorithm;
 
@@ -190,16 +189,14 @@ class RecipeTabFrame: TabFrameBase
         recipeList.addChild(scroll);
     }
 
-    auto toRecipeEntries(Pairs)(Pairs pairs)
-        if (isInputRange!Pairs && is(ElementType!Pairs == RecipePair))
+    auto toRecipeEntries(RecipePair[] pairs)
     {
         import std.algorithm;
 
         return pairs.map!((pair) {
                 import coop.core: SortOrder;
 
-                auto category = pair.category.to!dstring;
-                auto recipes = pair.recipes.to!(dstring[]);
+                auto category = pair.category;
 
                 Widget[] header = [];
                 if (useMetaSearch || sortKey.to!string == SortOrder.BySkill)
@@ -208,7 +205,7 @@ class RecipeTabFrame: TabFrameBase
                     hd.backgroundColor = 0xCCCCCC;
                     header = [hd];
                 }
-                return chain(header, recipes.map!(r => toRecipeWidget(r, category)).array);
+                return chain(header, pair.recipes.map!(r => toRecipeWidget(r, category)).array);
             }).join.array;
     }
 
@@ -343,59 +340,61 @@ class RecipeTabFrame: TabFrameBase
     EventHandler!() nColumnChanged;
     EventHandler!() sortKeyChanged;
     int delegate(size_t, int) tableColumnLength;
-    dstring[] delegate(dstring, dstring) relatedBindersFor;
+    dstring[] delegate(RecipeLink, dstring) relatedBindersFor;
 
 private:
-    Widget toRecipeWidget(dstring recipe, dstring category)
+    import coop.mui.model.wisdom_adapter;
+    Widget toRecipeWidget(RecipeLink recipe, dstring category)
     {
         import std.algorithm;
 
         import coop.mui.view.controls;
 
-        auto ret = new CheckableEntryWidget(recipe.to!string, recipe);
+        auto ret = new CheckableEntryWidget(recipe.レシピ名, recipe.レシピ名.to!dstring);
         auto customInfo = controller.customInfo;
         auto characters = controller.characters;
         auto binders = relatedBindersFor(recipe, category);
 
         import std.exception;
         import vibe.http.common;
-        import coop.mui.model.wisdom_adapter: RecipeInfo;
-        auto r = recipe.empty ? RecipeInfo.init : controller.model.getRecipe(recipe.to!string).ifThrown!HTTPStatusException(RecipeInfo.init);
+        import vibe.data.json;
 
         ret.checkStateChanged = (bool marked) {
             auto c = characters[charactersBox.selectedItem];
+            auto r = recipe.レシピ名.empty ? RecipeInfo.init : controller.model.getRecipe(recipe.レシピ名).ifThrown!HTTPStatusException(RecipeInfo.init);
             if (marked)
             {
-                binders.each!(b => c.markFiledRecipe(recipe.to!string, b.to!string));
-                if (c.hasSkillFor(r))
+                binders.each!(b => c.markFiledRecipe(recipe.レシピ名, b.to!string));
+                if (c.hasSkillFor(r.必要スキル))
                 {
                     ret.textColor = "black";
                 }
             }
             else
             {
-                binders.each!(b => c.unmarkFiledRecipe(recipe.to!string, b.to!string));
-                if (!c.hasSkillFor(r) || r.レシピ必須)
+                binders.each!(b => c.unmarkFiledRecipe(recipe.レシピ名, b.to!string));
+                if (!c.hasSkillFor(r.必要スキル) || r.レシピ必須)
                 {
                     ret.textColor = "gray";
                 }
             }
         };
-        ret.checked = binders.canFind!(b => characters[charactersBox.selectedItem].hasRecipe(recipe.to!string, b.to!string));
+        ret.checked = binders.canFind!(b => characters[charactersBox.selectedItem].hasRecipe(recipe.レシピ名, b.to!string));
         ret.enabled = binders.length == 1;
-        if (r.レシピ必須)
+        auto skills = recipe.追加情報["必要スキル"].deserialize!(JsonSerializer, double[string]);
+        if (recipe.追加情報["レシピ必須"].get!bool)
         {
-            ret.textColor = (ret.checked && characters[charactersBox.selectedItem].hasSkillFor(r)) ? "black" : "gray";
+            ret.textColor = (ret.checked && characters[charactersBox.selectedItem].hasSkillFor(skills)) ? "black" : "gray";
         }
         else
         {
-            ret.textColor = characters[charactersBox.selectedItem].hasSkillFor(r) ? "black" : "gray";
+            ret.textColor = characters[charactersBox.selectedItem].hasSkillFor(skills) ? "black" : "gray";
         }
         debug
         {
             import std.range;
 
-            if (r.レシピ名.empty)
+            if (recipe.レシピ名.empty)
             {
                 ret.textColor = "red";
             }
@@ -404,6 +403,7 @@ private:
                 import std.algorithm;
                 import std.exception;
 
+                auto r = recipe.レシピ名.empty ? RecipeInfo.init : controller.model.getRecipe(recipe.レシピ名).ifThrown!HTTPStatusException(RecipeInfo.init);
                 auto prods = r.生成物.map!"a.アイテム名".array;
                 if (prods.any!(p => collectException(controller.model.getItem(p))))
                 {
@@ -434,16 +434,16 @@ private:
             scope(exit) highlightDetailRecipe;
 
 
-            recipeDetail = RecipeDetailFrame.create(recipe, controller.model, characters);
+            recipeDetail = RecipeDetailFrame.create(recipe.レシピ名.to!dstring, controller.model, characters);
 
-            auto itemNames = controller.model.getRecipe(recipe.to!string)
+            auto itemNames = controller.model.getRecipe(recipe.レシピ名)
                                        .ifThrown!HTTPStatusException(RecipeInfo.init)
                                        .生成物.map!"a.アイテム名".array.to!(dstring[]);
             enforce(itemNames.length <= 2);
             if (itemNames.empty)
             {
                 // レシピ情報が完成するまでの間に合わせ
-                itemNames = [ recipe~"のレシピで作れる何か" ];
+                itemNames = [ recipe.レシピ名.to!dstring~"のレシピで作れる何か" ];
             }
 
             hideItemDetail(1);
@@ -464,6 +464,7 @@ private:
             import std.format;
             import std.string;
 
+            auto r = recipe.レシピ名.empty ? RecipeInfo.init : controller.model.getRecipe(recipe.レシピ名).ifThrown!HTTPStatusException(RecipeInfo.init);
             auto str = format("%s (%s%s) = %s"d,
                               r.生成物.map!(pr => format("%sx%s", pr.アイテム名.toHankaku.removechars(" "), pr.個数)).join(","),
                               r.必要スキル.byKeyValue.map!(kv => format("%s%.1f", kv.key.toHankaku.removechars(" "), kv.value)).join(","),

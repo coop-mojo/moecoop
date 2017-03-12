@@ -19,19 +19,21 @@ interface ModelAPI
     @path("/information") @property GetInformationResult getInformation();
 
     @path("/binders") @property GetBinderCategoriesResult getBinderCategories();
-    @path("/binders/:binder/recipes")
-    @queryParam("query", "query") @queryParam("migemo", "migemo") @queryParam("rev", "rev") @queryParam("key", "sort")
-    GetRecipesResult getBinderRecipes(string _binder, string query="", bool migemo=false, bool rev=false, string key = "defalut");
+    @path("/binders/:binder/recipes") @queryParam("query", "query")
+    @queryParam("migemo", "migemo") @queryParam("rev", "rev") @queryParam("key", "sort") @queryParam("fields", "fields")
+    GetRecipesResult getBinderRecipes(string _binder, string query="",
+                                      bool migemo=false, bool rev=false, string key = "defalut", string fields = "");
 
     @path("/skills") @property GetSkillCategoriesResult getSkillCategories();
-    @path("/skills/:skill/recipes")
-    @queryParam("query", "query") @queryParam("migemo", "migemo") @queryParam("rev", "rev") @queryParam("key", "sort")
-    GetRecipesResult getSkillRecipes(string _skill, string query="", bool migemo=false, bool rev=false, string key = "default");
+    @path("/skills/:skill/recipes") @queryParam("query", "query")
+    @queryParam("migemo", "migemo") @queryParam("rev", "rev") @queryParam("key", "sort") @queryParam("fields", "fields")
+    GetRecipesResult getSkillRecipes(string _skill, string query="",
+                                     bool migemo=false, bool rev=false, string key = "default", string fields = "");
 
     @path("/buffers") @property BufferLink[][string] getBuffers();
 
-    @path("/recipes") @queryParam("migemo", "migemo") @queryParam("rev", "rev") @queryParam("key", "sort")
-    GetRecipesResult getRecipes(string query="", bool migemo=false, bool rev=false, string key = "default");
+    @path("/recipes") @queryParam("migemo", "migemo") @queryParam("rev", "rev") @queryParam("key", "sort") @queryParam("fields", "fields")
+    GetRecipesResult getRecipes(string query="", bool migemo=false, bool rev=false, string key = "default", string fields = "");
 
     @path("/items") @queryParam("migemo", "migemo") @queryParam("onlyProducts", "only-products")
     GetItemsResult getItems(string query="", bool migemo=false, bool onlyProducts=false);
@@ -157,6 +159,7 @@ struct SkillNumberLink
 
 struct ItemLink
 {
+    import vibe.data.json;
     this(string item) @safe pure nothrow
     {
         アイテム名 = item;
@@ -164,10 +167,12 @@ struct ItemLink
     }
     string アイテム名;
     string 詳細;
+    Json[string] 追加情報;
 }
 
 struct RecipeLink
 {
+    import vibe.data.json;
     this(string recipe) @safe pure nothrow
     {
         import std.array;
@@ -176,6 +181,7 @@ struct RecipeLink
     }
     string レシピ名;
     string 詳細;
+    Json[string] 追加情報;
 }
 
 struct BufferLink
@@ -191,6 +197,7 @@ struct BufferLink
 
 struct ItemNumberLink
 {
+    import vibe.data.json;
     this(string item, int num) @safe pure nothrow
     {
         アイテム名 = item;
@@ -199,6 +206,7 @@ struct ItemNumberLink
     }
     string アイテム名;
     string 詳細;
+    Json[string] 追加情報;
     int 個数;
 }
 

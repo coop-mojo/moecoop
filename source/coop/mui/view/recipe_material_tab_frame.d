@@ -526,7 +526,7 @@ class RecipeMaterialTabFrame: TabFrameBase
                 rs[1].text = format("%s 回"d, *n);
                 auto detail = controller.model.getRecipe(r.to!string);
                 auto c = controller.characters[charactersBox.selectedItem];
-                if (!c.hasSkillFor(detail) || (detail.レシピ必須 && !c.hasRecipe(r.to!string)))
+                if (!c.hasSkillFor(detail.必要スキル) || (detail.レシピ必須 && !c.hasRecipe(r.to!string)))
                 {
                     rs[0].textColor = "gray";
                 }

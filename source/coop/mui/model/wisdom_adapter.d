@@ -16,25 +16,25 @@ class WisdomAdapter
         this.endpoint = endpoint;
     }
 
-    GetRecipesResult getBinderRecipes(string binder, string query, bool migemo, bool rev, string key)
+    GetRecipesResult getBinderRecipes(string binder, string query, bool migemo, bool rev, string key, string fields)
     {
         import std.array;
         import vibe.http.common;
         binder = binder.replace("/", "_");
         try {
-            return api.getBinderRecipes(binder, query, migemo, rev, key);
+            return api.getBinderRecipes(binder, query, migemo, rev, key, fields);
         } catch(HTTPStatusException e) {
             throw e;
         } catch(Exception e) {
             if (e.msg == "Reading from TLS stream was unsuccessful with ret 0")
             {
-                return api.getBinderRecipes(binder, query, migemo, rev, key);
+                return api.getBinderRecipes(binder, query, migemo, rev, key, fields);
             }
             else
             {
                 import std.format;
-                throw new Exception(format("%s in api.getBinderRecipes(%s, %s, %s, %s, %s)",
-                                           e.msg, binder, query, migemo, rev, key));
+                throw new Exception(format("%s in api.getBinderRecipes(%s, %s, %s, %s, %s, %s)",
+                                           e.msg, binder, query, migemo, rev, key, fields));
             }
         }
     }

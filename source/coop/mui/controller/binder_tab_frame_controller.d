@@ -34,6 +34,8 @@ class BinderTabFrameController: RecipeTabFrameController
         import std.regex;
         import std.typecons;
 
+        import coop.mui.model.wisdom_adapter;
+
         auto query = frame_.queryBox.text == frame_.defaultMessage ? ""d : frame_.queryBox.text;
         if (frame_.useMetaSearch && query.matchFirst(ctRegex!r"^\s*$"d))
         {
@@ -43,12 +45,9 @@ class BinderTabFrameController: RecipeTabFrameController
         auto binders = frame_.useMetaSearch ? model.getBinderCategories.バインダー一覧.map!"a.バインダー名.to!dstring".array
                        : [frame_.selectedCategory];
 
-        alias RecipePair = Tuple!(dstring, "category", dstring[], "recipes");
-
-        auto recipes = binders.map!(b => RecipePair(b, model.getBinderRecipes(b.to!string, query.to!string, frame_.useMigemo, false, "default")
-                                                            .レシピ一覧
-                                                            .map!"a.レシピ名.to!dstring"
-                                                            .array)).array;
+        auto recipes = binders.map!(b => RecipePair(b, model.getBinderRecipes(b.to!string, query.to!string, frame_.useMigemo, false, "default",
+                                                                              "レシピ必須,必要スキル")
+                                                            .レシピ一覧)).array;
         frame_.showRecipeList(recipes);
     }
 private:

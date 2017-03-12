@@ -167,7 +167,6 @@ struct ItemLink
     }
     string アイテム名;
     string 詳細;
-    Json[string] 追加情報;
 }
 
 struct RecipeLink

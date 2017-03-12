@@ -47,7 +47,7 @@ class BinderTabFrameController: RecipeTabFrameController
 
         auto recipes = binders.map!(b => RecipePair(b, model.getBinderRecipes(b.to!string, query.to!string, frame_.useMigemo, false, "default",
                                                                               "レシピ必須,必要スキル")
-                                                            .レシピ一覧)).array;
+                                                            .レシピ一覧)).filter!"!a.recipes.empty".array;
         frame_.showRecipeList(recipes);
     }
 private:

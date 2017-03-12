@@ -52,6 +52,8 @@ $ dub test
 ### 知恵袋のビルドに利用している各種ウェブサービスについて
 生協の知恵袋は以下のウェブサービスを使用して、各環境のテストやビルドを行っています。
 
+- [Github](https://github.com/)
+    - 知恵袋のソースコードの管理
 - [Travis CI](https://travis-ci.org/)
     - Linux、Mac 環境でのビルドテスト、知恵袋サーバーの Docker イメージ作成
 - [AppVeyor](https://www.appveyor.com/)

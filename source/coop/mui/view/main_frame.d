@@ -83,7 +83,7 @@ class MainFrame: AppFrame
         binderTab.controller.showRecipeNames;
 
         import std.format;
-        statusLine.setStatusText = format("%s (%s)"d, model.getInformation.message, defaultMessage);
+        statusLine.setStatusText = defaultStatusMessage;
     }
 
     @property auto controller()
@@ -102,7 +102,42 @@ class MainFrame: AppFrame
         binderTab.disableMigemoBox;
         skillTab.disableMigemoBox;
     }
+
+    auto setStatusText(dstring msg, ulong timeout = 0)
+    {
+        if (timerID > 0)
+        {
+            cancelTimer(timerID);
+        }
+        if (window)
+        {
+            statusLine.setStatusText = msg;
+            if (timeout > 0)
+            {
+                timerID = setTimer(timeout);
+            }
+        }
+    }
+
+    auto defaultStatusMessage()
+    {
+        import std.format;
+        dstring msg = "";
+        debug
+        {
+            msg ~= "デバッグ凡例: 赤 = レシピ情報なし、青 = アイテム情報なし、下線 = アイテム個別情報なし、"d;
+        }
+        msg ~= format("状態: %s"d, cast(WebModel)controller_.model ? "オフライン" : "オンライン");
+        return msg;
+    }
 protected:
+
+    override bool onTimer(ulong id)
+    {
+        statusLine.setStatusText = defaultStatusMessage;
+        return false;
+    }
+
     override protected void initialize()
     {
         ownStyle.theme.fontFamily(FontFamily.SansSerif).fontFace(fontName);
@@ -195,19 +230,6 @@ protected:
     }
 private:
 
-    auto defaultMessage()
-    {
-        debug
-        {
-            return "デバッグ凡例: 赤 = レシピ情報なし、青 = アイテム情報なし、下線 = アイテム個別情報なし"d;
-        }
-        else
-        {
-            import std.format;
-            return format("状態: %s"d, cast(WebModel)controller_.model ? "オフライン" : "オンライン");
-        }
-    }
-
     import coop.mui.controller.main_frame_controller;
     import coop.mui.view.recipe_tab_frame;
     import coop.mui.view.recipe_material_tab_frame;
@@ -215,4 +237,5 @@ private:
     MainFrameController controller_;
     RecipeTabFrame binderTab, skillTab;
     RecipeMaterialTabFrame materialTab;
+    ulong timerID;
 }

@@ -1,89 +1,82 @@
 # 開発に参加したい人向け
-ゼロから始めるドキュメント整備ページにようこそ！
+ゼロから始める知恵袋開発ページにようこそ！
 
-## 開発環境のインストール方法
-生協では、知恵袋の開発環境をひとまとめにした[生協の知恵袋 お裁縫セット](https://hub.docker.com/r/moecoop/docker-fukuro/)を公開しています。
+## バグ報告や要望について
+バグ報告や機能追加の要望などは、[Github の Issues](https://github.com/coop-mojo/moecoop/issues)か、[FS生協の Twitter アカウント](https://twitter.com/coop_moe)にどうぞ！
 
-### 推奨環境
-- Windows
-    - [Docker toolbox](https://www.docker.com/products/docker-toolbox)
-    - [Xming-mesa](http://www.straightrunning.com/XmingNotes/)
+## 生協の知恵袋の開発をしたい人向け
 
-- Linux
-    - [Docker](https://www.docker.com/)
-    - [Xサーバー](https://www.x.org/wiki/)
-        - 通常はどちらも、パッケージ管理システム経由でインストールできます。
+### ビルドやテストの方法について
+#### ビルドに必要なソフトウェア
+知恵袋の取得・ビルドには以下のプログラムが必要です。
 
-- Mac
-    - まだ未検証
+- git (バージョン管理システム)
+    - 知恵袋のソースの取得やビルドをするのに必要です。また生協に知恵袋のバグ修正や機能追加の要望を出す際にも使えます。
+- dmd、dub (コンパイラとビルドツール)
+    - 知恵袋のビルドに必要です。
+- MkDocs (ドキュメント生成システム)
+    - このドキュメントを生成するのに必要です。
 
-### 裁縫セットの使い方
+各コマンドのインストール方法は環境ごとに異なるため、ここでは省略します。
+手元にビルドツールを用意せずに開発を行う方法については、[各種ウェブサービスを使った開発環境構築について](#_8)をご覧ください。
 
-- Windows
-    - 事前に、PC の IP アドレスをご確認ください。通常は `ipconfig` で確認できます。
-    - デスクトップにできた `Docker Quickstart Terminal` を起動して、以下を入力してください。
+#### ソースの取得方法
+- 以下のコマンドで取得できます。
 ```
-$ export DISPLAY=$ip:0.0
-$ export PATH=/c/Program\ Files\ \(x86\)/Xming:$PATH
-$ run Xming :0 -multiwindow -ac -clipboard
-$ docker run -it --rm -e DISPLAY=$DISPLAY moecoop/docker-fukuro
+$ git clone https://github.com/coop-mojo/moecoop.git
 ```
 
-- Linux
-    - 事前に、docker デーモンが動作していることを確認してください。
+#### ビルド方法
+生協の知恵袋はサーバーとクライアントから構成されるソフトウェアです。
+
+- 知恵袋サーバーをビルドする場合には以下のコマンドを実行してください。ビルドディレクトリに `fukurod` が生成されます。
 ```
-$ xhost local:root
-$ sudo docker run -it --rm -v /tmp/.X11-unix:/tmp/.X11-unix moecoop/docker-fukuro
+$ dub build -c server
 ```
 
-- Mac
-    - まだ未検証
-
-### ビルド方法
-Windows 環境の X サーバーと、知恵袋が使用している GUI ライブラリの相性問題のため、
-環境によってビルド方法が若干異なるのでご注意ください。
-
-- Windows 環境
+- 以下のコマンドを実行することで、知恵袋サーバーを動かすための Docker イメージを作成することができます。
 ```
-$ dub build -c fallback
+$ ./archive.sh && docker build -t moecoop .
 ```
 
-- Linux、Mac 環境
+- 知恵袋クライアントをビルドする場合には以下のコマンドを実行してください。ビルドディレクトリに `fukuro` が生成されます。
 ```
-$ dub build
-```
-
-### 実行方法
-- Windows 環境
-```
-$ dub run -c fallback
+$ dub build -c mui
 ```
 
-- Linux、Mac 環境
-```
-$ dub run
-```
-
-### テスト方法
+#### テスト方法
 ```
 $ dub test
 ```
 
-### ファイルを編集したい
-- お裁縫セットではエディタは提供していません。以下のように、ローカルから知恵袋のリポジトリを参照できるようにしてから、お好みのエディタで編集してください。
+### 知恵袋のビルドに利用している各種ウェブサービスについて
+生協の知恵袋は以下のウェブサービスを使用して、各環境のテストやビルドを行っています。
 
-```
-## Windows 環境
-$ sudo docker run -it --rm -v //c/Users/foo/repository:/work -e DISPLAY=$DISPLAY moecoop/docker-fukuro
+- [Travis CI](https://travis-ci.org/)
+    - Linux、Mac 環境でのビルドテスト、知恵袋サーバーの Docker イメージ作成
+- [AppVeyor](https://www.appveyor.com/)
+    - Windows 環境でのビルドテスト、Windows 環境用の生焼け版の作成
+- [Coveralls](https://coveralls.io/)
+    - ソースコードのカバレッジの確認
+- [Dockerhub](https://hub.docker.com/)
+    - Travis CI でビルドした Docker イメージの保管
+- [Read the Docs](https://readthedocs.org/)
+    - 作成したドキュメントの公開
+- [Arukas](https://arukas.io/)
+    - Docker イメージを使って知恵袋サーバーのデプロイ
+- [swagger.io](http://swagger.io/)
+    - 知恵袋サーバーの API 仕様の公開、API 仕様の編集
 
-## Linux 環境
-$ sudo docker run -it --rm -v ~/repository:/work -v /tmp/.X11-unix:/tmp/.X11-unix moecoop/docker-fukuro
-```
+## 生協の知恵袋 API を使って開発をしたい人向け
+
+生協の知恵袋サーバーは API 仕様が公開されているため、知恵袋 API を利用したソフトウェアの開発も可能です。
+API の仕様については [swagger-ui](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/coop-mojo/moecoop/master/api/swagger.yml) か [swagger-editor](http://editor.swagger.io/?url=https://raw.githubusercontent.com/coop-mojo/moecoop/master/api/swagger.yml) をご覧ください。
+
 
 ## ライセンス
 ### 生協の知恵袋のライセンスについて
-生協の知恵袋はMIT ライセンスのもとで配布されています。詳細は[LICENSE](https://github.com/coop-mojo/moecoop/blob/master/LICENSE)をご覧ください。
-大雑把な説明をすると、MITライセンスは以下の特徴を持ったライセンスです。
+生協の知恵袋は MIT ライセンスのもとで配布されています。詳細は [LICENSE](https://github.com/coop-mojo/moecoop/blob/master/LICENSE) をご覧ください。
+大雑把な説明をすると、MIT ライセンスは以下の特徴を持ったライセンスです。
 
 - コピー許可
 - 再配布許可
@@ -95,7 +88,7 @@ $ sudo docker run -it --rm -v ~/repository:/work -v /tmp/.X11-unix:/tmp/.X11-uni
 
 よくわからない場合には、
 
-- 再配布するファイル群には[LICENSE](https://github.com/coop-mojo/moecoop/blob/master/LICENSE)も含めてください。
+- 再配布するファイル群には [LICENSE](https://github.com/coop-mojo/moecoop/blob/master/LICENSE) も含めてください。
     - ここで配布しているものをそのまま再配布する場合には、特に気にしなくても大丈夫です。
 - 別プログラム中でソースコードを利用した場合には、例えば以下の文言を README のどこかに記載してください。
 
@@ -107,10 +100,7 @@ https://github.com/coop-mojo/moecoop/blob/master/LICENSE
 
 - また、生協の知恵袋は C/Migemo ライブラリを利用しています。
   ライブラリを利用している部分を流用する場合には、ライブラリの著作権表示を README のどこかに記載してください。
-  C/Mimemo は、MIT ライセンスです。
-
-### 生協の知恵袋 お裁縫セットのライセンスについて
-生協の知恵袋 お裁縫セットのリポジトリ内のファイルは、CC0 のもとで配布されています。詳細は[LICENSE](https://github.com/coop-mojo/docker-fukuro/blob/master/LICENSE)をご覧ください。
+  C/Mimemo は MIT ライセンスです。
 
 ### 知恵袋が内部で利用しているソフトウェアのライランスについて
 生協の知恵袋では以下のソフトウェアが利用されています。
@@ -137,3 +127,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
+
+## 生協の知恵袋 お裁縫セットについて
+生協の知恵袋の開発に必要なソフトウェアをひとまとめにした[生協の知恵袋 お裁縫セット](https://github.com/coop-mojo/docker-fukuro) ([Dockerhub](https://hub.docker.com/r/moecoop/docker-fukuro/))は、
+遠い未来にリニューアル予定です…
+
+### 生協の知恵袋 お裁縫セットのライセンスについて
+生協の知恵袋 お裁縫セットのリポジトリ内のファイルは、CC0 のもとで配布されています。詳細は [LICENSE](https://github.com/coop-mojo/docker-fukuro/blob/master/LICENSE) をご覧ください。

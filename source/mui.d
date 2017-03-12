@@ -39,9 +39,7 @@ extern(C) int UIAppMain(string[] args)
     embeddedResourceList.addResources(embedResourcesFromList!"resources.list"());
 
     string endpoint = "https://moecoop-api.arukascloud.io/";
-    bool offline;
-    auto helpInfo = args.getopt("endpoint", "知恵袋サーバーのエンドポイントを指定します。", &endpoint,
-                                "offline", "オフラインモードで起動します。", &offline);
+    auto helpInfo = args.getopt("endpoint", "知恵袋サーバーのエンドポイントを指定します。", &endpoint);
     if (helpInfo.helpWanted)
     {
         defaultGetoptPrinter("生協の知恵袋クライアントです。",
@@ -99,9 +97,7 @@ extern(C) int UIAppMain(string[] args)
                                                  config.windowWidth,
                                                  config.windowHeight);
 
-    ModelAPI model = offline
-                     ? cast(ModelAPI)new WebModel(SystemResourceBase)
-                     : new WisdomAdapter(endpoint).wrap!ModelAPI;
+    ModelAPI model = new WisdomAdapter(endpoint).wrap!ModelAPI;
     window.mainWidget = new MainFrame(model, chars, config, customInfo);
     window.windowIcon = drawableCache.getImage("coop-icon");
     window.show;

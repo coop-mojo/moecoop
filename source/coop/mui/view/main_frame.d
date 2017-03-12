@@ -121,14 +121,15 @@ class MainFrame: AppFrame
 
     auto defaultStatusMessage()
     {
-        import std.format;
-        dstring msg = "";
         debug
         {
-            msg ~= "デバッグ凡例: 赤 = レシピ情報なし、青 = アイテム情報なし、下線 = アイテム個別情報なし、"d;
+            return "デバッグ凡例: 赤 = レシピ情報なし、青 = アイテム情報なし、下線 = アイテム個別情報なし、"d;
         }
-        msg ~= format("状態: %s"d, cast(WebModel)controller_.model ? "オフライン" : "オンライン");
-        return msg;
+        else
+        {
+            import std.conv;
+            return "生協からのお知らせ: "~controller_.model.getInformation.message.to!dstring;
+        }
     }
 protected:
 

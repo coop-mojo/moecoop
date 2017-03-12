@@ -10,6 +10,8 @@ host: moecoop-api.arukascloud.io
 schemes:
   - https
 basePath: /
+consumes:
+  - application/json
 produces:
   - application/json
 paths:
@@ -96,6 +98,12 @@ paths:
             - name
             - skill
             - default
+        - name: fields
+          in: query
+          description: 取得したいレシピ詳細情報のフィールド名を","でつなげた文字列です。ここで与えたフィールドの値が、返り値の追加情報欄に入ります。
+          required: false
+          type: string
+          collectionFormat: csv
       responses:
         200:
           description: バインダーに収録されているレシピ情報の配列
@@ -108,13 +116,13 @@ paths:
                   $ref: '#/definitions/レシピ情報'
         404:
           description:
-            指定したバインダーがない
+            指定したバインダーが存在しないか、fields パラメータで指定したフィールドが存在しない
           schema:
             type: object
             properties:
               statusMessage:
                 type: string
-                description: No such binder
+                description: No such binder か No such field
 
   /skills:
     get:
@@ -171,6 +179,12 @@ paths:
             - name
             - skill
             - default
+        - name: fields
+          in: query
+          description: 取得したいレシピ詳細情報のフィールド名を","でつなげた文字列です。ここで与えたフィールドの値が、返り値の追加情報欄に入ります。
+          required: false
+          type: string
+          collectionFormat: csv
       responses:
         200:
           description: スキルカテゴリに分類されているレシピ情報の配列
@@ -183,13 +197,13 @@ paths:
                   $ref: '#/definitions/レシピ情報'
         404:
           description:
-            指定したスキルカテゴリがない
+            指定したスキルカテゴリが存在しないか、fields パラメータで指定したフィールドが存在しない
           schema:
             type: object
             properties:
               statusMessage:
                 type: string
-                description: No such skill category
+                description: No such skill category か No such field
 
   /recipes:
     get:
@@ -222,6 +236,12 @@ paths:
             - name
             - skill
             - default
+        - name: fields
+          in: query
+          description: 取得したいレシピ詳細情報のフィールド名を","でつなげた文字列です。ここで与えたフィールドの値が、返り値の追加情報欄に入ります。
+          required: false
+          type: string
+          collectionFormat: csv
       responses:
         200:
           description: レシピ情報の配列
@@ -232,6 +252,14 @@ paths:
                 type: array
                 items:
                   $ref: '#/definitions/レシピ情報'
+        404:
+          description: fields パラメータで指定したフィールドが存在しない
+          schema:
+            type: object
+            properties:
+              statusMessage:
+                type: string
+                description: No such field
 
   /recipes/{recipe}:
     get:
@@ -249,44 +277,7 @@ paths:
         200:
           description: レシピの詳細情報
           schema:
-            type: object
-            properties:
-              レシピ名:
-                type: string
-                description: レシピ名です。
-              材料:
-                type: array
-                description: レシピの材料です。
-                items:
-                  $ref: '#/definitions/アイテム個数情報'
-              生成物:
-                type: array
-                description: 生成されるアイテムです。
-                items:
-                  $ref: '#/definitions/アイテム個数情報'
-              テクニック:
-                type: array
-                description: 生産に必要なテクニックです。配列内のどのテクニックでも生産できます。
-                items:
-                  type: string
-              必要スキル:
-                type: object
-                description: 生産に必要なスキル値です。
-              レシピ必要:
-                type: boolean
-                description: true の場合、生産にはレシピが必要です。
-              ギャンブル型:
-                type: boolean
-                description: true の場合、生産ルーレットはギャンブル配置です。
-              ペナルティ型:
-                type: boolean
-                description: true の場合、生産ルーレットはペナルティ配置です。
-              収録バインダー:
-                type: array
-                items:
-                  $ref: '#/definitions/バインダー情報'
-              備考:
-                type: string
+            $ref: '#/definitions/レシピ詳細情報'
         404:
           description:
             指定したレシピがない
@@ -563,6 +554,49 @@ definitions:
       詳細:
         type: string
         description: 詳細情報を表示するエンドポイントです。
+      追加情報:
+        type: object
+        description: リンク以外の追加情報が含まれます。取り得るキーや値についてはレシピ詳細情報と同様です。
+  レシピ詳細情報:
+    type: object
+    properties:
+      レシピ名:
+        type: string
+        description: レシピ名です。
+      材料:
+        type: array
+        description: レシピの材料です。
+        items:
+          $ref: '#/definitions/アイテム個数情報'
+      生成物:
+        type: array
+        description: 生成されるアイテムです。
+        items:
+          $ref: '#/definitions/アイテム個数情報'
+      テクニック:
+        type: array
+        description: 生産に必要なテクニックです。配列内のどのテクニックでも生産できます。
+        items:
+          type: string
+      必要スキル:
+        type: object
+        description: 生産に必要なスキル値です。
+      レシピ必要:
+        type: boolean
+        description: true の場合、生産にはレシピが必要です。
+      ギャンブル型:
+        type: boolean
+        description: true の場合、生産ルーレットはギャンブル配置です。
+      ペナルティ型:
+        type: boolean
+        description: true の場合、生産ルーレットはペナルティ配置です。
+      収録バインダー:
+        type: array
+        items:
+          $ref: '#/definitions/バインダー情報'
+      備考:
+        type: string
+
   スキルカテゴリ情報:
     type: object
     properties:

@@ -232,7 +232,6 @@ private:
             else
             {
                 import vibe.http.common;
-                /// 404 は適切？
                 enforceHTTP(false, HTTPStatus.notFound, "No such field '"~f~"'");
             }
         }

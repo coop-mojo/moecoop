@@ -38,7 +38,6 @@ void main(string[] args)
     }
 
     auto router = new URLRouter;
-    router.get("/", staticTemplate!"index.dt");
     router.registerRestInterface(new WebModel(SystemResourceBase, environment.get("MOECOOP_MESSAGE", "")));
     auto settings = new HTTPServerSettings;
     settings.port = port;

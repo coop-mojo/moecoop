@@ -205,7 +205,6 @@ struct ItemNumberLink
     }
     string アイテム名;
     string 詳細;
-    Json[string] 追加情報;
     int 個数;
 }
 

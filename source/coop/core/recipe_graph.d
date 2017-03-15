@@ -87,6 +87,8 @@ class RecipeGraph
         import std.algorithm;
         import std.array;
 
+        // target に指定されているものは、mats に入っている場合でも作成を省略しない
+        mats.removeKey(targets.keys);
         int[string] rs, leftover;
         MatTuple[string] ms = targets.byKeyValue.map!(kv => tuple(kv.key, MatTuple(kv.value, false))).assocArray;
         foreach(r; elements.recipes.map!"a.name")

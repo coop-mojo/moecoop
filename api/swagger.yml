@@ -620,6 +620,9 @@ definitions:
         type: integer
         description: アイテムの個数です。
         minimum: 0
+      追加情報:
+        type: object
+        description: 間違えて足したままにしちゃった＞＜ このフィールドは互換性保持のためにこのままにしています。
   アイテム情報:
     type: object
     properties:

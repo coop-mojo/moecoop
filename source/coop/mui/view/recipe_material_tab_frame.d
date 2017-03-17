@@ -657,17 +657,12 @@ class RecipeMaterialTabFrame: TabFrameBase
         import std.range;
         import std.typecons;
 
+        import vibe.data.json;
+
         auto elems = controller.model.postMenuRecipePreparation(items.to!(string[]));
         fullMaterialInfo = elems.必要素材.map!(a => MaterialInfo(a.素材情報.アイテム名, !a.中間素材)).array;
-        auto parentWithBros(string recipe)
-        {
-            auto ret = controller.model.getMenuRecipeOptions.選択可能レシピ.find!(e => e.レシピ候補.canFind!(a => a.レシピ名 == recipe)).array;
-            return ret.empty ? "" : ret.front.生産アイテム.アイテム名;
-        }
-        auto recipes = elems.必要レシピ.map!(a => RecipeInfo(a.レシピ名,
-                                                        parentWithBros(a.レシピ名))).array;
 
-        initRecipeTable(recipes);
+        initRecipeTable(elems.必要レシピ.map!(a => RecipeInfo(a.レシピ名, a.追加情報["選択レシピグループ"].get!string)).array);
         initLeftoverTable(fullMaterialInfo);
         initMaterialTable(fullMaterialInfo);
     }

@@ -192,14 +192,29 @@ class WebModel: ModelAPI
     {
         import std.algorithm;
         import std.range;
+        import coop.core.recipe_graph: RI = RecipeInfo;
+
+        auto toMenuRecipeInfo(RI ri)
+        {
+            import std.exception;
+            import vibe.http.common;
+            import vibe.data.json;
+
+            auto ret = RecipeLink(ri.name);
+            auto detail = getRecipe(ri.name).ifThrown!HTTPStatusException(RecipeInfo.init);
+            ret.追加情報["必要スキル"] = detail.必要スキル.serialize!JsonSerializer;
+            ret.追加情報["レシピ必須"] = detail.レシピ必須.serialize!JsonSerializer;
+            ret.追加情報["選択レシピグループ"] = ri.parentGroup.serialize!JsonSerializer;
+            return ret;
+        }
 
         auto ret = wm.getMenuRecipeResult(作成アイテム);
+
         with(typeof(return))
         {
-            return typeof(return)(ret.recipes.map!(r => RecipeLink(r.name)).array,
-                                  ret.materials
-                                     .map!(m => MatElem(ItemLink(m.name),
-                                                        !m.isLeaf)).array);
+            return typeof(return)(
+                ret.recipes.map!toMenuRecipeInfo.array,
+                ret.materials.map!(m => MatElem(ItemLink(m.name), !m.isLeaf)).array);
         }
     }
 

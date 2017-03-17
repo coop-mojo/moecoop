@@ -63,7 +63,6 @@ class RecipeGraph
         }
         RecipeInfo[] rinfo = orderedRecipes_.map!((r) {
                 auto bros = recipes_[r].parents[].map!(p => materials_[p].children).join.map!"a.name".array.sort().uniq.array;
-                assert(bros.length <= 1 || recipes_[r].parents[].walkLength == 1);
                 return RecipeInfo(r, bros.length > 1 ? recipes_[r].parents[].front : "");
             }).array;
 
@@ -199,7 +198,7 @@ private:
     /++
      + Init tree from a given material name
      +/
-    void init(string name, RecipeContainer parent) pure
+    void init(string name, RecipeContainer parent, bool fromChildren = false) pure
     out {
         import std.algorithm;
         assert(materials_[name].children.all!(c => name in c.parents));
@@ -214,6 +213,12 @@ private:
             return;
         }
         materials_[name] = mat;
+
+        // 精米 -> 精米/米ぬか -> 米ぬか などの逆向きに呼ばれる場合には子ノードを作らない
+        if (fromChildren)
+        {
+            return;
+        }
 
         if (auto rs = rrecipeFor(name))
         {
@@ -260,7 +265,7 @@ private:
         {
             if (r !in materials_)
             {
-                this.init(r, cast(RecipeContainer)null);
+                this.init(r, cast(RecipeContainer)null, true);
             }
             recipe.parents.insert(r);
         }

@@ -65,7 +65,6 @@ class ItemDetailFrame: ScrollWidget
 
             table.addElem("NPC売却価格", format("%s g", item.NPC売却価格), item.isOverlaid!"NPC売却価格");
 
-            import coop.core.price;
             table.addChild(new TextWidget("", "参考価格: "d));
             auto lo = new HorizontalLayout;
             auto refPriceWidget = new TextWidget("", format("%s g"d, item.参考価格));

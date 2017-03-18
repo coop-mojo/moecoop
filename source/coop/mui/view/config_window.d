@@ -8,7 +8,7 @@ module coop.mui.view.config_window;
 import dlangui;
 import dlangui.dialogs.dialog;
 
-import coop.core.character;
+import coop.mui.model.character;
 
 class ConfigDialog: Dialog
 {

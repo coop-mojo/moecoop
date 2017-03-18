@@ -50,7 +50,7 @@ public:
 
 class MainFrame: AppFrame
 {
-    import coop.core.character;
+    import coop.mui.model.character;
     import coop.mui.model.custom_info;
     import coop.mui.model.config;
     import coop.mui.model.wisdom_adapter;

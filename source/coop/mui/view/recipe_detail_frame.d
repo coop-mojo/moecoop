@@ -13,7 +13,7 @@ class RecipeDetailFrame: ScrollWidget, MenuItemActionHandler
     import std.container;
     import std.range;
 
-    import coop.core.character;
+    import coop.mui.model.character;
     import coop.mui.model.wisdom_adapter;
 
     this() { super(); }

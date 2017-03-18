@@ -29,7 +29,7 @@ extern(C) int UIAppMain(string[] args)
     import std.path;
     import std.typecons;
 
-    import coop.core.character;
+    import coop.mui.model.character;
     import coop.mui.model.config;
     import coop.mui.model.custom_info;
     import coop.mui.model.wisdom_adapter;

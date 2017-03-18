@@ -660,7 +660,7 @@ class RecipeMaterialTabFrame: TabFrameBase
         import vibe.data.json;
 
         auto elems = controller.model.postMenuRecipePreparation(items.to!(string[]));
-        fullMaterialInfo = elems.必要素材.map!(a => MaterialInfo(a.素材情報.アイテム名, !a.中間素材)).array;
+        fullMaterialInfo = elems.必要素材.map!(a => MaterialInfo(a.アイテム名, !a.追加情報["中間素材"].get!bool)).array;
 
         initRecipeTable(elems.必要レシピ.map!(a => RecipeInfo(a.レシピ名, a.追加情報["選択レシピグループ"].get!string)).array);
         initLeftoverTable(fullMaterialInfo);

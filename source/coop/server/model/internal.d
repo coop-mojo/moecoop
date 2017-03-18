@@ -210,12 +210,13 @@ class WebModel: ModelAPI
 
         auto ret = wm.getMenuRecipeResult(作成アイテム);
 
-        with(typeof(return))
-        {
-            return typeof(return)(
-                ret.recipes.map!toMenuRecipeInfo.array,
-                ret.materials.map!(m => MatElem(ItemLink(m.name), !m.isLeaf)).array);
-        }
+        return typeof(return)(
+            ret.recipes.map!toMenuRecipeInfo.array,
+            ret.materials.map!((m) {
+                    auto it = ItemLink(m.name);
+                    it.追加情報["中間素材"] = (!m.isLeaf).serialize!JsonSerializer;
+                    return it;
+                }).array);
     }
 
     override PostMenuRecipeResult postMenuRecipe(int[string] 作成アイテム, int[string] 所持アイテム, string[string] 使用レシピ, string[] 直接調達アイテム)

@@ -93,12 +93,8 @@ struct GetMenuRecipeOptionsResult
 
 struct PostMenuRecipePreparationResult
 {
-    static struct MatElem{
-        ItemLink 素材情報;
-        bool 中間素材;
-    }
     RecipeLink[] 必要レシピ;
-    MatElem[] 必要素材;
+    ItemLink[] 必要素材;
 }
 
 struct PostMenuRecipeResult

@@ -112,9 +112,6 @@ class RecipeTabFrame: TabFrameBase
             characterChanged();
             return true;
         };
-
-        childById!Button("editItem1").enabled = false;
-        childById!Button("editItem2").enabled = false;
     }
 
     override @property EditLine queryBox()
@@ -547,7 +544,6 @@ auto recipeDetailsLayout()
                     id: item1
                     HorizontalLayout {
                         TextWidget { text: "アイテム情報1" }
-                        Button { id: editItem1; text: "編集" }
                     }
                     FrameLayout {
                         id: detailFrame1
@@ -560,7 +556,6 @@ auto recipeDetailsLayout()
                     id: item2
                     HorizontalLayout {
                         TextWidget { text: "アイテム情報2" }
-                        Button { id: editItem2; text: "編集" }
                     }
                     FrameLayout {
                         id: detailFrame2

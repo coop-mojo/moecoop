@@ -91,7 +91,7 @@ class Character
 
     @property auto url(string u)
     {
-        import coop.core.skills;
+        import coop.mui.model.skills;
         import std.exception;
         import std.traits;
         import std.typecons;

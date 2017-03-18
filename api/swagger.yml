@@ -19,7 +19,7 @@ paths:
     get:
       summary: サーバーバージョン情報
       description: 生協の知恵袋 API サーバーのバージョンを返します。デバッグ用です。
-      tags: 
+      tags:
         - その他
       responses:
         200:
@@ -544,7 +544,7 @@ definitions:
         description: バインダー名です。
       レシピ一覧:
         type: string
-        description: バインダーに収録されているレシピを表示するエンドポイントです。
+        description: バインダーに収録されているレシピを取得するための URL です。
   レシピ情報:
     type: object
     properties:
@@ -553,7 +553,7 @@ definitions:
         description: レシピ名です。
       詳細:
         type: string
-        description: 詳細情報を表示するエンドポイントです。
+        description: 詳細情報を取得するための URL です。
       追加情報:
         type: object
         description: リンク以外の追加情報が含まれます。取り得るキーや値についてはレシピ詳細情報と同様です。
@@ -606,7 +606,7 @@ definitions:
       レシピ一覧:
         type: string
         description:
-          スキルカテゴリに分類されているレシピを表示するエンドポイントです。
+          スキルカテゴリに分類されているレシピを取得するための URL です。
   アイテム個数情報:
     type: object
     properties:
@@ -615,7 +615,7 @@ definitions:
         description: アイテム名です。
       詳細:
         type: string
-        description: 詳細情報を表示するエンドポイントです。
+        description: 詳細情報を取得するための URL です。
       個数:
         type: integer
         description: アイテムの個数です。
@@ -631,7 +631,7 @@ definitions:
         description: アイテム名です。
       詳細:
         type: string
-        description: 詳細情報を表示するエンドポイントです。
+        description: 詳細情報を取得するための URL です。
   アイテム詳細情報:
     type: object
     properties:
@@ -896,7 +896,7 @@ definitions:
         description: スキル名です。
       レシピ一覧:
         type: string
-        description: このスキルで生産できるレシピの一覧を表示するエンドポイントです。
+        description: このスキルで生産できるレシピの一覧を取得するための URL です。
       スキル値:
         type: number
         description: 必要スキル値です。

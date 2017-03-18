@@ -41,7 +41,7 @@ extern(C) int UIAppMain(string[] args)
     string endpoint = "https://moecoop-api.arukascloud.io/";
     version(Windows){}
     else {
-        auto helpInfo = args.getopt("endpoint", "知恵袋サーバーのエンドポイントを指定します。", &endpoint);
+        auto helpInfo = args.getopt("endpoint", "知恵袋サーバーのベース URL を指定します。", &endpoint);
         if (helpInfo.helpWanted)
         {
             defaultGetoptPrinter("生協の知恵袋クライアントです。",

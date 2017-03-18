@@ -266,6 +266,7 @@ private:
             if (r !in materials_)
             {
                 this.init(r, cast(RecipeContainer)null, true);
+                materials_[r].children ~= recipe;
             }
             recipe.parents.insert(r);
         }
@@ -344,6 +345,8 @@ class RecipeContainer
         parents = new RedBlackTree!string;
     }
 
+    override string toString() { import std.format, std.array; return format("RC(%s, parents: %s, children: %s)", name, parents[].array, children); }
+
     string name;
     RedBlackTree!string parents;
     MaterialContainer[] children;
@@ -363,6 +366,7 @@ class MaterialContainer
     {
         return !isProduct;
     }
+    override string toString() { import std.format, std.array; return format("MC(%s, parents: %s, children: %s)", name, parents[].array, children); }
 
     string name;
     bool isProduct = true;
@@ -659,6 +663,8 @@ unittest
                    MaterialInfo("精米", false),
                ]));
     auto mats = tpl.materials.map!"a.name".array;
+    import std.stdio;
+    writeln("Mats: ", graph.roots);
     assert(mats.indexOf("精米") < mats.indexOf("玄米"));
     assert(mats.indexOf("米ぬか") < mats.indexOf("玄米"));
 }

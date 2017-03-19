@@ -32,15 +32,7 @@ class SkillTabFrameController: RecipeTabFrameController
                                                        .map!"a.バインダー名"
                                                        .array.to!(dstring[]);
         frame.tableColumnLength = (nRecipes, nColumns) => (nRecipes.to!real/nColumns).ceil.to!int;
-        with(frame.childById!ComboBox("sortBy"))
-        {
-            import std.algorithm;
-            import std.range;
-            import coop.core: SortOrder;
-
-            items = only(EnumMembers!SortOrder).map!"cast(string)a".array.to!(dstring[])[0..$-1];
-            selectedItemIndex = 0;
-        }
+        frame.registerSortKeys(cast(SortOrder[])[EnumMembers!SortOrder][1..$]);
         auto revSearch = new CheckBox("revSearch", "逆引き検索"d);
         frame.childById("searchOptions").addChild(revSearch);
     }
@@ -53,7 +45,6 @@ class SkillTabFrameController: RecipeTabFrameController
         import std.regex;
         import std.typecons;
 
-        import coop.core: SortOrder;
         import coop.mui.model.wisdom_adapter;
 
         auto query = frame_.queryBox.text == frame_.defaultMessage ? ""d : frame_.queryBox.text;
@@ -62,33 +53,21 @@ class SkillTabFrameController: RecipeTabFrameController
             return;
         }
 
-        string key;
-        final switch(frame_.sortKey.to!string) with(SortOrder)
-        {
-        case ByName:
-            key = "name";
-            break;
-        case BySkill:
-            key = "skill";
-            break;
-        case ByBinderOrder:
-            key = "default";
-            break;
-        }
         auto skill = frame_.selectedCategory;
         auto rs = frame_.useMetaSearch
-                  ? model.getRecipes(query.to!string, frame_.useMigemo, frame_.useReverseSearch, key, "レシピ必須,必要スキル,収録バインダー").レシピ一覧
-                  : model.getSkillRecipes(skill.to!string, query.to!string, frame_.useMigemo, frame_.useReverseSearch, key, "レシピ必須,必要スキル,収録バインダー")
+                  ? model.getRecipes(query.to!string, frame_.useMigemo, frame_.useReverseSearch, cast(string)frame_.sortKey, "レシピ必須,必要スキル,収録バインダー").レシピ一覧
+                  : model.getSkillRecipes(skill.to!string, query.to!string, frame_.useMigemo, frame_.useReverseSearch, cast(string)frame_.sortKey, "レシピ必須,必要スキル,収録バインダー")
                          .レシピ一覧;
 
         RecipePair[] recipes;
 
-        if (rs.empty || key == "name")
+        if (rs.empty || frame_.sortKey == SortOrder.ByName)
         {
             recipes = [RecipePair(skill, (RecipeLink[]).init)];
         }
         else
         {
+            assert(frame_.sortKey == SortOrder.BySkill);
             auto levels(RecipeLink ri)
             {
                 import std.exception;

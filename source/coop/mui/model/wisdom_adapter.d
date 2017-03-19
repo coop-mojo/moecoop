@@ -6,7 +6,6 @@
 module coop.mui.model.wisdom_adapter;
 
 public import coop.server.model;
-public import coop.server.model.internal: WebModel;
 
 class WisdomAdapter
 {

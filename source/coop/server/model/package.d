@@ -52,6 +52,13 @@ interface ModelAPI
     PostMenuRecipeResult postMenuRecipe(int[string] 作成アイテム, int[string] 所持アイテム, string[string] 使用レシピ, string[] 直接調達アイテム);
 }
 
+enum SortOrder: string
+{
+    ByDefault = "default",
+    BySkill = "skill",
+    ByName = "name",
+}
+
 struct GetVersionResult
 {
     @name("version") string version_;

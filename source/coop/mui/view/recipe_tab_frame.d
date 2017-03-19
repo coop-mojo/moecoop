@@ -16,6 +16,7 @@ class RecipeTabFrame: TabFrameBase
     import coop.mui.controller.recipe_tab_frame_controller;
     import coop.util;
     import coop.mui.view.main_frame;
+    import coop.mui.model.wisdom_adapter;
 
     mixin TabFrame;
 
@@ -44,19 +45,10 @@ class RecipeTabFrame: TabFrameBase
             };
         }
 
-        with(childById!ComboBox("sortBy"))
-        {
-            import std.traits;
-
-            import coop.core: SortOrder;
-
-            items = [EnumMembers!SortOrder].to!(dstring[]);
-            selectedItemIndex = 0;
-            itemClick = (Widget src, int idx) {
-                sortKeyChanged();
-                return true;
-            };
-        }
+        childById!ComboBox("sortBy").itemClick = (Widget src, int idx) {
+            sortKeyChanged();
+            return true;
+        };
 
         import coop.mui.view.editors;
         childById!EditLine("searchQuery").contentChange = (EditableContent content) {
@@ -191,12 +183,10 @@ class RecipeTabFrame: TabFrameBase
         import std.algorithm;
 
         return pairs.map!((pair) {
-                import coop.core: SortOrder;
-
                 auto category = pair.category;
 
                 Widget[] header = [];
-                if (useMetaSearch || sortKey.to!string == SortOrder.BySkill)
+                if (useMetaSearch || sortKey == SortOrder.BySkill)
                 {
                     Widget hd = new TextWidget("", category);
                     hd.backgroundColor = 0xCCCCCC;
@@ -255,9 +245,25 @@ class RecipeTabFrame: TabFrameBase
         frame.addChild(item);
     }
 
+    auto registerSortKeys(SortOrder[] its)
+    {
+        import std.algorithm;
+        import std.array;
+        import std.typecons;
+
+        auto keyMap = [
+            SortOrder.ByDefault: "デフォルト"d,
+            SortOrder.BySkill: "スキル順",
+            SortOrder.ByName: "名前順",
+            ];
+        childById!ComboBox("sortBy").items = its.map!(a => keyMap[a]).array;
+        childById!ComboBox("sortBy").selectedItemIndex = 0;
+        revSortMap = its.map!(a => tuple(keyMap[a], a)).assocArray;
+    }
+
     @property auto sortKey()
     {
-        return childById!ComboBox("sortBy").selectedItem;
+        return revSortMap[childById!ComboBox("sortBy").selectedItem];
     }
 
     auto hideItemDetail(int idx)
@@ -338,6 +344,7 @@ class RecipeTabFrame: TabFrameBase
     EventHandler!() sortKeyChanged;
     int delegate(size_t, int) tableColumnLength;
     dstring[] delegate(RecipeLink, dstring) relatedBindersFor;
+    SortOrder[dstring] revSortMap;
 
 private:
     import coop.mui.model.wisdom_adapter;

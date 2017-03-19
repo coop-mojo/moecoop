@@ -5,13 +5,9 @@
  */
 module coop.core;
 
-enum SortOrder {
-    BySkill       = "スキル値順",
-    ByName        = "名前順",
-    ByBinderOrder = "バインダー順",
-}
-
 public import coop.core.wisdom: Binder, Category;
+
+import coop.server.model: SortOrder;
 
 class WisdomModel
 {
@@ -153,7 +149,7 @@ class WisdomModel
             return arr.map!"a[0]".array;
         case ByName:
             return queryResult.sort().array;
-        case ByBinderOrder:
+        case ByDefault:
             assert(false);
         }
     }

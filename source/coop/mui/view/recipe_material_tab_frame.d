@@ -678,12 +678,12 @@ class RecipeMaterialTabFrame: TabFrameBase
                                                      controller.customInfo.recipePreference,
                                                      controller.customInfo.leafMaterials);
         updateMaterialTable(elems.必要素材
-                                 .filter!(mat => mat.素材情報.アイテム名.to!dstring !in targets)
-                                 .map!(mat => tuple(mat.素材情報.アイテム名.to!dstring,
-                                                    MatTuple(mat.素材数, mat.中間素材)))
+                                 .filter!(mat => mat.アイテム名.to!dstring !in targets)
+                                 .map!(mat => tuple(mat.アイテム名.to!dstring,
+                                                    MatTuple(mat.個数, mat.追加情報["中間素材"].get!bool)))
                                  .assocArray); // 最初にすること！
-        updateRecipeTable(elems.必要レシピ.map!"tuple(a.レシピ情報.レシピ名.to!dstring, a.コンバイン数)".assocArray);
-        updateLeftoverTable(elems.余り物.map!"tuple(a.素材情報.アイテム名.to!dstring, a.余剰数)".assocArray);
+        updateRecipeTable(elems.必要レシピ.map!"tuple(a.レシピ名.to!dstring, a.コンバイン数)".assocArray);
+        updateLeftoverTable(elems.余り物.map!"tuple(a.アイテム名.to!dstring, a.個数)".assocArray);
         showResult;
     }
 

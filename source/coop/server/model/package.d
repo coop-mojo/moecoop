@@ -99,22 +99,9 @@ struct PostMenuRecipePreparationResult
 
 struct PostMenuRecipeResult
 {
-    static struct RecipeElem{
-        RecipeLink レシピ情報;
-        int コンバイン数;
-    }
-    static struct MatElem{
-        ItemLink 素材情報;
-        int 素材数;
-        bool 中間素材;
-    }
-    static struct LOElem{
-        ItemLink 素材情報;
-        int 余剰数;
-    }
-    RecipeElem[] 必要レシピ;
-    MatElem[] 必要素材;
-    LOElem[] 余り物;
+    RecipeNumberLink[] 必要レシピ;
+    ItemNumberLink[] 必要素材;
+    ItemNumberLink[] 余り物;
 }
 
 struct BinderLink
@@ -204,6 +191,22 @@ struct ItemNumberLink
     string 詳細;
     Json[string] 追加情報;
     int 個数;
+}
+
+struct RecipeNumberLink
+{
+    import vibe.data.json;
+    this(string recipe, int num) @safe pure nothrow
+    {
+        import std.array;
+        レシピ名 = recipe;
+        詳細 = "/recipes/"~recipe.replace("/", "_");
+        コンバイン数 = num;
+    }
+    string レシピ名;
+    string 詳細;
+    Json[string] 追加情報;
+    int コンバイン数;
 }
 
 struct RecipeInfo

@@ -227,12 +227,14 @@ class WebModel: ModelAPI
         import std.container.rbtree;
 
         auto ret = wm.getMenuRecipeResult(作成アイテム, 所持アイテム, 使用レシピ, new RedBlackTree!string(直接調達アイテム));
-        with(typeof(return))
-        {
-            return typeof(return)(ret.recipes.byKeyValue.map!(kv => RecipeElem(RecipeLink(kv.key), kv.value)).array,
-                                  ret.materials.byKeyValue.map!(kv => MatElem(ItemLink(kv.key), kv.value.num, kv.value.isIntermediate)).array,
-                                  ret.leftovers.byKeyValue.map!(kv => LOElem(ItemLink(kv.key), kv.value)).array);
-        }
+        return typeof(return)(
+            ret.recipes.byKeyValue.map!(kv => RecipeNumberLink(kv.key, kv.value)).array,
+            ret.materials.byKeyValue.map!((kv) {
+                    auto it = ItemNumberLink(kv.key, kv.value.num);
+                    it.追加情報["中間素材"] = kv.value.isIntermediate.serialize!JsonSerializer;
+                    return it;
+                }).array,
+            ret.leftovers.byKeyValue.map!(kv => ItemNumberLink(kv.key, kv.value)).array);
     }
 private:
     auto getDetails(Json[string] info, string[] fields)

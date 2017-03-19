@@ -209,7 +209,7 @@ auto readFoods(string fname)
 /// 飲食バフのグループ
 enum AdditionalEffectGroup
 {
-    A, B1, B2, C1, C2, D1, D2, D3, D4, E, F, Others,
+    A, B1, B2, C1, C2, D1, D2, D3, D4, E, F, その他,
 }
 
 /// 飲食バフの効果情報

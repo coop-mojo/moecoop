@@ -200,11 +200,8 @@ auto addExtraElem(Item)(Widget layout, Item item)
                         effectStr ~= ", ";
                     effectStr ~= その他効果;
                 }
-                import coop.core.item: AdditionalEffectGroup;
                 layout.addElem!""("", effectStr);
-                layout.addElem("バフグループ",
-                               バフグループ == AdditionalEffectGroup.Others.to!string ? "その他"
-                               : バフグループ.to!string);
+                layout.addElem("バフグループ", バフグループ.to!string);
                 layout.addElem("効果時間", format("%s 秒", 効果時間));
 
                 return 備考;

@@ -13,7 +13,7 @@ class RecipeMaterialTabFrame: TabFrameBase
     import std.container;
 
     import coop.mui.controller.recipe_material_tab_frame_controller;
-    import coop.core.recipe_graph: MaterialInfo, MatTuple;
+    import coop.core.recipe_graph: MaterialInfo;
     import coop.util;
     import coop.mui.view.main_frame;
     import coop.server.model;
@@ -578,7 +578,7 @@ class RecipeMaterialTabFrame: TabFrameBase
         }
     }
 
-    auto updateMaterialTable(MatTuple[dstring] materials)
+    auto updateMaterialTable(ItemNumberLink[dstring] materials)
     {
         import std.algorithm;
         import std.exception;
@@ -588,68 +588,71 @@ class RecipeMaterialTabFrame: TabFrameBase
         unhighlightDetailItems;
         scope(exit) highlightDetailItems;
         auto tbl = enforce(childById!TableLayout("materials"));
-        tbl.rows.each!((rs) {
-                import std.string;
+        foreach(rs; tbl.rows)
+        {
+            import std.string;
 
-                isLocked = true;
-                scope(exit) isLocked = false;
+            isLocked = true;
+            scope(exit) isLocked = false;
 
-                auto m = rs[0].text.chomp(": ");
-                if (auto n = m in materials)
+            auto m = rs[0].text.chomp(": ");
+            if (auto it = m in materials)
+            {
+                import std.range;
+
+                import vibe.data.json;
+
+                rs.each!(w => w.visibility = Visibility.Visible);
+                rs[2].text = format("/%s 個"d, (*it).個数);
+                rs[0].textColor = (*it).追加情報["中間素材"].get!bool ? "blue" : "black";
+                if (!rs[1].text.empty && rs[1].text.to!int >= (*it).個数)
                 {
-                    import std.range;
-
-                    rs.each!(w => w.visibility = Visibility.Visible);
-                    rs[2].text = format("/%s 個"d, (*n).num);
-                    rs[0].textColor = (*n).isIntermediate ? "blue" : "black";
-                    if (!rs[1].text.empty && rs[1].text.to!int >= (*n).num)
-                    {
-                        rs[0].checked = true;
-                    }
-                    else
-                    {
-                        rs[0].checked = false;
-                    }
-
-                    auto mat = fullMaterialInfo.find!(mi => mi.name.to!dstring == m).front;
-                    if (!mat.isLeaf)
-                    {
-                        import std.typecons;
-
-                        import coop.mui.view.controls;
-
-                        auto menu = new MenuItem;
-                        if (controller.customInfo.leafMaterials.canFind(mat.name))
-                        {
-                            auto a = new Action(25000, "材料から用意する"d);
-                            auto it = new MenuItem(a);
-                            it.menuItemClick = (MenuItem _) {
-                                controller.customInfo.leafMaterials = controller.customInfo.leafMaterials.filter!(a => a != mat.name).array;
-                                reload;
-                                return false;
-                            };
-                            menu.add(it);
-                        }
-                        else
-                        {
-                            auto a = new Action(25001, "直接用意する"d);
-                            auto it = new MenuItem(a);
-                            it.menuItemClick = (MenuItem _) {
-                                controller.customInfo.leafMaterials ~= mat.name;
-                                reload;
-                                return false;
-                            };
-                            menu.add(it);
-                        }
-                        auto cew = (cast(CheckableEntryWidget)rs[0]);
-                        cew.popupMenu = menu;
-                    }
+                    rs[0].checked = true;
                 }
                 else
                 {
-                    rs.each!(w => w.visibility = Visibility.Gone);
+                    rs[0].checked = false;
                 }
-            });
+
+                auto mat = fullMaterialInfo.find!(mi => mi.name.to!dstring == m).front;
+                if (!mat.isLeaf)
+                {
+                    import std.typecons;
+
+                    import coop.mui.view.controls;
+
+                    auto menu = new MenuItem;
+                    if (controller.customInfo.leafMaterials.canFind(mat.name))
+                    {
+                        auto a = new Action(25000, "材料から用意する"d);
+                        auto mi = new MenuItem(a);
+                        mi.menuItemClick = (MenuItem _) {
+                            controller.customInfo.leafMaterials = controller.customInfo.leafMaterials.filter!(a => a != mat.name).array;
+                            reload;
+                            return false;
+                        };
+                        menu.add(mi);
+                    }
+                    else
+                    {
+                        auto a = new Action(25001, "直接用意する"d);
+                        auto mi = new MenuItem(a);
+                        mi.menuItemClick = (MenuItem _) {
+                            controller.customInfo.leafMaterials ~= mat.name;
+                            reload;
+                            return false;
+                        };
+                        menu.add(mi);
+                    }
+                    auto cew = (cast(CheckableEntryWidget)rs[0]);
+                    cew.popupMenu = menu;
+                }
+            }
+            else
+            {
+                rs.each!(w => w.visibility = Visibility.Gone);
+            }
+        }
     }
 
     auto initializeTables(dstring[] items)
@@ -680,8 +683,7 @@ class RecipeMaterialTabFrame: TabFrameBase
                                                      controller.customInfo.leafMaterials);
         updateMaterialTable(elems.必要素材
                                  .filter!(mat => mat.アイテム名.to!dstring !in targets)
-                                 .map!(mat => tuple(mat.アイテム名.to!dstring,
-                                                    MatTuple(mat.個数, mat.追加情報["中間素材"].get!bool)))
+                                 .map!(mat => tuple(mat.アイテム名.to!dstring, mat))
                                  .assocArray); // 最初にすること！
         updateRecipeTable(elems.必要レシピ.map!"tuple(a.レシピ名.to!dstring, a.コンバイン数)".assocArray);
         updateLeftoverTable(elems.余り物.map!"tuple(a.アイテム名.to!dstring, a.個数)".assocArray);

@@ -83,6 +83,8 @@ struct GetVersionResult
 struct GetInformationResult
 {
     string message;
+    string oldestSupportedRelease;
+    string latestRelease;
 }
 
 struct GetBinderCategoriesResult

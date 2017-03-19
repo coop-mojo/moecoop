@@ -28,7 +28,7 @@ class WebModel: ModelAPI
 
     override @property GetInformationResult getInformation() const pure nothrow
     {
-        return GetInformationResult(message);
+        return GetInformationResult(message, "v1.2.1", "v1.2.1");
     }
 
     override @property GetBinderCategoriesResult getBinderCategories() const pure nothrow

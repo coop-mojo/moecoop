@@ -416,10 +416,9 @@ private:
                 else
                 {
                     if (prods.any!((p) {
-                                import coop.core.item: ItemType;
                                 import coop.mui.model.wisdom_adapter;
                                 auto it = controller.model.getItem(p).ifThrown!HTTPStatusException(ItemInfo.init);
-                                return it.アイテム種別 != ItemType.Others &&
+                                return it.アイテム種別 != "その他" &&
                                     (it.飲食物情報.isNull && it.武器情報.isNull && it.防具情報.isNull && &it.弾情報.isNull && it.盾情報.isNull);
                             }))
                     {

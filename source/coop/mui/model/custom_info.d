@@ -13,6 +13,9 @@ class CustomInfo
     /// アイテムごとの調達価格
     int[string] prices;
 
+    /// アイテムごとのメモ欄
+    @optional string[string] memos;
+
     string[] leafMaterials;
     string[string] recipePreference;
 private:

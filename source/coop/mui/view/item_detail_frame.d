@@ -75,12 +75,12 @@ class ItemDetailFrame: ScrollWidget
                 int modifiedPrice;
                 if (content.text.empty)
                 {
-                    customInfo.prices.remove(item.アイテム名);
+                    customInfo.prices.remove(name.to!string);
                     modifiedPrice = item.アイテム名.empty ? 0 : model.postItem(name.to!string, customInfo.prices).参考価格;
                 }
                 else
                 {
-                    customInfo.prices[item.アイテム名] = modifiedPrice = content.text.to!int;
+                    customInfo.prices[name.to!string] = modifiedPrice = content.text.to!int;
                 }
                 refPriceWidget.text = format("%s g"d, modifiedPrice);
             };
@@ -127,6 +127,20 @@ class ItemDetailFrame: ScrollWidget
 
                 table.addElem("備考", [rem, extraRemarks].filter!"!a.empty".join(", "));
             }
+
+            table.addChild(new TextWidget("", "メモ: "d));
+            auto memo = new EditLine("", customInfo.memos.get(name.to!string, "").to!dstring);
+            memo.contentChange = (EditableContent content) {
+                if (content.text.empty)
+                {
+                    customInfo.memos.remove(name.to!string);
+                }
+                else
+                {
+                    customInfo.memos[name.to!string] = content.text.to!string;
+                }
+            };
+            table.addChild(memo);
         }
 
         return ret;
@@ -139,7 +153,6 @@ class ItemDetailFrame: ScrollWidget
 private:
     ItemInfo item_;
 }
-
 
 auto addElem(dstring delim = ": ", Str1, Str2)(Widget layout, Str1 caption, Str2 elem)
     if (isSomeString!Str1 && isSomeString!Str2)

@@ -13,7 +13,6 @@ class RecipeMaterialTabFrame: TabFrameBase
     import std.container;
 
     import coop.mui.controller.recipe_material_tab_frame_controller;
-    import coop.core.recipe_graph: MaterialInfo;
     import coop.util;
     import coop.mui.view.main_frame;
     import coop.server.model;
@@ -376,7 +375,7 @@ class RecipeMaterialTabFrame: TabFrameBase
         fr.addChild(scr);
     }
 
-    auto initLeftoverTable(MaterialInfo[] leftovers)
+    auto initLeftoverTable(ItemLink[] leftovers)
     {
         import std.algorithm;
 
@@ -388,12 +387,12 @@ class RecipeMaterialTabFrame: TabFrameBase
         auto tbl = new TableLayout("leftovers");
         tbl.colCount = 2;
 
-        leftovers.map!"a.name".map!((lo) {
+        leftovers.map!"a.アイテム名".map!((lo) {
                 import std.format;
 
                 import coop.mui.view.controls;
 
-                auto w = new LinkWidget(lo.to!string, lo.to!dstring~": ");
+                auto w = new LinkWidget(lo, lo.to!dstring~": ");
                 auto n = new TextWidget("num", format("%s 個"d, 0));
                 w.click = (Widget _) {
                     import coop.mui.view.item_detail_frame;
@@ -414,7 +413,7 @@ class RecipeMaterialTabFrame: TabFrameBase
         fr.addChild(scr);
     }
 
-    auto initMaterialTable(MaterialInfo[] materials)
+    auto initMaterialTable(ItemLink[] materials)
     {
         import std.algorithm;
 
@@ -437,7 +436,7 @@ class RecipeMaterialTabFrame: TabFrameBase
                 import coop.mui.view.controls;
                 import coop.mui.view.editors;
 
-                auto w = new CheckableEntryWidget(mat.name.to!string, mat.name.to!dstring~": ");
+                auto w = new CheckableEntryWidget(mat.アイテム名, mat.アイテム名.to!dstring~": ");
                 auto o = new EditIntLine("own");
                 auto t = new TextWidget("times", format("/%s 個"d, 0));
                 o.minWidth = 55;
@@ -469,9 +468,9 @@ class RecipeMaterialTabFrame: TabFrameBase
                     scope(exit) highlightDetailItems;
 
                     showItemDetail(0);
-                    setItemDetail(ItemDetailFrame.create(mat.name.to!dstring, 1, controller.model, controller.customInfo), 0);
+                    setItemDetail(ItemDetailFrame.create(mat.アイテム名.to!dstring, 1, controller.model, controller.customInfo), 0);
                 };
-                if (!mat.isLeaf)
+                if (mat.追加情報["中間素材"].get!bool)
                 {
                     w.textFlags = TextFlag.Underline;
                 }
@@ -614,20 +613,20 @@ class RecipeMaterialTabFrame: TabFrameBase
                     rs[0].checked = false;
                 }
 
-                auto mat = fullMaterialInfo.find!(mi => mi.name.to!dstring == m).front;
-                if (!mat.isLeaf)
+                auto mat = fullMaterialInfo.find!(mi => mi.アイテム名.to!dstring == m).front;
+                if (mat.追加情報["中間素材"].get!bool)
                 {
                     import std.typecons;
 
                     import coop.mui.view.controls;
 
                     auto menu = new MenuItem;
-                    if (controller.customInfo.leafMaterials.canFind(mat.name))
+                    if (controller.customInfo.leafMaterials.canFind(mat.アイテム名))
                     {
                         auto a = new Action(25000, "材料から用意する"d);
                         auto mi = new MenuItem(a);
                         mi.menuItemClick = (MenuItem _) {
-                            controller.customInfo.leafMaterials = controller.customInfo.leafMaterials.filter!(a => a != mat.name).array;
+                            controller.customInfo.leafMaterials = controller.customInfo.leafMaterials.filter!(a => a != mat.アイテム名).array;
                             reload;
                             return false;
                         };
@@ -638,7 +637,7 @@ class RecipeMaterialTabFrame: TabFrameBase
                         auto a = new Action(25001, "直接用意する"d);
                         auto mi = new MenuItem(a);
                         mi.menuItemClick = (MenuItem _) {
-                            controller.customInfo.leafMaterials ~= mat.name;
+                            controller.customInfo.leafMaterials ~= mat.アイテム名;
                             reload;
                             return false;
                         };
@@ -664,7 +663,7 @@ class RecipeMaterialTabFrame: TabFrameBase
         import vibe.data.json;
 
         auto elems = controller.model.postMenuRecipePreparation(items.to!(string[]));
-        fullMaterialInfo = elems.必要素材.map!(a => MaterialInfo(a.アイテム名, !a.追加情報["中間素材"].get!bool)).array;
+        fullMaterialInfo = elems.必要素材;
 
         initRecipeTable(elems.必要レシピ);
         initLeftoverTable(fullMaterialInfo);
@@ -763,7 +762,7 @@ class RecipeMaterialTabFrame: TabFrameBase
     EventHandler!() migemoOptionChanged;
     EventHandler!() queryChanged;
     EventHandler!() characterChanged;
-    MaterialInfo[] fullMaterialInfo;
+    ItemLink[] fullMaterialInfo;
     ulong timerID;
 }
 

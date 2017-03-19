@@ -16,6 +16,7 @@ class Wisdom {
     import coop.core.item;
     import coop.core.recipe;
     import coop.core.vendor;
+    import coop.server.model;
 
     /// バインダーごとのレシピ名一覧
     string[][string] binderList;

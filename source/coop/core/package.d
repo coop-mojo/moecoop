@@ -53,6 +53,7 @@ class WisdomModel
         }
         else
         {
+            import coop.server.model;
             Item item;
             item.petFoodInfo = [PetFoodType.UNKNOWN: 0];
             return item;
@@ -71,6 +72,7 @@ class WisdomModel
     {
         import std.typecons;
         import coop.core.item;
+        import coop.server.model;
 
         alias RetType = Tuple!(ItemType, "type", ExtraInfo, "extra");
 

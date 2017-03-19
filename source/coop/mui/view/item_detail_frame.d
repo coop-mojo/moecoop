@@ -41,13 +41,10 @@ class ItemDetailFrame: ScrollWidget
         import vibe.http.common;
 
         import coop.util;
-        import coop.mui.model.wisdom_adapter;
-        import coop.core.item: overlaid;
 
-        auto orig = name.empty ? ItemInfo.init : model.postItem(name.to!string, customInfo.prices).ifThrown!HTTPStatusException(ItemInfo.init);
+        auto item = name.empty ? ItemInfo.init : model.postItem(name.to!string, customInfo.prices).ifThrown!HTTPStatusException(ItemInfo.init);
         auto ret = new typeof(this)("detail"~idx.to!string);
-        auto item = overlaid(orig, name.to!string in customInfo.items);
-        ret.item_ = orig;
+        ret.item_ = item;
 
         auto table = ret.childById("table");
         with(table)
@@ -58,12 +55,12 @@ class ItemDetailFrame: ScrollWidget
 
             table.addElem("名前", name);
 
-            table.addElem("英名", item.英名.empty ? "わからん（´・ω・｀）" : item.英名, item.isOverlaid!"英名");
-            table.addElem("重さ", item.重さ.isNaN ? "そこそこの重さ" : format("%.2f", item.重さ), item.isOverlaid!"重さ");
+            table.addElem("英名", item.英名.empty ? "わからん（´・ω・｀）" : item.英名);
+            table.addElem("重さ", item.重さ.isNaN ? "そこそこの重さ" : format("%.2f", item.重さ));
 
             string extraRemarks = table.addExtraElem(item);
 
-            table.addElem("NPC売却価格", format("%s g", item.NPC売却価格), item.isOverlaid!"NPC売却価格");
+            table.addElem("NPC売却価格", format("%s g", item.NPC売却価格));
 
             table.addChild(new TextWidget("", "参考価格: "d));
             auto lo = new HorizontalLayout;
@@ -91,41 +88,39 @@ class ItemDetailFrame: ScrollWidget
             lo.addChild(new TextWidget("", " g)"d));
             table.addChild(lo);
 
-            table.addElem("転送可", item.転送可 ? "はい" : "いいえ", item.isOverlaid!"転送可");
-            table.addElem("スタック可", item.スタック可 ? "はい": "いいえ", item.isOverlaid!"スタック可");
+            table.addElem("転送可", item.転送可 ? "はい" : "いいえ");
+            table.addElem("スタック可", item.スタック可 ? "はい": "いいえ");
 
             if (!item.特殊条件.empty)
             {
                 import std.algorithm;
                 import std.conv;
-                table.addElem("特殊条件", item.特殊条件.map!"a.詳細".join(", ").to!dstring, item.isOverlaid!"特殊条件");
+                table.addElem("特殊条件", item.特殊条件.map!"a.詳細".join(", ").to!dstring);
             }
 
-            import coop.core.item: PetFoodType;
             if (item.ペットアイテム.種別 != cast(string)PetFoodType.NoEatable)
             {
                 import std.algorithm;
 
                 if (item.ペットアイテム.種別 == cast(string)PetFoodType.UNKNOWN)
                 {
-                    table.addElem("ペットアイテム", "不明", item.isOverlaid!"ペットアイテム");
+                    table.addElem("ペットアイテム", "不明");
                 }
                 else
                 {
                     table.addElem("ペットアイテム",
                                   format("%s (%.1f)",
                                          item.ペットアイテム.種別,
-                                         item.ペットアイテム.効果),
-                                  item.isOverlaid!"ペットアイテム");
+                                         item.ペットアイテム.効果));
                 }
             }
 
             if (!item.info.empty)
             {
-                table.addElem("info", item.info, item.isOverlaid!"info");
+                table.addElem("info", item.info);
             }
 
-            auto rem = orig.アイテム名 ? item.備考 : "細かいことはわかりません（´・ω・｀）";
+            auto rem = item.アイテム名 ? item.備考 : "細かいことはわかりません（´・ω・｀）";
             if (!rem.empty || !extraRemarks.empty)
             {
                 import std.algorithm;
@@ -142,27 +137,21 @@ class ItemDetailFrame: ScrollWidget
         return item_;
     }
 private:
-    import coop.mui.model.wisdom_adapter: ItemInfo;
     ItemInfo item_;
 }
 
 
-auto addElem(dstring delim = ": ", Str1, Str2)(Widget layout, Str1 caption, Str2 elem, bool overlaid = false)
+auto addElem(dstring delim = ": ", Str1, Str2)(Widget layout, Str1 caption, Str2 elem)
     if (isSomeString!Str1 && isSomeString!Str2)
 {
     layout.addChild(new TextWidget("", (caption~delim).to!dstring));
     auto text = new TextWidget("", elem.to!dstring);
     layout.addChild(text);
-    if (overlaid)
-    {
-        text.textColor = "red";
-    }
 }
 
 auto addExtraElem(Item)(Widget layout, Item item)
 {
     import std.range;
-    import coop.core.item: ItemType;
 
     if (item.アイテム種別.empty)
     {
@@ -248,8 +237,7 @@ auto addExtraElem(Item)(Widget layout, Item item)
                            .join(", "));
         layout.addElem("装備スロット", format("%s (%s)", info.装備スロット, info.両手装備 ? "両手" : "片手"));
         layout.addElem("素材", info.素材);
-        import coop.core.item: ShipRestriction;
-        if (info.装備可能シップ.front.シップ名 != ShipRestriction.Any)
+        if (info.装備可能シップ.front.シップ名 != "なし")
         {
             layout.addElem("装備可能シップ", info.装備可能シップ.map!(a => a.シップ名.to!dstring~"系").join(", "));
         }
@@ -308,8 +296,7 @@ auto addExtraElem(Item)(Widget layout, Item item)
                            .join(", "));
         layout.addElem("装備スロット", info.装備スロット);
         layout.addElem("素材", info.素材);
-        import coop.core.item: ShipRestriction;
-        if (info.装備可能シップ.front.シップ名 != ShipRestriction.Any)
+        if (info.装備可能シップ.front.シップ名 != "なし")
         {
             layout.addElem("装備可能シップ", info.装備可能シップ.map!(a => a.シップ名.to!string~"系").join(", "));
         }
@@ -361,8 +348,7 @@ auto addExtraElem(Item)(Widget layout, Item item)
                            .map!(sk => format("%s (%.1f)", sk.スキル名, sk.スキル値))
                            .join(", "));
         layout.addElem("装備スロット", "矢/弾");
-        import coop.core.item: ShipRestriction;
-        if (info.使用可能シップ.front.シップ名 != ShipRestriction.Any)
+        if (info.使用可能シップ.front.シップ名 != "なし")
         {
             layout.addElem("使用可能シップ", info.使用可能シップ.map!(a => a.シップ名.to!string~"系").join(", "));
         }
@@ -401,8 +387,7 @@ auto addExtraElem(Item)(Widget layout, Item item)
                            .join(", "));
         layout.addElem("回避", format("%s%%", info.回避));
         layout.addElem("素材", info.素材);
-        import coop.core.item: ShipRestriction;
-        if (info.使用可能シップ.front.シップ名 != ShipRestriction.Any)
+        if (info.使用可能シップ.front.シップ名 != "なし")
         {
             layout.addElem("使用可能シップ", info.使用可能シップ.map!(a => a.シップ名.to!string~"系").join(", "));
         }

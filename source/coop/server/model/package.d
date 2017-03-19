@@ -59,6 +59,22 @@ enum SortOrder: string
     ByName = "name",
 }
 
+enum ItemType: string
+{
+    UNKNOWN = "不明", Others = "その他", Food = "食べ物", Drink = "飲み物",
+    Liquor = "酒", Expendable = "消耗品", Weapon = "武器", Armor = "防具",
+    Bullet = "弾", Shield = "盾", Asset = "アセット",
+}
+
+enum PetFoodType: string
+{
+    UNKNOWN = "不明", Food = "食べ物", Meat = "肉食物", Weed = "草食物",
+    Drink = "飲み物", Liquor = "酒", Medicine = "薬", Metal = "金属",
+    Stone = "石", Bone = "骨", Crystal = "クリスタル", Wood = "木",
+    Leather = "皮", Paper = "紙", Cloth = "布", Others = "その他",
+    NoEatable = "犬も喰わない",
+}
+
 struct GetVersionResult
 {
     @name("version") string version_;

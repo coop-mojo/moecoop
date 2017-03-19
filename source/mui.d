@@ -61,11 +61,6 @@ extern(C) int UIAppMain(string[] args)
                      .parseJsonString
                      .deserialize!(JsonSerializer, CustomInfo);
     }
-    else if (buildPath(UserResourceBase, "wisdom").exists)
-    {
-        auto cInfoDir = buildPath(UserResourceBase, "wisdom");
-        customInfo = new CustomInfo(cInfoDir);
-    }
     else
     {
         customInfo = new CustomInfo;

@@ -7,6 +7,8 @@ module coop.core.item;
 
 import std.variant: Algebraic;
 
+import coop.server.model;
+
 import vibe.data.json;
 
 /// アイテムの追加情報
@@ -149,15 +151,6 @@ in {
     return item;
 }
 
-enum PetFoodType: string
-{
-    UNKNOWN = "不明", Food = "食べ物", Meat = "肉食物", Weed = "草食物",
-    Drink = "飲み物", Liquor = "酒", Medicine = "薬", Metal = "金属",
-    Stone = "石", Bone = "骨", Crystal = "クリスタル", Wood = "木",
-    Leather = "皮", Paper = "紙", Cloth = "布", Others = "その他",
-    NoEatable = "犬も喰わない",
-}
-
 enum SpecialProperty: string
 {
     NT = "他のプレイヤーにトレードで渡せない",
@@ -174,13 +167,6 @@ enum SpecialProperty: string
     LO = "ログアウトすると消える",
     AL = "現在のエリア限定",
     WA = "WarAgeでは性能が低下する",
-}
-
-enum ItemType: string
-{
-    UNKNOWN = "不明", Others = "その他", Food = "食べ物", Drink = "飲み物",
-    Liquor = "酒", Expendable = "消耗品", Weapon = "武器", Armor = "防具",
-    Bullet = "弾", Shield = "盾", Asset = "アセット",
 }
 
 /// 料理固有の情報

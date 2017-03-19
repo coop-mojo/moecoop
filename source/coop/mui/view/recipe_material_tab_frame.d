@@ -13,9 +13,10 @@ class RecipeMaterialTabFrame: TabFrameBase
     import std.container;
 
     import coop.mui.controller.recipe_material_tab_frame_controller;
-    import coop.core.recipe_graph: RecipeInfo, MaterialInfo, MatTuple;
+    import coop.core.recipe_graph: MaterialInfo, MatTuple;
     import coop.util;
     import coop.mui.view.main_frame;
+    import coop.server.model;
 
     mixin TabFrame;
 
@@ -319,7 +320,7 @@ class RecipeMaterialTabFrame: TabFrameBase
             }).filter!(a => a[1] > 0).assocArray;
     }
 
-    auto initRecipeTable(RecipeInfo[] recipes)
+    auto initRecipeTable(RecipeLink[] recipes)
     {
         import std.algorithm;
 
@@ -337,28 +338,28 @@ class RecipeMaterialTabFrame: TabFrameBase
 
                 import coop.mui.view.controls;
 
-                auto w = new LinkWidget(r.to!string, r.name.to!dstring~": ");
+                auto w = new LinkWidget(r.レシピ名, r.レシピ名.to!dstring~": ");
                 auto t = new TextWidget("times", format("%s 回"d, 0));
                 w.click = (Widget _) {
                     import coop.mui.view.recipe_detail_frame;
 
                     unhighlightDetailRecipe;
                     scope(exit) highlightDetailRecipe;
-                    recipeDetail = RecipeDetailFrame.create(r.name.to!dstring, controller.model, controller.characters);
+                    recipeDetail = RecipeDetailFrame.create(r.レシピ名.to!dstring, controller.model, controller.characters);
                     return true;
                 };
-                if (!r.parentGroup.empty)
+                if (auto group = r.追加情報["選択レシピグループ"].get!string)
                 {
-                    auto bros = recipes.filter!(rs => rs.name != r.name && rs.parentGroup == r.parentGroup);
+                    auto bros = recipes.filter!(rs => rs.レシピ名 != r.レシピ名 && rs.追加情報["選択レシピグループ"].get!string == group);
                     assert(!bros.empty);
 
                     auto menu = new MenuItem;
                     auto idx = 25000; // 番号自体に意味はない
                     bros.map!((b) {
-                            auto a = new Action(idx++, format("%s を使う"d, b.name));
+                            auto a = new Action(idx++, format("%s を使う"d, b.レシピ名));
                             auto it = new MenuItem(a);
                             it.menuItemClick = (MenuItem _) {
-                                controller.customInfo.recipePreference[b.parentGroup] = b.name;
+                                controller.customInfo.recipePreference[b.追加情報["選択レシピグループ"].get!string] = b.レシピ名;
                                 reload;
                                 return false;
                             };
@@ -662,7 +663,7 @@ class RecipeMaterialTabFrame: TabFrameBase
         auto elems = controller.model.postMenuRecipePreparation(items.to!(string[]));
         fullMaterialInfo = elems.必要素材.map!(a => MaterialInfo(a.アイテム名, !a.追加情報["中間素材"].get!bool)).array;
 
-        initRecipeTable(elems.必要レシピ.map!(a => RecipeInfo(a.レシピ名, a.追加情報["選択レシピグループ"].get!string)).array);
+        initRecipeTable(elems.必要レシピ);
         initLeftoverTable(fullMaterialInfo);
         initMaterialTable(fullMaterialInfo);
     }

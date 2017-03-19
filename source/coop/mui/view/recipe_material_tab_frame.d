@@ -587,7 +587,7 @@ class RecipeMaterialTabFrame: TabFrameBase
         unhighlightDetailItems;
         scope(exit) highlightDetailItems;
         auto tbl = enforce(childById!TableLayout("materials"));
-        foreach(rs; tbl.rows)
+        tbl.rows.each!((rs)
         {
             import std.string;
 
@@ -651,7 +651,7 @@ class RecipeMaterialTabFrame: TabFrameBase
             {
                 rs.each!(w => w.visibility = Visibility.Gone);
             }
-        }
+        });
     }
 
     auto initializeTables(dstring[] items)

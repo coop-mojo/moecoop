@@ -63,7 +63,7 @@ class SkillTabFrameController: RecipeTabFrameController
 
         if (rs.empty || frame_.sortKey == SortOrder.ByName)
         {
-            recipes = [RecipePair(skill, (RecipeLink[]).init)];
+            recipes = [RecipePair(skill, rs)];
         }
         else
         {

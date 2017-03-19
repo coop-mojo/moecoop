@@ -19,7 +19,7 @@ paths:
     get:
       summary: サーバーバージョン情報
       description: 生協の知恵袋 API サーバーのバージョンを返します。デバッグ用です。
-      tags:
+      tags: 
         - その他
       responses:
         200:
@@ -445,15 +445,9 @@ paths:
                   $ref: '#/definitions/レシピ情報'
               必要素材:
                 type: array
-                description: 必要アイテム一覧です。
+                description: 必要アイテム一覧です。追加情報から "中間素材" (boolean) が取得できます。"中間素材" は、該当素材が他の素材からの生産スキルで作成でき、body 部から渡される作成アイテムにふくまれていない場合に true になります。
                 items:
-                  type: object
-                  properties:
-                    素材情報:
-                      $ref: '#/definitions/アイテム情報'
-                    中間素材:
-                      type: boolean
-                      description: このアイテムが他の素材から作られる中間素材の場合には true になります。
+                  $ref: '#/definitions/アイテム情報'
 
   /menu-recipes:
     post:
@@ -544,7 +538,7 @@ definitions:
         description: バインダー名です。
       レシピ一覧:
         type: string
-        description: バインダーに収録されているレシピを取得するための URL です。
+        description: バインダーに収録されているレシピを表示するエンドポイントです。
   レシピ情報:
     type: object
     properties:
@@ -553,7 +547,7 @@ definitions:
         description: レシピ名です。
       詳細:
         type: string
-        description: 詳細情報を取得するための URL です。
+        description: 詳細情報を表示するエンドポイントです。
       追加情報:
         type: object
         description: リンク以外の追加情報が含まれます。取り得るキーや値についてはレシピ詳細情報と同様です。
@@ -606,7 +600,7 @@ definitions:
       レシピ一覧:
         type: string
         description:
-          スキルカテゴリに分類されているレシピを取得するための URL です。
+          スキルカテゴリに分類されているレシピを表示するエンドポイントです。
   アイテム個数情報:
     type: object
     properties:
@@ -615,7 +609,7 @@ definitions:
         description: アイテム名です。
       詳細:
         type: string
-        description: 詳細情報を取得するための URL です。
+        description: 詳細情報を表示するエンドポイントです。
       個数:
         type: integer
         description: アイテムの個数です。
@@ -631,7 +625,7 @@ definitions:
         description: アイテム名です。
       詳細:
         type: string
-        description: 詳細情報を取得するための URL です。
+        description: 詳細情報を表示するエンドポイントです。
   アイテム詳細情報:
     type: object
     properties:
@@ -896,7 +890,7 @@ definitions:
         description: スキル名です。
       レシピ一覧:
         type: string
-        description: このスキルで生産できるレシピの一覧を取得するための URL です。
+        description: このスキルで生産できるレシピの一覧を表示するエンドポイントです。
       スキル値:
         type: number
         description: 必要スキル値です。

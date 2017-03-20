@@ -76,9 +76,7 @@ class RecipeGraph
      +/
     auto elements(int[string] targets, int[string] owned, RedBlackTree!string mats = new RedBlackTree!string) pure
     in {
-        import std.algorithm;
-        import std.array;
-        import std.format;
+        import std.range;
 
         assert(!targets.keys.empty);
     } body {

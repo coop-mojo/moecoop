@@ -128,6 +128,7 @@ class MainFrame: AppFrame
         else
         {
             import std.conv;
+            import std.range;
             import coop.util;
             auto info = controller_.model.getInformation;
             string msg;
@@ -139,6 +140,10 @@ class MainFrame: AppFrame
             {
                 import std.format;
                 msg = format("生協の知恵袋 %s が公開中です！ダウンロードはバージョン情報からどうぞ！", info.latestRelease);
+            }
+            else if (info.message.empty)
+            {
+                msg = "ダイアロス生活協同組合は P 鯖と E 鯖で活動中！晩御飯からピッキングの相談までお気軽にどうぞ！";
             }
             else
             {

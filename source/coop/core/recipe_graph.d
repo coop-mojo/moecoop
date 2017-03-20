@@ -81,7 +81,6 @@ class RecipeGraph
         import std.format;
 
         assert(!targets.keys.empty);
-        assert(targets.keys.all!(t => roots.map!"a.name".canFind(t)), format("Invalid input: %s but roots are %s", targets, roots.map!"a.name".array));
     } body {
         import std.algorithm;
         import std.array;

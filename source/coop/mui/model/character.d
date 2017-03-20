@@ -3,7 +3,7 @@
  * Authors: Mojo
  * License: $(LINK2 https://github.com/coop-mojo/moecoop/blob/master/LICENSE, MIT License)
  */
-module coop.core.character;
+module coop.mui.model.character;
 
 class Character
 {
@@ -91,7 +91,7 @@ class Character
 
     @property auto url(string u)
     {
-        import coop.core.skills;
+        import coop.mui.model.skills;
         import std.exception;
         import std.traits;
         import std.typecons;

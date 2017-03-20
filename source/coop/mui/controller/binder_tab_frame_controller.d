@@ -16,13 +16,13 @@ class BinderTabFrameController: RecipeTabFrameController
         import dlangui;
         import std.traits;
 
-        import coop.core: SortOrder;
+        import coop.mui.model.wisdom_adapter: SortOrder;
 
         super(frame, categories);
         frame.relatedBindersFor = (recipe, binder) => [binder];
         frame.tableColumnLength = (_, nColumns) => MaxNumberOfBinderPages/nColumns;
 
-        frame.childById!ComboBox("sortBy").selectedItemIndex = [EnumMembers!SortOrder].length-1;
+        frame.registerSortKeys([SortOrder.ByDefault]);
         frame.childById("sortBox").visibility = Visibility.Gone;
     }
 

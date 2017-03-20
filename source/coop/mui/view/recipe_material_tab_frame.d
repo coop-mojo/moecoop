@@ -13,9 +13,9 @@ class RecipeMaterialTabFrame: TabFrameBase
     import std.container;
 
     import coop.mui.controller.recipe_material_tab_frame_controller;
-    import coop.core.recipe_graph: RecipeInfo, MaterialInfo, MatTuple;
     import coop.util;
     import coop.mui.view.main_frame;
+    import coop.server.model;
 
     mixin TabFrame;
 
@@ -319,7 +319,7 @@ class RecipeMaterialTabFrame: TabFrameBase
             }).filter!(a => a[1] > 0).assocArray;
     }
 
-    auto initRecipeTable(RecipeInfo[] recipes)
+    auto initRecipeTable(RecipeLink[] recipes)
     {
         import std.algorithm;
 
@@ -337,28 +337,28 @@ class RecipeMaterialTabFrame: TabFrameBase
 
                 import coop.mui.view.controls;
 
-                auto w = new LinkWidget(r.to!string, r.name.to!dstring~": ");
+                auto w = new LinkWidget(r.レシピ名, r.レシピ名.to!dstring~": ");
                 auto t = new TextWidget("times", format("%s 回"d, 0));
                 w.click = (Widget _) {
                     import coop.mui.view.recipe_detail_frame;
 
                     unhighlightDetailRecipe;
                     scope(exit) highlightDetailRecipe;
-                    recipeDetail = RecipeDetailFrame.create(r.name.to!dstring, controller.model, controller.characters);
+                    recipeDetail = RecipeDetailFrame.create(r.レシピ名.to!dstring, controller.model, controller.characters);
                     return true;
                 };
-                if (!r.parentGroup.empty)
+                if (auto group = r.追加情報["選択レシピグループ"].get!string)
                 {
-                    auto bros = recipes.filter!(rs => rs.name != r.name && rs.parentGroup == r.parentGroup);
+                    auto bros = recipes.filter!(rs => rs.レシピ名 != r.レシピ名 && rs.追加情報["選択レシピグループ"].get!string == group);
                     assert(!bros.empty);
 
                     auto menu = new MenuItem;
                     auto idx = 25000; // 番号自体に意味はない
                     bros.map!((b) {
-                            auto a = new Action(idx++, format("%s を使う"d, b.name));
+                            auto a = new Action(idx++, format("%s を使う"d, b.レシピ名));
                             auto it = new MenuItem(a);
                             it.menuItemClick = (MenuItem _) {
-                                controller.customInfo.recipePreference[b.parentGroup] = b.name;
+                                controller.customInfo.recipePreference[b.追加情報["選択レシピグループ"].get!string] = b.レシピ名;
                                 reload;
                                 return false;
                             };
@@ -375,7 +375,7 @@ class RecipeMaterialTabFrame: TabFrameBase
         fr.addChild(scr);
     }
 
-    auto initLeftoverTable(MaterialInfo[] leftovers)
+    auto initLeftoverTable(ItemLink[] leftovers)
     {
         import std.algorithm;
 
@@ -387,12 +387,12 @@ class RecipeMaterialTabFrame: TabFrameBase
         auto tbl = new TableLayout("leftovers");
         tbl.colCount = 2;
 
-        leftovers.map!"a.name".map!((lo) {
+        leftovers.map!"a.アイテム名".map!((lo) {
                 import std.format;
 
                 import coop.mui.view.controls;
 
-                auto w = new LinkWidget(lo.to!string, lo.to!dstring~": ");
+                auto w = new LinkWidget(lo, lo.to!dstring~": ");
                 auto n = new TextWidget("num", format("%s 個"d, 0));
                 w.click = (Widget _) {
                     import coop.mui.view.item_detail_frame;
@@ -413,7 +413,7 @@ class RecipeMaterialTabFrame: TabFrameBase
         fr.addChild(scr);
     }
 
-    auto initMaterialTable(MaterialInfo[] materials)
+    auto initMaterialTable(ItemLink[] materials)
     {
         import std.algorithm;
 
@@ -436,7 +436,7 @@ class RecipeMaterialTabFrame: TabFrameBase
                 import coop.mui.view.controls;
                 import coop.mui.view.editors;
 
-                auto w = new CheckableEntryWidget(mat.name.to!string, mat.name.to!dstring~": ");
+                auto w = new CheckableEntryWidget(mat.アイテム名, mat.アイテム名.to!dstring~": ");
                 auto o = new EditIntLine("own");
                 auto t = new TextWidget("times", format("/%s 個"d, 0));
                 o.minWidth = 55;
@@ -468,9 +468,9 @@ class RecipeMaterialTabFrame: TabFrameBase
                     scope(exit) highlightDetailItems;
 
                     showItemDetail(0);
-                    setItemDetail(ItemDetailFrame.create(mat.name.to!dstring, 1, controller.model, controller.customInfo), 0);
+                    setItemDetail(ItemDetailFrame.create(mat.アイテム名.to!dstring, 1, controller.model, controller.customInfo), 0);
                 };
-                if (!mat.isLeaf)
+                if (mat.追加情報["中間素材"].get!bool)
                 {
                     w.textFlags = TextFlag.Underline;
                 }
@@ -577,7 +577,7 @@ class RecipeMaterialTabFrame: TabFrameBase
         }
     }
 
-    auto updateMaterialTable(MatTuple[dstring] materials)
+    auto updateMaterialTable(ItemNumberLink[dstring] materials)
     {
         import std.algorithm;
         import std.exception;
@@ -587,68 +587,71 @@ class RecipeMaterialTabFrame: TabFrameBase
         unhighlightDetailItems;
         scope(exit) highlightDetailItems;
         auto tbl = enforce(childById!TableLayout("materials"));
-        tbl.rows.each!((rs) {
-                import std.string;
+        tbl.rows.each!((rs)
+        {
+            import std.string;
 
-                isLocked = true;
-                scope(exit) isLocked = false;
+            isLocked = true;
+            scope(exit) isLocked = false;
 
-                auto m = rs[0].text.chomp(": ");
-                if (auto n = m in materials)
+            auto m = rs[0].text.chomp(": ");
+            if (auto it = m in materials)
+            {
+                import std.range;
+
+                import vibe.data.json;
+
+                rs.each!(w => w.visibility = Visibility.Visible);
+                rs[2].text = format("/%s 個"d, (*it).個数);
+                rs[0].textColor = (*it).追加情報["中間素材"].get!bool ? "blue" : "black";
+                if (!rs[1].text.empty && rs[1].text.to!int >= (*it).個数)
                 {
-                    import std.range;
-
-                    rs.each!(w => w.visibility = Visibility.Visible);
-                    rs[2].text = format("/%s 個"d, (*n).num);
-                    rs[0].textColor = (*n).isIntermediate ? "blue" : "black";
-                    if (!rs[1].text.empty && rs[1].text.to!int >= (*n).num)
-                    {
-                        rs[0].checked = true;
-                    }
-                    else
-                    {
-                        rs[0].checked = false;
-                    }
-
-                    auto mat = fullMaterialInfo.find!(mi => mi.name.to!dstring == m).front;
-                    if (!mat.isLeaf)
-                    {
-                        import std.typecons;
-
-                        import coop.mui.view.controls;
-
-                        auto menu = new MenuItem;
-                        if (controller.customInfo.leafMaterials.canFind(mat.name))
-                        {
-                            auto a = new Action(25000, "材料から用意する"d);
-                            auto it = new MenuItem(a);
-                            it.menuItemClick = (MenuItem _) {
-                                controller.customInfo.leafMaterials = controller.customInfo.leafMaterials.filter!(a => a != mat.name).array;
-                                reload;
-                                return false;
-                            };
-                            menu.add(it);
-                        }
-                        else
-                        {
-                            auto a = new Action(25001, "直接用意する"d);
-                            auto it = new MenuItem(a);
-                            it.menuItemClick = (MenuItem _) {
-                                controller.customInfo.leafMaterials ~= mat.name;
-                                reload;
-                                return false;
-                            };
-                            menu.add(it);
-                        }
-                        auto cew = (cast(CheckableEntryWidget)rs[0]);
-                        cew.popupMenu = menu;
-                    }
+                    rs[0].checked = true;
                 }
                 else
                 {
-                    rs.each!(w => w.visibility = Visibility.Gone);
+                    rs[0].checked = false;
                 }
-            });
+
+                auto mat = fullMaterialInfo.find!(mi => mi.アイテム名.to!dstring == m).front;
+                if (mat.追加情報["中間素材"].get!bool)
+                {
+                    import std.typecons;
+
+                    import coop.mui.view.controls;
+
+                    auto menu = new MenuItem;
+                    if (controller.customInfo.leafMaterials.canFind(mat.アイテム名))
+                    {
+                        auto a = new Action(25000, "材料から用意する"d);
+                        auto mi = new MenuItem(a);
+                        mi.menuItemClick = (MenuItem _) {
+                            controller.customInfo.leafMaterials = controller.customInfo.leafMaterials.filter!(a => a != mat.アイテム名).array;
+                            reload;
+                            return false;
+                        };
+                        menu.add(mi);
+                    }
+                    else
+                    {
+                        auto a = new Action(25001, "直接用意する"d);
+                        auto mi = new MenuItem(a);
+                        mi.menuItemClick = (MenuItem _) {
+                            controller.customInfo.leafMaterials ~= mat.アイテム名;
+                            reload;
+                            return false;
+                        };
+                        menu.add(mi);
+                    }
+                    auto cew = (cast(CheckableEntryWidget)rs[0]);
+                    cew.popupMenu = menu;
+                }
+            }
+            else
+            {
+                rs.each!(w => w.visibility = Visibility.Gone);
+            }
+        });
     }
 
     auto initializeTables(dstring[] items)
@@ -657,17 +660,12 @@ class RecipeMaterialTabFrame: TabFrameBase
         import std.range;
         import std.typecons;
 
-        auto elems = controller.model.postMenuRecipePreparation(items.to!(string[]));
-        fullMaterialInfo = elems.必要素材.map!(a => MaterialInfo(a.素材情報.アイテム名, !a.中間素材)).array;
-        auto parentWithBros(string recipe)
-        {
-            auto ret = controller.model.getMenuRecipeOptions.選択可能レシピ.find!(e => e.レシピ候補.canFind!(a => a.レシピ名 == recipe)).array;
-            return ret.empty ? "" : ret.front.生産アイテム.アイテム名;
-        }
-        auto recipes = elems.必要レシピ.map!(a => RecipeInfo(a.レシピ名,
-                                                        parentWithBros(a.レシピ名))).array;
+        import vibe.data.json;
 
-        initRecipeTable(recipes);
+        auto elems = controller.model.postMenuRecipePreparation(items.to!(string[]));
+        fullMaterialInfo = elems.必要素材;
+
+        initRecipeTable(elems.必要レシピ);
         initLeftoverTable(fullMaterialInfo);
         initMaterialTable(fullMaterialInfo);
     }
@@ -683,12 +681,11 @@ class RecipeMaterialTabFrame: TabFrameBase
                                                      controller.customInfo.recipePreference,
                                                      controller.customInfo.leafMaterials);
         updateMaterialTable(elems.必要素材
-                                 .filter!(mat => mat.素材情報.アイテム名.to!dstring !in targets)
-                                 .map!(mat => tuple(mat.素材情報.アイテム名.to!dstring,
-                                                    MatTuple(mat.素材数, mat.中間素材)))
+                                 .filter!(mat => mat.アイテム名.to!dstring !in targets)
+                                 .map!(mat => tuple(mat.アイテム名.to!dstring, mat))
                                  .assocArray); // 最初にすること！
-        updateRecipeTable(elems.必要レシピ.map!"tuple(a.レシピ情報.レシピ名.to!dstring, a.コンバイン数)".assocArray);
-        updateLeftoverTable(elems.余り物.map!"tuple(a.素材情報.アイテム名.to!dstring, a.余剰数)".assocArray);
+        updateRecipeTable(elems.必要レシピ.map!"tuple(a.レシピ名.to!dstring, a.コンバイン数)".assocArray);
+        updateLeftoverTable(elems.余り物.map!"tuple(a.アイテム名.to!dstring, a.個数)".assocArray);
         showResult;
     }
 
@@ -765,7 +762,7 @@ class RecipeMaterialTabFrame: TabFrameBase
     EventHandler!() migemoOptionChanged;
     EventHandler!() queryChanged;
     EventHandler!() characterChanged;
-    MaterialInfo[] fullMaterialInfo;
+    ItemLink[] fullMaterialInfo;
     ulong timerID;
 }
 

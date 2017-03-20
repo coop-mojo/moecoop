@@ -50,7 +50,7 @@ public:
 
 class MainFrame: AppFrame
 {
-    import coop.core.character;
+    import coop.mui.model.character;
     import coop.mui.model.custom_info;
     import coop.mui.model.config;
     import coop.mui.model.wisdom_adapter;
@@ -128,7 +128,28 @@ class MainFrame: AppFrame
         else
         {
             import std.conv;
-            return "生協からのお知らせ: "~controller_.model.getInformation.message.to!dstring;
+            import std.range;
+            import coop.util;
+            auto info = controller_.model.getInformation;
+            string msg;
+            if (Version.versionLT(info.oldestSupportedRelease))
+            {
+                msg = "知恵袋サーバーがサポートしてるのより古いバージョンだよ！このまま使うと鼻から LoC が出てくるかも！バージョン情報から最新版を入手してね！";
+            }
+            else if (Version.versionLT(info.latestRelease))
+            {
+                import std.format;
+                msg = format("生協の知恵袋 %s が公開中です！ダウンロードはバージョン情報からどうぞ！", info.latestRelease);
+            }
+            else if (info.message.empty)
+            {
+                msg = "ダイアロス生活協同組合は P 鯖と E 鯖で活動中！晩御飯からピッキングの相談までお気軽にどうぞ！";
+            }
+            else
+            {
+                msg = info.message;
+            }
+            return "生協からのお知らせ: "~msg.to!dstring;
         }
     }
 protected:
@@ -149,7 +170,7 @@ protected:
     {
         MenuItem mainMenuItems = new MenuItem;
         auto optionItem = new MenuItem(new Action(MENU_ACTION.OPTION, "オプション..."d));
-        auto versionItem = new MenuItem(new Action(MENU_ACTION.VERSION, "バージョン..."d));
+        auto versionItem = new MenuItem(new Action(MENU_ACTION.VERSION, "バージョン情報..."d));
         auto exitItem = new MenuItem(new Action(MENU_ACTION.EXIT, "終了"d));
         mainMenuItems.add(optionItem);
         mainMenuItems.add(versionItem);

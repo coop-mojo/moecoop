@@ -28,7 +28,7 @@ class WebModel: ModelAPI
 
     override @property GetInformationResult getInformation() const pure nothrow
     {
-        return GetInformationResult(message);
+        return GetInformationResult(message, "v1.2.1", "v1.2.1");
     }
 
     override @property GetBinderCategoriesResult getBinderCategories() const pure nothrow
@@ -192,15 +192,31 @@ class WebModel: ModelAPI
     {
         import std.algorithm;
         import std.range;
+        import coop.core.recipe_graph: RI = RecipeInfo;
+
+        auto toMenuRecipeInfo(RI ri)
+        {
+            import std.exception;
+            import vibe.http.common;
+            import vibe.data.json;
+
+            auto ret = RecipeLink(ri.name);
+            auto detail = getRecipe(ri.name).ifThrown!HTTPStatusException(RecipeInfo.init);
+            ret.追加情報["必要スキル"] = detail.必要スキル.serialize!JsonSerializer;
+            ret.追加情報["レシピ必須"] = detail.レシピ必須.serialize!JsonSerializer;
+            ret.追加情報["選択レシピグループ"] = ri.parentGroup.serialize!JsonSerializer;
+            return ret;
+        }
 
         auto ret = wm.getMenuRecipeResult(作成アイテム);
-        with(typeof(return))
-        {
-            return typeof(return)(ret.recipes.map!(r => RecipeLink(r.name)).array,
-                                  ret.materials
-                                     .map!(m => MatElem(ItemLink(m.name),
-                                                        !m.isLeaf)).array);
-        }
+
+        return typeof(return)(
+            ret.recipes.map!toMenuRecipeInfo.array,
+            ret.materials.map!((m) {
+                    auto it = ItemLink(m.name);
+                    it.追加情報["中間素材"] = (!m.isLeaf).serialize!JsonSerializer;
+                    return it;
+                }).array);
     }
 
     override PostMenuRecipeResult postMenuRecipe(int[string] 作成アイテム, int[string] 所持アイテム, string[string] 使用レシピ, string[] 直接調達アイテム)
@@ -211,12 +227,14 @@ class WebModel: ModelAPI
         import std.container.rbtree;
 
         auto ret = wm.getMenuRecipeResult(作成アイテム, 所持アイテム, 使用レシピ, new RedBlackTree!string(直接調達アイテム));
-        with(typeof(return))
-        {
-            return typeof(return)(ret.recipes.byKeyValue.map!(kv => RecipeElem(RecipeLink(kv.key), kv.value)).array,
-                                  ret.materials.byKeyValue.map!(kv => MatElem(ItemLink(kv.key), kv.value.num, kv.value.isIntermediate)).array,
-                                  ret.leftovers.byKeyValue.map!(kv => LOElem(ItemLink(kv.key), kv.value)).array);
-        }
+        return typeof(return)(
+            ret.recipes.byKeyValue.map!(kv => RecipeNumberLink(kv.key, kv.value)).array,
+            ret.materials.byKeyValue.map!((kv) {
+                    auto it = ItemNumberLink(kv.key, kv.value.num);
+                    it.追加情報["中間素材"] = kv.value.isIntermediate.serialize!JsonSerializer;
+                    return it;
+                }).array,
+            ret.leftovers.byKeyValue.map!(kv => ItemNumberLink(kv.key, kv.value)).array);
     }
 private:
     auto getDetails(Json[string] info, string[] fields)

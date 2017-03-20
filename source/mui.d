@@ -29,7 +29,7 @@ extern(C) int UIAppMain(string[] args)
     import std.path;
     import std.typecons;
 
-    import coop.core.character;
+    import coop.mui.model.character;
     import coop.mui.model.config;
     import coop.mui.model.custom_info;
     import coop.mui.model.wisdom_adapter;
@@ -41,7 +41,7 @@ extern(C) int UIAppMain(string[] args)
     string endpoint = "https://moecoop-api.arukascloud.io/";
     version(Windows){}
     else {
-        auto helpInfo = args.getopt("endpoint", "知恵袋サーバーのエンドポイントを指定します。", &endpoint);
+        auto helpInfo = args.getopt("endpoint", "知恵袋サーバーのベース URL を指定します。", &endpoint);
         if (helpInfo.helpWanted)
         {
             defaultGetoptPrinter("生協の知恵袋クライアントです。",
@@ -60,11 +60,6 @@ extern(C) int UIAppMain(string[] args)
                      .readText
                      .parseJsonString
                      .deserialize!(JsonSerializer, CustomInfo);
-    }
-    else if (buildPath(UserResourceBase, "wisdom").exists)
-    {
-        auto cInfoDir = buildPath(UserResourceBase, "wisdom");
-        customInfo = new CustomInfo(cInfoDir);
     }
     else
     {

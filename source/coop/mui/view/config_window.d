@@ -8,7 +8,7 @@ module coop.mui.view.config_window;
 import dlangui;
 import dlangui.dialogs.dialog;
 
-import coop.core.character;
+import coop.mui.model.character;
 
 class ConfigDialog: Dialog
 {
@@ -231,7 +231,7 @@ class CharacterSettingDialog: Dialog
             auto txt = con.text;
             if (charNameBox.enabled)
             {
-                import coop.core.skills;
+                import coop.mui.model.skills;
                 import std.exception;
                 import std.traits;
                 import std.typecons;
@@ -274,7 +274,7 @@ class CharacterSettingDialog: Dialog
             auto txt = urlBox.text;
             if (txt.empty || txt == defaultURL)
             {
-                import coop.core.skills;
+                import coop.mui.model.skills;
                 if (charNameBox.text.empty || charNameBox.text == defaultCharName)
                 {
                     import std.conv;

@@ -43,6 +43,13 @@ paths:
             properties:
               message:
                 type: string
+                description: 広告です。
+              oldestSupportedRelease:
+                type: string
+                description: このサーバーがサポートしている最も古い知恵袋クライアントのバージョンです。
+              latestRelease:
+                type: string
+                description: 知恵袋クライアントの最新バージョンです。
   /binders:
     get:
       summary: バインダー情報
@@ -445,15 +452,9 @@ paths:
                   $ref: '#/definitions/レシピ情報'
               必要素材:
                 type: array
-                description: 必要アイテム一覧です。
+                description: 必要アイテム一覧です。各要素の追加情報から "中間素材" (boolean) が取得できます。"中間素材" は、該当素材が他の素材からの生産スキルで作成でき、body 部から渡される作成アイテムに含まれていない場合に true になります。
                 items:
-                  type: object
-                  properties:
-                    素材情報:
-                      $ref: '#/definitions/アイテム情報'
-                    中間素材:
-                      type: boolean
-                      description: このアイテムが他の素材から作られる中間素材の場合には true になります。
+                  $ref: '#/definitions/アイテム情報'
 
   /menu-recipes:
     post:
@@ -498,42 +499,18 @@ paths:
                 description: 必要レシピとその適用回数です。
                 # TODO: ソート順についても追記する
                 items:
-                  type: object
-                  properties:
-                    レシピ情報:
-                      $ref: '#/definitions/レシピ情報'
-                    コンバイン数:
-                      type: integer
-                      description: コンバインが必要な回数です。
-                      minimum: 1
+                  $ref: '#/definitions/レシピ回数情報'
               必要素材:
                 type: array
-                description: 必要アイテムとその個数です。
+                description: 必要アイテムとその個数です。各要素の追加情報から "中間素材" (boolean) が取得できます。"中間素材" は、該当素材が他の素材からの生産スキルで作成でき、body 部から渡される作成アイテムに含まれていない場合に true になります。
                 # TODO: ソート順についても追記する
                 items:
-                  type: object
-                  properties:
-                    素材情報:
-                      $ref: '#/definitions/アイテム情報'
-                    素材数:
-                      type: integer
-                      description: 必要な素材数です。
-                      minimum: 1
-                    中間素材:
-                      type: boolean
-                      description: このアイテムが他の素材から作られる中間素材の場合には true になります。
+                  $ref: '#/definitions/アイテム個数情報'
               余り物:
                 type: array
-                description: 目的のアイテム作成後に残る素材とその個数です。
+                description: 作成イテムを作ったときに余る素材とその個数です。
                 items:
-                  type: object
-                  properties:
-                    素材情報:
-                      $ref: '#/definitions/アイテム情報'
-                    余剰数:
-                      type: integer
-                      description: アイテムが余った数です。
-                      minimum: 1
+                  $ref: '#/definitions/アイテム個数情報'
 
 definitions:
   バインダー情報:
@@ -557,6 +534,22 @@ definitions:
       追加情報:
         type: object
         description: リンク以外の追加情報が含まれます。取り得るキーや値についてはレシピ詳細情報と同様です。
+  レシピ回数情報:
+    type: object
+    properties:
+      レシピ名:
+        type: string
+        description: レシピ名です。
+      詳細:
+        type: string
+        description: 詳細情報を表示するエンドポイントです。
+      追加情報:
+        type: object
+        description: リンク以外の追加情報が含まれます。取り得るキーや値についてはレシピ詳細情報と同様です。
+      コンバイン数:
+        type: integer
+        description: レシピのコンバイン数です。
+        minimum: 1
   レシピ詳細情報:
     type: object
     properties:
@@ -596,7 +589,6 @@ definitions:
           $ref: '#/definitions/バインダー情報'
       備考:
         type: string
-
   スキルカテゴリ情報:
     type: object
     properties:
@@ -798,7 +790,7 @@ definitions:
           - D4
           - E
           - F
-          - Others
+          - その他
       効果:
         type: object
         description: ステータスに影響を与える効果です。

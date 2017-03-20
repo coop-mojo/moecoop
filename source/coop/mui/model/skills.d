@@ -3,7 +3,7 @@
  * Authors: Mojo
  * License: $(LINK2 https://github.com/coop-mojo/moecoop/blob/master/LICENSE, MIT License)
  */
-module coop.core.skills;
+module coop.mui.model.skills;
 
 enum SkillPon = "http://www.ponz-web.com/skill/";
 

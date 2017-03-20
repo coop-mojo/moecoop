@@ -7,7 +7,7 @@ module coop.mui.controller.main_frame_controller;
 
 class MainFrameController
 {
-    import coop.core.character;
+    import coop.mui.model.character;
     import coop.mui.model.wisdom_adapter;
     import coop.mui.model.config;
     import coop.mui.model.custom_info;

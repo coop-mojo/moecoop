@@ -5,13 +5,9 @@
  */
 module coop.core;
 
-enum SortOrder {
-    BySkill       = "スキル値順",
-    ByName        = "名前順",
-    ByBinderOrder = "バインダー順",
-}
-
 public import coop.core.wisdom: Binder, Category;
+
+import coop.server.model: SortOrder;
 
 class WisdomModel
 {
@@ -57,6 +53,7 @@ class WisdomModel
         }
         else
         {
+            import coop.server.model;
             Item item;
             item.petFoodInfo = [PetFoodType.UNKNOWN: 0];
             return item;
@@ -75,6 +72,7 @@ class WisdomModel
     {
         import std.typecons;
         import coop.core.item;
+        import coop.server.model;
 
         alias RetType = Tuple!(ItemType, "type", ExtraInfo, "extra");
 
@@ -153,7 +151,7 @@ class WisdomModel
             return arr.map!"a[0]".array;
         case ByName:
             return queryResult.sort().array;
-        case ByBinderOrder:
+        case ByDefault:
             assert(false);
         }
     }

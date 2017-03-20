@@ -43,6 +43,13 @@ paths:
             properties:
               message:
                 type: string
+                description: 広告です。
+              oldestSupportedRelease:
+                type: string
+                description: このサーバーがサポートしている最も古い知恵袋クライアントのバージョンです。
+              latestRelease:
+                type: string
+                description: 知恵袋クライアントの最新バージョンです。
   /binders:
     get:
       summary: バインダー情報
@@ -582,7 +589,6 @@ definitions:
           $ref: '#/definitions/バインダー情報'
       備考:
         type: string
-
   スキルカテゴリ情報:
     type: object
     properties:
@@ -784,7 +790,7 @@ definitions:
           - D4
           - E
           - F
-          - Others
+          - その他
       効果:
         type: object
         description: ステータスに影響を与える効果です。

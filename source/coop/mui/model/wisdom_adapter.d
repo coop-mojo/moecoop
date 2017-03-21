@@ -5,7 +5,7 @@
  */
 module coop.mui.model.wisdom_adapter;
 
-public import coop.server.model;
+public import coop.common;
 
 class WisdomAdapter
 {

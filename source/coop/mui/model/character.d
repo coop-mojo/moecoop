@@ -38,7 +38,7 @@ class Character
         }
     }
 
-    import coop.server.model: RecipeInfo;
+    import coop.common: RecipeInfo;
     auto hasSkillFor(double[string] skill)
     {
         import std.algorithm;

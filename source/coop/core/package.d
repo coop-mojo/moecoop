@@ -7,7 +7,7 @@ module coop.core;
 
 public import coop.core.wisdom: Binder, Category;
 
-import coop.server.model: SortOrder;
+import coop.common: SortOrder;
 
 class WisdomModel
 {
@@ -53,7 +53,7 @@ class WisdomModel
         }
         else
         {
-            import coop.server.model;
+            import coop.common;
             Item item;
             item.petFoodInfo = [PetFoodType.UNKNOWN: 0];
             return item;
@@ -72,7 +72,7 @@ class WisdomModel
     {
         import std.typecons;
         import coop.core.item;
-        import coop.server.model;
+        import coop.common;
 
         alias RetType = Tuple!(ItemType, "type", ExtraInfo, "extra");
 

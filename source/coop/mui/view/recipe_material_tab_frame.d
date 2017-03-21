@@ -15,7 +15,7 @@ class RecipeMaterialTabFrame: TabFrameBase
     import coop.mui.controller.recipe_material_tab_frame_controller;
     import coop.util;
     import coop.mui.view.main_frame;
-    import coop.server.model;
+    import coop.common;
 
     mixin TabFrame;
 

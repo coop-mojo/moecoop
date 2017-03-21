@@ -7,7 +7,7 @@ module coop.core.item;
 
 import std.variant: Algebraic;
 
-import coop.server.model;
+import coop.common;
 
 import vibe.data.json;
 
@@ -734,7 +734,7 @@ private:
     {
         import std.conv;
         import std.range;
-        import coop.server.model: PetFoodInfo;
+        import coop.common: PetFoodInfo;
         static if (is(T == PetFoodInfo))
             return val.種別.empty || val.種別 == cast(string)PetFoodType.UNKNOWN;
         else

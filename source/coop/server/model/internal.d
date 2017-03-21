@@ -5,7 +5,7 @@
  */
 module coop.server.model.internal;
 
-import coop.server.model;
+import coop.common;
 
 class WebModel: ModelAPI
 {

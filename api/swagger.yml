@@ -455,6 +455,14 @@ paths:
                 description: 必要アイテム一覧です。各要素の追加情報から "中間素材" (boolean) が取得できます。"中間素材" は、該当素材が他の素材からの生産スキルで作成でき、body 部から渡される作成アイテムに含まれていない場合に true になります。
                 items:
                   $ref: '#/definitions/アイテム情報'
+        403:
+          description: 引数に渡されたアイテムが存在しない
+          schema:
+            type: object
+            properties:
+              statusMessage:
+                type: string
+                description: No such item
 
   /menu-recipes:
     post:
@@ -511,6 +519,14 @@ paths:
                 description: 作成イテムを作ったときに余る素材とその個数です。
                 items:
                   $ref: '#/definitions/アイテム個数情報'
+        403:
+          description: 引数に渡されたアイテムかレシピが存在しない
+          schema:
+            type: object
+            properties:
+              statusMessage:
+                type: string
+                description: No such item or no such recipe
 
 definitions:
   バインダー情報:

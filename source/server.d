@@ -50,4 +50,5 @@ void main(string[] args)
 void accControl(HTTPServerRequest req, HTTPServerResponse res)
 {
     res.headers["Access-Control-Allow-Origin"] = "*";
+    res.headers["X-Content-Type-Options"] = "nosniff";
 }

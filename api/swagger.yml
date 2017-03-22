@@ -9,7 +9,6 @@ info:
 host: moecoop-api.arukascloud.io
 schemes:
   - https
-basePath: /
 consumes:
   - application/json
 produces:

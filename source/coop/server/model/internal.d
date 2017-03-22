@@ -53,7 +53,7 @@ class WebModel: ModelAPI
 
         binder = binder.replace("_", "/");
         enforceHTTP(getBinderCategories.バインダー一覧.map!"a.バインダー名".canFind(binder),
-                    HTTPStatus.notFound, "No such binder");
+                    HTTPStatus.notFound, "No such binder '"~binder~"'");
 
         auto lst = recipeSort(wm.getRecipeList(query, Binder(binder), No.useMetaSearch,
                                                cast(Flag!"useMigemo")migemo, cast(Flag!"useReverseSearch")rev), key);
@@ -89,7 +89,7 @@ class WebModel: ModelAPI
 
         auto fields = fs.split(",");
 
-        enforceHTTP(getSkillCategories.スキル一覧.map!"a.スキル名".canFind(skill), HTTPStatus.notFound, "No such skill category");
+        enforceHTTP(getSkillCategories.スキル一覧.map!"a.スキル名".canFind(skill), HTTPStatus.notFound, "No such skill category '"~skill~"'");
 
         auto lst = recipeSort(wm.getRecipeList(query, Category(skill), No.useMetaSearch, cast(Flag!"useMigemo")migemo,
                                                cast(Flag!"useReverseSearch")rev, SortOrder.ByName), key);
@@ -148,7 +148,7 @@ class WebModel: ModelAPI
         import vibe.http.common;
 
         _recipe = _recipe.replace("_", "/");
-        return RecipeInfo(enforceHTTP(wm.getRecipe(_recipe), HTTPStatus.notFound, "No such recipe"), wm);
+        return RecipeInfo(enforceHTTP(wm.getRecipe(_recipe), HTTPStatus.notFound, "No such recipe '"~_recipe~"'"), wm);
     }
 
     override ItemInfo getItem(string _item)
@@ -159,7 +159,7 @@ class WebModel: ModelAPI
     override ItemInfo postItem(string _item, int[string] 調達価格)
     {
         import vibe.http.common;
-        auto info = ItemInfo(enforceHTTP(wm.getItem(_item), HTTPStatus.notFound, "No such item"), wm);
+        auto info = ItemInfo(enforceHTTP(wm.getItem(_item), HTTPStatus.notFound, "No such item '"~_item~"'"), wm);
         info.参考価格 = wm.costFor(_item, 調達価格);
         return info;
     }
@@ -194,10 +194,11 @@ class WebModel: ModelAPI
         import std.range;
         import coop.core.recipe_graph: RI = RecipeInfo;
 
+        import vibe.http.common;
+
         auto toMenuRecipeInfo(RI ri)
         {
             import std.exception;
-            import vibe.http.common;
             import vibe.data.json;
 
             auto ret = RecipeLink(ri.name);
@@ -207,6 +208,8 @@ class WebModel: ModelAPI
             ret.追加情報["選択レシピグループ"] = ri.parentGroup.serialize!JsonSerializer;
             return ret;
         }
+
+        作成アイテム.each!(i => enforceHTTP(wm.getItem(i), HTTPStatus.badRequest, "No such item '"~i~"'"));
 
         auto ret = wm.getMenuRecipeResult(作成アイテム);
 
@@ -225,6 +228,14 @@ class WebModel: ModelAPI
         import std.conv;
         import std.range;
         import std.container.rbtree;
+
+        import vibe.http.common;
+
+        chain(作成アイテム.keys, 所持アイテム.keys,
+              使用レシピ.keys, 直接調達アイテム).each!(i => enforceHTTP(wm.getItem(i),
+                                                                        HTTPStatus.badRequest,
+                                                                        "No such item '"~i~"'"));
+        使用レシピ.values.each!(r => enforceHTTP(wm.getRecipe(r), HTTPStatus.badRequest, "No such recipe '"~r~"'"));
 
         auto ret = wm.getMenuRecipeResult(作成アイテム, 所持アイテム, 使用レシピ, new RedBlackTree!string(直接調達アイテム));
         return typeof(return)(

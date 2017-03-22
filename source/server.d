@@ -38,10 +38,16 @@ void main(string[] args)
     }
 
     auto router = new URLRouter;
+    router.any("*", &accControl);
     router.registerRestInterface(new WebModel(SystemResourceBase, environment.get("MOECOOP_MESSAGE", "")));
     auto settings = new HTTPServerSettings;
     settings.port = port;
     listenHTTP(settings, router);
     lowerPrivileges;
     runEventLoop;
+}
+
+void accControl(HTTPServerRequest req, HTTPServerResponse res)
+{
+    res.headers["Access-Control-Allow-Origin"] = "*";
 }

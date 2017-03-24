@@ -1,7 +1,6 @@
 {
     "name": "moecoop-mui",
     "targetName": "fukuro",
-    "targetType": "executable",
     "description": "生協の知恵袋",
     "homepage": "https://github.com/coop-mojo/moecoop/",
     "copyright": "© 2016, もじょんぬ",

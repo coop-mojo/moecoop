@@ -72,7 +72,7 @@ $ dub test
 ## 生協の知恵袋 API を使って開発をしたい人向け
 
 生協の知恵袋サーバーは API 仕様が公開されているため、知恵袋 API を利用したソフトウェアの開発も可能です。
-API の仕様については [swagger-ui](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/coop-mojo/moecoop-common/master/api/swagger.yml) か [swagger-editor](http://editor.swagger.io/?url=https://raw.githubusercontent.com/coop-mojo/moecoop-common/master/api/swagger.yml) をご覧ください。
+API の仕様については [swagger-ui](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/coop-mojo/moecoop/master/api/swagger.yml) か [swagger-editor](http://editor.swagger.io/?url=https://raw.githubusercontent.com/coop-mojo/moecoop/master/api/swagger.yml) をご覧ください。
 
 
 ## ライセンス

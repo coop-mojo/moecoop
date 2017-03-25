@@ -26,5 +26,7 @@
     "subPackages": [
         "./common"
     ],
+
+    "mainSourceFile": "source/mui.d",
     "versions": ["UseMUI"]
 }

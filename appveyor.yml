@@ -11,7 +11,7 @@ notifications:
 environment:
   matrix:
     - DC: dmd
-      DVersion: 2.071.2
+      DVersion: 2.072.0
     - DC: ldc
       DVersion: 1.1.1
 

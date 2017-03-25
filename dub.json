@@ -9,57 +9,20 @@
 
     "dependencies": {
         "derelict-util": "==2.0.6",
-        "vibe-d:data": ">=0.8.0-beta.3"
+        "dlangui": ">=0.9.47",
+        "vibe-d:data": ">=0.8.0-beta.3",
+        "vibe-d:http": ">=0.8.0-beta.3",
+        "vibe-d:web": ">=0.8.0-beta.3",
+        "openssl": "~>1.1.5"
     },
 
     "stringImportPaths": ["views", "views/res"],
 
     "preBuildCommands": ["git describe > views/version"],
-    "configurations": [
-        {
-            "name": "mui",
-            "targetType": "executable",
-            "mainSourceFile": "source/mui.d",
-            "excludedSourceFiles": ["source/server.d"],
-            "targetName": "fukuro",
-            "sourceFiles-windows": ["source/icon.res"],
-            "preBuildCommands-windows": ["rc source/icon.rc"],
-            "dependencies": {
-                "dlangui": ">=0.9.47",
-                "vibe-d:http": ">=0.8.0-beta.3",
-                "vibe-d:web": ">=0.8.0-beta.3",
-                "openssl": "~>1.1.5"
-            },
-            "versions": ["UseMUI"]
-        },
-
-        {
-            "name": "server",
-            "targetType": "executable",
-            "mainSourceFile": "source/server.d",
-            "excludedSourceFiles": ["source/mui.d", "source/coop/mui/*"],
-            "targetName": "fukurod",
-            "dependencies": {
-                "vibe-d": ">=0.8.0-beta.3"
-            },
-            "versions": ["Server", "VibeNoSSL"]
-        },
-
-        {
-            "name": "library",
-            "targetType": "library",
-            "excludedSourceFiles": ["source/mui.d", "source/server.d"],
-            "dependencies": {
-                "dlangui": ">=0.9.47",
-                "vibe-d": ">=0.8.0-beta.3"
-            },
-            "versions": ["VibeNoSSL"]
-        },
-
-        {
-            "name": "fallback",
-            "targetType": "executable",
-            "subConfiguration": {"dlangui": "x11"}
-        }
-    ]
+    "targetType": "executable",
+    "mainSourceFile": "source/mui.d",
+    "excludedSourceFiles": ["source/server.d"],
+    "sourceFiles-windows": ["source/icon.res"],
+    "preBuildCommands-windows": ["rc source/icon.rc"],
+    "versions": ["UseMUI"]
 }

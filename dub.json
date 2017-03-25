@@ -19,9 +19,6 @@
     "stringImportPaths": ["views", "views/res"],
 
     "preBuildCommands": ["git describe > views/version"],
-    "targetType": "executable",
-    "mainSourceFile": "source/mui.d",
-    "excludedSourceFiles": ["source/server.d"],
     "sourceFiles-windows": ["source/icon.res"],
     "preBuildCommands-windows": ["rc source/icon.rc"],
     "versions": ["UseMUI"]

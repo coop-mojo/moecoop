@@ -70,6 +70,8 @@ install:
   - ps: SetUpDCompiler
 
 before_build:
+  - git submodule init
+  - git submodule update
   - ps: if($env:platform -eq "x86"){
             $env:compilersetupargs = "x86";
             $env:Darch = "x86";

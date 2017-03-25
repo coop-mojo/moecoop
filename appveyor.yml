@@ -11,9 +11,9 @@ notifications:
 environment:
   matrix:
     - DC: dmd
-      DVersion: 2.071.2
+      DVersion: 2.073.2
     - DC: ldc
-      DVersion: 1.1.0
+      DVersion: 1.1.1
 
 matrix:
   allow_failures:
@@ -62,10 +62,6 @@ install:
               mv ldc2-$($version)-win$($env:Dmodel)-msvc ldc2;
               popd;
             }
-            Invoke-WebRequest "https://code.dlang.org/files/dub-1.1.1-windows-x86.zip" -OutFile "c:\dub.zip";
-            pushd c:\\;
-            7z x dub.zip -odub > $null;
-            popd;
         }
   - ps: SetUpDCompiler
 
@@ -84,11 +80,9 @@ before_build:
         }
   - ps : if($env:DC -eq "dmd"){
            $env:PATH += ";C:\dmd2\windows\bin;";
-           $env:PATH += ";C:\dub";
          }
          elseif($env:DC -eq "ldc"){
            $env:PATH += ";C:\ldc2\bin";
-           $env:PATH += ";C:\dub";
            $env:DC = "ldc2";
          }
   - ps: $env:compilersetup = "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall";

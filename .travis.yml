@@ -1,10 +1,5 @@
-sudo: required
-
 notifications:
   email: false
-
-services:
-  - docker
 
 addons:
   apt:
@@ -35,22 +30,6 @@ before_install:
 script:
   - dub upgrade
   - dub test --coverage --combined
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then
-        ./archive.sh || exit 1;
-        docker build -t $MOECOOP_IMAGE .;
-        docker run $MOECOOP_IMAGE -h || exit 1;
-        docker images $MOECOOP_IMAGE;
-    fi
 
 after_success:
   - dub run doveralls
-  - if [ "$TRAVIS_OS_NAME" = "linux" -a "$TRAVIS_BRANCH" = "master" -a "$DC" = "dmd" ]; then
-        export version=$(cat views/version);
-        echo "uploading docker image...";
-        docker tag $MOECOOP_IMAGE $MOECOOP_IMAGE:$version;
-        docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-        docker push $MOECOOP_IMAGE:$version;
-        docker push $MOECOOP_IMAGE:latest;
-        echo "machine app.arukas.io login $ARUKAS_API_TOKEN password $ARUKAS_API_SECRET" > ~/.netrc;
-        ./arukas-update.sh $MOECOOP_IMAGE $version $MOECOOP_DOMAIN || exit 1;
-    fi

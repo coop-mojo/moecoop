@@ -2,7 +2,8 @@
 dub.selections.json
 userdata/
 fukuro*
-moecoop-mui-test-library
+moecoop-mui-test-application
+libfreetype-*.dll
 ui.log
 moecoop*.zip
 .fldd.cache

@@ -10,9 +10,9 @@
     "dependencies": {
         "derelict-util": "==2.0.6",
         "dlangui": ">=0.9.47",
-        "vibe-d:data": ">=0.8.0-beta.3",
-        "vibe-d:http": ">=0.8.0-beta.3",
-        "vibe-d:web": ">=0.8.0-beta.3",
+        "vibe-d:data": ">=0.8.0-beta.5",
+        "vibe-d:http": ">=0.8.0-beta.5",
+        "vibe-d:web": ">=0.8.0-beta.5",
         "openssl": "~>1.1.5",
         "moecoop-mui:common": "*"
     },

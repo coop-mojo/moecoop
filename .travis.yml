@@ -23,12 +23,18 @@ os:
 env:
   - ARCH=x86_64
 
+cache:
+  directories:
+    - $HOME/.dub
+
 before_install:
   - git fetch --unshallow
   - dub fetch doveralls
 
-script:
+before_script:
   - dub upgrade
+
+script:
   - dub test --coverage --combined
 
 after_success:

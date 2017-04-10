@@ -24,6 +24,9 @@ branches:
   except:
     - sandbox
 
+cache:
+  - '%HOME%\.dub'
+
 install:
   - ps: function SetUpDCompiler
         {

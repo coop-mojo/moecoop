@@ -105,7 +105,6 @@ test_script:
   - echo %PLATFORM%
   - echo %DC%
   - echo %PATH%
-  - echo %APPDATA%
   - '%DC% --version'
   - dub --version
   - dub upgrade

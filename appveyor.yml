@@ -25,7 +25,7 @@ branches:
     - sandbox
 
 cache:
-  - '%HOME%\.dub'
+  - '%APPDATA%\dub'
 
 install:
   - ps: function SetUpDCompiler
@@ -105,7 +105,7 @@ test_script:
   - echo %PLATFORM%
   - echo %DC%
   - echo %PATH%
-  - echo %HOME%
+  - echo %APPDATA%
   - '%DC% --version'
   - dub --version
   - dub upgrade

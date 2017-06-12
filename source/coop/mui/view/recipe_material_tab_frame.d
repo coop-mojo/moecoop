@@ -44,6 +44,11 @@ class RecipeMaterialTabFrame: TabFrameBase
             return true;
         };
 
+        childById!CheckBox("fromIngredients").checkChange = (Widget src, bool checked) {
+            fromIngredientsChanged();
+            return true;
+        };
+
         childById!ComboBox("characters").itemClick = (Widget src, int idx) {
             characterChanged();
             return true;
@@ -149,6 +154,11 @@ class RecipeMaterialTabFrame: TabFrameBase
     override @property void enableMigemoBox()
     {
         childById!CheckBox("migemo").enabled = true;
+    }
+
+    @property bool searchFromIngredients()
+    {
+        return childById!CheckBox("fromIngredients").checked;
     }
 
     auto setItemDetail(Widget item, int idx)
@@ -760,6 +770,7 @@ class RecipeMaterialTabFrame: TabFrameBase
     int[dstring] toBeMade;
     bool isLocked;
     EventHandler!() migemoOptionChanged;
+    EventHandler!() fromIngredientsChanged;
     EventHandler!() queryChanged;
     EventHandler!() characterChanged;
     ItemLink[] fullMaterialInfo;
@@ -783,7 +794,11 @@ auto recipeMaterialLayout()
                     id: itemQuery
                     minWidth: 300
                 }
-                CheckBox { id: migemo; text: "Migemo 検索" }
+
+                HorizontalLayout {
+                    CheckBox { id: migemo; text: "Migemo 検索" }
+                    CheckBox { id: fromIngredients; text: "材料名から検索" }
+                }
 
                 FrameLayout {
                     id: helper

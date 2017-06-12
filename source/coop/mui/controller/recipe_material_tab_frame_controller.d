@@ -36,6 +36,7 @@ class RecipeMaterialTabFrameController
 
         frame_.enableMigemoBox;
         frame_.migemoOptionChanged =
+            frame_.fromIngredientsChanged =
             frame_.queryChanged = {
             auto txt = frame_.childById("itemQuery").text;
             showProductCandidate(txt);
@@ -53,7 +54,7 @@ class RecipeMaterialTabFrameController
         {
             return;
         }
-        auto candidates = model.getItems(query.to!string, frame_.useMigemo, true)
+        auto candidates = model.getItems(query.to!string, frame_.useMigemo, true, frame_.searchFromIngredients)
                                .アイテム一覧
                                .map!"a.アイテム名.to!dstring"
                                .array;

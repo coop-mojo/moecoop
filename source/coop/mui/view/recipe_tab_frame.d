@@ -471,7 +471,7 @@ private:
             auto str = format("%s (%s%s) = %s"d,
                               r.生成物.map!(pr => format("%sx%s", pr.アイテム名.toHankaku.removechars(" "), pr.個数)).join(","),
                               r.必要スキル.byKeyValue.map!(kv => format("%s%.1f", kv.key.toHankaku.removechars(" "), kv.value)).join(","),
-                              r.レシピ必須 ? ": ﾚｼﾋﾟ必須" : "",
+                              ([r.レシピ必須 ? ": ﾚｼﾋﾟ必須" : ""]~r.収録バインダー.map!"a.バインダー名".array).join(", "),
                               r.材料.map!(ing => format("%sx%s", ing.アイテム名.toHankaku.removechars(" "), ing.個数)).join(" "));
             platform.setClipboardText(str);
             return false;

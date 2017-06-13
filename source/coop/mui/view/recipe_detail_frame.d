@@ -291,7 +291,7 @@ class RecipeDetailFrame: ScrollWidget, MenuItemActionHandler
                 auto str = format("%s (%s%s) = %s"d,
                                   recipe_.生成物.map!(pr => format("%sx%s", pr.アイテム名.toHankaku.removechars(" "), pr.個数)).join(","),
                                   recipe_.必要スキル.byKeyValue.map!(kv => format("%s%.1f", kv.key.toHankaku.removechars(" "), kv.value)).join(","),
-                                  recipe_.レシピ必須 ? ": ﾚｼﾋﾟ必須" : "",
+                                  ([recipe_.レシピ必須 ? ": ﾚｼﾋﾟ必須" : ""]~recipe_.収録バインダー.map!"a.バインダー名".array).join(", "),
                                   recipe_.材料.map!(ing => format("%sx%s", ing.アイテム名.toHankaku.removechars(" "), ing.個数)).join(" "));
                 platform.setClipboardText(str);
                 return true;

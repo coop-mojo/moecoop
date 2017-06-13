@@ -20,7 +20,11 @@ class BinderTabFrameController: RecipeTabFrameController
 
         super(frame, categories);
         frame.relatedBindersFor = (recipe, binder) => [binder];
-        frame.tableColumnLength = (_, nColumns) => MaxNumberOfBinderPages/nColumns;
+        frame.tableColumnLength = (nElems, nColumns) {
+            import std.algorithm: min;
+            immutable elemsPerColumn = MaxNumberOfBinderPages/nColumns;
+            return min(nElems, elemsPerColumn);
+        };
 
         frame.registerSortKeys([SortOrder.ByDefault]);
         frame.childById("sortBox").visibility = Visibility.Gone;

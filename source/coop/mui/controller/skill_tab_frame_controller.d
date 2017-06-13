@@ -31,7 +31,12 @@ class SkillTabFrameController: RecipeTabFrameController
                                                        .deserialize!(JsonSerializer, BinderLink[])
                                                        .map!"a.バインダー名"
                                                        .array.to!(dstring[]);
-        frame.tableColumnLength = (nRecipes, nColumns) => (nRecipes.to!real/nColumns).ceil.to!int;
+        frame.tableColumnLength = (nRecipes, nColumns) {
+            /// TODO: 行ごとの要素数の計算をちゃんとする
+            immutable elemsPerColumnBase = 128/nColumns; ///
+            immutable elemsPerColumn = (nRecipes.to!real/nColumns).ceil.to!int;
+            return max(elemsPerColumnBase, elemsPerColumn);
+        };
         frame.registerSortKeys(cast(SortOrder[])[EnumMembers!SortOrder][1..$]);
         auto revSearch = new CheckBox("revSearch", "逆引き検索"d);
         frame.childById("searchOptions").addChild(revSearch);

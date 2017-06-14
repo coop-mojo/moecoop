@@ -14,7 +14,7 @@ class ConfigDialog: Dialog
 {
     this(Window parent, Character[dstring] chars)
     {
-        super(UIString("設定"d), parent, DialogFlag.Popup);
+        super(UIString.fromRaw("設定"d), parent, DialogFlag.Popup);
         chars_ = chars;
     }
 
@@ -139,7 +139,7 @@ class CharacterSettingDialog: Dialog
 {
     this(Window parent, const Character[dstring] chars, dstring name = "", dstring url = "")
     {
-        super(UIString("キャラクター設定"d), parent, DialogFlag.Popup);
+        super(UIString.fromRaw("キャラクター設定"d), parent, DialogFlag.Popup);
         this.name = name;
         this.url = url;
         this.chars = chars;

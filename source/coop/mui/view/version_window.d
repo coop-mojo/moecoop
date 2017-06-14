@@ -12,7 +12,7 @@ class VersionDialog: Dialog
 {
     this(Window parent)
     {
-        super(UIString("バージョン情報"d), parent, DialogFlag.Popup);
+        super(UIString.fromRaw("バージョン情報"d), parent, DialogFlag.Popup);
     }
 
     override void initialize()

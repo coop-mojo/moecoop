@@ -12,13 +12,17 @@
 生協の知恵袋は、[Master of Epic](http://moepic.com/top.php?mid=_)のバインダーやアイテム・レシピ情報を見るためのツールです。
 
 # ダウンロード
-知恵袋には以下の2種類のバージョンがあります。
+知恵袋には以下の3種類のバージョンがあります。
 
 - リリース版: ([ダウンロードページ](https://github.com/coop-mojo/moecoop/releases/latest) の `moecoop-*.zip`)
     - ある程度バグが取れて、安定したバージョンです。
 
 - 生焼け版: ([64bit版](https://ci.appveyor.com/api/projects/coop-mojo/moecoop/artifacts/moecoop-trunk-64bit.zip?branch=master&job=Environment%3A%20DC%3Ddmd%2C%20DVersion%3D2.071.2%3B%20Platform%3A%20x64)、[32bit版](https://ci.appveyor.com/api/projects/coop-mojo/moecoop/artifacts/moecoop-trunk-32bit.zip?branch=master&job=Environment%3A%20DC%3Ddmd%2C%20DVersion%3D2.071.2%3B%20Platform%3A%20x86))
     - 開発中のバージョンです。リリース版からデータや新機能が追加されていることがありますが、お腹を壊したり爆発したりするかもしれません。新しい物好きの方はこちらをどうぞ。
+
+- [ウェブ版](http://fukuro.coop.moe/)
+    - スマートフォンにも対応した、インストールしなくても利用できるバージョンです。
+    - リリース版や生焼け版にある幾つかの機能が未実装です。
 
 # おいくら万円？
 - 無料です！

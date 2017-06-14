@@ -65,25 +65,31 @@ class MainFrame: AppFrame
         import coop.mui.controller.skill_tab_frame_controller;
 
         super();
-        controller_ = new MainFrameController(this, model, chars, config, cInfo);
-        binderTab.controller = new BinderTabFrameController(binderTab,
-                                                            model.getBinderCategories
-                                                                 .バインダー一覧
-                                                                 .map!"a.バインダー名"
-                                                                 .array
-                                                                 .to!(dstring[]));
-        skillTab.controller = new SkillTabFrameController(skillTab,
-                                                          model.getSkillCategories
-                                                               .スキル一覧
-                                                               .map!"a.スキル名"
-                                                               .array
-                                                               .to!(dstring[]));
-        materialTab.controller = new RecipeMaterialTabFrameController(materialTab);
 
-        binderTab.controller.showRecipeNames;
+        dstring msg;
 
-        import std.format;
-        statusLine.setStatusText = defaultStatusMessage;
+        try{
+            auto binders = model.getBinderCategories
+                                .バインダー一覧
+                               .map!"a.バインダー名"
+                               .array
+                               .to!(dstring[]);
+            auto skills = model.getSkillCategories
+                               .スキル一覧
+                               .map!"a.スキル名"
+                               .array
+                               .to!(dstring[]);
+
+            controller_ = new MainFrameController(this, model, chars, config, cInfo);
+            binderTab.controller = new BinderTabFrameController(binderTab, binders);
+            skillTab.controller = new SkillTabFrameController(skillTab, skills);
+            materialTab.controller = new RecipeMaterialTabFrameController(materialTab);
+            binderTab.controller.showRecipeNames;
+        } catch (NetworkException e) {
+            msg = "Link Dead: サーバーが落ちてるみたい。生協の人に教えてあげて！";
+        }
+
+        statusLine.setStatusText = msg ? msg : defaultStatusMessage;
     }
 
     @property auto controller()

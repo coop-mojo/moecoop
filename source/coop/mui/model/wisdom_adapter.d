@@ -7,6 +7,12 @@ module coop.mui.model.wisdom_adapter;
 
 public import coop.common;
 
+class NetworkException: Exception
+{
+    import std.exception;
+    mixin basicExceptionCtors;
+}
+
 class WisdomAdapter
 {
     this(string endpoint)
@@ -25,9 +31,14 @@ class WisdomAdapter
         } catch(HTTPStatusException e) {
             throw e;
         } catch(Exception e) {
+            import std.algorithm: startsWith;
             if (e.msg == "Reading from TLS stream was unsuccessful with ret 0")
             {
                 return api.getBinderRecipes(binder, query, migemo, rev, key, fields);
+            }
+            else if (e.msg.startsWith("Failed to connect to host"))
+            {
+                throw new NetworkException(e.msg);
             }
             else
             {
@@ -48,9 +59,14 @@ class WisdomAdapter
         } catch(HTTPStatusException e) {
             throw e;
         } catch(Exception e) {
+            import std.algorithm: startsWith;
             if (e.msg == "Reading from TLS stream was unsuccessful with ret 0")
             {
                 return api.getRecipe(_recipe);
+            }
+            else if (e.msg.startsWith("Failed to connect to host"))
+            {
+                throw new NetworkException(e.msg);
             }
             else
             {
@@ -69,9 +85,14 @@ class WisdomAdapter
         } catch(HTTPStatusException e) {
             throw e;
         } catch(Exception e) {
+            import std.algorithm: startsWith;
             if (e.msg == "Reading from TLS stream was unsuccessful with ret 0")
             {
                 return mixin(callStr);
+            }
+            else if (e.msg.startsWith("Failed to connect to host"))
+            {
+                throw new NetworkException(e.msg);
             }
             else
             {
@@ -90,9 +111,14 @@ class WisdomAdapter
         } catch(HTTPStatusException e) {
             throw e;
         } catch(Exception e) {
+            import std.algorithm: startsWith;
             if (e.msg == "Reading from TLS stream was unsuccessful with ret 0")
             {
                 return mixin(callStr);
+            }
+            else if (e.msg.startsWith("Failed to connect to host"))
+            {
+                throw new NetworkException(e.msg);
             }
             else
             {

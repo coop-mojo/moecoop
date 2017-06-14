@@ -49,6 +49,7 @@ class ItemDetailFrame: ScrollWidget
         auto table = ret.childById("table");
         with(table)
         {
+            import std.algorithm;
             import std.format;
             import std.math;
             import std.range;
@@ -90,6 +91,12 @@ class ItemDetailFrame: ScrollWidget
 
             table.addElem("転送可", item.転送可 ? "はい" : "いいえ");
             table.addElem("スタック可", item.スタック可 ? "はい": "いいえ");
+
+            auto rs = item.レシピ;
+            if (!rs.empty)
+            {
+                table.addElem("レシピ", rs.map!"a.レシピ名".join(", ").to!dstring);
+            }
 
             if (!item.特殊条件.empty)
             {

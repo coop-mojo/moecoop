@@ -23,12 +23,21 @@ class Config {
             enforce(json.type == Json.Type.object);
             windowWidth = json["initWindowWidth"].get!uint;
             windowHeight = json["initWindowHeight"].get!uint;
+            if (auto ep = "endpoint" in json)
+            {
+                endpoint = (*ep).get!string;
+            }
+            else
+            {
+                endpoint = defaultEndpoint;
+            }
         }
         else
         {
             // デフォルト値を設定
             windowWidth = 400;
             windowHeight = 300;
+            endpoint = defaultEndpoint;
         }
     }
 
@@ -48,10 +57,13 @@ class Config {
         import vibe.data.json;
         auto json = Json([ "initWindowWidth": Json(windowWidth),
                            "initWindowHeight": Json(windowHeight),
+                           "endpoint": Json(endpoint),
                              ]);
         return json.serializeToPrettyJson;
     }
     uint windowWidth, windowHeight;
+    string endpoint;
 private:
     string configFile;
+    enum defaultEndpoint = "https://moecoop-api.arukascloud.io/";
 }

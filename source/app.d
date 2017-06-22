@@ -38,7 +38,7 @@ extern(C) int UIAppMain(string[] args)
 
     embeddedResourceList.addResources(embedResourcesFromList!"resources.list"());
 
-    string endpoint = "https://moecoop-api.arukascloud.io/";
+    string endpoint;
     auto helpInfo = args.getopt("endpoint", "知恵袋サーバーのベース URL を指定します。", &endpoint);
     if (helpInfo.helpWanted)
     {
@@ -92,7 +92,7 @@ extern(C) int UIAppMain(string[] args)
                                                  config.windowWidth,
                                                  config.windowHeight);
 
-    ModelAPI model = new WisdomAdapter(endpoint).wrap!ModelAPI;
+    ModelAPI model = new WisdomAdapter(endpoint ? endpoint : config.endpoint).wrap!ModelAPI;
     window.mainWidget = new MainFrame(model, chars, config, customInfo);
     window.windowIcon = drawableCache.getImage("coop-icon");
     window.show;

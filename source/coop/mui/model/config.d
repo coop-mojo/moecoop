@@ -25,7 +25,8 @@ class Config {
             windowHeight = json["initWindowHeight"].get!uint;
             if (auto ep = "endpoint" in json)
             {
-                endpoint = (*ep).get!string;
+                auto url = (*ep).get!string;
+                endpoint = (url == deprecatedEndpoint) ? defaultEndpoint : url;
             }
             else
             {
@@ -65,5 +66,6 @@ class Config {
     string endpoint;
 private:
     string configFile;
-    enum defaultEndpoint = "https://moecoop-api.arukascloud.io/";
+    enum defaultEndpoint = "http://api.fukuro.coop.moe/";
+    enum deprecatedEndpoint = "https://moecoop-api.arukascloud.io/";
 }

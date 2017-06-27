@@ -39,15 +39,20 @@ extern(C) int UIAppMain(string[] args)
     embeddedResourceList.addResources(embedResourcesFromList!"resources.list"());
 
     string endpoint;
-    version(Windows) {}
-    else {
-        auto helpInfo = args.getopt("endpoint", "知恵袋サーバーのベース URL を指定します。", &endpoint);
-        if (helpInfo.helpWanted)
-        {
+    auto helpInfo = args.getopt("endpoint", "知恵袋サーバーのベース URL を指定します。", &endpoint);
+    if (helpInfo.helpWanted)
+    {
+        version(Windows) {
+            import dlangui.core.logger;
+            auto app = appender!string;
+            defaultGetoptFormatter(app, "生協の知恵袋クライアントです。",
+                                   helpInfo.options);
+            Log.i(app.data);
+        } else {
             defaultGetoptPrinter("生協の知恵袋クライアントです。",
                                  helpInfo.options);
-            return 0;
         }
+        return 0;
     }
 
     CustomInfo customInfo;

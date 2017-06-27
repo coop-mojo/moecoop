@@ -39,6 +39,7 @@ extern(C) int UIAppMain(string[] args)
     embeddedResourceList.addResources(embedResourcesFromList!"resources.list"());
 
     string endpoint;
+    Log.i(args);
     auto helpInfo = args.getopt("endpoint", "知恵袋サーバーのベース URL を指定します。", &endpoint);
     if (helpInfo.helpWanted)
     {

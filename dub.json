@@ -9,7 +9,7 @@
 
     "dependencies": {
         "derelict-util": "==2.0.6",
-        "dlangui": "==0.9.69",
+        "dlangui": "==0.9.77",
         "vibe-d:data": "~>0.8.0-rc.3",
         "vibe-d:http": "~>0.8.0-rc.3",
         "vibe-d:web": "~>0.8.0-rc.3",

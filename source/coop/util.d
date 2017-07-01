@@ -150,20 +150,11 @@ auto checkedAssocArray(Range)(Range r) if (isInputRange!Range)
                 auto val = kv[1];
                 if (auto it = key in r)
                 {
-                    version (UseMUI)
-                    {
-                        import dlangui.core.logger;
-                        alias logfln = Log.fd;
-                    }
-                    else
-                    {
-                        import std.stdio;
-                        alias logfln = writefln;
-                    }
-                    logfln("キーが重複しています: %s", key);
+                    import dlangui.core.logger;
+                    Log.fd("キーが重複しています: %s", key);
                     static if (hasMember!(ValueType, "file") && is(typeof(ValueType.init.file) == string))
                     {
-                        logfln(" (%s, %s)", (*it).file, val.file);
+                        Log.fd(" (%s, %s)", (*it).file, val.file);
                     }
                 }
                 r[key] = val;

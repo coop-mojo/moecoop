@@ -100,12 +100,12 @@ Released under the MIT license
 https://github.com/coop-mojo/moecoop/blob/master/LICENSE
 ```
 
-- また、生協の知恵袋は C/Migemo ライブラリを利用しています。
+- また、生協の知恵袋 API サーバーは C/Migemo ライブラリを利用しています。
   ライブラリを利用している部分を流用する場合には、ライブラリの著作権表示を README のどこかに記載してください。
   C/Mimemo は MIT ライセンスです。
 
 ### 知恵袋が内部で利用しているソフトウェアのライランスについて
-生協の知恵袋では以下のソフトウェアが利用されています。
+生協の知恵袋 API サーバーでは以下のソフトウェアが利用されています。
 
 - [C/Migemo](https://www.kaoriya.net/software/cmigemo/)
 ```

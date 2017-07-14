@@ -18,20 +18,20 @@
 [マニュアル](http://docs.fukuro.coop.moe)をご覧ください。
 
 ## できること
-- バインダーに登録されているレシピの管理
-  - キャラクターごとのバインダー管理
-  - 各バインダー内のレシピ検索
-- 料理や醸造，調合等の生産スキルごとのレシピの確認
-  - 各スキル内のレシピ検索
 - 生産したいアイテムを複数個作成するのに必要な素材やレシピの確認
 - レシピで作れるアイテムの価格の自動計算
 - レシピの詳細確認
 - アイテムの詳細確認 (まだ一部)
   - 食事バフ等の詳細情報の確認 (まだ一部)
+- バインダーに登録されているレシピの管理
+  - キャラクターごとのバインダー管理
+  - 各バインダー内のレシピ検索
+- 料理や醸造，調合等の生産スキルごとのレシピの確認
+  - 各スキル内のレシピ検索
 - バインダー内のレシピを検索
 - 複数のバインダーや必要スキルからレシピをまとめて検索
 
-- [C/Migemo](http://www.kaoriya.net/software/cmigemo/) を利用したいい感じの検索
+- とてもいい感じの検索
   - katsu でカツ丼やカツを検索できます (ローマ字のまま検索)
   - cookie でクッキーを，bread でパンを検索できます (英語でも検索)
   - soi でソード オブ インフェルノを検索できます (略称検索)
@@ -78,83 +78,6 @@ DMD と DUB は，Windows のパッケージマネージャーの[chocolatey](ht
 
 生協の知恵袋は，Windows，Linux，Mac 環境で動作するマルチプラットフォームアプリケーションです．
 
-## レシピやアイテムを追加したい人向け
-
-resource 以下を編集することで，レシピやアイテム，食事バフ等の追加や編集を行えます．
-以下がフォルダ構成です．
-
-- `resource`
-  - `バインダー`
-    - 各バインダーに登録されているレシピ名の情報
-    - 例えば `食べ物.json` 等には，`食べ物`，`食べ物 No.2`，`食べ物 No.3` のバインダー情報が書かれています．
-  - `食べ物`
-    - 効果や食事バフ等の，食べ物固有の情報
-    - `食べ物.json` に情報が書かれています．
-    - 量が多いため，中間素材や肉料理等のカテゴリごとにファイルを分けるかも
-  - `飲み物`
-    - 効果や飲み物バフ等の，飲み物固有の情報
-    - `飲み物.json` に情報が書かれています．
-  - `飲食バフ`
-    - 飲食バフの効果時間やグループ等の詳細情報
-    - `食べ物バフ.json` に食べ物バフ，`飲み物.json` に飲み物バフの情報が書かれています．
-    - 1つのファイルにまとめるかも
-  - `武器`
-    - 攻撃力や射程等の武器固有の情報
-    - `武器.json` に情報を追加する予定ですが，まだ仕様が決まっていません．
-    - 刀剣や槍等の武器カテゴリごとにファイルを分けるかも
-  - `素材`
-    - 重さやNPCへの売却価格等の，全てのアイテムに共通する情報
-    - ペットアイテム情報はここに書かれています
-    - 他と同様にファイルを分けるかも
-  - `レシピ`
-    - 必要な素材や要求されるスキル等の詳細情報
-    - `料理.json` や `鍛冶.json` 等，[Moe Wiki](http://moeread.usamimi.info/index.php?MoE%20Wiki%20-%20Master%20of%20Epic)の各カテゴリごとに分割されています．
-  - `クエスト`
-    - まだ仕様が決まっていません．
-    - 大体愛のかけらのせい
-  - `dict`
-    - Migemo 検索で使用するための辞書ファイル
-    - `moe-dict` が辞書ファイルです．
-
-データは全てテキストとして保存されているため，テキストエディタで編集を行えます．
-- Migemo の辞書ファイルである `moe-dict` の各行は変換前の単語，タブ，変換後の単語が順に並んでいます．
-- `moe-dict` 以外のファイルは [JSON 形式](https://ja.wikipedia.org/wiki/JavaScript_Object_Notation)で書かれています．
-  - 各ファイルの詳細は，`doc/spec` 以下のファイルに書かれています．
-  - 読めば大体の構造はわかるかも
-- メモ帳には `resource` 以下のファイルをまともに編集するための機能が備わっていないため，[サクラエディタ](http://sakura-editor.sourceforge.net) や [Atom](https://atom.io) 等の他のエディタを使いましょう．
-
-## このドキュメントに不足しているもの
-
-- データ仕様
-  - 各ファイル形式の詳細を追加する
-  - 追加，修正したものを送る方法を追加する
-
 ## ライセンス
 ### 生協の知恵袋のライセンスについて
 MIT ライセンスです。 詳細は[LICENSE](LICENSE)をご覧ください。
-
-### 内部で利用しているソフトウェアのライランスについて
-また、生協の知恵袋では以下のソフトウェアが利用されています。
-
-- [C/Migemo](https://www.kaoriya.net/software/cmigemo/)
-```
-Copyright (c) 2003-2007 MURAOKA Taro (KoRoN)
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-```

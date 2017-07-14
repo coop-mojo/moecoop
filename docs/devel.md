@@ -22,7 +22,7 @@
 
 #### ソースの取得方法
 - 以下のコマンドで取得できます。
-```
+```console
 $ git clone https://github.com/coop-mojo/moecoop.git
 ```
 
@@ -30,22 +30,22 @@ $ git clone https://github.com/coop-mojo/moecoop.git
 生協の知恵袋はサーバーとクライアントから構成されるソフトウェアです。
 
 - 知恵袋サーバーをビルドする場合には以下のコマンドを実行してください。ビルドディレクトリに `fukurod` が生成されます。
-```
+```console
 $ dub build -c server
 ```
 
 - 以下のコマンドを実行することで、知恵袋サーバーを動かすための Docker イメージを作成することができます。
-```
+```console
 $ ./archive.sh && docker build -t moecoop .
 ```
 
 - 知恵袋クライアントをビルドする場合には以下のコマンドを実行してください。ビルドディレクトリに `fukuro` が生成されます。
-```
-$ dub build -c mui
+```conslole
+$ dub build
 ```
 
 #### テスト方法
-```
+```console
 $ dub test
 ```
 
@@ -64,8 +64,8 @@ $ dub test
     - Travis CI でビルドした Docker イメージの保管
 - [Read the Docs](https://readthedocs.org/)
     - 作成したドキュメントの公開
-- [Arukas](https://arukas.io/)
-    - Docker イメージを使って知恵袋サーバーのデプロイ
+- [Google Cloud Platform](https://cloud.google.com/?hl=ja)
+    - 知恵袋サーバーのホスティング
 - [swagger.io](http://swagger.io/)
     - 知恵袋サーバーの API 仕様の公開、API 仕様の編集
 

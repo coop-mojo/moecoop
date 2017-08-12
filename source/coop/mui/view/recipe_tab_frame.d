@@ -26,15 +26,18 @@ class RecipeTabFrame: TabFrameBase
     {
         super(id);
         defaultMessage = "レシピ名";
+        layoutWidth(FILL_PARENT);
+        layoutHeight(FILL_PARENT);
+
         auto layout = new HorizontalLayout;
+        layout.layoutWidth(FILL_PARENT)
+              .layoutHeight(FILL_PARENT);
         addChild(layout);
         layout.margins = 20;
         layout.padding = 10;
 
         layout.addChild(recipeListLayout);
         layout.addChild(recipeDetailsLayout);
-        layout.layoutHeight(FILL_PARENT);
-        layout.layoutWidth(FILL_PARENT);
         with(childById!ComboBox("nColumns"))
         {
             items = ["1列表示"d, "2列表示", "4列表示"];
@@ -487,6 +490,9 @@ auto recipeListLayout()
 {
     auto layout = parseML(q{
             VerticalLayout {
+                layoutWidth: fill
+                layoutHeight: fill
+
                 HorizontalLayout {
                     TextWidget { text: "キャラクター" }
                     ComboBox {
@@ -526,6 +532,8 @@ auto recipeListLayout()
                 }
                 FrameLayout {
                     id: recipeList
+                    layoutWidth: fill
+                    layoutHeight: fill
                     padding: 1
                 }
             }
@@ -538,34 +546,42 @@ auto recipeDetailsLayout()
     auto layout = parseML(q{
             VerticalLayout {
                 padding: 10
-                minWidth: 400
+                minWidth: 500
+                maxWidth: 600
+                layoutHeight: fill
+
                 TextWidget { text: "レシピ情報" }
                 FrameLayout {
                     id: recipeDetail
                     padding: 1
+                    layoutHeight: fill
                     backgroundColor: "black"
                 }
 
                 VerticalLayout {
                     id: item1
+                    layoutHeight: fill
                     HorizontalLayout {
                         TextWidget { text: "アイテム情報1" }
                     }
                     FrameLayout {
                         id: detailFrame1
                         padding: 1
+                        layoutHeight: fill
                         backgroundColor: "black"
                     }
                 }
 
                 VerticalLayout {
                     id: item2
+                    layoutHeight: fill
                     HorizontalLayout {
                         TextWidget { text: "アイテム情報2" }
                     }
                     FrameLayout {
                         id: detailFrame2
                         padding: 1
+                        layoutHeight: fill
                         backgroundColor: "black"
                     }
                 }

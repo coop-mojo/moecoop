@@ -28,15 +28,18 @@ class RecipeMaterialTabFrame: TabFrameBase
 
         super(id);
         defaultMessage = "アイテム名";
+        layoutWidth(FILL_PARENT);
+        layoutHeight(FILL_PARENT);
+
         auto layout = new HorizontalLayout;
+        layout.layoutWidth(FILL_PARENT)
+              .layoutHeight(FILL_PARENT);
         addChild(layout);
         layout.margins = 20;
         layout.padding = 10;
 
         layout.addChild(recipeMaterialLayout);
         layout.addChild(recipeDetailsLayout);
-        layout.layoutHeight(FILL_PARENT);
-        layout.layoutWidth(FILL_PARENT);
 
         hideResult;
         childById!CheckBox("migemo").checkChange = (Widget src, bool checked) {
@@ -178,7 +181,7 @@ class RecipeMaterialTabFrame: TabFrameBase
         tbl.colCount = 3;
         scr.contentWidget = tbl;
         scr.backgroundColor = "white";
-        scr.maxHeight = 300;
+        scr.minHeight = 300;
 
         auto mats = chain(toBeMade.keys, candidates.filter!(c => !toBeMade.keys.canFind(c))).map!((c) {
                 import coop.mui.view.controls;
@@ -273,10 +276,7 @@ class RecipeMaterialTabFrame: TabFrameBase
 
         auto candidateFrame = new VerticalLayout;
         candidateFrame.addChild(new TextWidget(null, "作成候補"d));
-        auto hl = new HorizontalLayout;
-        hl.addChild(scr);
-        hl.addChild(new HSpacer);
-        candidateFrame.addChild(hl);
+        candidateFrame.addChild(scr);
 
         auto helperFrame = childById("helper");
         helperFrame.removeAllChildren;
@@ -437,6 +437,7 @@ class RecipeMaterialTabFrame: TabFrameBase
         fr.addChild(matCap);
 
         auto scr = new ScrollWidget;
+        scr.layoutHeight(FILL_PARENT);
         auto tbl = new TableLayout("materials");
         tbl.colCount = 3;
 
@@ -783,6 +784,9 @@ auto recipeMaterialLayout()
 
     auto layout = parseML(q{
             VerticalLayout {
+                layoutWidth: fill
+                layoutHeight: fill
+
                 HorizontalLayout {
                     TextWidget { text: "キャラクター" }
                     ComboBox {
@@ -802,24 +806,38 @@ auto recipeMaterialLayout()
 
                 FrameLayout {
                     id: helper
+                    layoutWidth: fill
+                    layoutHeight: fill
                     padding: 1
                 }
 
                 VerticalLayout {
                     id: result
+                    layoutWidth: fill
+                    layoutHeight: fill
                     TextWidget { text: "必要レシピ情報" }
                     HorizontalLayout {
                         padding: 1
+                        layoutWidth: fill
+                        layoutHeight: fill
                         VerticalLayout {
+                            layoutWidth: fill
+                            layoutHeight: fill
                             VerticalLayout {
                                 id: recipeBase
+                                layoutWidth: fill
+                                layoutHeight: fill
                             }
                             VerticalLayout {
                                 id: leftoverBase
+                                layoutWidth: fill
+                                layoutHeight: fill
                             }
                         }
                         VerticalLayout {
                             id: materialBase
+                            layoutWidth: fill
+                            layoutHeight: fill
                         }
                     }
                 }

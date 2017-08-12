@@ -193,14 +193,20 @@ protected:
             .layoutHeight(FILL_PARENT);
 
         binderTab = new RecipeTabFrame("binderFrame");
+        binderTab.layoutWidth(FILL_PARENT)
+                 .layoutHeight(FILL_PARENT);
         tabs.addTab(binderTab, "バインダー"d);
         binderTab.categoryName = "バインダー"d;
 
         skillTab = new RecipeTabFrame("skillFrame");
+        skillTab.layoutWidth(FILL_PARENT)
+                .layoutHeight(FILL_PARENT);
         tabs.addTab(skillTab, "スキル"d);
         skillTab.categoryName = "スキル"d;
 
         materialTab = new RecipeMaterialTabFrame("materialFrame");
+        materialTab.layoutWidth(FILL_PARENT)
+                   .layoutHeight(FILL_PARENT);
         tabs.addTab(materialTab, "レシピ材料"d);
 
         tabs.tabChanged = (string next, string prev) {

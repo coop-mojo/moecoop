@@ -13,19 +13,16 @@
         "vibe-d:data": "==0.8.1-beta.2",
         "vibe-d:http": "==0.8.1-beta.2",
         "vibe-d:web": "==0.8.1-beta.2",
-        "vibe-d:tls": "==0.8.1-beta.2",
         "moecoop-mui:common": "*"
     },
     "subPackages": [
         "./common"
     ],
-    "subConfigurations": {
-        "vibe-d:tls": "botan"
-    },
 
     "stringImportPaths": ["views", "views/res"],
 
     "preBuildCommands": ["git describe > views/version"],
     "sourceFiles-windows": ["source/icon.res"],
-    "preBuildCommands-windows": ["rc source/icon.rc"]
+    "preBuildCommands-windows": ["rc source/icon.rc"],
+    "versions": ["VibeNoSSL"]
 }

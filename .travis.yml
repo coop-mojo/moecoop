@@ -11,7 +11,7 @@ addons:
 language: d
 
 d:
-  - dmd-2.071.2
+  - dmd-2.074.1
   - ldc-1.3.0
 
 matrix:

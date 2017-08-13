@@ -9,12 +9,12 @@ addons:
 language: d
 
 d:
-  - dmd-2.071.2
-  - ldc-1.1.0
+  - dmd-2.075.0
+  - ldc-1.3.0
 
 matrix:
   allow_failures:
-    - d: ldc-1.1.0
+    - d: ldc-1.3.0
 
 os:
   - linux

@@ -22,6 +22,8 @@ os:
   - linux
   - osx
 
+dist: trusty
+
 env:
   - ARCH=x86_64
 

@@ -41,7 +41,6 @@ extern(C) int UIAppMain(string[] args)
     string endpoint;
     version(Windows) {}
     else {
-        args = AppName.to!string~args;
         auto helpInfo = args.getopt("endpoint", "知恵袋サーバーのベース URL を指定します。", &endpoint);
         if (helpInfo.helpWanted)
         {

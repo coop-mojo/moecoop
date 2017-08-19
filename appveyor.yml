@@ -76,13 +76,11 @@ before_build:
   - ps: if($env:platform -eq "x86"){
             $env:compilersetupargs = "x86";
             $env:Darch = "x86";
-            $env:arch = "x86_mscoff";
             $env:Dmodel = "32";
         }
         elseif($env:platform -eq "x64"){
             $env:compilersetupargs = "amd64";
             $env:Darch = "x86_64";
-            $env:arch = "x86_64";
             $env:Dmodel = "64";
         }
   - ps : if($env:DC -eq "dmd"){
@@ -106,7 +104,7 @@ test_script:
   - '%DC% --version'
   - dub --version
   - dub upgrade
-  - dub test --arch=%arch% --compiler=%DC%
+  - dub test --arch=%Darch% --compiler=%DC%
 
 artifacts:
   - path: moecoop-trunk-$(Dmodel)bit.zip
@@ -117,9 +115,9 @@ artifacts:
     name: 生協の知恵袋 v$(CoopVer) ($(Dmodel)bit)
 
 after_build:
-  - archive.bat %arch% debug
+  - archive.bat %Darch% debug
   - mv moecoop-%Darch%.zip moecoop-trunk-%Dmodel%bit-debug.zip
-  - archive.bat %arch% release
+  - archive.bat %Darch% release
   - mv moecoop-%Darch%.zip moecoop-trunk-%Dmodel%bit.zip
   - type views\version
   - set /p CoopVer=<views\version

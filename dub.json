@@ -23,6 +23,5 @@
 
     "preBuildCommands": ["git describe > views/version"],
     "sourceFiles-windows": ["source/icon.res"],
-    "preBuildCommands-windows": ["rc source/icon.rc"],
-    "versions": ["VibeUseOpenSSL11"]
+    "preBuildCommands-windows": ["rc source/icon.rc"]
 }

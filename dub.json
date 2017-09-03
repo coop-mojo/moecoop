@@ -13,12 +13,15 @@
         "vibe-d:data": "==0.8.1-rc.2",
         "vibe-d:http": "==0.8.1-rc.2",
         "vibe-d:web": "==0.8.1-rc.2",
+        "vibe-d:tls": "*",
         "moecoop-mui:common": "*"
     },
     "subPackages": [
         "./common"
     ],
-
+    "subConfigurations": {
+        "vibe-d:tls": "botan"
+    },
     "stringImportPaths": ["views", "views/res"],
 
     "preBuildCommands": ["git describe > views/version"],

@@ -11,6 +11,9 @@ addons:
 language: d
 
 d:
+  - dmd-2.073.2
+  - dmd-2.074.1
+  - dmd-2.075.1
   - dmd-2.076.0
   - ldc-1.3.0
 

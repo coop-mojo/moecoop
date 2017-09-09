@@ -34,13 +34,13 @@ cache:
 
 before_install:
   - git fetch --unshallow
-  - dub fetch doveralls
+  # - dub fetch doveralls
 
 before_script:
   - dub upgrade
 
-script:
-  - dub test --coverage --combined
+# script:
+#   - dub test --coverage --combined
 
-after_success:
-  - dub run doveralls
+# after_success:
+#   - dub run doveralls

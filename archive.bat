@@ -7,7 +7,7 @@ if %1==x86 (
 ) else (
   set arch=%1
 )
-dub build -a %arch% -b %2
+dub build -c windows -a %arch% -b %2
 
 powershell -Command Compress-Archive -Path fukuro.exe, LICENSE, README.md, docs, libeay32.dll, ssleay32.dll -DestinationPath moecoop-%1.zip
 

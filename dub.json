@@ -19,12 +19,24 @@
     "subPackages": [
         "./common"
     ],
-    "subConfigurations": {
-        "vibe-d:tls": "botan"
-    },
     "stringImportPaths": ["views", "views/res"],
 
     "preBuildCommands": ["git describe > views/version"],
     "sourceFiles-windows": ["source/icon.res"],
-    "preBuildCommands-windows": ["rc source/icon.rc"]
+    "preBuildCommands-windows": ["rc source/icon.rc"],
+    "configurations": [
+        {
+            "name": "default",
+            "subConfigurations": {
+                "vibe-d:tls": "botan"
+            },
+            "mainSourceFile": "source/app.d",
+            "targetType": "executable"
+        },
+        {
+            "name": "windows",
+            "mainSourceFile": "source/app.d",
+            "targetType": "executable"
+        }
+    ]
 }

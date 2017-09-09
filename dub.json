@@ -19,7 +19,7 @@
     "subPackages": [
         "./common"
     ],
-    "subConfigurations-windows": {
+    "subConfigurations": {
         "vibe-d:tls": "botan"
     },
     "stringImportPaths": ["views", "views/res"],

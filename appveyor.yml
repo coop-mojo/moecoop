@@ -104,7 +104,7 @@ test_script:
   - '%DC% --version'
   - dub --version
   - dub upgrade
-  - dub test --arch=%Darch% --compiler=%DC%
+  - dub test -c windows --arch=%Darch% --compiler=%DC%
 
 artifacts:
   - path: moecoop-trunk-$(Dmodel)bit.zip
